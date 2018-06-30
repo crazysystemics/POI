@@ -35,6 +35,7 @@ public class BattleEngine {
         int bandBDuration;
         int bandCDuration;
         int bandDDuration;
+        CartesianLocation cl;
         
         int j;
         int k;
@@ -46,17 +47,26 @@ public class BattleEngine {
         // TUNABLES.
         // EDIT TO GET DIFFERENT POI
         //
-        bandADuration = 1;
-        bandBDuration = 2;
-        bandCDuration = 3;
-        bandDDuration = 4;
         
+        // Set band durations here.
+        bandADuration = 10;
+        bandBDuration =  0;
+        bandCDuration =  0;
+        bandDDuration =  0;
+        
+        // Instantiating the Aircraft and Radar objects here.
         AirCraft A1 = new AirCraft(1, new CartesianLocation(100, 100, 100), new CartesianLocation(0, 0, 0),
                 aVel, bandADuration, bandBDuration, bandCDuration, bandDDuration);
         Radar R1 = new Radar(1, new CartesianLocation(0, 0, 0), 25  * Math.pow(10.0, -6.0), Bands.BANDA);
         
+        //
+        // Total number of ticks the simulation
+        // should run.
+        //
+        TOTAL_TICKS = 10000;
         
-        CartesianLocation cl;
+        
+        
         
         
         //for (k = 0; k < 11; k++) {
@@ -67,7 +77,7 @@ public class BattleEngine {
             //nonBandADuration = 10 - k;
 
             // Main loop.
-            TOTAL_TICKS = 10;
+            
             for (i = 0; i < TOTAL_TICKS; i++){
 
 
@@ -98,7 +108,8 @@ public class BattleEngine {
                 
             }
 
-            System.out.println("\n" + bandADuration + "," + bandBDuration + "," + aircraft_hits + "," + radar_hits + "," + (aircraft_hits / radar_hits));
+            System.out.println("\n" + bandADuration + "," + bandBDuration + "," + bandCDuration + "," + bandDDuration +
+                    "," + aircraft_hits + "," + radar_hits + "," + (aircraft_hits / radar_hits));
 
         //}
             
