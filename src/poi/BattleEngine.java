@@ -6,7 +6,6 @@
 package poi;
 import java.io.FileNotFoundException;
 import java.lang.*;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 
 /**
@@ -25,6 +24,7 @@ public class BattleEngine {
         // TODO code application logic here
         int i = 0;
         double C = 300000000.0;
+        int TOTAL_TICKS;
         double R;
         double Preceived;
         double aVel;
@@ -32,7 +32,12 @@ public class BattleEngine {
         double radar_hits = 0;
         int iteration = 0;
         int bandADuration;
-        int nonBandADuration;
+        int bandBDuration;
+        int bandCDuration;
+        int bandDDuration;
+        
+        int j;
+        int k;
         
         // Stationary object.
         aVel = 0;
@@ -41,51 +46,63 @@ public class BattleEngine {
         // TUNABLES.
         // EDIT TO GET DIFFERENT POI
         //
-        bandADuration = 9;
-        nonBandADuration = 1;
-        
+        bandADuration = 1;
+        bandBDuration = 2;
+        bandCDuration = 3;
+        bandDDuration = 4;
         
         AirCraft A1 = new AirCraft(1, new CartesianLocation(100, 100, 100), new CartesianLocation(0, 0, 0),
-                aVel, bandADuration, nonBandADuration);
-        Radar R1 = new Radar(1, new CartesianLocation(0, 0, 0), 25  * Math.pow(10.0, -6.0));
+                aVel, bandADuration, bandBDuration, bandCDuration, bandDDuration);
+        Radar R1 = new Radar(1, new CartesianLocation(0, 0, 0), 25  * Math.pow(10.0, -6.0), Bands.BANDA);
         
         
         CartesianLocation cl;
         
-        // Main loop.
-        for (i = 0; i < 10000; i++){
-
-
-            cl = A1.getCurLoc();
-
-            R = R1.getCurLoc().distanceCart(cl);
-            R1.setEchoMatrix(A1, R1, R);
-            R1.setEchoMatrixFilledTime((2 * R) / C);
-            System.out.println("Radar azimuth : " + R1.getRadarAntennaAzimuth());
-            
-            
-            
-            if (R1.checkEchoMatrix() == 1) {
-              
-                radar_hits = radar_hits + 1;
-                if (R1.getSignalBand() == A1.getRWRBand()) {
-                    aircraft_hits = aircraft_hits + 1;
-                }
-            }  
-            
-            // Update the Radar
-            R1.update(i);
-
-            // Update the Aircraft.
-            
-            A1.update(i);
-
-            
-        }
         
-        System.out.println("AC hits : " + aircraft_hits);
-        System.out.println("Radar hits : " + radar_hits);
-        System.out.println("POI : " + (aircraft_hits / radar_hits));
+        //for (k = 0; k < 11; k++) {
 
+            //aircraft_hits = 0;
+            //radar_hits = 0;
+            //bandADuration = k;
+            //nonBandADuration = 10 - k;
+
+            // Main loop.
+            TOTAL_TICKS = 10;
+            for (i = 0; i < TOTAL_TICKS; i++){
+
+
+                cl = A1.getCurLoc();
+                
+
+                R = R1.getCurLoc().distanceCart(cl);
+                R1.setEchoMatrix(A1, R1, R);
+                R1.setEchoMatrixFilledTime((2 * R) / C);
+                
+                System.out.println(i + "," + A1.getRWRBand() + "," + aircraft_hits + "," + radar_hits + "," + R1.getRadarAntennaAzimuth());
+                
+                if (R1.checkEchoMatrix() == 1) {
+
+                    radar_hits = radar_hits + 1;
+                    if (R1.getSignalBand() == A1.getRWRBand()) {
+                        aircraft_hits = aircraft_hits + 1;
+                    }
+                }  
+
+                // Update the Radar
+                R1.update(i);
+
+                // Update the Aircraft.
+
+                A1.update(i);
+
+                
+            }
+
+            System.out.println("\n" + bandADuration + "," + bandBDuration + "," + aircraft_hits + "," + radar_hits + "," + (aircraft_hits / radar_hits));
+
+        //}
+            
+        
+        
     }
 }

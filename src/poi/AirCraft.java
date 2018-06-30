@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package poi;
-import java.util.*;
 
 /**
  *
@@ -24,15 +23,23 @@ public class AirCraft {
     radarWarningReceiver RWR;
     int RWRHits;
     int bandADuration;
-    int nonBandADuration;
+    int bandBDuration;
+    int bandCDuration;
+    int bandDDuration;
+    
     int globalTicks;
     int bandATimer;
-    int bandNATimer;
+    int bandBTimer;
+    int bandCTimer;
+    int bandDTimer;
     
     
     
-    public AirCraft(int aId, CartesianLocation Ai, CartesianLocation Ae, double vel, int bADuration, int nBADuration) {
-        
+    
+    
+    public AirCraft(int aId, CartesianLocation Ai, CartesianLocation Ae, double vel, int bADuration, int bBDuration,
+            int bCDuration, int bDDuration) {
+            
         aircraftId = aId;
         AInitial = Ai;
         AEnd = Ae;
@@ -52,10 +59,24 @@ public class AirCraft {
         //
         RWR = new radarWarningReceiver(1);
         RWRHits = 0;
-        bandADuration = bADuration - 1;
-        nonBandADuration = nBADuration - 1;
+        if (bADuration > 0) {
+            bandADuration = bADuration - 1;
+        }
+        if (bBDuration > 0) {
+            bandBDuration = bBDuration - 1;
+        }
+        if (bCDuration > 0) {
+            bandCDuration = bCDuration - 1;
+        }
+        if (bDDuration > 0) {
+            bandDDuration = bDDuration - 1;
+        }
+        
+        
         bandATimer = bandADuration; 
-        bandNATimer = nonBandADuration;
+        bandBTimer = bandBDuration;
+        bandCTimer = bandCDuration;
+        bandDTimer = bandDDuration;
         
     }
     
@@ -125,24 +146,60 @@ public class AirCraft {
         globalTicks = gTicks;
         
                
-        // BAND A
-        if (RWR.getBand() == 1) {
-            if (bandATimer <= 0) {
-                RWR.setBand(0);
-                bandNATimer = nonBandADuration;
-            } else {
-                bandATimer = bandATimer - 1;
-            }            
-        } else { // Not BAND A
-            if (bandNATimer <= 0) {
-                RWR.setBand(1);
+        
+        if (RWR.getBand() == Bands.BANDA) {
+            if (bandATimer > 0) {
+                bandATimer = bandATimer - 1;           
+            } else if (bandBDuration != 0) {
+                RWR.setBand(Bands.BANDB);
+                bandBTimer = bandBDuration;
+            } else if (bandCDuration != 0) {
+                RWR.setBand(Bands.BANDC);
+                bandCTimer = bandCDuration;
+            } else if (bandDDuration != 0) {
+                RWR.setBand(Bands.BANDD);
+                bandDTimer = bandDDuration;
+            }
+        } else if (RWR.getBand() == Bands.BANDB) {
+           if (bandBTimer > 0) {
+                bandBTimer = bandBTimer - 1;           
+            } else if (bandCDuration != 0) {
+                RWR.setBand(Bands.BANDC);
+                bandCTimer = bandCDuration;
+            } else if (bandDDuration != 0) {
+                RWR.setBand(Bands.BANDD);
+                bandDTimer = bandDDuration;
+            } else if (bandADuration != 0) {
+                RWR.setBand(Bands.BANDA);
                 bandATimer = bandADuration;
-            } else {
-                bandNATimer = bandNATimer - 1;
-            }            
-        }
-        
-        
+            } 
+        } else if (RWR.getBand() == Bands.BANDC) {
+            if (bandCTimer > 0) {
+                bandCTimer = bandCTimer - 1;           
+            } else if (bandDDuration != 0) {
+                RWR.setBand(Bands.BANDD);
+                bandDTimer = bandDDuration;
+            } else if (bandADuration != 0) {
+                RWR.setBand(Bands.BANDA);
+                bandATimer = bandADuration;
+            } else if (bandBDuration != 0) {
+                RWR.setBand(Bands.BANDB);
+                bandBTimer = bandBDuration;
+            }
+        } else if  (RWR.getBand() == Bands.BANDD) {
+            if (bandDTimer > 0) {
+                bandDTimer = bandDTimer - 1;           
+            } else if (bandADuration != 0) {
+                RWR.setBand(Bands.BANDA);
+                bandATimer = bandADuration;
+            } else if (bandBDuration != 0) {
+                RWR.setBand(Bands.BANDB);
+                bandBTimer = bandBDuration;
+            } else if (bandCDuration != 0) {
+                RWR.setBand(Bands.BANDC);
+                bandCTimer = bandCDuration;
+            }
+        }       
         
         
     }

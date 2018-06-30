@@ -61,7 +61,7 @@ public class Radar {
     int globalTicks;
     
     
-    public Radar(int id, CartesianLocation rLoc, double pri){
+    public Radar(int id, CartesianLocation rLoc, double pri, int sB){
         int i;        
         
         RadarId = id;
@@ -86,13 +86,13 @@ public class Radar {
         MAX_SCAN_AZIMUTH = THETA - (MAX_BEAM_WIDTH/2);
         MIN_SCAN_ELEVATION = 34;//0 + (MAX_BEAM_HEIGHT/2);
         MAX_SCAN_ELEVATION = 34;//PHI - (MAX_BEAM_HEIGHT/2);
-        SCAN_RATE = 7.5;
+        SCAN_RATE = 22.5;
         
         radarAntennaAzimuthalDirection = MIN_SCAN_AZIMUTH;
         radarAntennaElevationDirection = MIN_SCAN_ELEVATION;
         reverseAzimuthalScan = 0;
         reverseElevationScan = 0;
-        signalBand = 1;
+        signalBand = sB;
         
         EM = new EchoMatrix();
         
@@ -213,9 +213,9 @@ public class Radar {
             if (radarAntennaAzimuthalDirection < MIN_SCAN_AZIMUTH) {
                 reverseAzimuthalScan = 0;
                 if (reverseElevationScan == 1) {
-                    radarAntennaElevationDirection = radarAntennaElevationDirection - 7.5;
+                    radarAntennaElevationDirection = radarAntennaElevationDirection - SCAN_RATE;
                 } else {
-                    radarAntennaElevationDirection = radarAntennaElevationDirection + 7.5;
+                    radarAntennaElevationDirection = radarAntennaElevationDirection + SCAN_RATE;
                 }
             }
             
@@ -309,9 +309,8 @@ public class Radar {
         //System.out.printf("Radar R%d : Radar antenna azimuth = %f, elevation = %f\n", this.RadarId, getRadarAntennaAzimuth(), getRadarAntennaElevation());
         //System.out.printf("Radar %d,%f,%f,", this.RadarId, getRadarAntennaAzimuth(), getRadarAntennaElevation());
         //showEchomatrix();
-        EM.clear();
-        acquire();
-        track();
+        //acquire();
+        //track();
     }
     public CartesianLocation getCurLoc(){
         return radarLoc;
