@@ -88,7 +88,7 @@ public class BattleEngine {
                 R1.setEchoMatrix(A1, R1, R);
                 R1.setEchoMatrixFilledTime((2 * R) / C);
                 
-                System.out.println(i + "," + A1.getRWRBand() + "," + aircraft_hits + "," + radar_hits + "," + R1.getRadarAntennaAzimuth());
+                //System.out.println(i + "," + A1.getRWRBand() + "," + aircraft_hits + "," + radar_hits + "," + R1.getRadarAntennaAzimuth());
                 
                 if (R1.checkEchoMatrix() == 1) {
 
