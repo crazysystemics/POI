@@ -10,7 +10,7 @@ package poi;
  * @author srbr
  */
 public class Radar {
-    
+    //test comment
     int RadarId;
     CartesianLocation radarLoc;
     SphericalLocation radarsphLoc;
