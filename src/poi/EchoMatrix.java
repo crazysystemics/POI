@@ -92,6 +92,7 @@ public class EchoMatrix {
                 ECHOMATRIX[i][j] = 0.0;
             }
         }
+        isEchoMatrixSet = 0;
     }
     
     public void setEchoMatrix(AirCraft Ac, Radar R, double Preceived) {
