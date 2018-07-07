@@ -5,6 +5,9 @@
  */
 package poi;
 
+import java.util.Random;
+
+
 /**
  *
  * @author srbr
@@ -22,24 +25,19 @@ public class AirCraft {
     double jammingProbability;
     radarWarningReceiver RWR;
     int RWRHits;
-    int bandADuration;
-    int bandBDuration;
-    int bandCDuration;
-    int bandDDuration;
-    
     int globalTicks;
-    int bandATimer;
-    int bandBTimer;
-    int bandCTimer;
-    int bandDTimer;
+    
+    int bands[];
+    int bandDuration[];
+    int bandTimer[];
+    int CURRENTBAND;
+    int NEXTBAND;
     
     
     
     
-    
-    public AirCraft(int aId, CartesianLocation Ai, CartesianLocation Ae, double vel, int bADuration, int bBDuration,
-            int bCDuration, int bDDuration) {
-            
+    public AirCraft(int aId, CartesianLocation Ai, CartesianLocation Ae, double vel) {
+                        
         aircraftId = aId;
         AInitial = Ai;
         AEnd = Ae;
@@ -59,24 +57,20 @@ public class AirCraft {
         //
         RWR = new radarWarningReceiver(1);
         RWRHits = 0;
-        if (bADuration > 0) {
-            bandADuration = bADuration - 1;
-        }
-        if (bBDuration > 0) {
-            bandBDuration = bBDuration - 1;
-        }
-        if (bCDuration > 0) {
-            bandCDuration = bCDuration - 1;
-        }
-        if (bDDuration > 0) {
-            bandDDuration = bDDuration - 1;
+                
+        CURRENTBAND = 0;
+        NEXTBAND = 1;
+        bands = new int[2];
+        bandDuration = new int[2];
+        bandTimer = new int[2];
+        
+        int i;
+        for (i = 0; i < 2; i++) {
+            bands[i] = 0;
+            bandTimer[i] = 0;
+            bandDuration[i] = 0;
         }
         
-        
-        bandATimer = bandADuration; 
-        bandBTimer = bandBDuration;
-        bandCTimer = bandCDuration;
-        bandDTimer = bandDDuration;
         
     }
     
@@ -126,6 +120,37 @@ public class AirCraft {
         return ACurrentLoc;
     }
     
+    public void assignBand() {
+        
+        int bandVal;
+        Random rand = new Random();
+        
+        // Set a random value between
+        // 1 to 4 to bandVal
+        // Based on a switch case we
+        // assign appropriate band
+        // to bands[NEXTBAND]
+        bandVal = rand.nextInt(4) + 1;
+    
+        // Set Duration
+        bandDuration[NEXTBAND] = rand.nextInt(11);
+    
+        // Set Band.
+        switch (bandVal) 
+        {
+            case 1:  bands[NEXTBAND] = Bands.BANDA;
+                     break;
+            case 2:  bands[NEXTBAND] = Bands.BANDB;
+                     break;
+            case 3:  bands[NEXTBAND] = Bands.BANDC;
+                     break;
+            case 4:  bands[NEXTBAND] = Bands.BANDD;
+                     break;
+            default: break;
+        }    
+        
+    }
+    
     public void update(int gTicks){
         
         
@@ -145,63 +170,25 @@ public class AirCraft {
         */
         globalTicks = gTicks;
         
-               
-        
-        if (RWR.getBand() == Bands.BANDA) {
-            if (bandATimer > 0) {
-                bandATimer = bandATimer - 1;           
-            } else if (bandBDuration != 0) {
-                RWR.setBand(Bands.BANDB);
-                bandBTimer = bandBDuration;
-            } else if (bandCDuration != 0) {
-                RWR.setBand(Bands.BANDC);
-                bandCTimer = bandCDuration;
-            } else if (bandDDuration != 0) {
-                RWR.setBand(Bands.BANDD);
-                bandDTimer = bandDDuration;
-            }
-        } else if (RWR.getBand() == Bands.BANDB) {
-           if (bandBTimer > 0) {
-                bandBTimer = bandBTimer - 1;           
-            } else if (bandCDuration != 0) {
-                RWR.setBand(Bands.BANDC);
-                bandCTimer = bandCDuration;
-            } else if (bandDDuration != 0) {
-                RWR.setBand(Bands.BANDD);
-                bandDTimer = bandDDuration;
-            } else if (bandADuration != 0) {
-                RWR.setBand(Bands.BANDA);
-                bandATimer = bandADuration;
-            } 
-        } else if (RWR.getBand() == Bands.BANDC) {
-            if (bandCTimer > 0) {
-                bandCTimer = bandCTimer - 1;           
-            } else if (bandDDuration != 0) {
-                RWR.setBand(Bands.BANDD);
-                bandDTimer = bandDDuration;
-            } else if (bandADuration != 0) {
-                RWR.setBand(Bands.BANDA);
-                bandATimer = bandADuration;
-            } else if (bandBDuration != 0) {
-                RWR.setBand(Bands.BANDB);
-                bandBTimer = bandBDuration;
-            }
-        } else if  (RWR.getBand() == Bands.BANDD) {
-            if (bandDTimer > 0) {
-                bandDTimer = bandDTimer - 1;           
-            } else if (bandADuration != 0) {
-                RWR.setBand(Bands.BANDA);
-                bandATimer = bandADuration;
-            } else if (bandBDuration != 0) {
-                RWR.setBand(Bands.BANDB);
-                bandBTimer = bandBDuration;
-            } else if (bandCDuration != 0) {
-                RWR.setBand(Bands.BANDC);
-                bandCTimer = bandCDuration;
-            }
-        }       
-        
-        
+            
+        /*
+         * We Remain in the current band till the timer
+         * expires and move on to next after that.
+        */
+        if (bandTimer[CURRENTBAND] > 0) {
+            bandTimer[CURRENTBAND]--;
+        } else {
+            /*
+             * Decide the next band and the duration we have
+             * to stay in it.
+            */
+            assignBand();
+            RWR.setBand(bands[NEXTBAND]);
+            bands[CURRENTBAND] = bands[NEXTBAND];
+            bandDuration[CURRENTBAND] = bandDuration[NEXTBAND];
+            bandTimer[CURRENTBAND] = bandDuration[NEXTBAND];
+        }
+       
     }
     
     public void addToRadarList(Radar r) {

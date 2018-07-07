@@ -56,7 +56,7 @@ public class BattleEngine {
         
         // Instantiating the Aircraft and Radar objects here.
         AirCraft A1 = new AirCraft(1, new CartesianLocation(100, 100, 100), new CartesianLocation(0, 0, 0),
-                aVel, bandADuration, bandBDuration, bandCDuration, bandDDuration);
+                aVel);
         Radar R1 = new Radar(1, new CartesianLocation(0, 0, 0), 25  * Math.pow(10.0, -6.0), Bands.BANDA);
         
         //
@@ -78,7 +78,7 @@ public class BattleEngine {
 
             // Main loop.
             
-            for (i = 0; i < TOTAL_TICKS; i++){
+            for (i = 0; i < TOTAL_TICKS; i++) {
 
 
                 cl = A1.getCurLoc();
@@ -88,7 +88,6 @@ public class BattleEngine {
                 R1.setEchoMatrix(A1, R1, R);
                 R1.setEchoMatrixFilledTime((2 * R) / C);
                 
-                //System.out.println(i + "," + A1.getRWRBand() + "," + aircraft_hits + "," + radar_hits + "," + R1.getRadarAntennaAzimuth());
                 
                 if (R1.checkEchoMatrix() == 1) {
 
@@ -97,6 +96,7 @@ public class BattleEngine {
                         aircraft_hits = aircraft_hits + 1;
                     }
                 }  
+                System.out.println(i + ", " + A1.getRWRBand() + ", " + aircraft_hits + ", " + radar_hits + ", " + R1.getRadarAntennaAzimuth());
 
                 // Update the Radar
                 R1.update(i);
@@ -108,8 +108,7 @@ public class BattleEngine {
                 
             }
 
-            System.out.println("\n" + bandADuration + "," + bandBDuration + "," + bandCDuration + "," + bandDDuration +
-                    "," + aircraft_hits + "," + radar_hits + "," + (aircraft_hits / radar_hits));
+            System.out.println(aircraft_hits + ", " + radar_hits + ", " + (aircraft_hits / radar_hits));
 
         //}
             
