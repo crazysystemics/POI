@@ -151,6 +151,22 @@ public class AirCraft {
         // Uncomment below line.
         // bandVal = Bands.BANDA;
         
+        // TEST CASE 3.
+        // Generate 0.5 POI.
+        //
+        // Under assumption that RADAR
+        // always operates in BANDA.
+        // Uncomment below code.
+        /*
+        if (RWR.getBand() == Bands.BANDA) {
+            bandVal = Bands.BANDB;
+            bandDuration[NEXTBAND] = 1;
+        } else {
+            bandVal = Bands.BANDA;
+            bandDuration[NEXTBAND] = 1;
+        }
+        */
+        
         // Set Band.
         switch (bandVal) 
         {
