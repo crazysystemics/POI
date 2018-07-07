@@ -42,7 +42,7 @@ public class BattleEngine {
         int k;
         
         // Stationary object.
-        aVel = 0;
+        aVel = -300;
         
         //
         // TUNABLES.
@@ -50,7 +50,7 @@ public class BattleEngine {
         //
         
         // Instantiating the Aircraft and Radar objects here.
-        AirCraft A1 = new AirCraft(1, new CartesianLocation(350, 350, 350), new CartesianLocation(0, 0, 0), aVel);
+        AirCraft A1 = new AirCraft(1, new CartesianLocation(1732.1, 1732.1, 1732.1), new CartesianLocation(0, 0, 0), aVel);
         Radar R1 = new Radar(1, new CartesianLocation(0, 0, 0), 25  * Math.pow(10.0, -6.0), Bands.BANDA);
         Radar R2 = new Radar(2, new CartesianLocation(1, 2, 3), 25  * Math.pow(10.0, -6.0), Bands.BANDB);
         
