@@ -143,6 +143,14 @@ public class AirCraft {
         // Uncomment below line.
         // bandVal = Bands.BANDB;
         
+        // TEST CASE 2.
+        // Generate 1.0 POI.
+        //
+        // Under assumption that RADAR
+        // always operates in BANDA.
+        // Uncomment below line.
+        // bandVal = Bands.BANDA;
+        
         // Set Band.
         switch (bandVal) 
         {
