@@ -134,7 +134,15 @@ public class AirCraft {
     
         // Set Duration
         bandDuration[NEXTBAND] = rand.nextInt(11);
-    
+        
+        // TEST CASE 1.
+        // Generate 0.0 POI.
+        //
+        // Under assumption that RADAR
+        // always operates in BANDA.
+        // Uncomment below line.
+        // bandVal = Bands.BANDB;
+        
         // Set Band.
         switch (bandVal) 
         {
