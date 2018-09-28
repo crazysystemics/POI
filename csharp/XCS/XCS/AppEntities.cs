@@ -31,6 +31,7 @@ namespace POI_XCS
     static class globals
     {
         public static uint tick;
+        public static uint scenario_num;
     }
 
   
@@ -75,11 +76,12 @@ namespace POI_XCS
         //This list is unknown to RWR. Included here
         //Just because it is concerned  with this Rwr
         //Global data  Unknown to Rwr
-        public uint band;
+        public uint band=1;
         public List<Intercept> curIlluminations;        
         public int[,] InterceptMat;
         public Dictionary<int, Intercept[]> InterceptTracks;
         public RxUnit rxunit = new RxUnit();
+        public uint duration=1;
 
 
         //set by battle engine
@@ -96,6 +98,11 @@ namespace POI_XCS
 
             curIlluminations = new List<Intercept>();
             InterceptTracks = new Dictionary<int, Intercept[]>();
+        }
+
+        public void Update()
+        {
+    
         }
 
     }
@@ -128,10 +135,22 @@ namespace POI_XCS
         public uint x;
         public uint y;
         public uint azim;
+        public string symbol;
 
         public Aircraft(List<TimedWayPoint> p)
         {
             plannedPath = p;
+        }
+
+        public void Update()
+        {
+            if (globals.scenario_num == 1)
+            {
+                //assuming it receives every tick
+                double dist = 333.0 / 1000.0; //in km
+                dist = dist * 0.75; //in pixels (48rows/64km)
+                y = (uint)Math.Round(y + dist); // in km
+            }
         }
     }
 
@@ -171,37 +190,63 @@ namespace POI_XCS
     {
         public uint radarId;
         public uint rtype;
+        public string symbol;
         public uint scanrate;
         public uint scan_interval;
-        public uint[] freq;
+        public uint freq;
         public uint pri;
         public uint pw;
         public uint posx;
         public uint posy;
-        public uint mb_azim; //main beam azimuth
+        public uint mb_azim;
+        public uint beam_width;//main beam azimuth
 
-        public Radar(uint pradarId, uint prtype, uint pscanrate, uint pscan_interval, uint[] pfreq, uint ppri, uint ppw, uint x, uint y)
+        public Radar(uint pradarId, uint prtype, uint pscanrate, uint pscan_interval, uint pfreq, uint ppri, uint ppw,
+                     uint x, uint y, string sym="R1")
         {
             radarId       = pradarId;
             rtype         = prtype;
             scanrate      = pscanrate;
-            scan_interval = pscan_interval;
+            //scan_interval = pscan_interval;
+            scan_interval = 72;
             freq          = pfreq;
             pri           = ppri;
-            pw = ppw;
-            posx = x;
-            posy = y;
+            pw            = ppw;
+            symbol        = sym;
+            posx          = x;
+            posy          = y;
+            beam_width = 10;
+
             
         }
+
+        public void Update()
+        {
+            mb_azim ++;
+            mb_azim = mb_azim % 360;
+        }
     }
+
+    enum State
+    {
+        STATE0=0,STATE1, STATE2, STATE3
+    }
+
 
     class RxUnit
     {
         public uint rxFreqMin;
         public uint rxFreqMax;
+        public uint rxBufCount=0;
+        public bool radarDetected;
+        public uint state;
 
         public void startRx(uint band)
         {
+            if (radarDetected)
+            {
+                rxBufCount++;
+            }
         }
 
         public void stopRx(uint band)
@@ -209,8 +254,8 @@ namespace POI_XCS
         }
         public int duration;
         public bool phi;//no input;
-        public Radar[] rxbuf = new Radar[32];
-        public int rxstatus;
+        public Radar[] rxbuf = new Radar[256];
+        
     }
 
     class Battle
@@ -240,31 +285,45 @@ namespace POI_XCS
 
         public uint[,] BattleState = new uint[18, 25];
 
+        public void SetUp_Scenario_1()
+        {
+            int num_of_radars = 1;
+            int num_of_ac     = 1;
+            int ac_to_radar_dist = 64; //in km;
+            int radar_rotation   = 5; //deg per sec;
+            int radar_beamwidth  = 10; //deg
+            int ac_vel = 333; //1mach in m/s
+            double tick_resoln; //1s
+            //trajectory x, y++
+              
+        }
+
         public void SetUp()
         {
+            
+            
+            
             //new int[10, 8];           
             double[,] init_radar_types = {
                                           { 0.0, 0.0, 1.0, 2.0, 500.0, 800.0,  0, 0, 2.5, 0.8 },
-                                          { 1.0, 0.0, 3.0, 4.0, 500.0, 800.0,  0, 0, 2.5, 0.8 },
+                                          { 1.0, 0.0, 3.0, 3.1, 500.0, 800.0,  0, 0, 2.5, 0.8 },
                                           { 2.0, 0.0, 5.0, 6.0, 500.0, 800.0,  0, 0, 2.5, 0.8 }
                                         };
 
 
 
             radars = new List<Radar>();
-
             radarTypes = new List<RadarType>();
 
-            for (uint i = 0; i < 3; i++)
-            {
-                double[] rtypebuf = new double[10];
-                for (int j = 0; j < 0; j++)
-                {
-                    Console.WriteLine(i.ToString() + ":" + j.ToString());
-                    rtypebuf[j] = init_radar_types[i, j];
+            //Aircraft Timed-Plan
+            uint[] aircraft_times = { 1, 2, 3, 4 };
+            uint[] aircraft_x = { 8, 8, 8, 8 };
+            uint[] aircraft_y = { 0, 2, 4, 15 };
 
-                }
-                radarTypes.Add(new RadarType(rtypebuf));
+            List<TimedWayPoint> pp = new List<TimedWayPoint>();
+            for (int i = 0; i < aircraft_times.Length; i++)
+            {
+                pp.Add(new TimedWayPoint(aircraft_x[i], aircraft_y[i], 0, aircraft_times[i]));
             }
 
             //Radars                           
@@ -273,39 +332,37 @@ namespace POI_XCS
             uint[] scan_rate = { 2, 1, 3, 1, 3, 1, 2, 2 };
             uint[] radar_x = { 1, 3, 12, 14, 5, 5, 6, 7 };
             uint[] radar_y = { 10, 10, 5, 5, 5, 7, 8, 7 };
-            uint[,] freqs = { { 1, 1, 1, 1 }, { 2, 2, 2, 2 }, { 3, 3, 3, 3 }, { 4, 4, 4, 4 } ,
-                                        { 1, 1, 1, 1 }, { 2, 2, 2, 2 }, { 3, 3, 3, 3 }, { 4, 4, 4, 4 }
-                                      };
-            uint[] pris = { 500, 530, 540, 560, 500, 530, 540, 560 };
-            uint[] pws = { 50, 53, 54, 56, 500, 530, 540, 560 };
-
-
-            for (uint i = 0; i < radar_ids.Length; i++)
-            {
-                uint[] freqbuf = new uint[10];
-                for (int j = 0; j < 4; j++)
-                {
-                    freqbuf[j] = freqs[i, j];
-                }
-
-                radars.Add(new Radar(radar_ids[i], ref_radar_types[i], scan_rate[i], 0,
-                                         freqbuf, pris[i], pws[i], radar_x[i], radar_y[i]));
-            }
-
-            //Aircraft Timed-Plan
-            uint[] aircraft_times = { 1, 2, 3, 4 };
-            uint[] aircraft_x     = { 8, 8, 8, 8 };
-            uint[] aircraft_y     = { 0, 2, 4, 15 };
-
-            List<TimedWayPoint> pp = new List<TimedWayPoint>();
-            for (int i = 0; i < aircraft_times.Length; i++)
-            {
-                pp.Add(new TimedWayPoint(aircraft_x[i], aircraft_y[i], 0, aircraft_times[i]));
-            }
+            //uint[,] freqs = { { 1, 1, 1, 1 }, { 2, 2, 2, 2 }, { 3, 3, 3, 3 }, { 4, 4, 4, 4 } ,
+            //  { 1, 1, 1, 1 }, { 2, 2, 2, 2 }, { 3, 3, 3, 3 }, { 4, 4, 4, 4 }
+            //};
+            uint[] freqs = { 3, 3, 7, 15 };
+            uint[] pris =  { 500, 530, 540, 560, 500, 530, 540, 560 };
+            uint[] pws =   { 50, 53, 54, 56, 500, 530, 540, 560 };
 
             aircraft = new Aircraft(pp);
-            aircraft.x = aircraft_x[0];
-            aircraft.y = aircraft_y[0];
+            
+
+            if (globals.scenario_num == 1)
+            {
+                int num_radars = 1;
+
+                radar_ids[0] = 1;
+                
+                ref_radar_types[0] = 1;
+                scan_rate[0] = 5;
+                radar_x[0] = 42;
+                radar_y[0] = 47;                
+
+                for (uint i = 0; i < num_radars; i++)
+                {
+                    radars.Add(new Radar(radar_ids[i], ref_radar_types[i], scan_rate[i], 0,
+                                             freqs[i], pris[i], pws[i], radar_x[i], radar_y[i]));
+                }
+
+                aircraft.x = 42;
+                aircraft.y = 0;
+                aircraft.symbol = "A";
+            }
 
             rwr = new Rwr();
 

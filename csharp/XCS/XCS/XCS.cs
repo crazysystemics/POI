@@ -21,10 +21,15 @@ namespace POI_XCS
     {
         public List<Radar>  sigma_radars = new List<Radar>();
         public List<Action> alpha_actions = new List<Action>();
-        public List<Action> default_actions = new List<Action>();
+        
         public ReInforcementProgram rp;
         public XCS  xcs;
-        public bool eop;       
+        public bool eop;  
+        
+        public Xcs_Environment()
+        {
+            xcs = new XCS();
+        }
 
         public void runNextCycle()
         {
@@ -60,6 +65,22 @@ namespace POI_XCS
         double gamma;
         double prob_dont_care;
 
+
+        public XCS()
+        {
+            Action a = new Action(1, 5);
+            default_actions.Add(a);
+
+            a = new Action(2, 5);
+            default_actions.Add(a);
+
+            a = new Action(3, 5);
+            default_actions.Add(a);
+
+            a = new Action(4, 5);
+            default_actions.Add(a);
+
+        }
 
         public List<Action> get_action_sequence(List<Radar> env_sigma_radars)
         {
@@ -121,7 +142,9 @@ namespace POI_XCS
                 }
 
 
-                if (num_actions < theta_mna)
+                //theta_mna is threshold for minimum number of actions
+                //TODO change back from <= to <
+                if (num_actions <= theta_mna)
                 {
                     Classifier clc = GenerateCoveringClassifier(M, sigma);
                     Population.Add(clc);
@@ -131,12 +154,16 @@ namespace POI_XCS
                 
             }
 
-                        return M;
+            return M;
         }
 
         public void DeleteFromPopulation(ref List<Classifier> population)
         {
             double min_fitness = 1.00;
+
+            if (population.Count < 15)
+                return;
+
             foreach (Classifier cl in population)
             {
                 if (cl.Fitness < min_fitness)
@@ -162,6 +189,8 @@ namespace POI_XCS
         {
             Classifier cl = new Classifier();
             Random random = new Random();
+            cl.conditions = new List<Condition>();
+            prob_dont_care = 0.5;
 
             foreach(Radar r in sigma)
             {
@@ -172,25 +201,32 @@ namespace POI_XCS
                 if (x < prob_dont_care)
                     cond.tfwin.mint = -1;
                 else
-                    cond.tfwin.mint = Convert.ToInt32(r.posx - 10);
+                    cond.tfwin.mint = Convert.ToInt32(r.scan_interval - 10);
 
                 x = random.NextDouble();
                 if (x < prob_dont_care)
                     cond.tfwin.maxt = -1;
                 else
-                    cond.tfwin.mint = Convert.ToInt32(r.posx +10);
+                    cond.tfwin.maxt = Convert.ToInt32(r.scan_interval + 10);
 
                 x = random.NextDouble();
                 if (x < prob_dont_care)
                     cond.tfwin.minf = -1;
                 else
-                    cond.tfwin.minf = Convert.ToInt32(r.posy - 10);
+                    cond.tfwin.minf = Convert.ToInt32(r.freq - 3);
 
                 x = random.NextDouble();
                 if (x < prob_dont_care)
-                    cond.tfwin.minf = -1;
+                    cond.tfwin.maxf = -1;
                 else
-                    cond.tfwin.minf = Convert.ToInt32(r.posy + 10);
+                    cond.tfwin.maxf = Convert.ToInt32(r.freq + 3);
+
+
+                cond.tfwin.mint = 62;
+                cond.tfwin.maxt = 82;
+                cond.tfwin.minf = 1;
+                cond.tfwin.maxf = 5;
+
 
                 cl.conditions.Add(cond);
             }
@@ -205,7 +241,7 @@ namespace POI_XCS
             cl.n = 1;
 
 
-            return null;
+            return cl;
         }
 
     
@@ -379,16 +415,16 @@ namespace POI_XCS
         public bool DoesMatch(Radar sigma_r)
         {
             //don't care conditions will be considered 
-            if (tfwin.mint >= 0 && sigma_r.posx < tfwin.mint)
+            if (tfwin.mint >= 0 && sigma_r.scan_interval < tfwin.mint)
                 return false;
 
-            if (tfwin.maxt >= 0 && sigma_r.posx >tfwin.mint)
+            if (tfwin.maxt >= 0 && sigma_r.scan_interval > tfwin.maxt)
                 return false;
 
-            if (tfwin.minf >= 0 && sigma_r.posy < tfwin.minf)
+            if (tfwin.minf >= 0 && sigma_r.freq < tfwin.minf)
                 return false;
 
-            if (tfwin.maxf >= 0 && sigma_r.posy > tfwin.minf)
+            if (tfwin.maxf >= 0 && sigma_r.freq > tfwin.maxf)
                 return false;
 
             return true;
@@ -403,7 +439,8 @@ namespace POI_XCS
 
         public Action(uint band, uint duration)
         {
-
+            this.band = band;
+            this.duration = duration;
         }
 
         public bool isEqual(Action a)

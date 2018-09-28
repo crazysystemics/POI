@@ -206,7 +206,7 @@ namespace POI_XCS
                 {
                     if (cl.conditions[i].tfwin.minf == -1)
                     {
-                        cl.conditions[i].tfwin.minf = (int)sigma.ToArray()[i].freq[0];
+                        cl.conditions[i].tfwin.minf = (int)sigma.ToArray()[i].freq;
                     }
                     else
                     {
@@ -219,7 +219,7 @@ namespace POI_XCS
                 {
                     if (cl.conditions[i].tfwin.maxf == -1)
                     {
-                        cl.conditions[i].tfwin.maxf = (int)sigma.ToArray()[i].freq[0];
+                        cl.conditions[i].tfwin.maxf = (int)sigma.ToArray()[i].freq;
                     }
                     else
                     {
