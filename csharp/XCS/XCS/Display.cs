@@ -60,11 +60,11 @@ namespace POI_XCS
                     Console.BackgroundColor = bg; //(System.ConsoleColor)fbs_color_bg[i, j]; // ConsoleColor.Gray;
                     Console.ForegroundColor = fg; //(System.ConsoleColor)fbs_color_fg[i, j];  //ConsoleColor.Black;
                     frame_buf[i, j] = ' ';
-                    Console.Write(frame_buf[i, j]);
+                    //Console.Write(frame_buf[i, j]);
                     fb_color_fg[i, j] = (char)fg; // fbs_color_fg[i, j];
                     fb_color_bg[i, j] = (char)bg; // fbs_color_bg[i, j];
                 }
-                Console.WriteLine("");
+                //Console.WriteLine("");
             }
         }
 

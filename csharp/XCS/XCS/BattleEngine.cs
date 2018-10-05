@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace POI_XCS
 {
     class BattleEngine
     {
-
         public void UpdateRwrRxBuf(Radar r, Aircraft ac, Rwr rwr)
         {
 
@@ -36,22 +36,35 @@ namespace POI_XCS
             double azim_deg = (180 / Math.PI) * azim_rad;
 
 
-
+            
             if (azim_deg >= min_azim && azim_deg <= max_azim  && r.freq == rwr.band)
             {
                 //if (rwr.rxunit.rxBufCount < 32)
                 if (rwr.rxunit.rxBufCount == 0)
                     rwr.rxunit.rxbuf[rwr.rxunit.rxBufCount++] = r;
-                Console.WriteLine(globals.tick.ToString() + " " + r.mb_azim.ToString() + " " +  r.beam_width.ToString() + " " + min_azim.ToString() + " " +
-                                                        max_azim.ToString() + " " + azim_deg.ToString());
+                //Console.WriteLine(globals.tick.ToString() + " " + r.mb_azim.ToString() + " " +  r.beam_width.ToString() + " " + min_azim.ToString() + " " +
+                //                                        max_azim.ToString() + " " + azim_deg.ToString());
+
+                
+
+                globals.dumpLog("====>" + r.mb_azim.ToString() + " " + r.beam_width.ToString() + " " + min_azim.ToString() + " " +
+                                                        max_azim.ToString() + " " + azim_deg.ToString() + "\n\r", false, false);
+                
             }
 
-            Console.WriteLine("out " + globals.tick.ToString() + " " +
-                              r.mb_azim.ToString() + " " + r.beam_width.ToString() + " " +
-                              min_azim.ToString() + " "  + max_azim.ToString() + " " + 
-                              azim_deg.ToString() + " " + r.freq.ToString() + " " + rwr.band.ToString() );
-
+            globals.dumpLog("out " + " dur " +
+                              rwr.duration.ToString() + " band: " + rwr.band.ToString(),false,false);
+           
         }
+
+  
+
+        //public BattleEngine()
+        //{
+        //    LogFile = new StreamWriter("C:\\Users\\rvjos\\Documents\\poi_xcs.txt");
+        //    LogFile.WriteLine("BEGIN");
+        //    LogFile.Close();
+        //}
 
     }
 }

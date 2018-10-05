@@ -25,6 +25,29 @@ namespace POI_XCS
             mu = m;
         }
 
+        public void fieldvalsToString(ref List<string> sl)
+        {
+            sl.Add("GA");
+
+            if (parent1 == null || parent2 == null)
+            {
+                sl.Add("NULL PARENTS");
+                return;
+            }
+
+            sl.Add("PARENT1:");
+            parent1.fieldvalsToString(ref sl);
+            sl.Add("PARENT2");
+            parent2.fieldvalsToString(ref sl);
+            sl.Add("CHILD1:");
+            child1.fieldvalsToString(ref sl);
+            sl.Add("CHILD2");
+            child2.fieldvalsToString(ref sl);
+            sl.Add("SCALARS:theta, psi, mu");
+            sl.Add(theta.ToString() + "\t" + psi.ToString() + "\t" + mu.ToString());
+
+        }
+
 
         public void Run(ref List<Classifier> A, List<Radar> sigma, ref List<Classifier> Population)
         {

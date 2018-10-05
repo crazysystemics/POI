@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,44 +31,172 @@ namespace POI_XCS
 
     static class globals
     {
+        public static StreamWriter LogFile;
         public static uint tick;
         public static uint scenario_num;
+        public static bool onconsole=true;
+        public static bool onfile = true;
+        public static bool not_over = true;
+
+        public static string path = "C:\\Users\\rvjos\\Documents\\";
+        public static string filename = "poi_xcs_log_02.txt";
+
+        public static void Init_Log()
+        {
+                                      
+            LogFile = new StreamWriter(path+filename);
+            LogFile.WriteLine("BEGIN:" + DateTime.Now.ToString());
+            LogFile.Close();
+        }
+
+        public static void dumpLog(string s, bool onConsole=true, bool onFile=true)
+        {
+            //onConsole
+            if (onConsole)
+            {
+                Console.WriteLine("[" + globals.tick.ToString() + "]:" + s);
+            }
+
+            //onFile
+            if (onFile)
+            {
+                LogFile = new StreamWriter(path+filename, true);
+                LogFile.WriteLine("[" + globals.tick.ToString() + "]:" + s);
+                LogFile.Close();
+            }
+        }
+
+        //----------------------------------------------------- DISPLAY------------------------------------------
+        static uint max_width = 174, max_height = 48;
+        static uint w = 174 / 2, h = 48 / 2;
+
+        public static void dumpLog(List<string> sl, bool onConsole=true, bool onFile=true)
+        {
+            //onConsole
+            foreach (string s in sl)
+            {
+                dumpLog(s, onConsole, onFile);
+            }       
+        }
+
+        public static console_win win2;
+        public static void Init_Display(ref console_win win)
+        {
+            uint w = 174 / 2; // (uint)Console.WindowWidth / 2;
+            uint h = 48; // (uint)Console.WindowHeight;
+            win = new console_win(1, 1, w, h, ConsoleColor.Green, ConsoleColor.Black);
+            win2 = new console_win(w + 2, 1, w, h, ConsoleColor.Cyan, ConsoleColor.Black);
+        }
+
+
+        public static void displayScenario1(ref console_win win, ref console_win win2, Battle b)
+        {
+            //win.clear();
+            win.puttext(b.radars.First().posx, b.radars.First().posy, b.radars.First().symbol, ConsoleColor.White, ConsoleColor.Red);
+            win.puttext(b.aircraft.x, b.aircraft.y, b.aircraft.symbol, ConsoleColor.White, ConsoleColor.Blue);
+
+
+            win2.puttext(72, 3, b.radars.First().symbol, ConsoleColor.White, ConsoleColor.Red);
+            win2.draw_box(62, 1, 21, 5);
+
+            //win.draw();
+            //win2.draw();
+
+            //Console.ResetColor();
+        }
+
     }
-
-  
-       
-    
-
 
     //--------------------------------RWR related Tasks -------------------------------------------
 
     class Intercept
     {
+        public uint trackid;
         public uint radarid;
-        public uint tick;
-        public uint band;
+        public uint freq;
         public uint priority;
-        public uint rect;
+        public uint mb_azim;
+        public uint pri;
 
         public void Print()
         {
-            Console.Write(band.ToString() + priority.ToString() + rect.ToString());
+            //Console.Write(band.ToString() + priority.ToString() + rect.ToString());
         }
 
-        public Intercept(uint rid, uint t, uint b, uint p, uint r)
+        public string fieldNamesToString()
         {
+            return "INTERCEPT" + "\t" +
+                "trackid"  + "\t" +
+                "radarid"  + "\t" +
+                "freq"     + "\t" +
+                "pri" + "\t" +
+                "mb_azim"  + "\t" +
+                "priority";
+        }
+
+        public void fieldvalsToString(ref List<string> sl)
+        {
+            sl.Add("INTERCEPT");
+            sl.Add(trackid.ToString() + "\t" +
+            radarid.ToString()        + "\t" +
+            freq.ToString()           + "\t" +
+            pri.ToString()            + "\t" +
+            mb_azim.ToString()        + "\t" +
+            priority.ToString()       + "\t"             
+            );
+        }      
+    
+        
+
+        public Intercept(uint trackid, uint rid, uint freq, uint pri, uint mb_azim, uint priority)
+        {
+            this.trackid = trackid;
             radarid = rid;
-            tick = t;
-            band = b;
-            priority = p;
-            rect = r;
+            this.freq = freq;
+            this.pri = pri;
+            this.mb_azim = mb_azim;
+            this.priority = priority;          
+        }
+
+        public bool isSameAs(Intercept icept)
+        {
+            int azim_window = 5; //in deg;
+            int min_azim = (int)mb_azim - azim_window;
+            if (min_azim < 0)
+            {
+                //min_azim will be subtracted from 360 as it is -ve
+                min_azim = 360 + min_azim;
+            }
+
+            int max_azim = ((int)mb_azim + azim_window) % 360;
+            if (freq == icept.freq && pri == icept.pri)
+            {
+                if (min_azim < max_azim)
+                {
+                    if (icept.mb_azim >= min_azim && icept.mb_azim <= max_azim)
+                        return true;
+                    else
+                        return false;
+                }
+                if (icept.mb_azim >= min_azim && icept.mb_azim < 360 ||
+                    icept.mb_azim > 0 && icept.mb_azim < max_azim)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return false;
         }
     }
 
     class interceptTrack
     {
         public int srcid;
-        Intercept[] track;
+        List<Intercept> track;
     }
 
       
@@ -77,17 +206,17 @@ namespace POI_XCS
         //Just because it is concerned  with this Rwr
         //Global data  Unknown to Rwr
         public uint band=1;
-        public List<Intercept> curIlluminations;        
-        public int[,] InterceptMat;
-        public Dictionary<int, Intercept[]> InterceptTracks;
+        public uint duration = 1;
         public RxUnit rxunit = new RxUnit();
-        public uint duration=1;
-
-
+        public List<List<Intercept>> InterceptTracks;
+        
         //set by battle engine
+        public List<Intercept> curIlluminations;
+        public List<Intercept> curIntercepts;
+        public int[,] InterceptMat;
         public uint azim;
 
-        public List<Intercept> curIntercepts;
+        
         
         public Rwr()
         {
@@ -97,7 +226,21 @@ namespace POI_XCS
                     InterceptMat[i, j] = 0;
 
             curIlluminations = new List<Intercept>();
-            InterceptTracks = new Dictionary<int, Intercept[]>();
+            InterceptTracks = new List<List<Intercept>>();
+        }
+
+        public void fieldvalsToString(ref List<string> sl)
+        {
+            sl.Add("RWR");
+            sl.Add(band.ToString() + "\t" + duration.ToString() + "\t");
+            foreach (List<Intercept> itrk in InterceptTracks)
+            {
+                sl.Add("TRACK");
+                foreach (Intercept icept in itrk)
+                {
+                    icept.fieldvalsToString(ref sl);
+                }
+            }
         }
 
         public void Update()
@@ -142,6 +285,25 @@ namespace POI_XCS
             plannedPath = p;
         }
 
+        public void fieldvalsToString(ref List<string> sl)
+        {
+            string s = "AIRCRAFT\r\n";
+            s = x.ToString() + "\t" +
+            y.ToString() + "\t" +
+            azim.ToString() + "\t" +
+            symbol.ToString();
+            sl.Add(s);
+            
+            foreach (TimedWayPoint twp in plannedPath)
+            {
+               sl.Add("twp\t" + twp.time.ToString() + "\t"+ twp.x.ToString() + "\t" + 
+                                        twp.y.ToString() + "\t" + twp.z.ToString() + "\r\n");
+            }
+
+            
+        }
+           
+
         public void Update()
         {
             if (globals.scenario_num == 1)
@@ -150,6 +312,11 @@ namespace POI_XCS
                 double dist = 333.0 / 1000.0; //in km
                 dist = dist * 0.75; //in pixels (48rows/64km)
                 y = (uint)Math.Round(y + dist); // in km
+            }
+            
+            if (Math.Abs(x - 20) < 0.01 && Math.Abs(y - 10) < 0.01)
+            {
+                globals.not_over = false ;
             }
         }
     }
@@ -186,6 +353,9 @@ namespace POI_XCS
         }
     }
 
+
+
+   
     class Radar
     {
         public uint radarId;
@@ -200,6 +370,44 @@ namespace POI_XCS
         public uint posy;
         public uint mb_azim;
         public uint beam_width;//main beam azimuth
+
+        public static string fieldNamesToString()
+        {
+            return "radarId" + "\t" +
+            "symbol" + "\t" +
+            "scanrate" + "\t" +
+            "scan_interval" + "\t" +
+            "freq" + "\t" +
+            "pri" + "\t" +
+            "pw" + "\t" +
+            "posx" + "\t" +
+            "posy" + "\t" +
+            "mb_azim" + "\t" +
+            "beam_width" + "\t";
+       
+    }
+
+        public void fieldvalsToString (ref List<string> sl)
+        {
+            string s = "CLASS:RADAR\r\n";
+            s += radarId.ToString() + "\t" +
+                rtype.ToString() + "\t" +
+                symbol.ToString() + "\t" +
+                scanrate.ToString() + "\t" +
+                scan_interval.ToString() + "\t" +
+                freq.ToString() + "\t" +
+                pri.ToString() + "\t" +
+                pw.ToString() + "\t" +
+                posx.ToString() + "\t" +
+                posy.ToString() + "\t" +
+                mb_azim.ToString() + "\t" +
+                beam_width.ToString() + "\t" +
+                radarId.ToString();
+
+               
+
+                sl.Add(s);            
+        }
 
         public Radar(uint pradarId, uint prtype, uint pscanrate, uint pscan_interval, uint pfreq, uint ppri, uint ppw,
                      uint x, uint y, string sym="R1")
@@ -220,10 +428,16 @@ namespace POI_XCS
             
         }
 
+ 
+
         public void Update()
         {
-            mb_azim ++;
-            mb_azim = mb_azim % 360;
+            if (globals.tick % 5 == 0)
+            {
+                mb_azim++;
+                mb_azim = mb_azim % 360;
+            }
+                
         }
     }
 
@@ -237,24 +451,23 @@ namespace POI_XCS
     {
         public uint rxFreqMin;
         public uint rxFreqMax;
-        public uint rxBufCount=0;
+        
         public bool radarDetected;
         public uint state;
+        public int  duration;
+        public bool phi;//no input;
+
+        public uint rxBufCount = 0;
+        public Radar[] rxbuf = new Radar[256];
 
         public void startRx(uint band)
-        {
-            if (radarDetected)
-            {
-                rxBufCount++;
-            }
+        {          
         }
 
         public void stopRx(uint band)
         {
         }
-        public int duration;
-        public bool phi;//no input;
-        public Radar[] rxbuf = new Radar[256];
+        
         
     }
 
@@ -266,6 +479,13 @@ namespace POI_XCS
         public Rwr rwr;
         public bool ac_hit;
         public string[,] global_view = new string[20, 20]; 
+
+        public Battle()
+        {
+            for (int i = 0; i < 15; i++)
+                for (int j = 0; j < 15; j++)
+                    global_view[i, j] = String.Empty;
+        }
 
         public bool MissionComplete()
         {
@@ -424,7 +644,7 @@ namespace POI_XCS
             //freq vs time
             //freq moves from top to bottom
             //int[,] interceptMat = new int[20, 20];
-
+           
 
             uint[,] rects = { {1, 1,  7,  11},
                               {9, 9, 15, 17},

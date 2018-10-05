@@ -20,12 +20,12 @@ namespace POI_XCS
         {
             Battle battle = new Battle();
             double epsilon = 0.0001;
-            uint max_width = 174, max_height = 48;
+            
             console_win win1 = new console_win();
 
             Xcs_Environment xcs_env = new Xcs_Environment();
 
-            uint start_tick = 0;
+            uint start_tick = 0, elapsed_time = 0;
             battle = new Battle();
 
 
@@ -55,8 +55,7 @@ namespace POI_XCS
             //win4.show_view4();
             //DISPLAY CONFIGURATION END
             globals.scenario_num = 1;
-            battle.SetUp();
-            BattleEngine be = new BattleEngine();
+
             //while(true)
             //{
             //    globals.tick++;
@@ -66,29 +65,38 @@ namespace POI_XCS
             //}
             //as long as aricraft is not hit and mission is not complete
             //continue execution
+
+
+            battle.SetUp();
+            BattleEngine be = new BattleEngine();
+
+
+           globals.Init_Log();
+           globals.Init_Display(ref win1);
+ 
+            //win2.clear();
+
             List<Action> acts = new List<Action>();
             int action_index = 0;
             Action act;
 
-            for (int i = 0; i < 15; i++)
-                for (int j = 0; j < 15; j++)
-                    battle.global_view[i, j] = String.Empty;
-
-
-            displayInit(ref win1);
-
-
-            while (!battle.ac_hit && !battle.MissionComplete())
+            while (globals.not_over && !battle.ac_hit && !battle.MissionComplete())
             {
                 globals.tick++;
+                globals.dumpLog(globals.tick.ToString(), globals.onconsole, globals.onfile);
 
                 if (globals.scenario_num == 1)
                 {
                     battle.aircraft.Update();
                     battle.radars.First().Update();
                     battle.rwr.Update();
-                    displayScenario1(ref win1, battle);
+                    globals.displayScenario1(ref win1, ref globals.win2, battle);
                 }
+
+                List<string> sl = new List<string>();
+                globals.dumpLog("MAIN-LOOP-BEGIN:", globals.onconsole, globals.onfile);
+
+
 
                 //receive in all bands of particular regime
                 if (action_index < acts.ToArray().Length)
@@ -103,20 +111,34 @@ namespace POI_XCS
                         battle.rwr.duration = acts[action_index].duration;
                         battle.rwr.band = acts[action_index].band;
                         battle.rwr.rxunit.state = (uint)State.STATE1;
+
+                        //sl = new List<string>();
+                        //sl.Add("INITIATING-RECEPTION[S0->S1]");
+                        //acts[action_index].fieldvalsToString(ref sl);
+                        //globals.dumpLog(sl, globals.onconsole, globals.onfile);
                     }
                     if (battle.rwr.rxunit.state == (uint)State.STATE1)
                     {
-                        if ((globals.tick - start_tick) < acts[action_index].duration)
+                        elapsed_time = (globals.tick - start_tick);
+                        if (elapsed_time < acts[action_index].duration)
                         {
+                            //globals.dumpLog("ACTION-LIST@WHILE-RCPTN-ON:actlist[" + acts.Count.ToString() + "] ActionIndex[" + action_index.ToString() + "] elapsedTime[" + elapsed_time.ToString() + "]",
+                            //                 globals.onconsole, globals.onfile);
+
+
                             //add radar-record to rxbuf
+                            //be.dumpLog("state:" + battle.rwr.rxunit.state.ToString() + " ActIndex:" + action_index.ToString());
                             be.UpdateRwrRxBuf(battle.radars.First(), battle.aircraft, battle.rwr);
                         }
                         else
                         {
-
                             battle.rwr.rxunit.stopRx(acts[action_index].band);
                             //move to next band
                             action_index++;
+
+                            //globals.dumpLog("ACTION-LIST@1-F:moved to action" + action_index.ToString(),
+                            //        globals.onconsole, globals.onfile);
+
                             battle.rwr.rxunit.state = (uint)State.STATE0;
                         }
                     }
@@ -131,44 +153,159 @@ namespace POI_XCS
                     //view routines also may be invoked here
 
                     //xcs component
+                    //if (battle.rwr.rxunit.rxBufCount > 0)
+                    globals.dumpLog("ALL-ACTIONS-DONE/XCS-PROC-BEGIN:", globals.onconsole, globals.onfile);
+
+                    //Log Messages
+                    globals.dumpLog("ACTIONS:", globals.onconsole, globals.onfile);
+                    foreach (Action succ_act in acts)
+                    {
+                        globals.dumpLog(succ_act.band.ToString() + "\t" + succ_act.duration.ToString(), globals.onconsole, globals.onfile);
+                    }
                     if (battle.rwr.rxunit.rxBufCount > 0)
                     {
-
-                        for(int i = 0; i < battle.rwr.rxunit.rxBufCount; ++i)
+                        globals.dumpLog("RADARS_RCVD:", !globals.onconsole, !globals.onfile);
+                        globals.dumpLog(Radar.fieldNamesToString(), globals.onconsole, globals.onfile);
+                        sl = new List<string>();
+                        for (int i = 0; i < battle.rwr.rxunit.rxBufCount; ++i)
                         {
-                            xcs_env.sigma_radars.Add(battle.rwr.rxunit.rxbuf[i]);
+                            battle.rwr.rxunit.rxbuf[i].fieldvalsToString(ref sl);
                         }
-                        battle.rwr.rxunit.rxBufCount = 0;
-
-                        xcs_env.alpha_actions = new List<Action>();
-                        xcs_env.runNextCycle();
-                        acts = xcs_env.alpha_actions;
+                        globals.dumpLog(sl, globals.onconsole, globals.onfile);
                     }
                     else
                     {
-                        acts = xcs_env.xcs.default_actions;                        
+                        globals.dumpLog("NO RADARS RCVD ", globals.onconsole, globals.onfile);
                     }
 
+
+
+
+
+                    xcs_env.sigma_radars = new List<Radar>();
+                    bool matching_found = false;
+                    List<List<Intercept>> new_icept_trks = new List<List<Intercept>>();
+
+                    //Log Messages
+
+                    sl = new List<string>();
+                    List<string> sl_icept = new List<string>();
+
+
+                    for (int i = 0; i < battle.rwr.rxunit.rxBufCount; ++i)
+                    {
+                        Radar r = battle.rwr.rxunit.rxbuf[i];
+                        xcs_env.sigma_radars.Add(r);
+
+                        uint priority = 0;
+                        Intercept new_icept = new Intercept(0, r.radarId, r.freq, r.pri, r.mb_azim, priority);
+                        //Log Messages
+                        {
+
+                            sl_icept = new List<string>();
+                            sl_icept.Add("INTERCEPTS:");
+
+
+                            sl_icept.Add(new_icept.fieldNamesToString());
+                            new_icept.fieldvalsToString(ref sl_icept);
+                            globals.dumpLog(sl_icept, globals.onconsole, globals.onfile);
+                        }
+
+                        foreach (List<Intercept> icepts in battle.rwr.InterceptTracks)
+                        {
+                            //move to next track (icepts)
+                            Intercept icept = icepts.Last();
+
+                            //Log Messages
+                            {
+                                //get log for latest attributes in (icepts) track
+                                icept.fieldvalsToString(ref sl_icept);
+                                globals.dumpLog(sl_icept.Last(), globals.onconsole, globals.onfile);
+                            }
+
+                            if (!matching_found && new_icept.isSameAs(icept))
+                            {
+                                new_icept.trackid = icept.trackid;
+                                icepts.Add(new_icept);
+                                matching_found = true;
+                                new_icept_trks.Add(icepts);
+                            }
+
+
+                        }
+
+                        if (!matching_found)
+                        {
+                            //new track
+                            List<Intercept> new_icept_trk = new List<Intercept>();
+
+                            int new_track_id = battle.rwr.InterceptTracks.Count + 1;
+                            new_icept.trackid = (uint)new_track_id;
+                            new_icept_trk.Add(new_icept);
+                            new_icept_trks.Add(new_icept_trk);
+
+                            //Log Messages
+                            {
+                                sl = new List<string>();
+                                new_icept.fieldvalsToString(ref sl);
+
+                                globals.dumpLog(sl, globals.onconsole, globals.onfile);
+                                globals.dumpLog("NEW-TRACK-THIS(ABOVE)-INTERCEPT", globals.onconsole, globals.onfile);
+                            }
+
+                        }
+                    }
+                    battle.rwr.InterceptTracks = new_icept_trks;
+
+                    //determine actions for next cycles through xcs
+                    //reset rxbufcount and alpha_actions
+                    battle.rwr.rxunit.rxBufCount = 0;
+                    xcs_env.alpha_actions = new List<Action>();
+
+                    xcs_env.runNextCycle();
+
+                    sl = new List<string>();
+                    xcs_env.fieldvalsToString(ref sl);
+                    globals.dumpLog(sl, globals.onconsole, globals.onfile);
+
+                    acts = xcs_env.alpha_actions;
                     action_index = 0;
+
+
+                    //Logging Messages
+                    if (acts.Count == 0)
+                    {
+                        globals.dumpLog(globals.tick.ToString() + "ACTION-LIST@EMPTY-ACTS-TO-EXEC:",
+                                                                  globals.onconsole, globals.onfile);
+                    }
+                    else
+                    {
+                        globals.dumpLog("ACTION-LIST-HAS-ACTIONS: " + acts.Count,
+                                        globals.onconsole, globals.onfile);
+
+                        foreach (Action act1 in acts)
+                        {
+                            act1.fieldvalsToString(ref sl);
+                            globals.dumpLog(sl.Last(), globals.onconsole, globals.onfile);
+                        }
+                    }
+
+                    //Logging Messages
+                    {
+                        sl = new List<string>();
+                        xcs_env.fieldvalsToString(ref sl);
+                        if (sl.Count > 0)
+                        {
+                            globals.dumpLog(sl, true, globals.onfile);
+                        }
+                    }
                 }
-            }
 
-        } //Main
+            }//Main
 
-        static void displayInit(ref console_win win)
-        {
-            uint w = 174 / 2; // (uint)Console.WindowWidth / 2;
-            uint h = 48; // (uint)Console.WindowHeight;
-            win = new console_win(1, 1, w, h, ConsoleColor.Green, ConsoleColor.Black);
         }
 
-        static void displayScenario1(ref console_win win, Battle b)
-        {
-            //win.clear();
-            win.puttext(b.radars.First().posx, b.radars.First().posy, b.radars.First().symbol, ConsoleColor.White, ConsoleColor.Red);
-            win.puttext(b.aircraft.x, b.aircraft.y, b.aircraft.symbol, ConsoleColor.White, ConsoleColor.Blue);
-            //win.draw();
-        }
+
 
 
     }
