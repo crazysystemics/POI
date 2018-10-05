@@ -34,11 +34,11 @@ namespace POI_XCS
         public static StreamWriter LogFile;
         public static uint tick;
         public static uint scenario_num;
-        public static bool onconsole=true;
+        public static bool onconsole=false; //true
         public static bool onfile = true;
         public static bool not_over = true;
 
-        public static string path = "C:\\Users\\rvjos\\Documents\\";
+        public static string path = "D:\\ravi\\hrc";
         public static string filename = "poi_xcs_log_02.txt";
 
         public static void Init_Log()
@@ -49,12 +49,12 @@ namespace POI_XCS
             LogFile.Close();
         }
 
-        public static void dumpLog(string s, bool onConsole=true, bool onFile=true)
+        public static void dumpLog(string s, bool onConsole=false, bool onFile=true)
         {
             //onConsole
             if (onConsole)
             {
-                Console.WriteLine("[" + globals.tick.ToString() + "]:" + s);
+               // Console.WriteLine("[" + globals.tick.ToString() + "]:" + s);
             }
 
             //onFile
@@ -70,7 +70,7 @@ namespace POI_XCS
         static uint max_width = 174, max_height = 48;
         static uint w = 174 / 2, h = 48 / 2;
 
-        public static void dumpLog(List<string> sl, bool onConsole=true, bool onFile=true)
+        public static void dumpLog(List<string> sl, bool onConsole=false, bool onFile=true)
         {
             //onConsole
             foreach (string s in sl)
@@ -92,15 +92,15 @@ namespace POI_XCS
         public static void displayScenario1(ref console_win win, ref console_win win2, Battle b)
         {
             //win.clear();
-            win.puttext(b.radars.First().posx, b.radars.First().posy, b.radars.First().symbol, ConsoleColor.White, ConsoleColor.Red);
-            win.puttext(b.aircraft.x, b.aircraft.y, b.aircraft.symbol, ConsoleColor.White, ConsoleColor.Blue);
+           // win.puttext(b.radars.First().posx, b.radars.First().posy, b.radars.First().symbol, ConsoleColor.White, ConsoleColor.Red);
+            //win.puttext(b.aircraft.x, b.aircraft.y, b.aircraft.symbol, ConsoleColor.White, ConsoleColor.Blue);
 
 
-            win2.puttext(72, 3, b.radars.First().symbol, ConsoleColor.White, ConsoleColor.Red);
-            win2.draw_box(62, 1, 21, 5);
+            //win2.puttext(72, 3, b.radars.First().symbol, ConsoleColor.White, ConsoleColor.Red);
+            //win2.draw_box(62, 1, 21, 5);
 
             //win.draw();
-            //win2.draw();
+            win2.draw();
 
             //Console.ResetColor();
         }
@@ -602,9 +602,11 @@ namespace POI_XCS
                 for (uint j = 0; j < cols; j++)
                 {
                     //pale blue sky
-                    Console.Write(mat[i, j].ToString().PadLeft(3));
+                    if (globals.onconsole)
+                        Console.Write(mat[i, j].ToString().PadLeft(3));
                 }
-                Console.WriteLine("");
+                if (globals.onconsole)
+                    Console.WriteLine("");
             }
 
         }
@@ -634,7 +636,8 @@ namespace POI_XCS
                         Console.Write(smat[i, j] + "\t");
                     }
                 }
-                Console.WriteLine("");
+                if (globals.onconsole)
+                    Console.WriteLine("");
             }
 
         }
@@ -728,7 +731,8 @@ namespace POI_XCS
             }
 
             //intercept mat is formed - print it
-            Console.WriteLine("        Time-Frequency Map");
+            if (globals.onconsole)
+                Console.WriteLine("        Time-Frequency Map");
             for (uint i = 0; i < 20; i++)
             {
                 string pstr = String.Empty;
@@ -773,18 +777,21 @@ namespace POI_XCS
 
                     Console.Write(pstr);
                 }
-                Console.WriteLine("");
+                if (globals.onconsole)
+                    Console.WriteLine("");
             }
             Console.ResetColor();
-            Console.WriteLine("X-AXIS: TIME 1 to 10 Ticks");
-            Console.WriteLine("Y-AXIS: FREQ 1 to 10 GHz");
+            if (globals.onconsole)
+                Console.WriteLine("X-AXIS: TIME 1 to 10 Ticks");
+            if (globals.onconsole)
+                Console.WriteLine("Y-AXIS: FREQ 1 to 10 GHz");
 
         }
 
         public void Go()
         {
-
-            Console.WriteLine("go");
+            if (globals.onconsole)
+                Console.WriteLine("go");
         }
     }
 

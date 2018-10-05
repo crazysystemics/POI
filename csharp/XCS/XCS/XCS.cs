@@ -162,7 +162,10 @@ namespace POI_XCS
 
 
             if (Population.Count > 0)
-            { Console.WriteLine(globals.tick.ToString()); }
+            {
+                if (globals.onconsole)
+                    Console.WriteLine(globals.tick.ToString());
+            }
 
 
 
@@ -335,14 +338,12 @@ namespace POI_XCS
                 {
                     foreach (Radar scl in sigma)
                     {
-                        if (pcl.DoesMatch(scl))
-                        {
-
-                            Population.Add(pcl);
+                        if (pcl.ModifyOnMatch(scl))
                             M.Add(pcl);
-                        }
+                        new_popn.Add(pcl);                       
                     }
                 }
+                Population = new_popn;
 
                 //Count the number of actions in M
                 int num_actions = 0;
@@ -388,6 +389,7 @@ namespace POI_XCS
                         rmin = rmax;
                     }
                     rmax = rmin + cl.actions.ToArray()[cl.index].duration;
+
                     cl.ref_mints.Add((int)rmin);
                     cl.ref_mints.Add((int)rmax);
 
@@ -726,6 +728,7 @@ class Action
     public uint prediction;
     public uint band;
     public uint duration;
+    public string symbol = string.Empty;
 
     public Action(uint band, uint duration)
     {
@@ -782,8 +785,13 @@ class Classifier
     public Classifier()
     {
         clid = clcnt++;
-
-
+        ref_mints = new List<int>();
+        ref_maxts = new List<int>();
+        predn_degs_per_sec = new List<int>();
+        prediction_array = new List<double>();
+        fitnessl = new List<double>();
+        ref_mints =new  List<int>();
+        ref_maxts = new  List<int>();
     }
 
 
@@ -811,26 +819,27 @@ class Classifier
     }
 
 
-    public bool DoesMatch(Radar sigma_r)
+    public bool ModifyOnMatch(Radar sigma_r)
+    //public bool DoesMatch(Radar sigma_r)
     {
 
         foreach (Condition cond in conditions)
         {
 
             if (cond.DoesMatch(sigma_r) == false)
-            {
+              {
                 sysPredictions = new List<int>();
                 return false;
             }
-
-            //where will this be initialized?
-            //on first hit fields are populated on radar
-            predn_degs.ToArray()[index] = (int)sigma_r.mb_azim;
-            predn_degs_per_sec.ToArray()[index] = (int)sigma_r.beam_width * 2;
-            
-
-
-            }
+            if (predn_degs != null)
+            {
+                //where will this be initialized?
+                //on first hit fields are populated on radar
+                predn_degs.ToArray()[index] = (int)sigma_r.mb_azim;
+                predn_degs_per_sec.ToArray()[index] = (int)sigma_r.beam_width * 2;
+                //symbol =    sigma_r.symbol;
+            }            
+        }
         return true;
     }
 

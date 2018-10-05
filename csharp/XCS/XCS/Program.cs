@@ -133,6 +133,12 @@ namespace POI_XCS
                         else
                         {
                             battle.rwr.rxunit.stopRx(acts[action_index].band);
+
+                            for(int i=0; i<battle.rwr.rxunit.rxBufCount; i++)
+                            {
+                                acts[action_index].symbol += battle.rwr.rxunit.rxbuf[i].symbol + " ";
+                            }
+
                             //move to next band
                             action_index++;
 
@@ -264,13 +270,33 @@ namespace POI_XCS
 
                     xcs_env.runNextCycle();
 
+                    //display routinne
+                    uint st_x = 5, st_y, ix = 0, xm = 3, ym = 5, x_w, y_h, index;
+                    string[] sym  = { "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9"};
+                    win1.clear();
+                    win1.puttext(1, ym * 0 + ym / 2, "[A]");
+                    win1.puttext(1, ym * 1 + ym / 2 , "[B]");
+                    win1.puttext(1, ym * 2 + ym / 2 , "[C]");
+                    win1.puttext(1, ym * 3 + ym / 2 , "[D]");
+                    Random random = new Random();
+                    foreach (Action a in xcs_env.alpha_actions)
+                    {
+                        st_y = (a.band - 1) * ym;
+                        x_w = a.duration * xm;
+                        y_h = ym;
+                        win1.draw_box(st_x, st_y, x_w, y_h);
+                        index = (uint)random.Next(9);
+                        win1.puttext(st_x + x_w/2, st_y + y_h/2, sym[(int)index], ConsoleColor.White, ConsoleColor.Red);
+                        win1.draw();
+                        st_x = st_x + x_w;
+                    }
+
                     sl = new List<string>();
                     xcs_env.fieldvalsToString(ref sl);
                     globals.dumpLog(sl, globals.onconsole, globals.onfile);
 
                     acts = xcs_env.alpha_actions;
                     action_index = 0;
-
 
                     //Logging Messages
                     if (acts.Count == 0)
