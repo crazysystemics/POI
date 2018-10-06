@@ -272,21 +272,38 @@ namespace POI_XCS
 
                     //display routinne
                     uint st_x = 5, st_y, ix = 0, xm = 3, ym = 5, x_w, y_h, index;
-                    string[] sym  = { "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9"};
+                    string[] sym1 = { "R1", "R2", "R3", "R4" };
+                    string[] sym2 = { "R5", "R6", "R7", "R8" };
+                    string[] sym3 = { "R9", "R10", "R11", "R12" };
+                    string[] sym4 = { "R13", "R14", "R15", "R16" };
+                    
                     win1.clear();
                     win1.puttext(1, ym * 0 + ym / 2, "[A]");
                     win1.puttext(1, ym * 1 + ym / 2 , "[B]");
                     win1.puttext(1, ym * 2 + ym / 2 , "[C]");
                     win1.puttext(1, ym * 3 + ym / 2 , "[D]");
+                    win1.puttext(20, 20, "Search Plan (Time Vs Frequency", ConsoleColor.White, ConsoleColor.Black);
                     Random random = new Random();
+                    string str_sym;
                     foreach (Action a in xcs_env.alpha_actions)
                     {
                         st_y = (a.band - 1) * ym;
                         x_w = a.duration * xm;
                         y_h = ym;
                         win1.draw_box(st_x, st_y, x_w, y_h);
-                        index = (uint)random.Next(9);
-                        win1.puttext(st_x + x_w/2, st_y + y_h/2, sym[(int)index], ConsoleColor.White, ConsoleColor.Red);
+                        index = (uint)random.Next(4);
+                        switch (a.band)
+                        {
+                            case 1: str_sym = sym1[(int)index]; break;
+                            case 2: str_sym = sym2[(int)index]; break;
+                            case 3: str_sym = sym3[(int)index]; break;
+                            case 4: str_sym = sym4[(int)index]; break;
+                            default:
+                                str_sym = "Ru";
+                                break;
+                        }
+
+                        win1.puttext(st_x + x_w/2, st_y + y_h/2, str_sym, ConsoleColor.White, ConsoleColor.Red);
                         win1.draw();
                         st_x = st_x + x_w;
                     }
