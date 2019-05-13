@@ -1,50 +1,58 @@
 ;class definitions
-;TODO NEXT (17/04/2019)
-;Resolve how to do id assignments to each agent
+;errors present
+;resolve how to do id assignments to each agent
 ;establish connection between aircraft, radar and missile
 ;correct aircraft HAS to be destroyed
+;
 
-breed        [radars radar]
+breed        [radars radar]        ;; [agentset member]
 breed        [aircrafts aircraft]
 breed        [rwrs rwr]
 breed        [missiles missile]
 
-radars-own   [id rx ry r_radius dist-rt trck_prblty d_rt d_mt]
-aircrafts-own[id ax ay rwrid a_radius a_d_rt]
+radars-own   [id rx ry r_a_id r_m_id r_radius dist-rt trck_prblty d_rt d_mt]    ;; defines the variables belonging to	each link
+aircrafts-own[id ax ay a_r_id a_m_id a_radius rid a_d_rt]
 rwrs-own     [id poi]
-missiles-own [id mx my mssl_vel missile_assigned mssl_d_rt mssl_d_mt
-             mssl_assgn_launch_prblty  mssl_on_trk_prblty mssl_on_trk
-             blast_dist ac_hit arcrft_id delay]
+missiles-own [id mx my m_a_id m_r_id mssl_vel missile_assigned mssl_d_rt mssl_d_mt
+             mssl_assgn_launch_prblty marcrft_id mssl_on_trk_prblty mssl_on_trk
+             blast_dist ac_hit delay]
 
+globals      [monxcor max_red_xcor max_blue_xcor mssn_strtd dist                                      ;; defines new global variables
+              mssn_cmpltd mssn_effctvnss dtct_prblty tracked_ac_count avg_trckd_ac_cnt rmid maxno     ;; they are accessible by all agents and can be used anywhere in a model
+              count2]
 
-globals      [monxcor max_red_xcor max_blue_xcor mssn_strtd rid radar_id dist
-              mssn_cmpltd mssn_effctvnss dtct_prblty tracked_ac_count avg_trckd_ac_cnt]
-die
-
-to SetUp
+to SetUp                      ;; used	to	begin	a	command	procedure
   ;;
-  clear-all
+  clear-all                   ;; combines the effects of clear-globals, clear-ticks, clear-turtles, clear-patches, clear-drawing, clear-all-plots, and clear-output
 
-  ;;set mssn_strtd     1
+  set mssn_strtd       1
   set mssn_cmpltd      1
   set mssn_effctvnss   0
 
     create-aircrafts       1
     [
         set color      blue ;; random shades look nice
-        set size       1.5  ;; easier to see
+        set size         2  ;; easier to see
         setxy min-pxcor  0  ;;
         set rid          0
         set a_d_rt       0
         set heading     90   ;; 135
         set a_radius     5
+        set shape "airplane"
+        set id who           ;; holds the turtle's "who number" or ID number
+
     ]
+    set maxno 1
+    set count2 0
+    set rmid 1
+    while [count2 < maxno]
+    [
 
     create-radars 1
     [
         set color red ;; random shades look nice
-        set size 1.5  ;; easier to see
-        ;;setxy 0 ( max-pycor ) / 2
+        set size  2  ;; easier to see
+        setxy 0 ( max-pycor ) / 2
         setxy 0 0
         set dist 0
         set d_rt 0
@@ -53,7 +61,7 @@ to SetUp
         set dtct_prblty  0.7
         set trck_prblty 0.7
         set r_radius 10
-        set radar_id 0
+        set id rmid
     ]
 
     create-missiles 1
@@ -66,17 +74,55 @@ to SetUp
     set mssl_on_trk_prblty 0.6
     set mssl_on_trk false
     set blast_dist 3
-    set rid 0
     set ac_hit false
     set mssl_d_rt 0
     set mssl_d_mt 0
     set delay 0
+    set id rmid
     ]
+
+    set count2 (count2 + 1)
+    ]
+  ;ask missiles
+  ;[set m_r_id  id]
+
+  ;ask radars
+  ;[set r_m_id  id]
 
   set tracked_ac_count 0
   set avg_trckd_ac_cnt 0
-
   reset-ticks
+end
+
+to dump_var
+
+    print "id of aircrafts"
+    show [id] of aircrafts
+
+    print "id of radars"
+    show [id] of radars
+
+    print "id of missiles"
+    show [id] of missiles
+
+    print "a_m_id of aircrafts"
+    show [a_m_id] of aircrafts
+
+    print "a_r_id of aircrafts"
+    show [a_r_id] of aircrafts
+
+    print "r_a_id of radars"
+    show [r_a_id] of radars
+
+    print "r_m_id of radars"
+    show [r_m_id] of radars
+
+    print "m_a_id of missiles"
+    show [m_a_id] of missiles
+
+    print "m_r_id of missiles"
+    show [m_r_id] of missiles
+
 end
 
 to target_hit [rdrid m_d_rt]
@@ -86,7 +132,7 @@ to target_hit [rdrid m_d_rt]
      [
       fd 0.76
       display
-      ask missiles with [rid = rdrid]
+      ask missiles with [id = rdrid]
       [
           set delay m_d_rt
       ]
@@ -112,22 +158,48 @@ to-report getax [paid]
 end
 
 to go
-  ;;using agentsets for selecting turtles with blue
+  ;; using agentsets for selecting turtles with blue
   ask aircrafts [if pxcor = min-pxcor [set mssn_strtd mssn_strtd + 1]]
   ask aircrafts [if pxcor = max-pxcor [set mssn_cmpltd mssn_cmpltd + 1]]
-  repeat 5 [ ask aircrafts [ fd 0.2 ] display ]
+  repeat 3 [ ask aircrafts [ fd 0.2 ] display ]
+
+  let dotick 1
 
   ask aircrafts
   [
+    let x -1
+    let rdrid -1
+    let msslid -1
+
     ask radars with [(distance myself < r_radius) and (pxcor > [pxcor] of myself)]
     [if random-float 1.0 < dtct_prblty
       [set color yellow]
-     set dist sqrt ((getay rid - ry ) * (getay rid - ry ) +
-      (getax rid - rx ) * (getax rid - rx ))
-     target_hit radar_id dist
+     set dist sqrt ((getay id - ry ) * (getay id - ry ) +
+      (getax id - rx ) * (getax id - rx ))
+
+     ;calculates delay for missiles
+     target_hit id dist
+
+      set rdrid [id] of self
+
+      set r_a_id [id] of myself
+      set x r_a_id
+
+      ask aircrafts with [id = [id] of myself]
+      [set a_r_id [id] of myself]
+
+      ask missiles with [id = [id] of myself]
+      [set m_a_id  x
+       set msslid id ]
     ]
+
+    set a_r_id rdrid
+    set a_m_id msslid
+
+    ;;set debug_var (x + 1)
+
     ask radars with [distance myself >= r_radius or pxcor < [pxcor] of myself]
-          [set color red]
+    [set color red]
   ]
 
   ask radars
@@ -141,28 +213,46 @@ to go
     ask aircrafts with [distance myself >= a_radius or pxcor > [pxcor] of myself  ]
                   [set color blue]
   ]
-
   ask missiles with [delay > 0]
-  [ set delay delay - 1
-    if delay = 0
-      [ if random-float 1.0 < mssl_on_trk_prblty
-        [ set ac_hit true ]
-        ask aircrafts with [id = arcrft_id myself]
-        [die]
-      ]
+  [
+  if delay > 0
+    [set delay delay - 1]
+   if delay = 1
+     [ ifelse random-float 1.0 < mssl_on_trk_prblty
+       [set ac_hit true] [set ac_hit false]
+       ;;set debug_var a_m_id
+       set dotick 0
+    ]
+
+
+;   TODO: Check whether section moved here will work...
+;   ask aircrafts in-radius 1
+;      [
+;         if (a_m_id >= 0) and (any? missiles with [id = [a_m_id] of myself])
+;         [die]
+;      ]
+
   ]
 
-  set max_red_xcor  max [xcor] of radars
-  set max_blue_xcor max [xcor] of aircrafts
-  set tracked_ac_count tracked_ac_count + count turtles with [color = yellow]
-  if ticks > 0  [set avg_trckd_ac_cnt tracked_ac_count / ticks]
+
+  ask missiles
+    [ask aircrafts in-radius 1
+      [
+      if (a_m_id >= 0) and (any? missiles with [id = [a_m_id] of myself])
+        [die]]]
+
+ set max_red_xcor [xcor] of radars
+ set max_blue_xcor [xcor] of aircrafts
+ set tracked_ac_count tracked_ac_count + count turtles with [color = yellow]
+ if ticks > 0  [set avg_trckd_ac_cnt tracked_ac_count / ticks]
 
 
-  set monxcor max [pxcor] of aircrafts
-  set mssn_effctvnss mssn_cmpltd / mssn_strtd
+ set monxcor [pxcor] of aircrafts
+ set mssn_effctvnss mssn_cmpltd / mssn_strtd
 
-  tick
-end
+ if dotick = 1 [tick]
+ tick
+ end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
