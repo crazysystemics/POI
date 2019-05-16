@@ -3,7 +3,6 @@
 ;resolve how to do id assignments to each agent
 ;establish connection between aircraft, radar and missile
 ;correct aircraft HAS to be destroyed
-;
 
 breed        [radars radar]        ;; [agentset member]
 breed        [aircrafts aircraft]
@@ -29,7 +28,7 @@ to SetUp                      ;; used	to	begin	a	command	procedure
   set mssn_cmpltd      1
   set mssn_effctvnss   0
 
-    create-aircrafts       1
+    create-aircrafts       3
     [
         set color      blue ;; random shades look nice
         set size         2  ;; easier to see
@@ -38,6 +37,7 @@ to SetUp                      ;; used	to	begin	a	command	procedure
         set a_d_rt       0
         set heading     90   ;; 135
         set a_radius     5
+        setxy random-xcor random-ycor
         set shape "airplane"
         set id who           ;; holds the turtle's "who number" or ID number
 
@@ -236,7 +236,7 @@ to go
 
 
   ask missiles
-    [ask aircrafts in-radius 1
+    [ask aircrafts in-radius 2
       [
       if (a_m_id >= 0) and (any? missiles with [id = [a_m_id] of myself])
         [die]]]
