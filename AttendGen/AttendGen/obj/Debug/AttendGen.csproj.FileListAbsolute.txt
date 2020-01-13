@@ -1,0 +1,7 @@
+C:\Users\lenovo\source\repos\POI\AttendGen\AttendGen\bin\Debug\AttendGen.exe.config
+C:\Users\lenovo\source\repos\POI\AttendGen\AttendGen\bin\Debug\AttendGen.exe
+C:\Users\lenovo\source\repos\POI\AttendGen\AttendGen\bin\Debug\AttendGen.pdb
+C:\Users\lenovo\source\repos\POI\AttendGen\AttendGen\obj\Debug\AttendGen.csprojAssemblyReference.cache
+C:\Users\lenovo\source\repos\POI\AttendGen\AttendGen\obj\Debug\AttendGen.csproj.CoreCompileInputs.cache
+C:\Users\lenovo\source\repos\POI\AttendGen\AttendGen\obj\Debug\AttendGen.exe
+C:\Users\lenovo\source\repos\POI\AttendGen\AttendGen\obj\Debug\AttendGen.pdb
