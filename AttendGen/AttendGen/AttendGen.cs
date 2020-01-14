@@ -16,22 +16,35 @@ namespace AttendGen
         public string[] colNames;
         public int maxAttn;
         public int minAttndnce;
-        public int ATTEND_MIN, ATTEND_MAX;
+        public int POS_ATTEND_MIN, POS_ATTEND_MAX;
+        public int MAXIMUM_UNCALIB_ATTN;
 
         public AttendGen()
         {
 
         }
 
+        public string GetCsvString(string[] sarr)
+        {
+            string outs = "";
+
+            foreach (string s in sarr)
+                outs += s + ",";
+
+            return outs.TrimEnd(',');
+
+        }
+
         public AttendGen(string infilename, string outfilename,
-                         int tc, int atmin, int atmax, int minatn, int maxatn)
+                         int tc, int atmin, int atmax, int minatn, int maxatn, int minuncalibattn)
         {
             sr = new StreamReader(infilename);
             sw = new StreamWriter(outfilename);
 
             totalCols = tc;
-            ATTEND_MIN = atmin;
-            ATTEND_MAX = atmax;
+            POS_ATTEND_MIN = atmin;
+            POS_ATTEND_MAX = atmax;
+            MAXIMUM_UNCALIB_ATTN = minuncalibattn;
 
             minAttndnce = minatn;
             maxAttn = maxatn;
@@ -42,10 +55,10 @@ namespace AttendGen
             initHeader(sr.ReadLine());
 
             string s = "";
-            while((s = sr.ReadLine()) != null)
+            while ((s = sr.ReadLine()) != null)
             {
                 string outs = this.Calibrate(s);
-                sw.WriteLine(outs);                
+                sw.WriteLine(outs);
             }
 
             sr.Close();
@@ -67,104 +80,8 @@ namespace AttendGen
             sw.WriteLine(s);
         }
 
-        
+
         public string Calibrate(string ins)
-        {
-            string outs = String.Empty;                     
-            string[] sarr = ins.Split(',');
-
-            //TODO: make a generic function getpos(string colname)
-            int i, postotal;
-            for (i = 0; i < sarr.Length; i++)
-            {
-                if (colNames[i] == "Total")
-                {
-                    break;
-                }
-            }
-            postotal = i;
-
-            int poscondon;
-            for (i = 0; i < sarr.Length; i++)
-            {
-                if (colNames[i] == "Condonation")
-                {
-                    break;
-                }
-            }
-            poscondon = i;
-
-
-
-
-            int totalAttendance = Convert.ToInt32(sarr[i]); //TODO:PARK IT BASED ON COLUMN NAME
-            if ((double)totalAttendance / (double)maxAttn > .86)
-                return ins;
-
-            int Absnts85 = Convert.ToInt32((double) maxAttn * .14);
-            int actAbsnts = maxAttn - totalAttendance;
-            double  absentProb = ((double)Absnts85 /(double) actAbsnts) -  0.01; 
-                                     //boundary - 1% bias towards not marking student present
-                                     // Want to push beyond 85% in one go :-)                              
-                                     
-
-            if (sarr.Length > totalCols)
-                 throw new Exception("more than max col");
-
-            int index = 0;
-            int attndnce = 0;
-            Random rn = new Random();
-            int endval = (int)((double)maxAttn * 0.86) + (rn.Next()) % 5;
-
-            Random r = new Random();
-            foreach (string s in sarr)
-            {
-                if (index >= ATTEND_MIN && index <= ATTEND_MAX)
-                {
-                    if ((postotal - 1) - index + 1 > (endval - attndnce + 1))
-                    {
-                        //you can still leave some A's toss and flip            
-                        if (s == "A" && r.Next() < absentProb)
-                        {
-                            outs += s + ",";
-                        }
-                        else
-                        {
-                            attndnce++;
-                            outs += attndnce.ToString() + ",";
-                        }
-                    }
-                    else if  ((postotal - 1) - index + 1 > (endval - attndnce + 1))
-                    {
-                        //we are at critical point. no more randomization
-                        //flip every A                                   
-                        if (s == "A")  
-                        {
-                            attndnce++;
-                            outs += attndnce.ToString() + ",";
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception("not enough spage " + index.ToString());
-                    }
-                }
-                index++;
-            }
-
-            outs += sarr[poscondon] + ",";
-            int total = attndnce + Convert.ToInt32(sarr[poscondon]);
-            double percent = (double)total / (double)maxAttn;
-            if (percent < 0.85)
-                throw new Exception("less than 85");
-            outs += total.ToString() + "," + percent.ToString();
-
-
-            return outs;
-
-        }
-
-        public string CalibrateReverse(string ins)
         {
             string outs = String.Empty;
             string[] sarr = ins.Split(',');
@@ -180,6 +97,7 @@ namespace AttendGen
             }
             postotal = i;
 
+
             int poscondon;
             for (i = 0; i < sarr.Length; i++)
             {
@@ -190,31 +108,72 @@ namespace AttendGen
             }
             poscondon = i;
 
-            int totalAttendance = Convert.ToInt32(sarr[i]); //TODO:PARK IT BASED ON COLUMN NAME
+
+
+
+            int totalAttendance = Convert.ToInt32(sarr[postotal]); //TODO:PARK IT BASED ON COLUMN NAME
             if ((double)totalAttendance / (double)maxAttn > .86)
                 return ins;
 
-            Random rn = new Random();
             int Absnts85 = Convert.ToInt32((double)maxAttn * .14);
             int actAbsnts = maxAttn - totalAttendance;
-            int reqflips = actAbsnts - Absnts85;
-            double absentProb = ((double)Absnts85 / (double)actAbsnts) - 0.01;
-            int startval = (int)((double)maxAttn * 0.86) + (rn.Next()) % 5;
+            double flipProb = ((double)Absnts85 / (double)actAbsnts) - 0.01;
             //boundary - 1% bias towards not marking student present
-            // Want to push beyond 85% in one go :-)  
+            // Want to push beyond 85% in one go :-)                              
+
+
+            if (sarr.Length > totalCols)
+                throw new Exception("more than max col");
+
+            int index = 0;
+            int attndnce = 0;
+            Random rn = new Random();
+            int endval86 = (int)((double)maxAttn * 0.86) + (rn.Next()) % 5;
+
             Random r = new Random();
-
-            for (i = ATTEND_MAX; i > ATTEND_MIN; i--)
+            for (index = POS_ATTEND_MIN; index <= POS_ATTEND_MAX; index++)
             {
-                if (reqflips <= 0)
-                    break;                          
-                if (sarr[i] == "A" && r.Next()> 0.86)
+                if (index >= POS_ATTEND_MIN && index <= POS_ATTEND_MAX)
                 {
-                    
+                   
+                    if ((POS_ATTEND_MAX - index + 1) > (endval86 - attndnce + 1))
+                    {                             
+                        //you can still leave some A's toss and flip 
+                        //leave first 6 attendance untouched
+                        if ((index - POS_ATTEND_MIN > MAXIMUM_UNCALIB_ATTN) && sarr[index] == "A" && r.Next() > flipProb)
+                        {
+                            attndnce++;
+                            sarr[index] = attndnce.ToString();
+                        }
+                    }
+                    else if ((POS_ATTEND_MAX - index + 1) < (endval86 - attndnce + 1))
+                    {
+                        //we are at critical point. no more randomization
+                        //flip every A                                   
+                        if (sarr[index] == "A")
+                        {
+                            sarr[index] = (attndnce++).ToString();
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("not enough space " + index.ToString());
+                    }
                 }
+                index++;
             }
-        
 
+
+
+            outs = GetCsvString(sarr);
+            int total = attndnce + Convert.ToInt32(sarr[poscondon]);
+            double percent = (double)total / (double)maxAttn;
+            if (percent < 0.85)
+                throw new Exception("less than 85");
+            outs += total.ToString() + "," + percent.ToString();
+
+            return outs;
         }
-    }   
+    }
+ 
 }
