@@ -1,72 +1,98 @@
 ;class definitions
-;errors present
 ;resolve how to do id assignments to each agent
 ;establish connection between aircraft, radar and missile
 ;correct aircraft HAS to be destroyed
+
+extensions [array]
 
 breed        [radars radar]        ;; [agentset member]
 breed        [aircrafts aircraft]
 breed        [rwrs rwr]
 breed        [missiles missile]
 
-radars-own   [id rx ry r_a_id r_m_id r_radius dist-rt trck_prblty d_rt d_mt]    ;; defines the variables belonging to	each link
-aircrafts-own[id ax ay a_r_id a_m_id a_radius rid a_d_rt]
+radars-own   [id rx ry freq-band r_a_id r_m_id r_radius dist-rt trck_prblty d_rt d_mt]    ;; defines the variables belonging to	each link
+aircrafts-own[id ax ay a_r_id a_m_id a_radius rid a_d_rt array:radar-array rwr-freq-band]
 rwrs-own     [id poi]
 missiles-own [id mx my m_a_id m_r_id mssl_vel missile_assigned mssl_d_rt mssl_d_mt
              mssl_assgn_launch_prblty marcrft_id mssl_on_trk_prblty mssl_on_trk
              blast_dist ac_hit delay]
 
-globals      [monxcor max_red_xcor max_blue_xcor mssn_strtd dist                                      ;; defines new global variables
-              mssn_cmpltd mssn_effctvnss dtct_prblty tracked_ac_count avg_trckd_ac_cnt rmid maxno     ;; they are accessible by all agents and can be used anywhere in a model
-              count2]
+globals      [monxcor   max_red_xcor max_blue_xcor mssn_strtd dist                                    ;; defines new global variables
+              mssn_succ mssn_effctvnss dtct_prblty tracked_ac_count avg_trckd_ac_cnt rmid maxno     ;; they are accessible by all agents and can be used anywhere in a model
+              count2 i border_x_cor monair_xcor
+              missile-ac-radius ac-count radar-count rwr-radius
+              learning array:Qrx eeta array:rxba
+              band_a_tick band_b_tick band_c_tick band_d_tick
+              band-ptr array:search-regime rl-il-prblty]
 
-to SetUp                      ;; used	to	begin	a	command	procedure
-  ;;
-  clear-all                   ;; combines the effects of clear-globals, clear-ticks, clear-turtles, clear-patches, clear-drawing, clear-all-plots, and clear-output
+to SetUp                        ;; used	to	begin	a	command	procedure
+  clear-all                     ;; combines the effects of clear-globals, clear-ticks, clear-turtles, clear-patches, clear-drawing, clear-all-plots, and clear-output
 
-  set mssn_strtd       1
-  set mssn_cmpltd      1
-  set mssn_effctvnss   0
+  set mssn_strtd         1      ;; sets variable to the given value
+  set mssn_succ          0
+  set mssn_effctvnss     0
+  set border_x_cor      15
+  set missile-ac-radius  5
+  set ac-count           9
+  set radar-count        9
 
-    create-aircrafts       3
-    [
-        set color      blue ;; random shades look nice
-        set size         2  ;; easier to see
-        setxy min-pxcor  0  ;;
+   ask aircrafts
+   [set array:radar-array array:from-list n-values 10 [0]]
+   set array:Qrx array:from-list n-values 4 [0]
+   set array:search-regime array:from-list n-values 4 [0]
+
+
+  create-aircrafts ac-count
+  [
+        set color      blue                                 ;; holds the color of the turtle or link
+        set size         2                                  ;; holds a number that is the turtle's apparent size
+        setxy min-pxcor  0                                  ;; these reporters give the minimum x-coordinate and minimum y-coordinate, (respectively) for patches, which determines the size of the worl
         set rid          0
         set a_d_rt       0
-        set heading     90   ;; 135
-        set a_radius     5
-        setxy random-xcor random-ycor
-        set shape "airplane"
-        set id who           ;; holds the turtle's "who number" or ID number
+        set heading     90                                  ;; indicates the direction the turtle is facing
+        set rwr-radius  10
+        setxy abs random-xcor * -1  random-ycor                       ;; reports a random floating point number from the allowable range of turtle coordinates along the given axis, x or y
+        set shape "airplane"                                ;; holds a string that is the name of the turtle or link's current shape
+        set id 1                                            ;; holds the turtle's "who number" or ID number
+        ;ask aircraft 0 [ create-links-to other aircrafts ] ;; creates a directed link from the caller to agent
+  ]
 
-    ]
-    set maxno 1
-    set count2 0
-    set rmid 1
-    while [count2 < maxno]
-    [
+  ;set maxno 1
+  ;set count2 0
+  ;set rmid 1
+  set i 0
 
-    create-radars 1
+  ;while [count2 < maxno]            ;; if reporter reports false, exit the loop, otherwise run commands and repeat
+  ;[
+    set rmid -1
+    let index 0               ;; list index starts at 0
+   create-radars radar-count
     [
-        set color red ;; random shades look nice
-        set size  2  ;; easier to see
-        setxy 0 ( max-pycor ) / 2
-        setxy 0 0
+        set color red
+        set size  2
+        ;let loc item index [[15 25] [15 41] [0 0]]           ;; get the next loc from the list
+        ;setxy (item 0 loc) (item 1 loc)                      ;; loc itself is a list, first item x, second item y
+        ;set index (index + 1)
+        setxy abs random-xcor mod 15  random-ycor                                                 ;; increment the index
         set dist 0
         set d_rt 0
         set d_mt 0
-        set heading 270    ;;315
+
+
+        set heading      270    ;;315
         set dtct_prblty  0.7
-        set trck_prblty 0.7
-        set r_radius 10
+        set trck_prblty  0.7
+        set r_radius      10
         set id rmid
+        set band
     ]
 
-    create-missiles 1
+    let index1 0
+    create-missiles radar-count
     [
-    setxy 0 0
+    ;let loc item index1 [[15 25] [15 41] [0 0]]
+    ;setxy (item 0 loc) (item 1 loc)
+    ;set index1 (index1 + 1)
     set heading 270
     set mssl_vel 0.0
     set missile_assigned false
@@ -81,23 +107,67 @@ to SetUp                      ;; used	to	begin	a	command	procedure
     set id rmid
     ]
 
-    set count2 (count2 + 1)
-    ]
-  ;ask missiles
-  ;[set m_r_id  id]
+   ;  ask aircrafts
+   ; [foreach n-values radar-count [ ndx -> ndx ] [ ndx -> array:set array:radar-array ndx  0]]
+   ; let radar-list (list  0 0 0 0 0)
 
-  ;ask radars
-  ;[set r_m_id  id]
+
+
+  set i 1
+  ask aircrafts
+  [
+    set array:radar-array array:from-list n-values radar-count [0]
+  ]
+
+  foreach n-values 4 [ ndx2 -> ndx2 ] [ ndx2 -> array:set array:Qrx ndx2  0]
+  ask aircrafts
+  [array:set array:radar-array 0 0]
+
+
+  set rmid 0
+  while [ i < radar-count ]
+  [
+    ask one-of radars with [id = -1]
+    [set id rmid]
+
+    ask radars with [ id = rmid ]
+    [ set freq-band rmid mod 4 ]
+
+    ask one-of missiles with [id = -1]
+    [set id rmid]
+
+    set i  (i + 1)
+    set rmid (rmid + 1)
+ ]
+
+ ask radars
+ [
+    ask missiles with [id = [id] of myself]
+    [ setxy [xcor] of myself [ycor] of myself]
+ ]
+
+
+
+;   set count2 (count2 + 1)
+;   set rmid (rmid + 1)
+;   ]
+
+   array:set array:search-regime 0 2000
+   array:set array:search-regime 1 20
+   array:set array:search-regime 2 20
+   array:set array:search-regime 3 20
 
   set tracked_ac_count 0
   set avg_trckd_ac_cnt 0
-  reset-ticks
-end
+
+
+  reset-ticks                           ;; resets the tick counter to zero, sets up all plots, then updates all plots (so that the initial state of the world is plotted)
+end                                     ;; used to conclude a procedure
 
 to dump_var
 
-    print "id of aircrafts"
-    show [id] of aircrafts
+    print "id of aircrafts"            ;; prints value in the Command Center, followed by a carriage return
+    show [id] of aircrafts             ;; prints value in the Command Center, preceded by this agent, and followed by a carriage return
 
     print "id of radars"
     show [id] of radars
@@ -127,12 +197,12 @@ end
 
 to target_hit [rdrid m_d_rt]
   ask missiles
-  [ifelse random-float 1.0 < mssl_on_trk_prblty  [set mssl_on_trk true ]  [ set mssl_on_trk false]
+  [ifelse random-float 1.0 < mssl_on_trk_prblty  [set mssl_on_trk true ]  [ set mssl_on_trk false]              ;; reporter must report a boolean (true or false) value
      if mssl_on_trk
      [
-      fd 0.76
-      display
-      ask missiles with [id = rdrid]
+      fd 0.76         ;; turtle moves forward by number steps, one step at a time
+      display         ;; causes the view to be updated immediately
+      ask missiles with [id = rdrid]      ;; specified agent or agentset runs the given commands ;; takes two inputs: on the left, an agentset (usually "turtles" or "patches"). On the right, a boolean reporter
       [
           set delay m_d_rt
       ]
@@ -141,8 +211,8 @@ to target_hit [rdrid m_d_rt]
 
 end
 
-to-report getry [prid]
-  report 0
+to-report getry [prid]        ;; used to begin a reporter procedure
+  report 0                    ;; immediately exits from the current to-report procedure and reports value as the result of that procedure
 end
 
 to-report getrx [prid]
@@ -158,30 +228,150 @@ to-report getax [paid]
 end
 
 to go
-  ;; using agentsets for selecting turtles with blue
+  ;using agentsets for selecting turtles with blue
   ask aircrafts [if pxcor = min-pxcor [set mssn_strtd mssn_strtd + 1]]
-  ask aircrafts [if pxcor = max-pxcor [set mssn_cmpltd mssn_cmpltd + 1]]
-  repeat 3 [ ask aircrafts [ fd 0.2 ] display ]
+  ;ask aircrafts [if pxcor = max-pxcor [set mssn_cmpltd mssn_cmpltd + 1]]
+  repeat 3 [ ask aircrafts [ fd 0.2 ] display ]                            ;; runs commands number times
 
-  let dotick 1
+  let dotick 1            ;; creates a new local variable and gives it the given value
+
+  ;Radar countering strategy
+  ;1. Open up reception window, and receive Radar Signals
+  ;2. Launch Anti-Radiation Missile (1-2) per aircraft
+  ;3. Launch chaff and flare
+  ;ABOVE THREE ARE AIRCRAFT-RADAR NEUTRAL. So if one aircraft takesa action, others should be quiet
+  ;4. Active Jamming - Aircraft vs Tracking Radar (Jammming Techniques RGPI, RGPO, VGPI, VGPO)
+  ;5. Toy Decoy Launching against specific Missile
+
+
+  ;RWRs (i.e.. aircrafts) see Radars ###
+  ask aircrafts
+    [ask radars in-radius rwr-radius
+      [if id > 0
+        [if freq-band = [rwr-freq-band] of myself [array:set [array:radar-array] of myself  [id] of self 1]]]]
+
+  set i      0
+  let Fbmax  0
+  let Qmax   0
+
+ ;while [i < radar-count]
+
+  ask aircrafts
+   [
+     ifelse learning = 0
+
+     ;Routinely increment band to next learning
+    [set rwr-freq-band ((rwr-freq-band + 1) mod 4  )]
+
+    ;else part
+    [
+      ifelse random-float 1.0 < rl-il-prblty
+      ;updating based on reinforcement learning
+      [
+
+        let rxb [rwr-freq-band] of self
+        let num_hits 0
+        set i 0
+
+        while [i < radar-count]
+        [
+          if array:item array:radar-array i =  1 [array:set array:rxba rwr-freq-band ((array:item array:rxba rwr-freq-band) + 1)]
+          set i (i + 1)
+        ]
+
+        ;Compute value of next tuning
+        ;There are four actions possible here => 0, 1, 2, 3
+        ;Can be done through Roulette-Wheel method also
+        while [i < 4]
+        [
+          array:set array:Qrx i (array:item array:Qrx i + eeta * (array:item array:rxba i - array:item array:Qrx i))
+          if array:item array:Qrx i > Qmax
+          [
+            set Qmax array:item array:Qrx i
+            set Fbmax i
+          ]
+          set i (i + 1)
+        ]
+
+        let Qtotal 0.0
+        let array:Qcdf [0.0 0.0 0.0 0.0]
+        set i 0
+        while [i < 4]
+        [
+          ; build cdf
+          set Qtotal Qtotal + array:item array:Qrx i
+
+        ]
+
+
+        set i 0
+        while [i < 4]
+        [
+          array:set array:Qcdf i  array:item array:Qrx i / Qtotal
+        ]
+
+         let Qrandom 0.0
+         set Qrandom random-float 1.0
+
+         set i 0
+         let band 0
+         while [i < 4]
+         [
+          if Qrandom < array:item array:Qcdf i
+          [
+            set band i
+            set i 10
+          ]
+         ]
+        set rwr-freq-band band
+       ]
+       [
+        ;Imitation Learning
+         set rwr-freq-band band-ptr
+         array:set array:search-regime band-ptr (array:item array:search-regime band-ptr - 1)
+         if array:item array:search-regime band-ptr  = 0
+         [set band-ptr (band-ptr + 1) mod 3]
+
+
+      ] ;else part
+    ]
+  ]
+
+
+
+  ;Assumption is that if aircraft sees Radar, Radar also will see aircraft
+  ;sooner or later. They are in line of sight. So, form clusters or groups
+  ;based on that. For each Radar, there will be group.
+
+
+
+;  if (learning = 0)
+;  [
+;  each aircraft w
+
+
+
 
   ask aircrafts
   [
-    let x -1
-    let rdrid -1
+
+
+    let x      -1
+    let rdrid  -1
     let msslid -1
 
-    ask radars with [(distance myself < r_radius) and (pxcor > [pxcor] of myself)]
+
+
+    ask radars with [(distance myself < r_radius) and (pxcor > [pxcor] of myself)]       ;; reports the distance from this agent to the given turtle or patch
     [if random-float 1.0 < dtct_prblty
       [set color yellow]
-     set dist sqrt ((getay id - ry ) * (getay id - ry ) +
-      (getax id - rx ) * (getax id - rx ))
+      set dist sqrt ((getay id - ry ) * (getay id - ry ) + (getax id - rx ) * (getax id - rx ))  ;; reports the square root of number
 
-     ;calculates delay for missiles
-     target_hit id dist
+      ;calculates delay for missiles
+      target_hit id dist
 
       set rdrid [id] of self
-
+                                         ;; "self" and "myself" are very different. "self" is simple; it means "me". "myself" means "the agent who asked me to do what I'm doing right now"
       set r_a_id [id] of myself
       set x r_a_id
 
@@ -196,59 +386,68 @@ to go
     set a_r_id rdrid
     set a_m_id msslid
 
-    ;;set debug_var (x + 1)
+    ;set debug_var (x + 1)
 
-    ask radars with [distance myself >= r_radius or pxcor < [pxcor] of myself]
+    ask radars with [distance myself >= r_radius or pxcor < [pxcor] of myself]        ;; pxcor is greater than or equal to min-pxcor and less than or equal to max-pxcor;
+                                                                                      ;; similarly for pycor and min-pycor and max-pycor
     [set color red]
   ]
 
   ask radars
   [
     ask aircrafts with [(distance myself < a_radius) and (pxcor < [pxcor] of myself)]
-    [if random-float 1.0 < dtct_prblty
-      [set color yellow ]
-    ]
-    ;;rid is attribute of aircraft, it indicates radar observed by aircraft
-    ;;initially, we will assume single aircraft, later, it may become list
+    [if random-float 1.0 < dtct_prblty                     ;; if number is positive, reports a random floating point number greater than or equal to 0 but strictly less than number
+      [set color yellow ]                                  ;; if number is negative, reports a random floating point number less than or equal to 0, but strictly greater than number
+    ]                                                      ;; if number is zero, the result is always 0
     ask aircrafts with [distance myself >= a_radius or pxcor > [pxcor] of myself  ]
                   [set color blue]
   ]
+
+
+
   ask missiles with [delay > 0]
   [
   if delay > 0
     [set delay delay - 1]
-   if delay = 1
-     [ ifelse random-float 1.0 < mssl_on_trk_prblty
+    if delay = 1
+    [ ifelse random-float 1.0 < mssl_on_trk_prblty
        [set ac_hit true] [set ac_hit false]
-       ;;set debug_var a_m_id
+       ;set debug_var a_m_id
        set dotick 0
     ]
-
-
-;   TODO: Check whether section moved here will work...
-;   ask aircrafts in-radius 1
-;      [
-;         if (a_m_id >= 0) and (any? missiles with [id = [a_m_id] of myself])
-;         [die]
-;      ]
-
   ]
 
 
-  ask missiles
-    [ask aircrafts in-radius 2
-      [
-      if (a_m_id >= 0) and (any? missiles with [id = [a_m_id] of myself])
-        [die]]]
+  ;ask aircrafts with [ aircrafts with a_r_id = [a_r_id] of myself ]
+  ;[
+  ;]
 
- set max_red_xcor [xcor] of radars
+  let radar-band 0
+  ask missiles
+  [ask aircrafts in-radius missile-ac-radius        ;; reports an agentset that includes only those agents from the original agentset whose distance from the caller is less than or equal to number
+    [
+      ask one-of radars with [r_a_id = id]
+      [set radar-band band]
+
+      ifelse radar-band = rwr-freq-band
+      [ set jam-prblty 0.7]
+      [ set jam-prblty 0]
+
+      if (a_m_id >= 0) and (any? missiles with [id = [a_m_id] of myself]) and (random-float 1.0 > jam-prblty)     ;; reports true if the given agentset is non-empty, false otherwise
+        [die]]]   ;; the turtle or link dies
+
+
+ask aircrafts with [pxcor > border_x_cor]
+  [set mssn_succ (mssn_succ + 1)
+    die]
+
+ set max_red_xcor  [xcor] of radars                                             ;; holds the current x coordinate of the turtle
  set max_blue_xcor [xcor] of aircrafts
- set tracked_ac_count tracked_ac_count + count turtles with [color = yellow]
+ set tracked_ac_count tracked_ac_count + count turtles with [color = yellow]   ;; reports the number of agents in the given agentset
  if ticks > 0  [set avg_trckd_ac_cnt tracked_ac_count / ticks]
 
-
  set monxcor [pxcor] of aircrafts
- set mssn_effctvnss mssn_cmpltd / mssn_strtd
+ set mssn_effctvnss mssn_succ / mssn_strtd
 
  if dotick = 1 [tick]
  tick
@@ -413,6 +612,45 @@ radius
 1
 0
 String
+
+MONITOR
+726
+257
+870
+302
+mission success counter
+mssn_succ
+17
+1
+11
+
+MONITOR
+723
+322
+912
+367
+monair_pxcor
+monair_xcor
+17
+1
+11
+
+BUTTON
+996
+285
+1059
+318
+NIL
+NIL
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -756,7 +994,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.1.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
