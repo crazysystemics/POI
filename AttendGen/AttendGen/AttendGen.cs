@@ -127,10 +127,10 @@ namespace AttendGen
 
             int index = 0;
             int attndnce = 0;
-            Random rn = new Random();
+            Random rn = new Random(13);
             int endval86 = (int)((double)maxAttn * 0.86) + (rn.Next()) % 5;
 
-            Random r = new Random();
+            Random r = new Random(18);
             for (index = POS_ATTEND_MIN; index <= POS_ATTEND_MAX; index++)
             {
                 if (index >= POS_ATTEND_MIN && index <= POS_ATTEND_MAX)
@@ -149,17 +149,16 @@ namespace AttendGen
                     else if ((POS_ATTEND_MAX - index + 1) < (endval86 - attndnce + 1))
                     {
                         //we are at critical point. no more randomization
-                        //flip every A                                   
-                        if (sarr[index] == "A")
-                        {
-                            sarr[index] = (attndnce++).ToString();
-                        }
-                    }
+                        //flip every A  
+                        attndnce++;
+                        sarr[index] = (attndnce).ToString();
+                    }                    
                     else
                     {
                         throw new Exception("not enough space " + index.ToString());
                     }
                 }
+
                 index++;
             }
 
