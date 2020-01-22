@@ -1,6 +1,7 @@
 ﻿//C# program to illustrate the 
 //Integration of different subsystems of BSR
 using System;
+using System.IO;
 namespace project
 {
     // Class Declaration 
@@ -88,16 +89,17 @@ namespace project
                 this.ata = target.ta;
             }
 
-            public double getTargetDistance(Target target)
+            public double getTargetDistance()
             {
-                target.td = target.td * 100;
+                //target.td = target.td * 100;
+                target.td = atd;
                 Console.WriteLine("\nFor Antenna : \nThe Target Distance is " + target.td + ".");
                 return target.td;
             }
 
-            public double getTargetAzimuth(Target target)
+            public double getTargetAzimuth()
             {
-                target.ta = target.ta * 100;
+                target.ta = ata * 100;
                 Console.WriteLine("The Target Azimuth is " + target.ta + ".");
                 return target.ta;
             }
@@ -105,24 +107,40 @@ namespace project
 
         public class RSP
         {
-            public double rstd; public double rsta;
-            public RSP(Antenna antenna)
+            public Antenna Ant;
+            public RDP     Rdp;
+
+            double targetDist;
+
+            public RSP(ref Antenna antenna)
             {
-                this.rstd = antenna.atd;
-                this.rsta = antenna.ata;
+                downAnt = antenna;
             }
-            public double getTargetDistance(Antenna antenna)
+
+            public RDP(ref RDP rdp)
             {
-                antenna.atd = (antenna.atd / 100) + 2;
+                upRdp = rdp;
+            }
+            
+            public double rstd; public double rsta;
+            //public RSP(Antenna antenna)
+            //{
+            //this.rstd = antenna.atd;
+            //this.rsta = antenna.ata;
+            //}
+            public double getTargetDistance()
+            {
+                //antenna.atd = (antenna.atd / 100) + 2;
+                targetDist = Ant.getTargetDistance();
                 Console.WriteLine("\nFor RSP : \nThe Target Distance is " + antenna.atd + ".");
                 return antenna.atd;
             }
 
             public double getTargetAzimuth(Antenna antenna)
             {
-                antenna.ata = (antenna.ata / 100) + 2;
+                //antenna.ata = (antenna.ata / 100) + 2;
                 Console.WriteLine("The Target Distance is " + antenna.ata + ".");
-                return antenna.ata;
+                return getTargetAzimuth();
             }
         }
 
