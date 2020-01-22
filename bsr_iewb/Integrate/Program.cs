@@ -12,7 +12,7 @@ namespace project
         double ToRxn;
 
         //Constructor Declaration of Class
-        public TargetAttributes (double SigAmp, double ToTxn, double ToRxn)
+        public TargetAttributes(double SigAmp, double ToTxn, double ToRxn)
         {
             this.SigAmp = SigAmp;
             this.ToTxn = ToTxn;
@@ -20,7 +20,7 @@ namespace project
         }
 
         //method 1 
-		public double getSignalAmplitude()
+        public double getSignalAmplitude()
         {
             return SigAmp;
         }
@@ -53,7 +53,7 @@ namespace project
         public double ta;
 
         // Constructor Declaration of Class 
-        public Target (double td, double ta)
+        public Target(double td, double ta)
         {
             this.td = td;
             this.ta = ta;
@@ -77,91 +77,154 @@ namespace project
         }
     }
 
-    public class Antenna : Target
+    public class BSR
     {
-        public double atd; public double ata;
-        public Antenna (double td, double ta) : base (td, ta)
+        public class Antenna
         {
-            atd = td * 1000;
-            ata = ta * 1000;
-            Console.WriteLine("At the Antenna:");
-            Console.WriteLine("The Target Distance is " + atd + " metres.");
-            Console.WriteLine("The Target Azimuth is " + ata + " metres.");
-        }
-    }
+            public double atd; public double ata;
+            public Antenna(Target target)
+            {
+                this.atd = target.td;
+                this.ata = target.ta;
+            }
 
-    public class RSP : Antenna
-    {
-        public double rstd; public double rsta;
-        public RSP (double td, double ta) : base (td, ta)
+            public double getTargetDistance(Target target)
+            {
+                target.td = target.td * 100;
+                Console.WriteLine("\nFor Antenna : \nThe Target Distance is " + target.td + ".");
+                return target.td;
+            }
+
+            public double getTargetAzimuth(Target target)
+            {
+                target.ta = target.ta * 100;
+                Console.WriteLine("The Target Azimuth is " + target.ta + ".");
+                return target.ta;
+            }
+        }
+
+        public class RSP
         {
-            rstd = td / 1000;
-            rsta = ta / 1000;
-            Console.WriteLine("\nAt the RSP:");
-            Console.WriteLine("The Target Distance is " + rstd + " kilometres.");
-            Console.WriteLine("The Target Azimuth is " + rsta + " kilometres.");
-        }
-    }
+            public double rstd; public double rsta;
+            public RSP(Antenna antenna)
+            {
+                this.rstd = antenna.atd;
+                this.rsta = antenna.ata;
+            }
+            public double getTargetDistance(Antenna antenna)
+            {
+                antenna.atd = (antenna.atd / 100) + 2;
+                Console.WriteLine("\nFor RSP : \nThe Target Distance is " + antenna.atd + ".");
+                return antenna.atd;
+            }
 
-    public class RDP : RSP
-    {
-        public double rdtd; public double rdta;
-        public RDP (double td, double ta) : base (td, ta)
+            public double getTargetAzimuth(Antenna antenna)
+            {
+                antenna.ata = (antenna.ata / 100) + 2;
+                Console.WriteLine("The Target Distance is " + antenna.ata + ".");
+                return antenna.ata;
+            }
+        }
+
+        public class RDP
         {
-            rdtd = td;
-            rdta = ta;
-            Console.WriteLine("\nAt the RDP:");
-            Console.WriteLine("The Target Distance is " + rdtd + ".");
-            Console.WriteLine("The Target Azimuth is " + rdta + ".");
-        }
-    }
+            public double rdtd; public double rdta;
+            public RDP(RSP rsp)
+            {
+                this.rdtd = rsp.rstd;
+                this.rdta = rsp.rsta;
+            }
 
-    public class ERC : RDP
-    {
-        public double ertd; public double erta;
-        public ERC (double td, double ta) : base (td, ta)
+            public double getTargetDistance(RSP rsp)
+            {
+                rsp.rstd = rsp.rstd + 10;
+                Console.WriteLine("\nFor RDP :\nThe Target Distance is " + rsp.rstd + ".");
+                return rsp.rstd;
+            }
+
+            public double getTargetAzimuth(RSP rsp)
+            {
+                rsp.rsta = rsp.rsta + 10;
+                Console.WriteLine("The Target Azimuth is " + rsp.rsta + ".");
+                return rsp.rsta;
+            }
+        }
+
+        public class ERC
         {
-            ertd = td;
-            erta = ta;
-            Console.WriteLine("\nAt the ERC:");
-            Console.WriteLine("The Target Distance is " + ertd + ".");
-            Console.WriteLine("The Target Azimuth is " + erta + ".");
-        }
-    }
+            public double ertd; public double erta;
+            public ERC(RDP rdp)
+            {
+                this.ertd = rdp.rdtd;
+                this.erta = rdp.rdta;
+            }
+            public double getTargetDistance(RDP rdp)
+            {
+                rdp.rdtd = rdp.rdtd - 10;
+                Console.WriteLine("\nFor ERC : \nThe Target Distance is " + rdp.rdtd + ".");
+                return rdp.rdtd;
+            }
 
-    public class RCDS : ERC
-    {
-        public double rctd; public double rcta;
-        public RCDS (double td, double ta) : base (td, ta)
+            public double getTargetAzimuth(RDP rdp)
+            {
+                rdp.rdta = rdp.rdta - 10;
+                Console.WriteLine("The Target Azimuth is " + rdp.rdta + ".");
+                return rdp.rdta;
+            }
+        }
+
+        public class RCDS
         {
-            rctd = td;
-            rcta = ta;
-            Console.WriteLine("\nAt the RCDS:");
-            Console.WriteLine("The Target Distance is " + rctd + ".");
-            Console.WriteLine("The Target Azimuth is " + rcta + ".");
-        }
-    }
+            public double rctd; public double rcta;
+            public RCDS(ERC erc)
+            {
+                this.rctd = erc.ertd;
+                this.rcta = erc.erta;
+            }
+            public double getTargetDistance(ERC erc)
+            {
+                erc.ertd = erc.ertd * 10;
+                Console.WriteLine("\nFor RCDS : \nThe Target Distance is " + erc.ertd + ".");
+                return erc.ertd;
+            }
 
-    // Main Method 
-    public class multilevel
-    {
+            public double getTargetAzimuth(ERC erc)
+            {
+                erc.erta = erc.erta * 10;
+                Console.WriteLine("The Target Azimuth is " + erc.erta + ".");
+                return erc.erta;
+            }
+        }
+
         public static void Main()
         {
+            double arg1 = 10;
+            double arg2 = 50;
             TargetAttributes attributes = new TargetAttributes(2.3, 4.3, 1.1);
-            Target target = new Target (3.4, 2.8);
-            Antenna antenna = new Antenna (3.4, 2.8);
-            RSP rsp = new RSP (3.4, 2.8);
-            RDP rdp = new RDP (3.4, 2.8);
-            ERC erc = new ERC (3.4, 2.8);
-            RCDS rcds = new RCDS (3.4, 2.8);
-            Console.WriteLine (attributes.threedouble());
-            Console.WriteLine (target.todouble());
+            Target target = new Target(arg1, arg2);
+            Antenna antenna = new Antenna(target);
+            RSP rsp = new RSP(antenna);
+            RDP rdp = new RDP(rsp);
+            ERC erc = new ERC(rdp);
+            RCDS rcds = new RCDS(erc);
+
+            Console.WriteLine(attributes.threedouble());
+            Console.WriteLine(target.todouble());
+
+            antenna.atd = antenna.getTargetDistance(target);
+            antenna.ata = antenna.getTargetAzimuth(target);
+
+            rsp.rstd = rsp.getTargetDistance(antenna);
+            rsp.rsta = rsp.getTargetAzimuth(antenna);
+
+            rdp.rdtd = rdp.getTargetDistance(rsp);
+            rdp.rdta = rdp.getTargetAzimuth(rsp);
+
+            erc.ertd = erc.getTargetDistance(rdp);
+            erc.erta = erc.getTargetAzimuth(rdp);
+
+            rcds.rctd = rcds.getTargetDistance(erc);
+            rcds.rcta = rcds.getTargetAzimuth(erc);
         }
     }
 }
-            
-        
-    
-    
-
-
