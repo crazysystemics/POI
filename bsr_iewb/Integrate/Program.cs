@@ -1,7 +1,6 @@
 ﻿//C# program to illustrate the 
 //Integration of different subsystems of BSR
 using System;
-using System.IO;
 namespace project
 {
     // Class Declaration 
@@ -84,7 +83,7 @@ namespace project
         {
             public Target UpTarget;
             public RSP DownRSP;
-            
+
             double targetDist;
             double targetAzim;
 
@@ -102,14 +101,12 @@ namespace project
             public double getTargetDistance()
             {
                 targetDist = UpTarget.getTargetDistance();
-                Console.WriteLine("\nFor Antenna : \nThe Target Distance is " + targetDist + ".");
                 return targetDist;
             }
 
             public double getTargetAzimuth()
             {
                 targetAzim = UpTarget.getTargetAzimuth();
-                Console.WriteLine("The Target Azimuth is " + targetAzim + ".");
                 return targetAzim;
             }
         }
@@ -136,14 +133,12 @@ namespace project
             public double getTargetDistance()
             {
                 targetDist = UpAnt.getTargetDistance();
-                Console.WriteLine("\nFor RSP : \nThe Target Distance is " + targetDist + ".");
                 return targetDist;
             }
 
             public double getTargetAzimuth()
             {
                 targetAzim = UpAnt.getTargetAzimuth();
-                Console.WriteLine("The Target Distance is " + targetAzim + ".");
                 return targetAzim;
             }
         }
@@ -170,14 +165,12 @@ namespace project
             public double getTargetDistance()
             {
                 targetDist = UpRSP.getTargetDistance();
-                Console.WriteLine("\nFor RDP :\nThe Target Distance is " + targetDist + ".");
                 return targetDist;
             }
 
             public double getTargetAzimuth()
             {
-                targetAzim = UpRSP.getTargetAzimuth(); 
-                Console.WriteLine("The Target Azimuth is " + targetAzim + ".");
+                targetAzim = UpRSP.getTargetAzimuth();
                 return targetAzim;
             }
         }
@@ -201,18 +194,16 @@ namespace project
             }
 
             public double ertd; public double erta;
-            
+
             public double getTargetDistance()
             {
                 targetDist = UpRDP.getTargetDistance();
-                Console.WriteLine("\nFor ERC : \nThe Target Distance is " + targetDist + ".");
                 return targetDist;
             }
 
             public double getTargetAzimuth()
             {
                 targetAzim = UpRDP.getTargetAzimuth();
-                Console.WriteLine("The Target Azimuth is " + targetAzim + ".");
                 return targetAzim;
             }
         }
@@ -230,18 +221,16 @@ namespace project
             }
 
             public double rctd; public double rcta;
-           
+
             public double getTargetDistance()
             {
                 targetDist = UpERC.getTargetDistance();
-                Console.WriteLine("\nFor RCDS : \nThe Target Distance is " + targetDist + ".");
                 return targetDist;
             }
 
             public double getTargetAzimuth()
             {
                 targetAzim = UpERC.getTargetAzimuth();
-                Console.WriteLine("The Target Azimuth is " + targetAzim + ".");
                 return targetAzim;
             }
         }
@@ -263,18 +252,28 @@ namespace project
 
             antenna.atd = antenna.getTargetDistance();
             antenna.ata = antenna.getTargetAzimuth();
+            Console.WriteLine("\nFor Antenna : \nThe Target Distance is " + antenna.atd + ".");
+            Console.WriteLine("The Target Azimuth is " + antenna.ata + ".");
 
             rsp.rstd = rsp.getTargetDistance();
             rsp.rsta = rsp.getTargetAzimuth();
+            Console.WriteLine("\nFor RSP : \nThe Target Distance is " + rsp.rstd + ".");
+            Console.WriteLine("The Target Distance is " + rsp.rsta + ".");
 
             rdp.rdtd = rdp.getTargetDistance();
             rdp.rdta = rdp.getTargetAzimuth();
+            Console.WriteLine("\nFor RDP :\nThe Target Distance is " + rdp.rdtd + ".");
+            Console.WriteLine("The Target Azimuth is " + rdp.rdta + ".");
 
             erc.ertd = erc.getTargetDistance();
             erc.erta = erc.getTargetAzimuth();
+            Console.WriteLine("\nFor ERC : \nThe Target Distance is " + erc.ertd + ".");
+            Console.WriteLine("The Target Azimuth is " + erc.erta + ".");
 
             rcds.rctd = rcds.getTargetDistance();
             rcds.rcta = rcds.getTargetAzimuth();
+            Console.WriteLine("\nFor RCDS : \nThe Target Distance is " + rcds.rctd + ".");
+            Console.WriteLine("The Target Azimuth is " + rcds.rcta + ".");
         }
     }
 }
