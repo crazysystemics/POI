@@ -252,27 +252,27 @@ namespace project
 
             antenna.atd = antenna.getTargetDistance();
             antenna.ata = antenna.getTargetAzimuth();
-            Console.WriteLine("\nFor Antenna : \nThe Target Distance is " + antenna.atd + ".");
+            Console.WriteLine("\nFor Antenna: \nThe Target Distance is " + antenna.atd + ".");
             Console.WriteLine("The Target Azimuth is " + antenna.ata + ".");
 
             rsp.rstd = rsp.getTargetDistance();
             rsp.rsta = rsp.getTargetAzimuth();
-            Console.WriteLine("\nFor RSP : \nThe Target Distance is " + rsp.rstd + ".");
+            Console.WriteLine("\nFor RSP: \nThe Target Distance is " + rsp.rstd + ".");
             Console.WriteLine("The Target Distance is " + rsp.rsta + ".");
 
             rdp.rdtd = rdp.getTargetDistance();
             rdp.rdta = rdp.getTargetAzimuth();
-            Console.WriteLine("\nFor RDP :\nThe Target Distance is " + rdp.rdtd + ".");
+            Console.WriteLine("\nFor RDP:\nThe Target Distance is " + rdp.rdtd + ".");
             Console.WriteLine("The Target Azimuth is " + rdp.rdta + ".");
 
             erc.ertd = erc.getTargetDistance();
             erc.erta = erc.getTargetAzimuth();
-            Console.WriteLine("\nFor ERC : \nThe Target Distance is " + erc.ertd + ".");
+            Console.WriteLine("\nFor ERC: \nThe Target Distance is " + erc.ertd + ".");
             Console.WriteLine("The Target Azimuth is " + erc.erta + ".");
 
             rcds.rctd = rcds.getTargetDistance();
             rcds.rcta = rcds.getTargetAzimuth();
-            Console.WriteLine("\nFor RCDS : \nThe Target Distance is " + rcds.rctd + ".");
+            Console.WriteLine("\nFor RCDS: \nThe Target Distance is " + rcds.rctd + ".");
             Console.WriteLine("The Target Azimuth is " + rcds.rcta + ".");
         }
     }
