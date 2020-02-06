@@ -3,277 +3,144 @@
 using System;
 namespace project
 {
-    // Class Declaration 
-    public class TargetAttributes
+    // Virtual auto-implemented property. Overrides can only
+    // provide specialized behavior if they implement get and set accessors.
+    public class BSRModel
     {
-        //Instance Variables
-        double SigAmp;
-        double ToTxn;
-        double ToRxn;
+        public int td, ta;
 
-        //Constructor Declaration of Class
-        public TargetAttributes(double SigAmp, double ToTxn, double ToRxn)
+        public virtual double getTargetDistance
         {
-            this.SigAmp = SigAmp;
-            this.ToTxn = ToTxn;
-            this.ToRxn = ToRxn;
+            set
+            {
+                td = (int)value;
+            }
+
+            get
+            {
+                return td;
+            }
         }
 
-        //method 1 
-        public double getSignalAmplitude()
+        public virtual double getTargetAzimuth
         {
-            return SigAmp;
-        }
+            set
+            {
+                ta = value;
+            }
 
-        // method 2 
-        public double getTimeofTransmission()
-        {
-            return ToTxn;
-        }
-
-        // method 3 
-        public double getTimeofReception()
-        {
-            return ToRxn;
-        }
-
-        public string threedouble()
-        {
-            return ("\nTarget Attributes: \nThe Signal Amplitude of the Target is " + this.getSignalAmplitude()
-                    + ".\nThe Time of Transmission of the Target is " + this.getTimeofTransmission()
-                    + ".\nThe Time of Reception of the Target is " + this.getTimeofReception()
-                    + ".");
+            get
+            {
+                return ta;
+            }
         }
     }
 
-    public class Target
+    // Override auto-implemented property with ordinary property
+    // to provide specialized accessor behavior.
+    public class Target : BSRModel
     {
-        // Instance Variables 
-        public double td;
-        public double ta;
-
-        // Constructor Declaration of Class 
-        public Target(double td, double ta)
+        public double ttd, tta;
+        BSRModel bsr = new BSRModel();
+        public override double getTargetDistance
         {
-            this.td = td;
-            this.ta = ta;
+            set
+            {
+                ttd = bsr.td;
+            }
+
+            get
+            {
+                return ttd;
+            }
         }
 
-        // method 1
-        public double getTargetDistance()
+        public override double getTargetAzimuth
         {
-            return td;
-        }
+            set
+            {
+                tta = bsr.ta;
+            }
 
-        // method 2
-        public double getTargetAzimuth()
-        {
-            return ta;
-        }
-
-        public string todouble()
-        {
-            return ("\nAt the Target: \nThe Target Distance is " + this.getTargetDistance() + ".\nThe Target Azimuth is " + this.getTargetAzimuth() + ".");
+            get
+            {
+                return tta;
+            }
         }
     }
 
-    public class BSR
+    public class Antenna : BSRModel
     {
-        public class Antenna
+        public double atd, ata;
+        Target target;
+
+        public void BindRadar(ref Target rt)
         {
-            public Target UpTarget;
-            public RSP DownRSP;
-
-            double targetDist;
-            double targetAzim;
-
-            public Antenna(ref Target target)
+            target = rt;
+        }
+        public override double getTargetDistance
+        {
+            set
             {
-                UpTarget = target;
+                atd = target.ttd;
             }
 
-            public Antenna(ref RSP rsp)
+            get
             {
-                DownRSP = rsp;
-            }
-
-            public double atd; public double ata;
-            public double getTargetDistance()
-            {
-                targetDist = UpTarget.getTargetDistance();
-                return targetDist;
-            }
-
-            public double getTargetAzimuth()
-            {
-                targetAzim = UpTarget.getTargetAzimuth();
-                return targetAzim;
+                return atd;
             }
         }
 
-        public class RSP
+        public override double getTargetAzimuth
         {
-            public Antenna UpAnt;
-            public RDP DownRDP;
-
-            double targetDist;
-            double targetAzim;
-
-            public RSP(ref Antenna antenna)
+            set
             {
-                UpAnt = antenna;
+                ata = target.tta;
             }
 
-            public RSP(ref RDP rdp)
+            get
             {
-                DownRDP = rdp;
-            }
-
-            public double rstd; public double rsta;
-            public double getTargetDistance()
-            {
-                targetDist = UpAnt.getTargetDistance();
-                return targetDist;
-            }
-
-            public double getTargetAzimuth()
-            {
-                targetAzim = UpAnt.getTargetAzimuth();
-                return targetAzim;
+                return ata;
             }
         }
+    }
 
-        public class RDP
+    public class IEWB
+    {
+
+        public Target tgt;
+        public Antenna ant;
+
+        public IEWB(ref Target rt)
         {
-            public RSP UpRSP;
-            public ERC DownERC;
-
-            double targetDist;
-            double targetAzim;
-
-            public RDP(ref RSP rsp)
-            {
-                UpRSP = rsp;
-            }
-
-            public RDP(ref ERC erc)
-            {
-                DownERC = erc;
-            }
-
-            public double rdtd; public double rdta;
-            public double getTargetDistance()
-            {
-                targetDist = UpRSP.getTargetDistance();
-                return targetDist;
-            }
-
-            public double getTargetAzimuth()
-            {
-                targetAzim = UpRSP.getTargetAzimuth();
-                return targetAzim;
-            }
+            ant.BindRadar(ref rt);
         }
 
-        public class ERC
-        {
-            public RDP UpRDP;
-            public RCDS DownRCDS;
-
-            double targetDist;
-            double targetAzim;
-
-            public ERC(ref RDP rdp)
-            {
-                UpRDP = rdp;
-            }
-
-            public ERC(ref RCDS rcds)
-            {
-                DownRCDS = rcds;
-            }
-
-            public double ertd; public double erta;
-
-            public double getTargetDistance()
-            {
-                targetDist = UpRDP.getTargetDistance();
-                return targetDist;
-            }
-
-            public double getTargetAzimuth()
-            {
-                targetAzim = UpRDP.getTargetAzimuth();
-                return targetAzim;
-            }
-        }
-
-        public class RCDS
-        {
-            public ERC UpERC;
-
-            double targetDist;
-            double targetAzim;
-
-            public RCDS(ref ERC erc)
-            {
-                UpERC = erc;
-            }
-
-            public double rctd; public double rcta;
-
-            public double getTargetDistance()
-            {
-                targetDist = UpERC.getTargetDistance();
-                return targetDist;
-            }
-
-            public double getTargetAzimuth()
-            {
-                targetAzim = UpERC.getTargetAzimuth();
-                return targetAzim;
-            }
-        }
 
         public static void Main()
         {
-            double arg1 = 10;
-            double arg2 = 50;
-            TargetAttributes attributes = new TargetAttributes(2.3, 4.3, 1.1);
-            Target target = new Target(arg1, arg2);
-            Antenna antenna = new Antenna(ref target);
-            RSP rsp = new RSP(ref antenna);
-            RDP rdp = new RDP(ref rsp);
-            ERC erc = new ERC(ref rdp);
-            RCDS rcds = new RCDS(ref erc);
+            Console.WriteLine("Enter the Target Distance and Target Azimuth");
+            double arg1 = Convert.ToDouble(Console.ReadLine());
+            double arg2 = Convert.ToDouble(Console.ReadLine());
 
-            Console.WriteLine(attributes.threedouble());
-            Console.WriteLine(target.todouble());
+            ant.getTargetAzimuth();
+            ant.getTargetDistance();
 
-            antenna.atd = antenna.getTargetDistance();
-            antenna.ata = antenna.getTargetAzimuth();
-            Console.WriteLine("\nFor Antenna: \nThe Target Distance is " + antenna.atd + ".");
-            Console.WriteLine("The Target Azimuth is " + antenna.ata + ".");
 
-            rsp.rstd = rsp.getTargetDistance();
-            rsp.rsta = rsp.getTargetAzimuth();
-            Console.WriteLine("\nFor RSP: \nThe Target Distance is " + rsp.rstd + ".");
-            Console.WriteLine("The Target Distance is " + rsp.rsta + ".");
 
-            rdp.rdtd = rdp.getTargetDistance();
-            rdp.rdta = rdp.getTargetAzimuth();
-            Console.WriteLine("\nFor RDP:\nThe Target Distance is " + rdp.rdtd + ".");
-            Console.WriteLine("The Target Azimuth is " + rdp.rdta + ".");
+            BSRModel bsr = new BSRModel();
+            bsr.td = arg1;
+            bsr.ta = arg2;
+            //bsr  = new Target();
 
-            erc.ertd = erc.getTargetDistance();
-            erc.erta = erc.getTargetAzimuth();
-            Console.WriteLine("\nFor ERC: \nThe Target Distance is " + erc.ertd + ".");
-            Console.WriteLine("The Target Azimuth is " + erc.erta + ".");
+            Antenna antenna = new Antenna();
 
-            rcds.rctd = rcds.getTargetDistance();
-            rcds.rcta = rcds.getTargetAzimuth();
-            Console.WriteLine("\nFor RCDS: \nThe Target Distance is " + rcds.rctd + ".");
-            Console.WriteLine("The Target Azimuth is " + rcds.rcta + ".");
+            Console.WriteLine("\nThe Target Distance is " + bsr.getTargetDistance + ".");
+            Console.WriteLine("The Target Azimuth is " + bsr.getTargetAzimuth + ".");
+
+            bsr = new Target();
+            Console.WriteLine("\nThe Target Distance is " + bsr.getTargetDistance + ".");
+            Console.WriteLine("The Target Azimuth is " + bsr.getTargetAzimuth + ".");
         }
     }
 }
