@@ -9,7 +9,7 @@ namespace project
     {
         public int td, ta;
 
-        public virtual double getTargetDistance
+        public virtual double TargetDistance
         {
             set
             {
@@ -22,7 +22,7 @@ namespace project
             }
         }
 
-        public virtual double getTargetAzimuth
+        public virtual double TargetAzimuth
         {
             set
             {
@@ -42,7 +42,7 @@ namespace project
     {
         public double ttd, tta;
         BSRModel bsr = new BSRModel();
-        public override double getTargetDistance
+        public override double TargetDistance
         {
             set
             {
@@ -55,7 +55,7 @@ namespace project
             }
         }
 
-        public override double getTargetAzimuth
+        public override double TargetAzimuth
         {
             set
             {
@@ -71,76 +71,81 @@ namespace project
 
     public class Antenna : BSRModel
     {
-        public double atd, ata;
+        //public double atd, ata;
         Target target;
 
         public void BindRadar(ref Target rt)
         {
             target = rt;
         }
-        public override double getTargetDistance
+        public override double TargetDistance
         {
             set
             {
-                atd = target.ttd;
+                target.td = value;
             }
 
             get
             {
-                return atd;
+                return target.td;
             }
         }
 
-        public override double getTargetAzimuth
+        public override double TargetAzimuth
         {
             set
             {
-                ata = target.tta;
+                target.ta = value;
             }
 
             get
             {
-                return ata;
+                return target.azimuth;
             }
         }
     }
 
     public class IEWB
     {
-
         public Target tgt;
         public Antenna ant;
 
-        public IEWB(ref Target rt)
+        public IEWB()
         {
-            ant.BindRadar(ref rt);
+            ant.BindRadar(ref tgt);
         }
+    }
 
-
+    static class Program
+    {
         public static void Main()
         {
+            IEWB iewb = new IEWB();
+
             Console.WriteLine("Enter the Target Distance and Target Azimuth");
             double arg1 = Convert.ToDouble(Console.ReadLine());
             double arg2 = Convert.ToDouble(Console.ReadLine());
 
-            ant.getTargetAzimuth();
-            ant.getTargetDistance();
 
 
+            Console.WriteLine("dist: ", ant.TargetDistance);
+            Console.WriteLine("azim: ", ant.TargetAzimuth);
 
-            BSRModel bsr = new BSRModel();
-            bsr.td = arg1;
-            bsr.ta = arg2;
-            //bsr  = new Target();
+            //BSRModel bsr = new BSRModel();
+            //bsr.td = arg1;
+            //bsr.ta = arg2;
+            ////bsr  = new Target();
 
-            Antenna antenna = new Antenna();
+            //Antenna antenna = new Antenna();
 
-            Console.WriteLine("\nThe Target Distance is " + bsr.getTargetDistance + ".");
-            Console.WriteLine("The Target Azimuth is " + bsr.getTargetAzimuth + ".");
+            //Console.WriteLine("\nThe Target Distance is " + bsr.getTargetDistance + ".");
+            //Console.WriteLine("The Target Azimuth is " + bsr.getTargetAzimuth + ".");
 
-            bsr = new Target();
-            Console.WriteLine("\nThe Target Distance is " + bsr.getTargetDistance + ".");
-            Console.WriteLine("The Target Azimuth is " + bsr.getTargetAzimuth + ".");
+            //bsr = new Target();
+            //Console.WriteLine("\nThe Target Distance is " + bsr.getTargetDistance + ".");
+            //Console.WriteLine("The Target Azimuth is " + bsr.getTargetAzimuth + ".");
         }
+
     }
+    
 }
