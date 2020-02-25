@@ -3,165 +3,339 @@
 using System;
 namespace project
 {
-    // Class Declaration 
-    public class TargetAttributes
+    public class BSRModel
     {
-        //Instance Variables
-        double SigAmp;
-        double ToTxn;
-        double ToRxn;
+        public double td, ta;
 
-        //Constructor Declaration of Class
-        public TargetAttributes (double SigAmp, double ToTxn, double ToRxn)
+        public virtual double TargetDistance
         {
-            this.SigAmp = SigAmp;
-            this.ToTxn = ToTxn;
-            this.ToRxn = ToRxn;
+            set
+            {
+                td = value;
+            }
+
+            get
+            {
+                return td;
+            }
         }
 
-        //method 1 
-		public double getSignalAmplitude()
+        public virtual double TargetAzimuth
         {
-            return SigAmp;
-        }
+            set
+            {
+                ta = value;
+            }
 
-        // method 2 
-        public double getTimeofTransmission()
-        {
-            return ToTxn;
-        }
-
-        // method 3 
-        public double getTimeofReception()
-        {
-            return ToRxn;
-        }
-
-        public string threedouble()
-        {
-            return ("\nTarget Attributes: \nThe Signal Amplitude of the Target is " + this.getSignalAmplitude()
-                    + ".\nThe Time of Transmission of the Target is " + this.getTimeofTransmission()
-                    + ".\nThe Time of Reception of the Target is " + this.getTimeofReception()
-                    + ".");
+            get
+            {
+                return ta;
+            }
         }
     }
 
-    public class Target
+    public class Target : BSRModel
     {
-        // Instance Variables 
-        public double td;
-        public double ta;
+        public double ttd, tta;
+        Antenna antenna = new Antenna();
 
-        // Constructor Declaration of Class 
-        public Target (double td, double ta)
+        public void BindRadar(ref Antenna lt)
         {
-            this.td = td;
-            this.ta = ta;
+            antenna = lt;
         }
 
-        // method 1
-        public double getTargetDistance()
+        public override double TargetDistance
         {
-            return td;
+            set
+            {
+                ttd = value;
+            }
+
+            get
+            {
+                return ttd;
+            }
         }
 
-        // method 2
-        public double getTargetAzimuth()
+        public override double TargetAzimuth
         {
-            return ta;
-        }
+            set
+            {
+                tta = value;
+            }
 
-        public string todouble()
-        {
-            return ("\nAt the Target: \nThe Target Distance is " + this.getTargetDistance() + ".\nThe Target Azimuth is " + this.getTargetAzimuth() + ".");
+            get
+            {
+                return tta;
+            }
         }
     }
 
-    public class Antenna : Target
+    public class Antenna : BSRModel
     {
-        public double atd; public double ata;
-        public Antenna (double td, double ta) : base (td, ta)
+        public double atd, ata;
+        Target target = new Target();
+        RSP rsp = new RSP();
+
+        public void BindRadar(ref Target rt)
         {
-            atd = td * 1000;
-            ata = ta * 1000;
-            Console.WriteLine("At the Antenna:");
-            Console.WriteLine("The Target Distance is " + atd + " metres.");
-            Console.WriteLine("The Target Azimuth is " + ata + " metres.");
+            Target = rt;
+        }
+
+        public void BindRadar(ref RSP lt)
+        {
+            rsp = lt;
+        }
+        public override double TargetDistance
+        {
+            set
+            {
+                Target.ttd = value;
+                atd = Target.ttd;
+            }
+
+            get
+            {
+                return atd;
+            }
+        }
+
+        public override double TargetAzimuth
+        {
+            set
+            {
+                Target.tta = value;
+                ata = Target.tta;
+            }
+
+            get
+            {
+                return ata;
+            }
+        }
+
+        public Target Target { get => target; set => target = value; }
+    }
+
+    public class RSP : BSRModel
+    {
+        public double rstd, rsta;
+        Antenna antenna = new Antenna();
+        RDP rdp = new RDP();
+
+        public void BindRadar(ref Antenna rt)
+        {
+            antenna = rt;
+        }
+
+        public void BindRadar(ref RDP lt)
+        {
+            rdp = lt;
+        }
+
+        public override double TargetDistance
+        {
+            set
+            {
+                antenna.atd = value;
+                rstd = antenna.atd;
+            }
+
+            get
+            {
+                return rstd;
+            }
+        }
+
+        public override double TargetAzimuth
+        {
+            set
+            {
+                antenna.ata = value;
+                rsta = antenna.ata;
+            }
+
+            get
+            {
+                return rsta;
+            }
         }
     }
 
-    public class RSP : Antenna
+    public class RDP : BSRModel
     {
-        public double rstd; public double rsta;
-        public RSP (double td, double ta) : base (td, ta)
+        public double rdtd, rdta;
+        RSP rsp = new RSP();
+        ERC erc = new ERC();
+
+        public void BindRadar(ref RSP rt)
         {
-            rstd = td / 1000;
-            rsta = ta / 1000;
-            Console.WriteLine("\nAt the RSP:");
-            Console.WriteLine("The Target Distance is " + rstd + " kilometres.");
-            Console.WriteLine("The Target Azimuth is " + rsta + " kilometres.");
+            rsp = rt;
+        }
+
+        public void BindRadar(ref ERC lt)
+        {
+            erc = lt;
+        }
+
+        public override double TargetDistance
+        {
+            set
+            {
+                rsp.rstd = value;
+                rdtd = rsp.rstd;
+            }
+
+            get
+            {
+                return rdtd;
+            }
+        }
+
+        public override double TargetAzimuth
+        {
+            set
+            {
+                rsp.rsta = value;
+                rdta = rsp.rsta;
+            }
+
+            get
+            {
+                return rdta;
+            }
         }
     }
 
-    public class RDP : RSP
+    public class ERC : BSRModel
     {
-        public double rdtd; public double rdta;
-        public RDP (double td, double ta) : base (td, ta)
+        public double ertd, erta;
+        RDP rdp = new RDP();
+        RCDS rcds = new RCDS();
+
+        public void BindRadar(ref RDP rt)
         {
-            rdtd = td;
-            rdta = ta;
-            Console.WriteLine("\nAt the RDP:");
-            Console.WriteLine("The Target Distance is " + rdtd + ".");
-            Console.WriteLine("The Target Azimuth is " + rdta + ".");
+            rdp = rt;
+        }
+
+        public void BindRadar(ref RCDS lt)
+        {
+            rcds = lt;
+        }
+
+        public override double TargetDistance
+        {
+            set
+            {
+                rdp.rdtd = value;
+                ertd = rdp.rdtd;
+            }
+
+            get
+            {
+                return ertd;
+            }
+        }
+
+        public override double TargetAzimuth
+        {
+            set
+            {
+                rdp.rdta = value;
+                erta = rdp.rdta;
+            }
+
+            get
+            {
+                return erta;
+            }
         }
     }
 
-    public class ERC : RDP
+    public class RCDS : BSRModel
     {
-        public double ertd; public double erta;
-        public ERC (double td, double ta) : base (td, ta)
+        public double rctd, rcta;
+        ERC erc = new ERC();
+
+        public void BindRadar(ref ERC rt)
         {
-            ertd = td;
-            erta = ta;
-            Console.WriteLine("\nAt the ERC:");
-            Console.WriteLine("The Target Distance is " + ertd + ".");
-            Console.WriteLine("The Target Azimuth is " + erta + ".");
+            erc = rt;
+        }
+
+        public override double TargetDistance
+        {
+            set
+            {
+                erc.ertd = value;
+                rctd = erc.ertd;
+            }
+
+            get
+            {
+                return rctd;
+            }
+        }
+
+        public override double TargetAzimuth
+        {
+            set
+            {
+                erc.erta = value;
+                rcta = erc.erta;
+            }
+
+            get
+            {
+                return rcta;
+            }
         }
     }
 
-    public class RCDS : ERC
+    public class IEWB
     {
-        public double rctd; public double rcta;
-        public RCDS (double td, double ta) : base (td, ta)
+        public Target target = new Target();
+        public Antenna antenna = new Antenna();
+        public RSP rsp = new RSP();
+        public RDP rdp = new RDP();
+        public ERC erc = new ERC();
+        public RCDS rcds = new RCDS();
+
+        public IEWB()
         {
-            rctd = td;
-            rcta = ta;
-            Console.WriteLine("\nAt the RCDS:");
-            Console.WriteLine("The Target Distance is " + rctd + ".");
-            Console.WriteLine("The Target Azimuth is " + rcta + ".");
+            antenna.BindRadar(ref target);
+            rsp.BindRadar(ref antenna);
+            rdp.BindRadar(ref rsp);
+            erc.BindRadar(ref rdp);
+            rcds.BindRadar(ref erc);
         }
     }
 
-    // Main Method 
-    public class multilevel
+    static class program
     {
         public static void Main()
         {
-            TargetAttributes attributes = new TargetAttributes(2.3, 4.3, 1.1);
-            Target target = new Target (3.4, 2.8);
-            Antenna antenna = new Antenna (3.4, 2.8);
-            RSP rsp = new RSP (3.4, 2.8);
-            RDP rdp = new RDP (3.4, 2.8);
-            ERC erc = new ERC (3.4, 2.8);
-            RCDS rcds = new RCDS (3.4, 2.8);
-            Console.WriteLine (attributes.threedouble());
-            Console.WriteLine (target.todouble());
+            IEWB iewb = new IEWB();
+            Console.WriteLine("Enter the Target Distance and Target Azimuth");
+            double arg1 = Convert.ToDouble(Console.ReadLine());
+            double arg2 = Convert.ToDouble(Console.ReadLine());
+
+            iewb.target.ttd = arg1;
+            iewb.target.tta = arg2;
+
+            Console.WriteLine("\nAt Antenna: \nThe Target Distance is " + iewb.antenna.atd.ToString() + ".");
+            Console.WriteLine("The Target Azimuth is " + iewb.antenna.ata.ToString() + ".");
+
+            Console.WriteLine("\nFor RSP: \nThe Target Distance is " + iewb.rsp.rstd.ToString() + ".");
+            Console.WriteLine("The Target Azimuth is " + iewb.rsp.rsta.ToString() + ".");
+
+            Console.WriteLine("\nFor RDP: \nThe Target Distance is " + iewb.rdp.rdtd.ToString() + ".");
+            Console.WriteLine("The Target Azimuth is " + iewb.rdp.rdta.ToString() + ".");
+
+            Console.WriteLine("\nFor ERC: \nThe Target Distance is " + iewb.erc.ertd.ToString() + ".");
+            Console.WriteLine("The Target Azimuth is " + iewb.erc.erta.ToString() + ".");
+
+            Console.WriteLine("\nFor RCDS: \nThe Target Distance is " + iewb.rcds.rctd.ToString() + ".");
+            Console.WriteLine("The Target Azimuth is " + iewb.rcds.rcta.ToString() + ".");
         }
     }
 }
-            
-        
-    
-    
-
-
