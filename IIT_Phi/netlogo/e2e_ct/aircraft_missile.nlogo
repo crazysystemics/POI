@@ -2,25 +2,25 @@
 ;; variables aircraft starting time, altitude, velocity; missile position , launch time and velocity
 ;; parameters may vary systemitically or randomly
 breed [planes plane]
-planes-own [target]
+planes-own [plane_travel_dist]
 
 breed [launchers launcher]
 
 breed [missiles missile]
-missiles-own [m_radius blast_prob]
+missiles-own [m_radius blast_prob m_vel]
 
-breed [radars radar]
+breed [assets asset]
 
-globals [dist]
+globals [dist x1 y1 dist_to_cover_x dist_to_cover_y time1 time2 time intercept]
 
 to setup
   clear-all
-  set-default-shape radars "house"
+  set-default-shape assets "house"
   set-default-shape planes "airplane"
   set-default-shape launchers "default"
 
-  create-radars 1 [
-    setxy max-pxcor setRadar-ycor
+  create-assets 1 [
+    setxy max-pxcor setPlane-ycor
     set color      blue
     set size       1.5
   ]
@@ -34,8 +34,7 @@ to setup
     setxy min-pxcor setPlane-ycor
     set color      red
     set size       1.5
-    set target radar 0
-    face target
+    set heading 90
   ]
   create-missiles 1
   [
@@ -45,35 +44,70 @@ to setup
     set m_radius 2
     set blast_prob 0.5
   ]
+  set time 0
+  set intercept 0
   reset-ticks
 end
 
 to go
+
+  if any? planes [ set time time + 1 ]
+  show time
+
   ask planes [
+    let target one-of assets
+    fd 1
+    ask assets [show distance myself ]
     if distance target = 0
-    [ask radar 0 [die]
-      ask planes [die]
-    ]
-    ifelse distance target < 1
-    [ move-to target ]
-    [ fd 1 ]
-  ]
-
-  ask planes [
-    ask missiles
     [
-      set dist sqrt (([ycor] of plane 2 - [ycor] of missile 3 ) * ([ycor] of plane 2 - [ycor] of missile 3 ) +
-        ([xcor] of plane 2 - [xcor] of missile 3 ) * ([xcor] of plane 2 - [xcor] of missile 3 ))
-      if dist < m_radius
-      [if random-float 1.0 < blast_prob
-        [ask plane 2 [die]
-          ask missile 3 [die]
-        ]
+      set intercept intercept + 1
+      if intercept = 1
+      [
+        set time1 time
+        set y1 ([ycor] of plane who)
+        set x1 ([xcor] of plane who)
       ]
+      if intercept = 2
+      [
+        set time2 time
+        set dist_to_cover_x ( abs ([xcor] of one-of missiles - x1) )
+        set dist_to_cover_y ( abs ([ycor] of one-of missiles - y1) )
+        set plane_travel_dist ( time2 - time1 )
+      ]
+    ]
+    if intercept > 2
+      [
+        ask missiles [
+          ifelse any? planes in-radius 1
+          [
+;;          if random-float 1.0 < blast_prob [
+            ask plane [who] of myself [die]
+            ask missile [who] of self [die]
+;;            ]
+          ]
+          [
+          show x1
+          show y1
+          show time1
+          show time2
+          show [plane_travel_dist] of myself
+          show dist_to_cover_x
+          set dist ( [plane_travel_dist] of myself - dist_to_cover_x )
+          show dist
+          show dist_to_cover_y
 
-      fd 1
+          set m_vel (dist_to_cover_y / dist)
+
+          fd m_vel
+          ]
+        ]
+    ]
+    if count missiles = 0
+    [
+      show "GAME OVER"
     ]
   ]
+
 
   tick
 end
@@ -92,7 +126,7 @@ GRAPHICS-WINDOW
 1
 1
 0
-0
+1
 0
 1
 -16
