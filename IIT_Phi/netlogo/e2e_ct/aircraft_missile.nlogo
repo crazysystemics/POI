@@ -11,7 +11,7 @@ missiles-own [m_radius blast_prob m_vel]
 
 breed [assets asset]
 
-globals [dist x1 y1 dist_to_cover_x dist_to_cover_y time1 time2 time intercept]
+globals [dist x1 y1 dist_to_cover_x dist_to_cover_y time1 time2 time intercept intercept_time plane-vel time_strike world_len]
 
 to setup
   clear-all
@@ -46,8 +46,11 @@ to setup
   ]
   set time 0
   set intercept 0
+  set world_len ( max-pxcor - min-pxcor ) + 1
+  ;;  print ( word "world lengfth is " world_len )
   reset-ticks
 end
+
 
 to go
 
@@ -55,57 +58,74 @@ to go
   show time
 
   ask planes [
-    let target one-of assets
-    fd 1
-    ask assets [show distance myself ]
-    if distance target = 0
+
+    setxy (xcor + setPlane-vel) (ycor)
+
+    ask assets
     [
-      set intercept intercept + 1
-      if intercept = 1
+      if any? planes in-radius 1
       [
-        set time1 time
-        set y1 ([ycor] of plane who)
-        set x1 ([xcor] of plane who)
+        if ( time - intercept_time > 4 )
+        [
+          set intercept intercept + 1
+          set intercept_time time
+        ]
+
+        if intercept = 1
+        [
+          set time1 time
+          set y1 ([ycor] of asset who)
+          set x1 ([xcor] of asset who)
+        ]
+
+        if intercept = 2
+        [
+          set time2 time
+          set dist_to_cover_x ( abs ([xcor] of one-of missiles - x1) )
+          set dist_to_cover_y ( abs ([ycor] of one-of missiles - y1) )
+
+        ]
+
       ]
-      if intercept = 2
-      [
-        set time2 time
-        set dist_to_cover_x ( abs ([xcor] of one-of missiles - x1) )
-        set dist_to_cover_y ( abs ([ycor] of one-of missiles - y1) )
-        set plane_travel_dist ( time2 - time1 )
-      ]
+
     ]
-    if intercept > 2
+
+
+    if intercept > 1
       [
+        set plane_travel_dist ( time2 - time1 )
+        set plane-vel world_len / plane_travel_dist
+
         ask missiles [
-          ifelse any? planes in-radius 1
+          ifelse any? planes in-radius 2
           [
-;;          if random-float 1.0 < blast_prob [
+            ;;          if random-float 1.0 < blast_prob [
             ask plane [who] of myself [die]
             ask missile [who] of self [die]
-;;            ]
+            ;;            ]
           ]
           [
-          show x1
-          show y1
-          show time1
-          show time2
-          show [plane_travel_dist] of myself
-          show dist_to_cover_x
-          set dist ( [plane_travel_dist] of myself - dist_to_cover_x )
-          show dist
-          show dist_to_cover_y
+            print ( word "This is x of missile"  x1 )
+            print ( word "This is y of missile"  y1 )
+            print ( word "This is time1 of missile"  time1 )
+            print ( word "This is time2 of missile"  time2 )
+            print ( word "This is plane_travel_dist of missile"  [plane_travel_dist] of myself )
 
-          set m_vel (dist_to_cover_y / dist)
+            show dist_to_cover_x
+            show dist_to_cover_y
 
-          fd m_vel
+            set dist ( world_len - dist_to_cover_x )
+            show dist
+
+            set time_strike dist / plane-vel
+
+            set m_vel (dist_to_cover_y / time_strike)
+
+            fd m_vel
           ]
         ]
     ]
-    if count missiles = 0
-    [
-      show "GAME OVER"
-    ]
+
   ]
 
 
@@ -204,19 +224,37 @@ NIL
 1
 
 SLIDER
-656
-121
-689
-271
-setRadar-ycor
-setRadar-ycor
--16
-16
-0.0
+29
+307
+201
+340
+setPlane-vel
+setPlane-vel
 1
+2
+1.3
+0.1
 1
 NIL
-VERTICAL
+HORIZONTAL
+
+PLOT
+655
+103
+1230
+394
+Effectiveness
+Time
+Effectiveness
+0.0
+100.0
+0.0
+10.0
+true
+true
+"set-plot-y-range 0 10" ""
+PENS
+"Effectiveness" 1.0 0 -2674135 true "" "plot intercept"
 
 @#$#@#$#@
 ## WHAT IS IT?
