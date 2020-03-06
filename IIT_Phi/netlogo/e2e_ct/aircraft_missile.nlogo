@@ -131,6 +131,29 @@ to go
 
   tick
 end
+
+
+to dv
+  ask planes
+  [
+    show (word  "asset_x: "  [xcor] of target " asset_y: " [ycor] of target)
+    show (word  "plane_x: "  [xcor] of self " plane_y: " [ycor] of self)
+  ]
+end
+
+;clear command centre
+to ccc
+;ask planes
+;[
+    show "           "
+    show "           "
+    show "           "
+    show "           "
+    show "           "
+    show "           "
+    show "           "
+;  ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
