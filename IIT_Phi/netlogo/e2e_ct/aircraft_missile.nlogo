@@ -12,7 +12,7 @@ missiles-own [m_radius blast_prob m_vel]
 breed [assets asset]
 
 globals [dist x1 y1 dist_to_cover_x dist_to_cover_y time1 time2 time intercept intercept_time plane-vel time_strike world_len
-         game_on asset_hit plane_hit ]
+         game_on asset_hit plane_hit me]
 
 to setup
   clear-all
@@ -23,6 +23,7 @@ to setup
   set game_on 1
   set asset_hit 0
   set plane_hit 0
+  set me 0
 
   create-assets 1 [
     setxy max-pxcor setPlane-ycor
@@ -62,12 +63,10 @@ to go
   if any? planes [set time time + 1]
   show time
 
-
-
-
   ask planes [
 
-    setxy (xcor + setPlane-vel) (ycor)
+    ;setxy (xcor + plane-vel) (ycor)
+    fd plane-vel
 
     ask assets
     [
@@ -103,6 +102,7 @@ to go
       [
         set plane_travel_dist ( time2 - time1 )
         set plane-vel world_len / plane_travel_dist
+        set plane-vel 1
 
         ask missiles [
           ifelse any? planes in-radius 2
@@ -110,7 +110,7 @@ to go
             show (word "i am here")
             set plane_hit plane_hit + 1
 
-            ;ask plane [who]   of myself   [die]
+            ask plane [who]   of myself   [die]
             ask missile [who] of self [die]
           ]
           [
@@ -137,9 +137,11 @@ to go
 
   ]
 
-  if [plane_hit = 0] [me
+  ifelse asset_hit = 0 [set me 0 ] [set me plane_hit / asset_hit]
 
   if not any? planes [stop]
+
+  tick
 end
 
 
@@ -216,7 +218,7 @@ launcher-xcor
 launcher-xcor
 -16
 16
-0.0
+-13.0
 1
 1
 NIL
@@ -287,7 +289,7 @@ true
 true
 "set-plot-y-range 0 10" ""
 PENS
-"Effectiveness" 1.0 0 -2674135 true "" "plot intercept"
+"Effectiveness" 1.0 0 -2674135 true "" "plot me"
 
 @#$#@#$#@
 ## WHAT IS IT?
