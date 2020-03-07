@@ -4,20 +4,25 @@
 breed [planes plane]
 planes-own [plane_travel_dist]
 
-breed [launchers launcher]
+breed        [launchers launcher]
 
-breed [missiles missile]
+breed        [missiles missile]
 missiles-own [m_radius blast_prob m_vel]
 
 breed [assets asset]
 
-globals [dist x1 y1 dist_to_cover_x dist_to_cover_y time1 time2 time intercept intercept_time plane-vel time_strike world_len]
+globals [dist x1 y1 dist_to_cover_x dist_to_cover_y time1 time2 time intercept intercept_time plane-vel time_strike world_len
+         game_on asset_hit plane_hit ]
 
 to setup
   clear-all
-  set-default-shape assets "house"
-  set-default-shape planes "airplane"
-  set-default-shape launchers "default"
+  set-default-shape assets     "house"
+  set-default-shape planes     "airplane"
+  set-default-shape launchers  "default"
+
+  set game_on 1
+  set asset_hit 0
+  set plane_hit 0
 
   create-assets 1 [
     setxy max-pxcor setPlane-ycor
@@ -54,8 +59,11 @@ end
 
 to go
 
-  if any? planes [ set time time + 1 ]
+  if any? planes [set time time + 1]
   show time
+
+
+
 
   ask planes [
 
@@ -68,6 +76,7 @@ to go
         if ( time - intercept_time > 4 )
         [
           set intercept intercept + 1
+          set asset_hit asset_hit + 1
           set intercept_time time
         ]
 
@@ -83,7 +92,6 @@ to go
           set time2 time
           set dist_to_cover_x ( abs ([xcor] of one-of missiles - x1) )
           set dist_to_cover_y ( abs ([ycor] of one-of missiles - y1) )
-
         ]
 
       ]
@@ -99,10 +107,11 @@ to go
         ask missiles [
           ifelse any? planes in-radius 2
           [
-            ;;          if random-float 1.0 < blast_prob [
-            ask plane [who] of myself [die]
+            show (word "i am here")
+            set plane_hit plane_hit + 1
+
+            ;ask plane [who]   of myself   [die]
             ask missile [who] of self [die]
-            ;;            ]
           ]
           [
             print ( word "This is x of missile"  x1 )
@@ -128,17 +137,18 @@ to go
 
   ]
 
+  if [plane_hit = 0] [me
 
-  tick
+  if not any? planes [stop]
 end
 
 
 to dv
-  ask planes
-  [
-    show (word  "asset_x: "  [xcor] of target " asset_y: " [ycor] of target)
-    show (word  "plane_x: "  [xcor] of self " plane_y: " [ycor] of self)
-  ]
+;  ask planes
+;  [
+;    show (word  "asset_x: "  [xcor] of target " asset_y: " [ycor] of target)
+;    show (word  "plane_x: "  [xcor] of self " plane_y: " [ycor] of self)
+;  ]
 end
 
 ;clear command centre
