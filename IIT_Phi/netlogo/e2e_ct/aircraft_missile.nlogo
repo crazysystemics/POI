@@ -8,11 +8,9 @@ breed        [launchers launcher]
 
 breed        [missiles missile]
 missiles-own [m_radius blast_prob m_vel]
-
-breed [assets asset]
-
-globals [dist x1 y1 dist_to_cover_x dist_to_cover_y time1 time2 time intercept intercept_time plane-vel time_strike world_len
-         game_on asset_hit plane_hit me]
+breed        [assets asset]
+globals      [dist x1 y1 dist_to_cover_x dist_to_cover_y time1 time2 time asset_hit asset_hit_time
+              plane-vel time_strike world_len game_on  plane_hit me]
 
 to setup
   clear-all
@@ -20,10 +18,12 @@ to setup
   set-default-shape planes     "airplane"
   set-default-shape launchers  "default"
 
-  set game_on 1
-  set asset_hit 0
-  set plane_hit 0
-  set me 0
+  set game_on        1
+  set time           0
+  set asset_hit      0
+  set asset_hit_time 0
+  set plane_hit      0
+  set me             0
 
   create-assets 1 [
     setxy max-pxcor setPlane-ycor
@@ -50,8 +50,8 @@ to setup
     set m_radius 2
     set blast_prob 0.5
   ]
-  set time 0
-  set intercept 0
+
+
   set world_len ( max-pxcor - min-pxcor ) + 1
   ;;  print ( word "world lengfth is " world_len )
   reset-ticks
@@ -60,46 +60,45 @@ end
 
 to go
 
-  if any? planes [set time time + 1]
-  show time
+  if any? planes
+  [set time time + 1]
+  ;show time
+
 
   ask planes [
-
-    ;setxy (xcor + plane-vel) (ycor)
+    ;set plane-vel 1
+    setxy (xcor + plane-vel) (ycor)
     fd plane-vel
 
     ask assets
     [
       if any? planes in-radius 1
       [
-        if ( time - intercept_time > 4 )
+        if ( time - asset_hit_time > 4 )
         [
-          set intercept intercept + 1
           set asset_hit asset_hit + 1
-          set intercept_time time
+          set asset_hit_time time
         ]
 
-        if intercept = 1
+        if asset_hit = 1
         [
           set time1 time
           set y1 ([ycor] of asset who)
           set x1 ([xcor] of asset who)
         ]
 
-        if intercept = 2
+        if asset_hit = 2
         [
           set time2 time
           set dist_to_cover_x ( abs ([xcor] of one-of missiles - x1) )
           set dist_to_cover_y ( abs ([ycor] of one-of missiles - y1) )
         ]
-
       ]
+   ]
 
-    ]
 
-
-    if intercept > 1
-      [
+  if asset_hit > 1
+  [
         set plane_travel_dist ( time2 - time1 )
         set plane-vel world_len / plane_travel_dist
         set plane-vel 1
@@ -110,21 +109,24 @@ to go
             show (word "i am here")
             set plane_hit plane_hit + 1
 
-            ask plane [who]   of myself   [die]
-            ask missile [who] of self [die]
+            ask plane   [who] of myself   [die]
+            ask missile [who] of self     [die]
           ]
           [
-            print ( word "This is x of missile"  x1 )
-            print ( word "This is y of missile"  y1 )
-            print ( word "This is time1 of missile"  time1 )
-            print ( word "This is time2 of missile"  time2 )
-            print ( word "This is plane_travel_dist of missile"  [plane_travel_dist] of myself )
+            set x1 [xcor] of self
+            set y1 [ycor] of self
 
-            show dist_to_cover_x
-            show dist_to_cover_y
+            print ( word "attributes of missile "  x1  " "  int y1 " " time1 " " time2)
+
+            if round y1 >= 16  [setxy launcher-xcor min-pycor]
+
+            ;print ( word "This is plane_travel_dist of missile"  [plane_travel_dist] of myself )
+
+            ;show dist_to_cover_x
+            ;show dist_to_cover_y
 
             set dist ( world_len - dist_to_cover_x )
-            show dist
+            ;show dist
 
             set time_strike dist / plane-vel
 
@@ -133,8 +135,7 @@ to go
             fd m_vel
           ]
         ]
-    ]
-
+      ]
   ]
 
   ifelse asset_hit = 0 [set me 0 ] [set me plane_hit / asset_hit]
@@ -203,7 +204,7 @@ setPlane-ycor
 setPlane-ycor
 -16
 16
-0.0
+-3.0
 1
 1
 NIL
@@ -218,7 +219,7 @@ launcher-xcor
 launcher-xcor
 -16
 16
--13.0
+1.0
 1
 1
 NIL
@@ -267,7 +268,7 @@ setPlane-vel
 setPlane-vel
 1
 2
-1.3
+1.7
 0.1
 1
 NIL
