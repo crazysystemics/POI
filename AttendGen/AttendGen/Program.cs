@@ -17,7 +17,7 @@ namespace AttendGen
         static string outfn = "outattend.csv";
         
 
-        public static AttendGen attgen = new AttendGen(infn_work_pc, outfn, 67, 6, 63, 4, 57,6);        
+        public static AttendGen attgen = new AttendGen(infn_work_pc, outfn, 67, 5, 63, 4, 59,6);        
 
         static void Main(string[] args)
         {
