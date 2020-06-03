@@ -1,8 +1,18 @@
-private void btread_Click(object sender, RoutedEventArgs e)
+using System;
+using System.IO;
+using System.Collections;
+using System.Collections.Generic;
+
+namespace RpdSim
+{
+    class PacketHelper
+    {
+
+        public void interpretPkt()
         {
 
             BinaryReader rcds_channel
-               = new BinaryReader(File.Open(@"E:\tcpip\WriteFlag.dat", FileMode.Open));
+               = new BinaryReader(File.Open("WriteFlag.dat", FileMode.Open));
 
             List<byte> byteListPkt = new List<byte>();
 
@@ -37,7 +47,6 @@ private void btread_Click(object sender, RoutedEventArgs e)
             rmsg.HDN = (ushort)IRSParser.getParameter(b, 19, 21, 0, 0);// 143, 158);
 
             rmsg.CHKSM = (ushort)IRSParser.getParameter(b, 21, 23, 0, 0);// 159, 174);
-
-
-        
         }
+    }
+}

@@ -230,7 +230,7 @@ namespace RpdSim
         {
 
             BinaryReader rcds_channel
-               = new BinaryReader(File.Open(@"E:\tcpip\WriteFlag.dat", FileMode.Open));
+               = new BinaryReader(File.Open("WriteFlag.dat", FileMode.Open));
 
             List<byte> byteListPkt = new List<byte>();
 
@@ -268,7 +268,7 @@ namespace RpdSim
 
 
             byte[] Data = new byte[500];
-            Data = File.ReadAllBytes(@"E:\tcpip\WriteFlag.dat");
+            Data = File.ReadAllBytes(@"WriteFlag.dat");
             PeriodicTrackData rmsg1 = new PeriodicTrackData();
 
             IntPtr ptr = Marshal.AllocHGlobal(8);
@@ -383,7 +383,7 @@ namespace RpdSim
         {
 
             BinaryReader rcds_channel
-               = new BinaryReader(File.Open(@"E:\tcpip\WriteFlag.dat", FileMode.Open));
+               = new BinaryReader(File.Open("WriteFlag.dat", FileMode.Open));
 
             List<byte> byteListPkt = new List<byte>();
 
@@ -417,10 +417,11 @@ namespace RpdSim
             rmsg.SPD = (ushort)IRSParser.getParameter(b, 17, 19, 0, 0);// 127, 142);
             rmsg.HDN = (ushort)IRSParser.getParameter(b, 19, 21, 0, 0);// 143, 158);
 
-            rmsg.CHKSM = (ushort)IRSParser.getParameter(b, 21, 23, 0, 0);// 159, 174);
+            rmsg.CHKSM = (ushort)IRSParser.getParameter(b, 21, 23, 0, 0);// 159, 174);  
+
+            
 
 
-        
         }
     }
 }

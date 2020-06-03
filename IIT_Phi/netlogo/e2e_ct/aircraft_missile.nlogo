@@ -109,14 +109,14 @@ to go
             show (word "i am here")
             set plane_hit plane_hit + 1
 
-            ask plane   [who] of myself   [die]
-            ask missile [who] of self     [die]
+            ;ask plane   [who] of myself   [die]
+            ;ask missile [who] of self     [die]
           ]
           [
             set x1 [xcor] of self
             set y1 [ycor] of self
 
-            print ( word "attributes of missile "  x1  " "  int y1 " " time1 " " time2)
+            ;print ( word "attributes of missile "  x1  " "  int y1 " " time1 " " time2)
 
             if round y1 >= 16  [setxy launcher-xcor min-pycor]
 
@@ -138,9 +138,10 @@ to go
       ]
   ]
 
+  print(word "asset_hit= " asset_hit " plane_hit= " plane_hit " me= " me)
   ifelse asset_hit = 0 [set me 0 ] [set me plane_hit / asset_hit]
 
-  if not any? planes [stop]
+  ;if not any? planes [stop]
 
   tick
 end
@@ -268,7 +269,7 @@ setPlane-vel
 setPlane-vel
 1
 2
-1.7
+1.5
 0.1
 1
 NIL
@@ -288,7 +289,7 @@ Effectiveness
 10.0
 true
 true
-"set-plot-y-range 0 10" ""
+"set-plot-y-range 0 1" ""
 PENS
 "Effectiveness" 1.0 0 -2674135 true "" "plot me"
 
