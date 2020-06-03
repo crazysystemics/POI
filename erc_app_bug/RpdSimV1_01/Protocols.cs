@@ -125,7 +125,7 @@ namespace RpdSim
 
         public enum StatusValues
         {
-            EMPTY = 0,
+            EMPTY = 0, FULL=1
         };
         //------------------------- PACKET_PAYLOAD_STRUCTURES--------------------------------------
         //------------------------------------PacketHeader Payload-------------------------------------------

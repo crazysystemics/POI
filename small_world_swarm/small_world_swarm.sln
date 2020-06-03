@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1145
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "small_world_swarm", "small_world_swarm\small_world_swarm.csproj", "{9E6ED39D-79B0-42D8-91AF-B723DC21F70E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9E6ED39D-79B0-42D8-91AF-B723DC21F70E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E6ED39D-79B0-42D8-91AF-B723DC21F70E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E6ED39D-79B0-42D8-91AF-B723DC21F70E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E6ED39D-79B0-42D8-91AF-B723DC21F70E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C662ABE4-BE0E-4F5D-AD9B-C2E527297770}
+	EndGlobalSection
+EndGlobal
