@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="AppInfra">
+      <UniqueIdentifier>{b6c80423-5ce0-47b4-9728-1374fe5b2dad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AppLayer">
+      <UniqueIdentifier>{ec3005eb-f9c8-486a-8995-0756474810e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SysStack">
+      <UniqueIdentifier>{d79c7233-a912-4b53-9984-33cefb184940}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APILayer">
+      <UniqueIdentifier>{91b70909-7c99-45ef-817a-5c6cdfe4e64a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Rsp.h">
+      <Filter>AppLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="ErcExecutive.h">
+      <Filter>AppInfra</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>AppLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="ErcExeCmd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Rcds.h">
+      <Filter>AppLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Rdp.h">
+      <Filter>AppLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Erc.h">
+      <Filter>AppLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Rf.h">
+      <Filter>AppLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Enum.h">
+      <Filter>AppLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketAPI.h">
+      <Filter>APILayer</Filter>
+    </ClInclude>
+    <ClInclude Include="AxiAPI.h">
+      <Filter>APILayer</Filter>
+    </ClInclude>
+    <ClInclude Include="QApi.h">
+      <Filter>APILayer</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ErcMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EthernetIO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AxiIO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
