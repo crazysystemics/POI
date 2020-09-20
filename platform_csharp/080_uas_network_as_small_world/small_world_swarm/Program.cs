@@ -142,6 +142,10 @@ namespace small_world_swarm
                                )
         {
             //results = new List<Tuple<int, int>>();
+            if (bf_blue_red == null)
+            {
+                bf_blue_red = new Dictionary<string, List<string>>();
+            }
             string src = Matrix[srci, srcj];            
  
             int sr = srci - radius, sc = srcj - radius, er = srci + radius, ec = srcj + radius;
@@ -195,6 +199,10 @@ namespace small_world_swarm
         {
 
            bf_adjacency_red_blue = new int[bfOrder, bfOrder];
+           if (blue_red_adj_mat == null)
+            {
+                blue_red_adj_mat = new string[bfOrder, bfOrder];
+            }
 
 
             for (int i = 0; i < bfOrder; i++)
@@ -207,11 +215,13 @@ namespace small_world_swarm
 
             foreach (string src in bf_blue_red.Keys)
             {
-                int bid = BlueRadarIds.FindIndex(x =>x == src);
+                int bid = BlueRadarIds.FindIndex(x =>"B" + x == src);
                 foreach (string dest in bf_blue_red[src])
                 {
-                    int rid = RedRadarIds.FindIndex(x => x == dest);
-                    bf_adjacency_red_blue[bid, rid] = 1;
+                    int rid = RedRadarIds.FindIndex(x => "R" + x == dest);
+                    //TODO: remove the if condition so that field is assigned every time
+                    if (bid < bfOrder && rid < bfOrder)
+                        bf_adjacency_red_blue[bid, rid] = 1;
                     
                 }
             }              
@@ -306,7 +316,7 @@ namespace small_world_swarm
         {
             //ConsoleUiManager cm = new ConsoleUiManager();
             //cm.RunTests();
-            Small_World_Swarm_Bf small_world = new Small_World_Swarm_Bf(5);
+            Small_World_Swarm_Bf small_world = new Small_World_Swarm_Bf(10);
             
             
 
