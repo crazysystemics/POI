@@ -162,7 +162,9 @@ namespace uassociit
         //Cluster is cell which experinces toppling or avalanche of SOC
         //Cluster is set of UAS tracked together by a Radar Network
         public double phi;
-        List<Cluster> subClusters = new List<Cluster>();
+
+        //no concept of sub-clusters now as it is only top level
+        //List<Cluster> subClusters = new List<Cluster>();
 
         public Cluster()
         {
@@ -181,7 +183,7 @@ namespace uassociit
             //all in same direction, integrity is high
             //so phi is ratio of "cells with same direction"/"total number of cells"
             Dictionary<string, int> phi_hist = new Dictionary<string, int>();
-            
+
             return 0.0;
         }
 
@@ -225,29 +227,7 @@ namespace uassociit
 
             tempc = this;
             tempc.top = c3.top; tempc.left = c3.left; tempc.bottom = c3.bottom; tempc.right = c3.right;
-            parent_cluster.Add(tempc);
-
-
-            int min_sc = 0; double min_phi = 0.0;
-            for (int i = 0; i < subClusters.Count; i++)
-            {
-                if (Math.Abs(subClusters[i].phi - min_phi) < phi_tolerance)
-                {
-                    min_phi = subClusters[i].phi;
-                    min_sc = i;
-                }
-            }
-
-
-            for (int i = 0; i < subClusters.Count; i++)
-            {
-                if (Math.Abs(subClusters[i].phi - min_phi) < phi_tolerance)
-                {
-                    //Subclusters with low fitness
-                    //Recursive Split in DFS manner, decomposes as long as integrity is weak
-                    subClusters[i].SplitMinPhi(ref parent_cluster);
-                }
-            }
+            parent_cluster.Add(tempc);  
 
             return parent_cluster;
         }
@@ -268,55 +248,47 @@ namespace uassociit
             }
         }
 
-        public List<Cluster> SplitAndCombine (List<Cluster> top_level_clusters)
+        public List<Cluster> SplitAndCombine(List<Cluster> top_level_clusters)
         {
-            List<Cluster> cclist = new List<Cluster>();
-            List<Cluster> near_min_sc = new List<Cluster>();
-            List<Cluster> near_max_sc = new List<Cluster>();
-            List<Cluster> except_list = near_min_sc;
-            except_list.AddRange(near_max_sc);
+            List<int> visited = new List<int>();
 
-               bool first = true, combined = false;
+            //except_list.AddRange(near_max_sc);          
 
-            //while (first || combined)
-            //{
-                first    = false;
-                combined = false;
-
-                foreach (Cluster c1 in top_level_clusters)
+            foreach (Cluster c1 in top_level_clusters)
+            {
+                visited.Add(c1.id);
+                //check whether c1 is of low fitness or high
+                if (glboals.wheel.NextDouble() < phi)
                 {
-                    if (glboals.wheel.NextDouble() < phi)
+                    //c1 fitness is low. Split it
+                    SplitMinPhi(ref top_level_clusters);
+                }
+                else
+                {
+                    //c1 fitness is high. Combine it with another high phi top-level cluster
+                    foreach (Cluster c2 in top_level_clusters)
                     {
-                        SplitMinPhi(ref top_level_clusters);
-                    }
-                    else
-                    {
-                        foreach (Cluster c2 in top_level_clusters)
+                        var rslt = top_level_clusters.Find(x => x.id == c2.id);
+                        if (rslt != null && isAdjacent(c1, c2) && Math.Abs(c1.phi - c2.phi) < phi_tolerance)
                         {
-                            if (isAdjacent(c1, c2) && Math.Abs(c1.phi - c2.phi) < phi_tolerance)
-                            {
-                                //spinning random roulette, for selection
-                                //wheel will generate a random number between 0 and 0.1; So if it is less than phi,
-                                //it will be combined. Very high phis will not be combined where as intermediate will
-                                combined = true;
-                            }
-                            else if (glboals.doublediff(glboals.wheel.NextDouble(), phi, 0.001))
-                            {
-                                Cluster c = CombineTwoClusters(c1, c2, top_level_clusters);
-                                top_level_clusters.Add(c);
+                            visited.Add(c2.id);
+                            //spinning random roulette, for selection
+                            //wheel will generate a random number between 0 and 0.1; So if it is less than phi,
+                            //it will be combined. Very high phis will not be combined where as intermediate will
+                            Cluster c = CombineTwoClusters(c1, c2, top_level_clusters);
+                            top_level_clusters.Add(c);
 
-                                c = cclist.Find(x => x.id == c1.id);
-                                top_level_clusters.Remove(c);
+                            c = top_level_clusters.Find(x => x.id == c1.id);
+                            top_level_clusters.Remove(c);
 
-                                c = cclist.Find(x => x.id == c2.id);
-                                top_level_clusters.Remove(c);
-                            }                            
+                            c = top_level_clusters.Find(x => x.id == c2.id);
+                            top_level_clusters.Remove(c);
                         }
                     }
                 }
+            }
 
             //}
-            
             return top_level_clusters;
         }
 
@@ -333,8 +305,8 @@ namespace uassociit
             Cluster c = new Cluster();
 
             c.id = c1.id;
-            c.subClusters[0] = c1;
-            c.subClusters[1] = c2;
+            parent_clusters.Add(c1);
+            parent_clusters.Add(c2);
 
             int cindex = parent_clusters.Find(x => x.id == c.id).locn;
             parent_clusters[cindex] = c;
@@ -342,12 +314,8 @@ namespace uassociit
             int c2index = parent_clusters.Find(x => x.id == c2.id).locn;
             parent_clusters[c2index] = null;
 
-
             return c;
-
         }
-
-
     }
 
 
