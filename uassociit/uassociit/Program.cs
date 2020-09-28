@@ -106,9 +106,9 @@ namespace uassociit
     public static class globals
     {
         public static Random wheel = new Random();
-        public static bool debug, info, error;
+        public static bool debug=false, info=false, error=false;
 
-        public static bool   doublediff(double d1, double d2, double tolerance)
+        public static bool doublediff(double d1, double d2, double tolerance)
         {
             if (Math.Abs(d1 - d2) < tolerance)
                 return true;
@@ -120,11 +120,11 @@ namespace uassociit
 
     class SharedCanvas
     {
-        public Force     Alliance;
+        public Force Alliance;
         public string[,] Sky;
         public string[,] Canvas;
-        public   FgBg[,] CanvasColors;
-        public   int     SkyOrder;
+        public FgBg[,] CanvasColors;
+        public int SkyOrder;
         public List<Cluster> Clusters;
 
         public SharedCanvas(Force side, int order, string[,] b)
@@ -161,10 +161,10 @@ namespace uassociit
                         colfg = (colbg < 10 ? 0 : 14);
                         //Cluster c = new Cluster(initial_canvas[i,j], 
                         //                        (ConsoleColor)colbg, (ConsoleColor)colfg);
-                        Cluster c = new Cluster(i,j,i,j,initial_canvas[i,j], 
+                        Cluster c = new Cluster(i, j, i, j, initial_canvas[i, j],
                                                 ConsoleColor.Black, ConsoleColor.Yellow);
                         Clusters.Add(c);
- 
+
                         if (globals.info)
                         {
                             Console.WriteLine("INFO: " + c);
@@ -172,7 +172,7 @@ namespace uassociit
                     }
                 }
             }
-            
+
         }
 
         public void Clear()
@@ -187,7 +187,6 @@ namespace uassociit
 
         public void Clear(int top, int left, int bottom, int right)
         {
-
             for (int i = left; i <= right; i++)
             {
                 for (int j = top; j <= bottom; j++)
@@ -204,15 +203,16 @@ namespace uassociit
         public void Compose()
         {
             foreach (Cluster c in Clusters)
-            {            
+            {
                 for (int i = c.top; i <= c.bottom; i++)
                 {
                     for (int j = c.left; j <= c.right; j++)
                     {
-                        Console.WriteLine("DEBUG: " + i + " " + j);
+
+                        if (globals.debug) { Console.WriteLine("DEBUG: " + i + " " + j); }
                         Canvas[i, j] = Sky[i, j];
-                        CanvasColors[i, j] = new FgBg(ConsoleColor.Black, ConsoleColor.Yellow);//DIRTY
-                    }                    
+                        CanvasColors[i, j] = new FgBg(c.fc, c.bc);
+                    }
                 }
             }
         }
@@ -237,15 +237,13 @@ namespace uassociit
             //{
             //    //c.ComputeSmallPhi();
             //    Compose()
-            //}
-           
+            //}           
             Cluster top = new Cluster();
             top.SplitAndCombine(ref Clusters);
         }
     }
 
-
-    //===========   ===========
+    //=============================================
     class Cluster
     {
         public static int? sid;
@@ -266,12 +264,9 @@ namespace uassociit
 
         public override string ToString()
         {
-
-
-
             string s = " id " + id + " pivot " + pivot + " phi " + phi +
                        " top " + top + " left " + left + " bottom " + bottom + " right " + right + "px, py, pvel " +
-                       " background " + bc.ToString()  + " foreground " + fc.ToString() ;
+                       " background " + bc.ToString() + " foreground " + fc.ToString();
 
             return s;
         }
@@ -281,6 +276,9 @@ namespace uassociit
 
         public Cluster()
         {
+
+
+
             if (sid == null)
             {
                 sid = 0;
@@ -292,8 +290,15 @@ namespace uassociit
 
             id = sid.Value;
 
-            bc = ConsoleColor.Yellow;//DIRTY// (ConsoleColor)(id % 13);   //FromArgb(someInt);
-            fc = id < 12 ? ConsoleColor.White : ConsoleColor.Black;
+            bc = (ConsoleColor)(id % 16);
+            if (bc == ConsoleColor.Gray || bc == ConsoleColor.White || bc == ConsoleColor.Yellow)
+            {
+                fc = ConsoleColor.Black;
+            }
+            else
+            {
+                fc = ConsoleColor.White;
+            }
 
             pivot = ">";//">>" for output
             px = py = pvel = 0;
@@ -302,15 +307,15 @@ namespace uassociit
             top = left = right = bottom = 0;
         }
 
-        public Cluster(string pivot, ConsoleColor cfg, ConsoleColor cbg):
+        public Cluster(string pivot, ConsoleColor cfg, ConsoleColor cbg) :
                this()
         {
             this.pivot = pivot;
             fc = cfg;
             bc = cbg;
-        }           
-            
-        public Cluster(int top, int left, int bottom, int right, string pivot, ConsoleColor fg, ConsoleColor bg):
+        }
+
+        public Cluster(int top, int left, int bottom, int right, string pivot, ConsoleColor fg, ConsoleColor bg) :
                this()
         {
             this.pivot = pivot;
@@ -375,32 +380,62 @@ namespace uassociit
             return parent_cluster;
         }
 
-        public bool canBeCombined(Cluster c1, Cluster sc)
+        public bool canBeCombined(Cluster c1, Cluster c2)
         {
-            if ((c1.top <= sc.top && c1.left >= sc.left && c1.top >= sc.bottom && c1.left <= sc.right) || //c1.topleft is within  sc
-                (c1.top <= sc.top && c1.right >= sc.left && c1.top >= sc.bottom && c1.right <= sc.right) || //c1.topright within   sc
-                (c1.bottom <= sc.top && c1.right >= sc.left && c1.bottom >= sc.bottom && c1.right <= sc.right) || //c1.bottomright within sc
-                (c1.bottom <= sc.top && c1.left >= sc.left && c1.bottom >= sc.bottom && c1.left <= sc.right) &&   //c1.bottomright within sc
-                Math.Abs(c1.top - c1.bottom) == Math.Abs(sc.top - sc.bottom) && //height of both clusters are same
-                Math.Abs(c1.left - c1.right) == Math.Abs(sc.top - sc.right))//width of both clusters are same
+            Cluster c = new Cluster();
+
+            //Adjacency check
+            if (c1.top == c2.top || c1.bottom == c2.bottom)
             {
-                return true;
+                if (c1.right == c2.left - 1)
+                {
+                    //aligned side-by-side c1-left, c2-right
+                    return true;
+                }
+                else if (c1.left == c2.right + 1)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
-            else
+            else if (c1.left == c2.left || c1.right == c2.right)
             {
-                return false;
+
+                if (c1.bottom == c2.top - 1)
+                {
+                    return true;
+                }
+                else if (c1.left == c2.right + 1)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
             }
+
+            return false;
         }
 
+        //Containment Check
         //TODO:Check whether Combine can be made separate routine...
+        //TODO:Check whether to preserve splitcount == combinecount
+        //TODO:  => i.e.. preserve population count;
+
         public List<Cluster> SplitAndCombine(ref List<Cluster> top_level_clusters)
         {
             List<int> visited = new List<int>();
 
             //except_list.AddRange(near_max_sc);          
 
-            foreach (Cluster c1 in top_level_clusters)
+            for (int iter1 = 0; iter1 < top_level_clusters.Count; iter1++)
             {
+                Cluster c1 = top_level_clusters[iter1];
                 visited.Add(c1.id);
                 //check whether c1 is of low fitness or high
                 if (globals.wheel.NextDouble() < phi)
@@ -410,11 +445,14 @@ namespace uassociit
                 }
                 else
                 {
-                    //c1 fitness is high. Combine it with another high phi top-level cluster
-                    foreach (Cluster c2 in top_level_clusters)
+                    //c1 fitness is high. Combine it with another high phi top-level cluster                    {
+                    //check whether it is already visited
+                    //var rslt = visited.Find(x => x == c2.id);
+
+                    for (int iter2 = 0; iter2 < top_level_clusters.Count; iter2++)
                     {
-                        var rslt = top_level_clusters.Find(x => x.id == c2.id);
-                        if (rslt != null && canBeCombined(c1, c2) && Math.Abs(c1.phi - c2.phi) < phi_tolerance)
+                        Cluster c2 = top_level_clusters[iter2];
+                        if (c1.id != c2.id && canBeCombined(c1, c2) && Math.Abs(c1.phi - c2.phi) < phi_tolerance)
                         {
                             visited.Add(c2.id);
                             //spinning random roulette, for selection
@@ -470,7 +508,8 @@ namespace uassociit
                 }
             }
 
-            parent_clusters.Add(c1);
+            //parent_clusters.Add(c);
+
 
             return c;
         }
@@ -494,8 +533,6 @@ namespace uassociit
             this.tc = tc;
             this.desc = desc;
         }
-
-
     }
 
     class Program
@@ -523,7 +560,8 @@ namespace uassociit
         {
 
             ConsoleUiManager cuim = new ConsoleUiManager();
-            globals.info = true;
+            globals.info  = true;
+            globals.debug = false;
 
             InitTestCases();
 
@@ -532,26 +570,43 @@ namespace uassociit
             //SharedCanvas skyscope = new SharedCanvas(Force.BLUE, 2, tc.tc);
 
             //foreach (TestCase tc in TestCases)
-            {
-                TestCase tc = TestCases.ElementAt(0);
-                SharedCanvas skyscope = new SharedCanvas(Force.BLUE, 2, tc.tc);
 
-                string title = "TC:" + tc.id.ToString() + "  " + tc.desc + "Input Sky";
-                skyscope.initCanvas(skyscope.Sky);
+            TestCase tc = TestCases.ElementAt(0);
+            SharedCanvas skyscope = new SharedCanvas(Force.BLUE, 2, tc.tc);
+
+            string title = "TC:" + tc.id.ToString() + "  " + tc.desc + "Input Sky";
+            Console.WriteLine(title);
+
+            skyscope.initCanvas(skyscope.Sky);
+            skyscope.Compose();
+            skyscope.Paint();
+            
+
+            string tick = "y";
+            int tick_count = 0;
+
+            while (tick == "y")
+            {
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;                
+
+                title = "TC:" + tc.id.ToString() + "  " + tc.desc +
+                              "Input Sky: after next" + tick.Count();
+
+                Console.WriteLine(title);
+
+                skyscope.next();
                 skyscope.Compose();
                 skyscope.Paint();
-                skyscope.next();
-                //title = "TC:" + tc.id.ToString() + "  " + tc.desc + "Input Sky: after next";
-                //skyscope.Paint();
 
-
-                // string title = "TC:" + tc.id.ToString() + "  " + tc.desc + "Input Sky";              
+                //string title = "TC:" + tc.id.ToString() + "  " + tc.desc + "Input Sky";              
                 //cuim.PrintMatrix(title, skyscope.Canvas, skyscope.CanvasOrder, skyscope.CanvasOrder,
                 //ConsoleColor.Blue, ConsoleColor.Yellow,
                 //ConsoleColor.White, ConsoleColor.Black);
-
+                ConsoleKeyInfo key = Console.ReadKey();
+                tick = key.KeyChar.ToString().ToLower();
             }
-            Console.ReadKey();
+            
         }
     }
 }
