@@ -19,9 +19,6 @@ namespace uassociit
                 Console.ResetColor();
         }
 
-
-
-
         public void Write(string s, ConsoleColor bg, ConsoleColor fg, bool reset = true, string delim = " ")
         {
             Console.BackgroundColor = bg;
