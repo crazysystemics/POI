@@ -193,7 +193,6 @@ namespace uassociit
 
                 for (int j = 0; j < cols; j++)
                 {
-
                     if (i == posi && j == posj)
                     {
                         Console.ForegroundColor = fg;
