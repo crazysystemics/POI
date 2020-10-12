@@ -134,14 +134,17 @@ namespace uassociit
         }
     }
 
-    static class globals
+    //renamed globals to sglobal to avoid conflict with global in intellisense
+    static class sglobal
     {
-        public static Random wheel = new Random();
-        public static bool debug = false, info = false, error = false;
-        //TODO: Resolve Bug public static Log log2; error 0052
+        public static Random wheel         = new Random();
+        public static bool debug           = false, info = false, error = false;
         public static StreamWriter logp;
-        public static int tick_count = 0;
+        public static bool close_stream    = false;
+        public static int tick_count       = 0;
         public static string[] single_star = new string[] { "*" };
+        static public List<string> slist   = new List<string>();
+        
 
         public static bool doublediff(double d1, double d2, double tolerance)
         {
@@ -153,6 +156,15 @@ namespace uassociit
         public static string dbg = String.Empty;
         public static string[,] Sky;
 
+        public static void WriteHead()
+        {
+            //Write In HTML
+            HtmlWriter htw = new HtmlWriter();
+            htw.GetHtmlHead();
+        }
+
+  
+
         public static void WriteLine(string text, ConsoleColor bg = ConsoleColor.Yellow, ConsoleColor fg=ConsoleColor.Black)
         {
             //WriteOnConsole
@@ -163,10 +175,10 @@ namespace uassociit
 
             //Write In HTML
             HtmlWriter htw = new HtmlWriter();
-            List<string> sl = htw.GetHtmlString(bg, fg, text);
-            foreach (string s in sl)
+            htw.GetHtmlString(bg, fg, text);
+            foreach (string s in slist)
             {
-                globals.logp.WriteLine(s);
+                sglobal.logp.WriteLine(s);
             }
         }
 
@@ -187,13 +199,28 @@ namespace uassociit
                 }
             }
 
-            List<string> sl = htw.GetHtmlforMat(rh,ch, Mat, order, MatColors, top, left);
-            foreach (string s in sl)
-            {
-                //globals.logp.WriteLine(s);
-            }
+            htw.GetHtmlforMat(rh,ch, Mat, order, MatColors, top, left);
+           
         }
 
+        public static void WriteIntoFile(bool close)
+        {
+            slist.Add("</style>");
+            slist.Add("</body >");
+            slist.Add("</html>");
+
+            foreach (string s in slist)
+            {
+               
+                logp.WriteLine(s);
+            }
+
+            if (close)
+            {
+                logp.Close();
+            }
+
+        }
     }
 
     class SharedCanvas
@@ -209,7 +236,7 @@ namespace uassociit
         public SharedCanvas(Force side, int order, string[,] b)
         {
             Alliance = side;
-            globals.Sky = b;
+            sglobal.Sky = b;
             Canvas = new string[order, order];
             CanvasColors = new FgBg[order, order];
             Clusters = new List<Cluster>();
@@ -246,7 +273,7 @@ namespace uassociit
 
                         //if (globals.info)
                         {
-                            globals.WriteLine("INFO: " + c);
+                            //sglobal.WriteLine("INFO: " + c);
                         }
                     }
                 }
@@ -277,7 +304,7 @@ namespace uassociit
                 }
             }
 
-            globals.WriteMat(globals.single_star, globals.single_star, Canvas, 
+            sglobal.WriteMat(sglobal.single_star, sglobal.single_star, Canvas, 
                              (bottom - top + 1),CanvasColors, top, left);
 
             Console.WriteLine();
@@ -293,14 +320,14 @@ namespace uassociit
                     for (int j = c.left; j <= c.right; j++)
                     {
                         
-                        globals.WriteLine("DEBUG: " + i + " " + j);                      
+                        sglobal.WriteLine("DEBUG: " + i + " " + j);                      
 
-                        Canvas[i, j] = globals.Sky[i, j];
+                        Canvas[i, j] = sglobal.Sky[i, j];
                         CanvasColors[i, j] = new FgBg(c.fc, c.bc);
                     }
                 }
 
-                globals.WriteMat(globals.single_star, globals.single_star, Canvas, (c.bottom - c.top + 1), CanvasColors, c.top, c.left);
+                sglobal.WriteMat(sglobal.single_star, sglobal.single_star, Canvas, (c.bottom - c.top + 1), CanvasColors, c.top, c.left);
 
             }
         }
@@ -317,7 +344,7 @@ namespace uassociit
                           " Input Sky: after next " + tick_count +
                           " Num of Clusters       " + Clusters.Count;
 
-            globals.WriteLine(title);
+            sglobal.WriteLine(title);
 
             Paint();
         }
@@ -342,7 +369,7 @@ namespace uassociit
                         
             string[] col_hdg = { "a0", "a1" };
             string[] row_hdg = { "r0", "r1" };          
-            globals.WriteMat(row_hdg, col_hdg, Canvas, SkyOrder, CanvasColors);
+            sglobal.WriteMat(sglobal.single_star, sglobal.single_star, Canvas, SkyOrder, CanvasColors);
         }
 
         public string kernel(Cluster c)
@@ -353,13 +380,13 @@ namespace uassociit
             {
                 for (j = c.left; j <= c.right; j++)
                 {
-                    if (!phi_hist.ContainsKey(globals.Sky[i, j]))
+                    if (!phi_hist.ContainsKey(sglobal.Sky[i, j]))
                     {
-                        phi_hist.Add(globals.Sky[i, j], 1);
+                        phi_hist.Add(sglobal.Sky[i, j], 1);
                     }
                     else
                     {
-                        phi_hist[globals.Sky[i, j]]++;
+                        phi_hist[sglobal.Sky[i, j]]++;
                     }
                 }
             }
@@ -385,24 +412,24 @@ namespace uassociit
                 //distribute nodes on boundary to both clusters
                 if (((c.bottom - c.top + 1) % 2 == 1) && ((c.right - c.left + 1) % 2 == 1))
                 {
-                    globals.Sky[midrow, midcol] = s;
+                    sglobal.Sky[midrow, midcol] = s;
                 }
                 else if (((c.bottom - c.top + 1) % 2 == 1) && ((c.right - c.left + 1) % 2) == 0)
                 {
-                    globals.Sky[midrow, midcol] = s;
-                    globals.Sky[midrow, midcol + 1] = s;
+                    sglobal.Sky[midrow, midcol] = s;
+                    sglobal.Sky[midrow, midcol + 1] = s;
                 }
                 else if (((c.bottom - c.top + 1) % 2 == 0) && ((c.right - c.left + 1) % 2) == 1)
                 {
-                    globals.Sky[midrow, midcol] = s;
-                    globals.Sky[midrow + 1, midcol] = s;
+                    sglobal.Sky[midrow, midcol] = s;
+                    sglobal.Sky[midrow + 1, midcol] = s;
                 }
                 else
                 {
-                    globals.Sky[midrow, midcol] = s;
-                    globals.Sky[midrow, midcol + 1] = s;
-                    globals.Sky[midrow + 1, midcol] = s;
-                    globals.Sky[midrow + 1, midcol + 1] = s;
+                    sglobal.Sky[midrow, midcol] = s;
+                    sglobal.Sky[midrow, midcol + 1] = s;
+                    sglobal.Sky[midrow + 1, midcol] = s;
+                    sglobal.Sky[midrow + 1, midcol + 1] = s;
                 }
             }
 
@@ -523,13 +550,13 @@ namespace uassociit
             {
                 for (j = left; j <= right; j++)
                 {
-                    if (!phi_hist.ContainsKey(globals.Sky[i, j]))
+                    if (!phi_hist.ContainsKey(sglobal.Sky[i, j]))
                     {
-                        phi_hist.Add(globals.Sky[i, j], 1);
+                        phi_hist.Add(sglobal.Sky[i, j], 1);
                     }
                     else
                     {
-                        phi_hist[globals.Sky[i, j]]++;
+                        phi_hist[sglobal.Sky[i, j]]++;
                     }
                 }
             }
@@ -540,7 +567,7 @@ namespace uassociit
 
                 foreach (KeyValuePair<string, int> p in phi_hist)
                 {
-                    globals.WriteLine("DEBUG: phi_hist pivot: " + p.Key + "DEBUG: phi_hist count: " + p.Value);
+                    sglobal.WriteLine("DEBUG: phi_hist pivot: " + p.Key + "DEBUG: phi_hist count: " + p.Value);
 
                 }
             }
@@ -652,7 +679,7 @@ namespace uassociit
                 Cluster c1 = top_level_clusters[iter1];
                 visited.Add(c1.id);
                 //check whether c1 is of low fitness or high
-                if (globals.wheel.NextDouble() < phi)
+                if (sglobal.wheel.NextDouble() < phi)
                 {
                     //c1 fitness is low. Split it
                     SplitMinPhi(ref top_level_clusters);
@@ -750,7 +777,7 @@ namespace uassociit
     class Program
     {
         static public List<TestCase> TestCases = new List<TestCase>();
-
+       
         static public void InitTestCases()
         {
             int id = 0;
@@ -776,9 +803,9 @@ namespace uassociit
             date = date.Replace(" ","_");
             string now = DateTime.Now.ToString();
             date = date.Replace(":", "_");
-            globals.logp  = new StreamWriter("log_" + date + ".htm");
-            globals.info  = true;
-            globals.debug = false;
+            sglobal.logp  = new StreamWriter("log_" + date + ".txt");
+            sglobal.info  = true;
+            sglobal.debug = false;
 
             InitTestCases();
 
@@ -795,25 +822,25 @@ namespace uassociit
 
             TestCase input_tc = TestCases.ElementAt(1);
             SharedCanvas skyscope = new SharedCanvas(Force.BLUE, 2, input_tc.tc);
+            skyscope.initCanvas(input_tc.tc);
 
             
-
-
-
-
             int tick_count = 0;
 
+            
+            
             string title = "TC:" + input_tc.id.ToString() + "  " + input_tc.desc +
                           "Input Sky: in BEGINNING " + tick_count + " Num of Clusters " + skyscope.Clusters.Count;
-            globals.WriteLine(title);
 
-            globals.WriteLine("Input Sky: ");
+            sglobal.WriteHead();
+            sglobal.WriteLine(title);
+            sglobal.WriteLine("Input Sky: ");
 
             //skyscope.initCanvas(globals.Sky);
             //skyscope.Compose();
             //skyscope.Paint();
 
-            globals.logp.Close();
+            
             string tick = "y";
 
             while (tick_count < 1 && tick != "n" && tick != "q")
@@ -823,14 +850,12 @@ namespace uassociit
 
                 //Move tick to next state
                 tick_count++;
-                globals.tick_count = tick_count;
+                sglobal.tick_count = tick_count;
 
                 //tick = Console.ReadKey().KeyChar.ToString().ToLower();
-
             }
 
-            //Console.ForegroundColor = ConsoleColor.White;
-            //Console.BackgroundColor = ConsoleColor.Black;
+            sglobal.WriteIntoFile(true);
             
         }
     }
