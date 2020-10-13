@@ -198,7 +198,7 @@ namespace uassociit
                     Console.ResetColor();                 
                 }
             }
-
+            
             htw.GetHtmlforMat(rh,ch, Mat, order, MatColors, top, left);
            
         }
@@ -209,9 +209,16 @@ namespace uassociit
             slist.Add("</body >");
             slist.Add("</html>");
 
+            int index = 0;
+            int hindex = 0;
             foreach (string s in slist)
             {
-               
+                if (s.Contains("body"))
+                {
+                    hindex++;
+                }
+                index++;
+
                 logp.WriteLine(s);
             }
 
@@ -340,7 +347,7 @@ namespace uassociit
             Console.ForegroundColor = ConsoleColor.Black;
             Console.BackgroundColor = ConsoleColor.Cyan;
 
-            title = "TC:" + tc.id.ToString() + "  " + tc.desc +
+            title = "TC:PaintWithHeader" + tc.id.ToString() + "  " + tc.desc +
                           " Input Sky: after next " + tick_count +
                           " Num of Clusters       " + Clusters.Count;
 

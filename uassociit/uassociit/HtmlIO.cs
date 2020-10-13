@@ -75,7 +75,6 @@ namespace uassociit
             sglobal.slist.Add("#red");    sglobal.slist.Add("{background-color:red;color:white;}");
             sglobal.slist.Add("#white");  sglobal.slist.Add("{background-color:white;color:black;}");
             sglobal.slist.Add("#yellow"); sglobal.slist.Add("{background-color:yellow;color:black;}");
-            sglobal.slist.Add("</td>");
             sglobal.slist.Add("<body>");
            
         }
@@ -83,12 +82,14 @@ namespace uassociit
         public void GetHtmlString(ConsoleColor bg, ConsoleColor fg, string text)
         {
             sglobal.slist.Add("<p background-color:\"" + chmap[bg] + "\"" + text + "</p>");
+
         }
 
-        public List<string> GetHtmlforMat (string[] row_heading, string[] col_heading, 
+        public void GetHtmlforMat (string[] row_heading, string[] col_heading, 
                                            string[,] Mat, int order,  FgBg[,] fgbgmat, 
                                            int top = 0, int left = 0)
         {
+            
             sglobal.slist.Add("<table>");
             sglobal.slist.Add("<tr>");
             if (col_heading == null)
@@ -140,7 +141,7 @@ namespace uassociit
 
             sglobal.slist.Add("</table>");
 
-            return sglobal.slist;
+           
         }
     }
 }
