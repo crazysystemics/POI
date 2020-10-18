@@ -4,6 +4,8 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 //NOTES
 //size of partitions (width of partitions no bits flowing into/out-of it in a single tick)
@@ -93,7 +95,12 @@ namespace uassociit
     class Log
     {
         public int level;
-        //public  StreamWriter logp;
+        public StreamWriter logp;
+        public string log_file_name;
+        public List<string> slist = new List<string>();
+        public bool entry_exit = false;
+        public int call_level = 0;
+
 
         public Log()
         { }
@@ -101,26 +108,106 @@ namespace uassociit
         public Log(string filename)
         {
             level = 0;
-            StreamWriter logstream = new StreamWriter(filename);
         }
 
-        public void onconsole(string logmsg, ConsoleColor fg, ConsoleColor bg)
+        public void Open(string filename, bool append)
         {
-            Console.ForegroundColor = fg;
-            Console.BackgroundColor = bg;
-            Console.WriteLine(logmsg);
-            Console.ResetColor();
+            log_file_name = filename;
+            logp = new StreamWriter(filename, append);
         }
 
-        public void onstream(string logmsg, ConsoleColor fg, ConsoleColor bg)
+        public void WriteHead()
         {
-            Console.ForegroundColor = fg;
+            //Write In HTML
+            HtmlWriter htw = new HtmlWriter();
+            htw.GetHtmlHead(this);
+        }
+
+        public void WriteLine(string text, ConsoleColor fg = ConsoleColor.Black, ConsoleColor bg = ConsoleColor.White)
+        {
+            //WriteOnConsole
             Console.BackgroundColor = bg;
-            Console.WriteLine(logmsg);
+            Console.ForegroundColor = fg;
+            Console.WriteLine(text);
             Console.ResetColor();
+
+            //Write In HTML
+            HtmlWriter htw = new HtmlWriter();
+            htw.GetHtmlString(this, bg, fg, text);
+        }
+
+        public void WriteMat(string title, string[] rh, string[] ch, string[,] Mat, int rows, int cols, FgBg[,] MatColors,
+                                    int top = -1, int left = -1, int bottom = -1, int right = -1)
+        {
+            //WriteOnConsole
+            //Write In HTML
+            top = (top == -1 ? 0 : top);
+            left = (left == -1 ? 0 : left);
+            bottom = (bottom == -1 ? sglobal.SkyRow - 1 : bottom);
+            right = (right == -1 ? sglobal.SkyCol - 1 : right);
+            Debug.Assert(top <= bottom && left <= right);
+
+            HtmlWriter htw = new HtmlWriter();
+            if (!String.IsNullOrEmpty(title))
+            {
+                WriteLine(title);
+            }
+
+            for (int i = top; i <= bottom; i++)
+            {
+                for (int j = left; j <= right; j++)
+                {
+                    Console.BackgroundColor = MatColors[i, j].Bg;
+                    Console.ForegroundColor = MatColors[i, j].Fg;
+                    Console.WriteLine(Mat[i, j]);
+                    Console.ResetColor();
+                }
+            }
+
+            htw.GetHtmlforMat(this, rh, ch, Mat, rows, cols, MatColors, top, left, bottom, right);
+        }
+
+        public void WriteToFile(bool addfooter)
+        {
+            if (addfooter)
+            {
+                slist.Add("</style>");
+                slist.Add("</body >");
+                slist.Add("</html>");
+            }
+
+            foreach (string s in slist)
+            {
+                logp.WriteLine(s);
+            }
+        }
+
+        public void Close(bool store, bool addfooter)
+        {
+            if (store)
+            {
+                WriteToFile(addfooter);
+            }
+
+            logp.Close();
+        }
+
+        public void Save(bool addfooter)
+        {
+            //store to file, but dont add footer
+            Close(true, addfooter);
+            Open(log_file_name, true);
         }
     }
     enum Force { BLUE, RED }
+
+    public static class Helpers
+    {
+        public static string GetCallerName([CallerMemberName] string caller = null)
+        {
+            return caller;
+        }
+    }
 
     class FgBg
     {
@@ -137,14 +224,14 @@ namespace uassociit
     //renamed globals to sglobal to avoid conflict with global in intellisense
     static class sglobal
     {
-        public static Random wheel         = new Random();
-        public static bool debug           = false, info = false, error = false;
-        public static StreamWriter logp;
-        public static bool close_stream    = false;
-        public static int tick_count       = 0;
+        public static Random wheel = new Random();
+        public static bool debug = false, info = false, error = false;
+        public static bool close_stream = false;
+        public static int tick_count = 0;
         public static string[] single_star = new string[] { "*" };
-        static public List<string> slist   = new List<string>();
+        public static Log logger = new Log();
         
+
 
         public static bool doublediff(double d1, double d2, double tolerance)
         {
@@ -155,80 +242,33 @@ namespace uassociit
         }
         public static string dbg = String.Empty;
         public static string[,] Sky;
+        public static int SkyRow, SkyCol;
 
-        public static void WriteHead()
+        public static Dictionary<ConsoleColor, string> chmap = new Dictionary<ConsoleColor, string>();
+
+        public static void init_chmap()
         {
-            //Write In HTML
-            HtmlWriter htw = new HtmlWriter();
-            htw.GetHtmlHead();
+            chmap.Add(ConsoleColor.Black,       "black");
+            chmap.Add(ConsoleColor.Blue,         "blue");
+            chmap.Add(ConsoleColor.Cyan,         "cyan");
+            chmap.Add(ConsoleColor.DarkBlue, "darkblue");
+
+            chmap.Add(ConsoleColor.DarkCyan,      "darkcyan");
+            chmap.Add(ConsoleColor.DarkGray,      "darkgray");
+            chmap.Add(ConsoleColor.DarkGreen,    "darkgreen");
+            chmap.Add(ConsoleColor.DarkMagenta, "darkmagenta");
+
+            chmap.Add(ConsoleColor.DarkRed,       "darkred");
+            chmap.Add(ConsoleColor.DarkYellow, "darkyellow");
+            chmap.Add(ConsoleColor.Gray,             "gray");
+            chmap.Add(ConsoleColor.Green,            "green");
+
+            chmap.Add(ConsoleColor.Magenta, "magenta");
+            chmap.Add(ConsoleColor.Red, "red");
+            chmap.Add(ConsoleColor.White, "white");
+            chmap.Add(ConsoleColor.Yellow, "yellow");
         }
-
-  
-
-        public static void WriteLine(string text, ConsoleColor bg = ConsoleColor.Yellow, ConsoleColor fg=ConsoleColor.Black)
-        {
-            //WriteOnConsole
-            Console.BackgroundColor = bg;
-            Console.ForegroundColor = fg;
-            Console.WriteLine(text);
-            Console.ResetColor();
-
-            //Write In HTML
-            HtmlWriter htw = new HtmlWriter();
-            htw.GetHtmlString(bg, fg, text);
-            foreach (string s in slist)
-            {
-                sglobal.logp.WriteLine(s);
-            }
-        }
-
-        public static void WriteMat(string[] rh, string[] ch, string[,] Mat, int order, FgBg[,] MatColors,
-                                    int top=0, int left=0)
-        {
-            //WriteOnConsole
-            //Write In HTML
-            HtmlWriter htw = new HtmlWriter();
-            for (int i = top; i < top + order; i++)
-            {
-                for (int j = left ; j < left + order; j++)
-                {
-                    Console.BackgroundColor = MatColors[i, j].Bg;
-                    Console.ForegroundColor = MatColors[i, j].Fg;
-                    Console.WriteLine(Mat[i,j]);
-                    Console.ResetColor();                 
-                }
-            }
-            
-            htw.GetHtmlforMat(rh,ch, Mat, order, MatColors, top, left);
-           
-        }
-
-        public static void WriteIntoFile(bool close)
-        {
-            slist.Add("</style>");
-            slist.Add("</body >");
-            slist.Add("</html>");
-
-            int index = 0;
-            int hindex = 0;
-            foreach (string s in slist)
-            {
-                if (s.Contains("body"))
-                {
-                    hindex++;
-                }
-                index++;
-
-                logp.WriteLine(s);
-            }
-
-            if (close)
-            {
-                logp.Close();
-            }
-
-        }
-    }
+     }
 
     class SharedCanvas
     {
@@ -236,22 +276,60 @@ namespace uassociit
 
         public string[,] Canvas;
         public FgBg[,] CanvasColors;
+        public FgBg[,] DefaultColors;
         public int SkyOrder;
+        public string[] CanvasIndices;
         public List<Cluster> Clusters;
         public double PHI = 0.0;
+        public string state = String.Empty;
 
         public SharedCanvas(Force side, int order, string[,] b)
         {
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD"   + " METHOD: SharedCanvas ";
+            if (sglobal.logger.entry_exit)
+            {
+                //sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                //sglobal.logger.WriteLine("input0 " + "this.phi " + phi);
+            }
+
             Alliance = side;
             sglobal.Sky = b;
+
             Canvas = new string[order, order];
+            CanvasIndices = new string[order];
+            for (int i = 0; i < order; i++)
+            {
+                CanvasIndices[i] = i.ToString();
+            }
+
             CanvasColors = new FgBg[order, order];
+            DefaultColors = new FgBg[order, order];
+
+            for (int i = 0; i < order; i++)
+            { 
+                for (int j = 0; j < order; j++)
+                {
+                    DefaultColors[i, j] = new FgBg(ConsoleColor.Black, ConsoleColor.White);
+                }
+            }
+
             Clusters = new List<Cluster>();
             SkyOrder = order;
+            sglobal.SkyRow = order;
+            sglobal.SkyCol = order;
         }
 
         public void initCanvas(string[,] initial_canvas)
         {
+
+            //state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: initCanvas ";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                //sglobal.logger.WriteLine("input0 " + "this.phi " + phi);
+            }
+
+
             CanvasColors = new FgBg[SkyOrder, SkyOrder];
             for (int i = 0; i < SkyOrder; i++)
             {
@@ -274,25 +352,33 @@ namespace uassociit
                         colbg = (i * SkyOrder + j + 1) % 13;
                         colfg = (colbg < 10 ? 0 : 14);
                         //Cluster c = new Cluster(initial_canvas[i,j], 
-                        //                        (ConsoleColor)colbg, (ConsoleColor)colfg);
+                        //(ConsoleColor)colbg, (ConsoleColor)colfg);
                         Cluster c = new Cluster(i, j, i, j, initial_canvas[i, j]);
-                        Clusters.Add(c);
-
-                        //if (globals.info)
-                        {
-                            //sglobal.WriteLine("INFO: " + c);
-                        }
+                        Clusters.Add(c);         
                     }
                 }
             }
-
         }
 
 
 
         public void Clear()
         {
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: Clear ";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                //sglobal.logger.WriteLine("input0 " + "this.phi " + phi);
+            }
+
             Clear(0, SkyOrder - 1, 0, SkyOrder - 1);
+
+            state = "@Exit: Clear ";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                //sglobal.logger.WriteLine("input0 " + "this.phi " + phi);
+            }
         }
 
         public void Clear(Cluster c)
@@ -302,6 +388,14 @@ namespace uassociit
 
         public void Clear(int top, int left, int bottom, int right)
         {
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: Clear ";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                //sglobal.logger.WriteLine("input0 " + "this.phi " + phi);
+            }
+
+
             for (int i = top; i <= bottom; i++)
             {
                 for (int j = left; j <= right; j++)
@@ -311,76 +405,129 @@ namespace uassociit
                 }
             }
 
-            sglobal.WriteMat(sglobal.single_star, sglobal.single_star, Canvas, 
-                             (bottom - top + 1),CanvasColors, top, left);
+            state = "@Exit: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: Clear ";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                //sglobal.logger.WriteLine("input0 " + "this.phi " + phi);
+            }
+
+            sglobal.logger.WriteMat("Clearing Canvas...",sglobal.single_star, sglobal.single_star, 
+                                    Canvas,  this.SkyOrder, this.SkyOrder,  CanvasColors, top, left);
 
             Console.WriteLine();
         }
 
 
-        public void Compose()
+        public void Compose(List<Cluster>clusters_to_compose, bool print_cluster)
         {
-            foreach (Cluster c in Clusters)
+            
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: Compose ";
+            if (sglobal.logger.entry_exit)
             {
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                //sglobal.logger.WriteLine("input0 " + "this.phi " + phi);
+            }
+
+            foreach (Cluster c in clusters_to_compose)
+            {
+                
                 for (int i = c.top; i <= c.bottom; i++)
                 {
                     for (int j = c.left; j <= c.right; j++)
                     {
-                        
-                        sglobal.WriteLine("DEBUG: " + i + " " + j);                      
+
+                        //sglobal.logger.WriteLine("DEBUG: " + i + " " + j);
 
                         Canvas[i, j] = sglobal.Sky[i, j];
                         CanvasColors[i, j] = new FgBg(c.fc, c.bc);
                     }
                 }
 
-                sglobal.WriteMat(sglobal.single_star, sglobal.single_star, Canvas, (c.bottom - c.top + 1), CanvasColors, c.top, c.left);
+                if (print_cluster)
+                {
 
+                    sglobal.logger.WriteLine("Cluster id = " + c + " ", ConsoleColor.White, ConsoleColor.Black);
+                    sglobal.logger.WriteMat("Composed Canvas", sglobal.single_star, sglobal.single_star,
+                                            Canvas, this.SkyOrder, this.SkyOrder, CanvasColors, c.top, c.left, c.bottom, c.right);
+                }
+            }
+            state = "@Exit: Compose ";
+
+            if (sglobal.logger.entry_exit)
+            {
+
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Black);
+                //sglobal.logger.WriteMat("Composed Canvas", sglobal.single_star, sglobal.single_star,
+                //                        Canvas, this.SkyOrder, this.SkyOrder, CanvasColors, top, left, bottom, c.right);
             }
         }
 
         public void PaintWithHeader(string Token, TestCase tc, int tick_count, string title)
         {
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: PaintWithHeader ";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                sglobal.logger.WriteLine("input0 " + "param tick_count "   + tick_count);
+                sglobal.logger.WriteLine("input0 " + "param title " + "\"" + title + "\"");
+            }
+            
             //Print Next
-            Compose();
+            Compose(Clusters, true);
 
             Console.ForegroundColor = ConsoleColor.Black;
             Console.BackgroundColor = ConsoleColor.Cyan;
 
-            title = "TC:PaintWithHeader" + tc.id.ToString() + "  " + tc.desc +
-                          " Input Sky: after next " + tick_count +
-                          " Num of Clusters       " + Clusters.Count;
 
-            sglobal.WriteLine(title);
+            sglobal.logger.WriteMat( "Painted Canvas...", sglobal.single_star, sglobal.single_star,
+                                     Canvas, SkyOrder, SkyOrder, CanvasColors);
 
-            Paint();
-        }
 
-        public void Paint()
-        {
-            //for (int i = 0; i < SkyOrder; i++)
-            //{
-            //    for (int j = 0; j < SkyOrder; j++)
-            //    {
-            //        Console.ForegroundColor = CanvasColors[i, j].Fg;
-            //        Console.BackgroundColor = CanvasColors[i, j].Bg;
-            //        Console.Write(Canvas[i, j]);
-            //    }
-            //    globals.WriteLine("");
-            //}
+            state = "@Exit: PaintWithHeader:  "        ;             
+            state +=" Clusters.Count " + Clusters.Count;
 
-            //List<string> sl = htwriter.GetHtmlString(ConsoleColor.Yellow, ConsoleColor.Red, "hello");
-
-            //StreamWriter outp = new StreamWriter("out.htm");
-
-                        
-            string[] col_hdg = { "a0", "a1" };
-            string[] row_hdg = { "r0", "r1" };          
-            sglobal.WriteMat(sglobal.single_star, sglobal.single_star, Canvas, SkyOrder, CanvasColors);
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state);
+            }
         }
 
         public string kernel(Cluster c)
         {
+            state  = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: kernel ";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                sglobal.logger.WriteLine("input0 " + "parameter Cluster c " + c);
+
+                string[,] kernelCanvas = Canvas;
+                FgBg[,] kernelColors = new FgBg[SkyOrder, SkyOrder];
+
+                for (int i1=0; i1 < SkyOrder; i1++)
+                {
+                    for (int j1=0; j1 < SkyOrder; j1++)
+                    {
+                        kernelColors[i1, j1]  = DefaultColors[i1, j1];
+                    }
+                }
+                
+                for (int row = c.top; row <= c.bottom; row++)
+                {
+                    for (int col = c.left; col <= c.right; col++)
+                    {
+                        kernelCanvas[row, col] = c.pivot;
+                        kernelColors[row, col] = new FgBg(c.fc, c.bc);
+                        //kernelColors[c.top + row, c.left + col] = new FgBg(c.fc, c.bc);
+                    }
+                }
+
+                sglobal.logger.WriteMat("c-mat ", CanvasIndices, CanvasIndices, Canvas,
+                                        SkyOrder, SkyOrder, 
+                                        kernelColors, c.top, c.left, c.bottom, c.right);                
+                
+            }
+
             Dictionary<string, int> phi_hist = new Dictionary<string, int>();
             int i, j;
             for (i = c.top; i <= c.bottom; i++)
@@ -399,17 +546,37 @@ namespace uassociit
             }
 
             int maxval = phi_hist.Values.Max();
-            var rslt = phi_hist.Where(x => x.Value == maxval);
+            var rslt = phi_hist.Where(x => x.Value == maxval);           
+
+            
+
+            state = "@Exit kernel " + rslt.ElementAt(0).Key;
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state);
+            }
+
             return rslt.ElementAt(0).Key;
         }
 
-        public void next()
+        public void next(int tick_count)
         {
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: next ";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine("input member Clusters.Count: " + Clusters.Count);
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+            }
+
+            sglobal.logger.WriteMat("Sky Just Before Kernel Churning...", sglobal.single_star, sglobal.single_star, sglobal.Sky,
+                                    SkyOrder, SkyOrder, DefaultColors);
+
             Cluster newCluster = new Cluster();
 
             foreach (Cluster c in Clusters)
             {
                 //compute next value of s based on surroundings
+                Debug.Assert(c.top <= c.bottom && c.left <= c.right);
                 string s = kernel(c);
                 int midrow, midcol;
                 midrow = (c.bottom - c.top) / 2;
@@ -438,21 +605,37 @@ namespace uassociit
                     sglobal.Sky[midrow + 1, midcol] = s;
                     sglobal.Sky[midrow + 1, midcol + 1] = s;
                 }
-            }
+            }                                       
 
             foreach (Cluster c in Clusters)
             {
                 c.ComputeSmallPhi();
+                
             }
 
             Cluster System = new Cluster();
             System.SplitAndCombine(ref Clusters);
             System.ComputeSmallPhi();
             PHI = System.phi;
+
+            state =  "@Exit: SharedCanvas.next" +  " tick_count " + tick_count;
+            state += " Clusters.Count " + Clusters.Count;
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state);
+            }
+
+
+            //            sglobal.logger.WriteMat("Sky In Next Step...", sglobal.single_star, sglobal.single_star, sglobal.Sky,
+            //                                    SkyOrder, SkyOrder, );
+            //sglobal.logger.WriteLine("@Exit SharedCanvas.next Cluster Count: " + Clusters.Count);
         }
+
+        
     }
 
-    //=============================================
+    //========================================================================================================================
+    //========================================================================================================================
     class Cluster
     {
         public static int? sid;
@@ -465,7 +648,8 @@ namespace uassociit
         public string pivot;
         public int px, py, pvel;
         public int top, left, right, bottom;
-        public string[,] mysky;
+        public string state;
+        public bool deleted = false;
 
         //Cluster is mechanism of IIT 3.0
         //Cluster is cell which experinces toppling or avalanche of SOC
@@ -474,9 +658,9 @@ namespace uassociit
 
         public override string ToString()
         {
-            string s = " id " + id + " pivot " + pivot + " phi " + phi +
-                       " top " + top + " left " + left + " bottom " + bottom + " right " + right + "px, py, pvel " +
-                       " background " + bc.ToString() + " foreground " + fc.ToString();
+            string s = this.GetType().Name + " OBJECT id " + id + " pivot " + pivot  + " phi "   + phi +
+                       " [ top " + top  + " left "  + left  + " bottom "      + bottom + " right  " + right + " ] px, py, pvel " +
+                       " background " + bc.ToString()     + " foreground "  + fc.ToString();
 
             return s;
         }
@@ -486,6 +670,14 @@ namespace uassociit
 
         public Cluster()
         {
+            //state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: Cluster Constructor ";
+            //if (sglobal.logger.entry_exit)
+            //{
+            //    sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+            //    //sglobal.logger.WriteLine("input0 " + "parameter Cluster c " + c);
+
+            //}
+
             if (sid == null)
             {
                 sid = 0;
@@ -512,11 +704,14 @@ namespace uassociit
             phi = 0.0;
 
             top = left = right = bottom = 0;
+            Debug.Assert(top <= bottom && left <= right);
         }
 
         public Cluster(string pivot, ConsoleColor cfg = ConsoleColor.Black, ConsoleColor cbg = ConsoleColor.Black) :
                this()
         {
+
+            
             if (cfg != ConsoleColor.Black && cbg != ConsoleColor.White)
             {
                 fc = cfg;
@@ -530,6 +725,15 @@ namespace uassociit
                        ConsoleColor cfg = ConsoleColor.Black, ConsoleColor cbg = ConsoleColor.Black) :
                this()
         {
+            //state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: Cluster Constructor ";
+            //if (sglobal.logger.entry_exit)
+            //{
+            //    sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+            //    //sglobal.logger.WriteLine("input0 " + "parameter Cluster c " + c);
+
+            //}
+
+
             if (cfg != ConsoleColor.Black && cbg != ConsoleColor.White)
             {
                 fc = cfg;
@@ -538,6 +742,49 @@ namespace uassociit
 
             this.pivot = pivot;
             this.top = top; this.left = left; this.bottom = bottom; this.right = right;
+        }
+
+        public void print(string text)
+        {
+            string[] cluster_row_indices  = new string[sglobal.SkyRow];
+            string[] cluster_col_indices = new string[sglobal.SkyCol];
+            
+            FgBg[,]  cluster_colors   = new FgBg[sglobal.SkyRow, sglobal.SkyCol];
+
+
+
+
+            for (int i = 0; i < sglobal.SkyRow; i++)
+            {
+                cluster_row_indices[i] = i.ToString();
+            }
+
+            for (int j = 0; j < sglobal.SkyCol; j++)
+            {
+                cluster_col_indices[j] = j.ToString();
+            }
+
+            for (int i = 0; i < sglobal.SkyRow; i++) 
+            {
+                for (int j = 0; j < sglobal.SkyCol; j++)
+                {
+                    if (i >= top && i <= bottom && j >= left && j <= right)
+                    {
+                        cluster_colors[i, j] = new FgBg(fc, bc);
+                    }
+                    else
+                    {
+                        cluster_colors[i, j] = new FgBg(ConsoleColor.Black, ConsoleColor.White);
+                    }
+                }
+            }              
+            
+
+            sglobal.logger.WriteLine(text);
+            //(bottom - top + 1), (right - left + 1);
+            sglobal.logger.WriteMat("c-mat ", cluster_row_indices, cluster_col_indices, sglobal.Sky,
+                       sglobal.SkyRow, sglobal.SkyCol,
+                       cluster_colors , top, left, bottom, right);
         }
 
         public void ComputeSmallPhi()
@@ -550,6 +797,15 @@ namespace uassociit
             //so phi is ratio of "cells with same direction"/"total number of cells"
 
             //Instead of Nested Nodes, we will take flat bed of nodes
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: ComputeSmallPhi ";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                sglobal.logger.WriteLine("input0 " + "this.phi " + phi) ;               
+            }
+
+     
+
             Dictionary<string, int> phi_hist = new Dictionary<string, int>();
 
             int i, j;
@@ -572,16 +828,22 @@ namespace uassociit
             {
                 //string[] sarr = { "DEBUG: phi_hist pivot: ", "#1", "value: ", "#2" };
 
-                foreach (KeyValuePair<string, int> p in phi_hist)
-                {
-                    sglobal.WriteLine("DEBUG: phi_hist pivot: " + p.Key + "DEBUG: phi_hist count: " + p.Value);
+                //foreach (KeyValuePair<string, int> p in phi_hist)
+                //{
+                //    sglobal.logger.WriteLine("DEBUG: phi_hist pivot: " + p.Key + "DEBUG: phi_hist count: " + p.Value);
 
-                }
+                //}
             }
             //data-homogeneity 
             int maxval = phi_hist.Values.Max();
             int total_cells = (right - left + 1) * (bottom - top + 1);
             phi = (double)maxval / (double)total_cells;
+
+            state = "@Exit ComputeSmallPhi : " + phi;
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state);
+            }
         }
 
         public List<Cluster> SplitMinPhi(ref List<Cluster> parent_cluster)
@@ -593,6 +855,22 @@ namespace uassociit
             //if there are edges check strenth {if both are mixes} and then split
 
             //Split Currrent Cluster into 4-Sub Clusters
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: SplitMinPhi ";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                //sglobal.logger.WriteLine("input0 " + "parameter Cluster c " + c);
+                sglobal.logger.WriteLine("input0 : " + "parameter Parent Cluster List", ConsoleColor.Blue, ConsoleColor.White);
+                foreach (Cluster cc in parent_cluster)
+                {
+                    sglobal.logger.WriteLine(cc.ToString(), ConsoleColor.White, ConsoleColor.Blue);
+                    cc.print("...split min phi...");
+                }
+
+            }
+
+
+
             Cluster c0, c1, c2, c3;
             c0 = new Cluster(); c1 = new Cluster(); c2 = new Cluster(); c3 = new Cluster();
 
@@ -624,11 +902,43 @@ namespace uassociit
             tempc.top = c3.top; tempc.left = c3.left; tempc.bottom = c3.bottom; tempc.right = c3.right;
             parent_cluster.Add(tempc);
 
+            state = "@Exit SplitMinPhi: " + " Output ref Param: Parent Cluster List";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state);
+                foreach (Cluster cc in parent_cluster)
+                {
+                    sglobal.logger.WriteLine(cc.ToString());
+                }
+            }
+
             return parent_cluster;
         }
 
         public bool canBeCombined(Cluster c1, Cluster c2)
         {
+            bool cbcombined = false;
+
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: canBeCombined ";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                
+                sglobal.logger.WriteLine("input0 : " + "Cluster 0: " + c1.ToString());
+                sglobal.logger.WriteLine("input1 : " + "Cluster 1: " + c2.ToString());
+                List<Cluster> toBeClusters = new List<Cluster>();
+                toBeClusters.Add(c1);
+                toBeClusters.Add(c2);
+                SharedCanvas sc = new SharedCanvas(Force.BLUE, sglobal.SkyRow, sglobal.Sky);
+                sc.CanvasColors = sc.DefaultColors;
+                sc.Compose(toBeClusters, false);
+                sglobal.logger.WriteMat("Can be Combined Input Clusters", sglobal.single_star, sglobal.single_star,
+                                        sc.Canvas, sglobal.SkyRow, sglobal.SkyCol, sc.CanvasColors);
+
+                
+            }
+    
+
             Cluster c = new Cluster();
 
             //Adjacency check
@@ -637,15 +947,15 @@ namespace uassociit
                 if (c1.right == c2.left - 1)
                 {
                     //aligned side-by-side c1-left, c2-right
-                    return true;
+                    cbcombined = true;
                 }
                 else if (c1.left == c2.right + 1)
                 {
-                    return true;
+                    cbcombined = true;
                 }
                 else
                 {
-                    return false;
+                    cbcombined = false;
                 }
             }
             else if (c1.left == c2.left || c1.right == c2.right)
@@ -654,20 +964,27 @@ namespace uassociit
                 if (c1.bottom == c2.top - 1)
                 {
                     //c1 on top of c2
-                    return true;
+                    cbcombined = true;
                 }
                 else if (c2.bottom == c1.top - 1)
                 {
                     //c2 on top of c
-                    return true;
+                    cbcombined = true;
                 }
                 else
                 {
-                    return false;
+                    cbcombined = false;
                 }
             }
 
-            return false;
+ 
+            state = "@Exit :canBeCombined " + "cbcombined: " + cbcombined;
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state);               
+            }          
+
+            return cbcombined;
         }
 
         //Containment Check
@@ -677,14 +994,27 @@ namespace uassociit
 
         public List<Cluster> SplitAndCombine(ref List<Cluster> top_level_clusters)
         {
+            bool combined = false;
             List<int> visited = new List<int>();
+
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: SplitAndCombine ";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                sglobal.logger.WriteLine("input0 param top_level_clusters ", ConsoleColor.White, ConsoleColor.Blue);
+                foreach (Cluster cc in top_level_clusters)
+                {
+                    sglobal.logger.WriteLine(cc.ToString());
+                }                
+            }
 
             //except_list.AddRange(near_max_sc);          
 
             for (int iter1 = 0; iter1 < top_level_clusters.Count; iter1++)
             {
+                combined = false;
                 Cluster c1 = top_level_clusters[iter1];
-                visited.Add(c1.id);
+                
                 //check whether c1 is of low fitness or high
                 if (sglobal.wheel.NextDouble() < phi)
                 {
@@ -700,9 +1030,11 @@ namespace uassociit
                     for (int iter2 = 0; iter2 < top_level_clusters.Count; iter2++)
                     {
                         Cluster c2 = top_level_clusters[iter2];
-                        if (c1.id != c2.id && canBeCombined(c1, c2) && Math.Abs(c1.phi - c2.phi) < phi_tolerance)
+                        //Math.Abs(c1.phi - c2.phi) < phi_tolerance
+                        if (!c1.deleted && !c2.deleted && c1.id != c2.id && canBeCombined(c1, c2) && 
+                            c1.phi > c1.phi_tolerance && c2.phi > c2.phi_tolerance)
                         {
-                            visited.Add(c2.id);
+                            //sited.Add(c2.id);
                             //spinning random roulette, for selection
                             //wheel will generate a random number between 0 and 0.1; So if it is less than phi,
                             //it will be combined. Very high phis will not be combined where as intermediate will
@@ -710,12 +1042,45 @@ namespace uassociit
                             top_level_clusters.Add(c);
 
                             c = top_level_clusters.Find(x => x.id == c1.id);
-                            top_level_clusters.Remove(c);
+
+                            for (int i=0; i < top_level_clusters.Count; i++)
+                            {
+                                if (top_level_clusters[i].id == c1.id)
+                                {
+                                    top_level_clusters[i].deleted = true;
+                                }
+
+                                if (top_level_clusters[i].id == c2.id)
+                                {
+                                    top_level_clusters[i].deleted = true;
+                                }
+                            }                          
 
                             c = top_level_clusters.Find(x => x.id == c2.id);
                             top_level_clusters.Remove(c);
-                        }
+                            combined = true;
+                            //c2 loop
+                            break;                           
+                        }                        
                     }
+
+                    top_level_clusters.RemoveAll(x => x.deleted);
+                }
+            }
+
+            state = this.GetType().Name + "OBJECT: id " + id + " METHOD: SplitAndCombine";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state);
+            }
+            state = "@Exit: SplitAndCombine " + "Output ref Param: top_level_list ";
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state);
+                foreach (Cluster cc in top_level_clusters)
+                {
+                    sglobal.logger.WriteLine(cc.ToString());
+                    cc.print(".............cc.id.ToString()............");
                 }
             }
 
@@ -726,6 +1091,20 @@ namespace uassociit
         {
             //...similarly select nearly_max_c
             Cluster c = new Cluster();
+
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: CombineTwoClusters ";
+            if (sglobal.logger.entry_exit)
+            {   
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                sglobal.logger.WriteLine("input0 param : c1 " + c1);
+                sglobal.logger.WriteLine("input0 param : c2 " + c2);
+                sglobal.logger.WriteLine("input0 param : parent_clusters");
+                foreach (Cluster cc in parent_clusters)
+                {
+                    sglobal.logger.WriteLine(cc.ToString());
+                }                
+            }
+           
 
             if (c1.top == c2.top || c1.bottom == c2.bottom)
             {
@@ -756,7 +1135,14 @@ namespace uassociit
                 }
             }
 
-            //[parent_clusters.Add(c);]
+            //logging begins
+            state = "@Exit : CombineTwoClusters Combined Cluster c: " + c;
+            c.print("...combined cluster");
+
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state);
+            }          
             return c;
         }
     }
@@ -784,7 +1170,7 @@ namespace uassociit
     class Program
     {
         static public List<TestCase> TestCases = new List<TestCase>();
-       
+
         static public void InitTestCases()
         {
             int id = 0;
@@ -806,53 +1192,51 @@ namespace uassociit
         {
 
             ConsoleUiManager cuim = new ConsoleUiManager();
+
+            //logger configuration
+            //logger file
+            Console.WriteLine("UAS SWARM Attrition/Reinforcement Recommendion System......");
+            Console.WriteLine("Started...");
             string date = DateTime.Now.ToString().Replace("-", "_");
-            date = date.Replace(" ","_");
+            date = date.Replace(" ", "_");
             string now = DateTime.Now.ToString();
             date = date.Replace(":", "_");
-            sglobal.logp  = new StreamWriter("log_" + date + ".txt");
-            sglobal.info  = true;
-            sglobal.debug = false;
+            //sglobal.logger.Open("log_"+ input.tc.id + date + ".htm", false);
+            //logger on/off types
+            sglobal.logger.entry_exit = true;
 
-            InitTestCases();
-
-
-
-            //Console.WriteLine(s);
-
-
-            Console.WriteLine("Initial...");
-
-            //SharedCanvas skyscope = new SharedCanvas(Force.BLUE, 2, tc.tc);
-
-            //foreach (TestCase tc in TestCases)
-
-            TestCase input_tc = TestCases.ElementAt(1);
+            //***Test Configuration.....
+            int test_case_id = 1;
+            InitTestCases();            
+            TestCase input_tc = TestCases.ElementAt(test_case_id);
+            sglobal.logger.Open("log_" + input_tc.id + "_" + date + ".htm", false);
             SharedCanvas skyscope = new SharedCanvas(Force.BLUE, 2, input_tc.tc);
             skyscope.initCanvas(input_tc.tc);
 
-            
-            int tick_count = 0;
 
-            
-            
+            int tick_count = 0;            
             string title = "TC:" + input_tc.id.ToString() + "  " + input_tc.desc +
                           "Input Sky: in BEGINNING " + tick_count + " Num of Clusters " + skyscope.Clusters.Count;
-
-            sglobal.WriteHead();
-            sglobal.WriteLine(title);
-            sglobal.WriteLine("Input Sky: ");
-
+            
+            sglobal.init_chmap();
+            sglobal.logger.WriteHead();
+            sglobal.logger.WriteLine("UAS SWARM Attrition/Reinforcement Recommendion System......");
+            sglobal.logger.WriteLine("Class Program Method: Main @Entry ", ConsoleColor.White, ConsoleColor.Blue);
+            sglobal.logger.WriteLine(title, ConsoleColor.Red, ConsoleColor.Yellow);
+           
+            
+            //sglobal.logger.WriteLine("Input RED Sky: ", );
+            //sglobal.logger.Save(true);
             //skyscope.initCanvas(globals.Sky);
             //skyscope.Compose();
             //skyscope.Paint();
 
-            
+
             string tick = "y";
 
-            while (tick_count < 1 && tick != "n" && tick != "q")
+            while (tick_count < 2 && tick != "n" && tick != "q")
             {
-                skyscope.next();
+                skyscope.next(tick_count);
                 skyscope.PaintWithHeader("TC:", input_tc, tick_count, " after next ");
 
                 //Move tick to next state
@@ -862,8 +1246,9 @@ namespace uassociit
                 //tick = Console.ReadKey().KeyChar.ToString().ToLower();
             }
 
-            sglobal.WriteIntoFile(true);
-            
+            sglobal.logger.WriteLine("PROGRAM RAN TO COMPLETION");
+            sglobal.logger.Close(true, true);
+
         }
     }
 }
