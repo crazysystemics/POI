@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
 
-//NOTES
+//NOTES:ONE NOTE - SEARCH FOR UAS-SOC-IIT
 //size of partitions (width of partitions no bits flowing into/out-of it in a single tick)
 //#partitions vs size of partitions create a distribution (exhibits power-law)
 //if we want partition beyond a size, it is below height of one partition only
@@ -930,9 +930,17 @@ namespace uassociit
                 toBeClusters.Add(c1);
                 toBeClusters.Add(c2);
                 SharedCanvas sc = new SharedCanvas(Force.BLUE, sglobal.SkyRow, sglobal.Sky);
+                for (int i=0; i < sglobal.SkyRow; i++)
+                {
+                    for (int j=0; j < sglobal.SkyCol; j++)
+                    {
+                        sc.Canvas[i, j] = sglobal.Sky[i, j];
+                        sc.CanvasColors[i, j] = new FgBg(ConsoleColor.White, ConsoleColor.Black);
+                    }
+                }
                 sc.CanvasColors = sc.DefaultColors;
                 sc.Compose(toBeClusters, false);
-                sglobal.logger.WriteMat("Can be Combined Input Clusters", sglobal.single_star, sglobal.single_star,
+                sglobal.logger.WriteMat("Would be Cluster Couple...", sglobal.single_star, sglobal.single_star,
                                         sc.Canvas, sglobal.SkyRow, sglobal.SkyCol, sc.CanvasColors);
 
                 
