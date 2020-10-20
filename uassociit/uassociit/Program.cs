@@ -493,75 +493,91 @@ namespace uassociit
             }
         }
 
-        public string kernel(Cluster c)
+        public void kernel(ref string[,] Mat, int rows, int cols)
         {
+            int i, j;
+
+            //TODO IMPORTANT We can write GetCluster which tells the cluster to which a Mat[i,j] belongs to
+            //Based on that both cluster-members and surrounding neighbors (same and non cluster) can be used to represent values
+            //Cluster members represent functional cohesion whereas grid neibhorhood repesents spatial or temportal cohesion
+
             state  = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: kernel ";
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
-                sglobal.logger.WriteLine("input0 " + "parameter Cluster c " + c);
+                //sglobal.logger.WriteLine("input0 " + "parameter Cluster c " + c);
 
-                string[,] kernelCanvas = Canvas;
-                FgBg[,] kernelColors = new FgBg[SkyOrder, SkyOrder];
+                //string[,] kernelCanvas = sglobal.Sky;
+                //FgBg[,] kernelColors = DefaultColors; // new FgBg[SkyOrder, SkyOrder];
 
-                for (int i1=0; i1 < SkyOrder; i1++)
+                for (i = 0; i < rows; i++)
                 {
-                    for (int j1=0; j1 < SkyOrder; j1++)
+                    for (j = 0; j < cols; j++)
                     {
-                        kernelColors[i1, j1]  = DefaultColors[i1, j1];
+                        Mat[i, j] = Mat[i, j];
                     }
                 }
+
+
+                //for (int i1=0; i1 < SkyOrder; i1++)
+                //{
+                //    for (int j1=0; j1 < SkyOrder; j1++)
+                //    {
+                //        kernelColors[i1, j1]  = DefaultColors[i1, j1];
+                //    }
+                //}
                 
-                for (int row = c.top; row <= c.bottom; row++)
-                {
-                    for (int col = c.left; col <= c.right; col++)
-                    {
-                        kernelCanvas[row, col] = c.pivot;
-                        kernelColors[row, col] = new FgBg(c.fc, c.bc);
-                        //kernelColors[c.top + row, c.left + col] = new FgBg(c.fc, c.bc);
-                    }
-                }
+                //for (int row = c.top; row <= c.bottom; row++)
+                //{
+                //    for (int col = c.left; col <= c.right; col++)
+                //    {
+                //        kernelCanvas[row, col] = Canvas[row,col];// c.pivot;
+                //        //kernelColors[row, col] = kernelColors[row, col];
+                //        //new FgBg(c.fc, c.bc);
+                //        //kernelColors[c.top + row, c.left + col] = new FgBg(c.fc, c.bc);
+                //    }
+                //}
 
-                sglobal.logger.WriteMat("c-mat ", CanvasIndices, CanvasIndices, Canvas,
-                                        SkyOrder, SkyOrder, 
-                                        kernelColors, c.top, c.left, c.bottom, c.right);                
+                sglobal.logger.WriteMat("c-mat kernel", CanvasIndices, CanvasIndices, Mat,
+                                        rows, cols, 
+                                        DefaultColors);                
                 
             }
 
-            Dictionary<string, int> phi_hist = new Dictionary<string, int>();
-            int i, j;
-            for (i = c.top; i <= c.bottom; i++)
-            {
-                for (j = c.left; j <= c.right; j++)
-                {
-                    if (!phi_hist.ContainsKey(sglobal.Sky[i, j]))
-                    {
-                        phi_hist.Add(sglobal.Sky[i, j], 1);
-                    }
-                    else
-                    {
-                        phi_hist[sglobal.Sky[i, j]]++;
-                    }
-                }
-            }
+            //Dictionary<string, int> phi_hist = new Dictionary<string, int>();
+            ////int i, j;
+            //for (i = c.top; i <= c.bottom; i++)
+            //{
+            //    for (j = c.left; j <= c.right; j++)
+            //    {
+            //        if (!phi_hist.ContainsKey(sglobal.Sky[i, j]))
+            //        {
+            //            phi_hist.Add(sglobal.Sky[i, j], 1);
+            //        }
+            //        else
+            //        {
+            //            phi_hist[sglobal.Sky[i, j]]++;
+            //        }
+            //    }
+            //}
 
-            int maxval = phi_hist.Values.Max();
-            var rslt = phi_hist.Where(x => x.Value == maxval);           
+            //int maxval = phi_hist.Values.Max();
+            //var rslt = phi_hist.Where(x => x.Value == maxval);           
 
-            
 
-            state = "@Exit kernel " + rslt.ElementAt(0).Key;
+
+            state = "@Exit kernel ";// + rslt.ElementAt(0).Key;
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state);
             }
 
-            return rslt.ElementAt(0).Key;
+            //return rslt.ElementAt(0).Key;
         }
 
         public void next(int tick_count)
         {
-            state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: next ";
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: next tick_count " + tick_count;
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine("input member Clusters.Count: " + Clusters.Count);
@@ -573,39 +589,46 @@ namespace uassociit
 
             Cluster newCluster = new Cluster();
 
-            foreach (Cluster c in Clusters)
-            {
-                //compute next value of s based on surroundings
-                Debug.Assert(c.top <= c.bottom && c.left <= c.right);
-                string s = kernel(c);
-                int midrow, midcol;
-                midrow = (c.bottom - c.top) / 2;
-                midcol = (c.right - c.left) / 2;
+            //Currently kernel is doing nothing. 
+            //It should be member of Cluster Members and Spatial neighborhood
+            kernel(ref sglobal.Sky, SkyOrder, SkyOrder);
+
+            //foreach (Cluster c in Clusters)
+            //{
+            //    //compute next value of s based on surroundings
+            //    Debug.Assert(c.top <= c.bottom && c.left <= c.right);
+            //    string s = kernel(c);
+            //    int midrow, midcol;
+            //    midrow = (c.bottom - c.top) / 2;
+            //    midcol = (c.right - c.left) / 2;
 
 
-                //distribute nodes on boundary to both clusters
-                if (((c.bottom - c.top + 1) % 2 == 1) && ((c.right - c.left + 1) % 2 == 1))
-                {
-                    sglobal.Sky[midrow, midcol] = s;
-                }
-                else if (((c.bottom - c.top + 1) % 2 == 1) && ((c.right - c.left + 1) % 2) == 0)
-                {
-                    sglobal.Sky[midrow, midcol] = s;
-                    sglobal.Sky[midrow, midcol + 1] = s;
-                }
-                else if (((c.bottom - c.top + 1) % 2 == 0) && ((c.right - c.left + 1) % 2) == 1)
-                {
-                    sglobal.Sky[midrow, midcol] = s;
-                    sglobal.Sky[midrow + 1, midcol] = s;
-                }
-                else
-                {
-                    sglobal.Sky[midrow, midcol] = s;
-                    sglobal.Sky[midrow, midcol + 1] = s;
-                    sglobal.Sky[midrow + 1, midcol] = s;
-                    sglobal.Sky[midrow + 1, midcol + 1] = s;
-                }
-            }                                       
+            //    //distribute nodes on boundary to both clusters
+            //    if (((c.bottom - c.top + 1) % 2 == 1) && ((c.right - c.left + 1) % 2 == 1))
+            //    {
+            //        sglobal.Sky[midrow, midcol] = s;
+            //    }
+            //    else if (((c.bottom - c.top + 1) % 2 == 1) && ((c.right - c.left + 1) % 2) == 0)
+            //    {
+            //        sglobal.Sky[midrow, midcol] = s;
+            //        sglobal.Sky[midrow, midcol + 1] = s;
+            //    }
+            //    else if (((c.bottom - c.top + 1) % 2 == 0) && ((c.right - c.left + 1) % 2) == 1)
+            //    {
+            //        sglobal.Sky[midrow, midcol] = s;
+            //        sglobal.Sky[midrow + 1, midcol] = s;
+            //    }
+            //    else
+            //    {
+            //        sglobal.Sky[midrow, midcol] = s;
+            //        sglobal.Sky[midrow, midcol + 1] = s;
+            //        sglobal.Sky[midrow + 1, midcol] = s;
+            //        sglobal.Sky[midrow + 1, midcol + 1] = s;
+            //    }
+            //}  
+            
+
+
 
             foreach (Cluster c in Clusters)
             {
@@ -1085,6 +1108,7 @@ namespace uassociit
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state);
+                sglobal.logger.WriteLine("top_level_clusters....");
                 foreach (Cluster cc in top_level_clusters)
                 {
                     sglobal.logger.WriteLine(cc.ToString());
@@ -1214,7 +1238,7 @@ namespace uassociit
             sglobal.logger.entry_exit = true;
 
             //***Test Configuration.....
-            int test_case_id = 1;
+            int test_case_id = 0;
             InitTestCases();            
             TestCase input_tc = TestCases.ElementAt(test_case_id);
             sglobal.logger.Open("log_" + input_tc.id + "_" + date + ".htm", false);
