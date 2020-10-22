@@ -230,7 +230,7 @@ namespace uassociit
         public static int tick_count = 0;
         public static string[] single_star = new string[] { "*" };
         public static Log logger = new Log();
-        
+
 
 
         public static bool doublediff(double d1, double d2, double tolerance)
@@ -248,27 +248,27 @@ namespace uassociit
 
         public static void init_chmap()
         {
-            chmap.Add(ConsoleColor.Black,       "black");
-            chmap.Add(ConsoleColor.Blue,         "blue");
-            chmap.Add(ConsoleColor.Cyan,         "cyan");
+            chmap.Add(ConsoleColor.Black, "black");
+            chmap.Add(ConsoleColor.Blue, "blue");
+            chmap.Add(ConsoleColor.Cyan, "cyan");
             chmap.Add(ConsoleColor.DarkBlue, "darkblue");
 
-            chmap.Add(ConsoleColor.DarkCyan,      "darkcyan");
-            chmap.Add(ConsoleColor.DarkGray,      "darkgray");
-            chmap.Add(ConsoleColor.DarkGreen,    "darkgreen");
+            chmap.Add(ConsoleColor.DarkCyan, "darkcyan");
+            chmap.Add(ConsoleColor.DarkGray, "darkgray");
+            chmap.Add(ConsoleColor.DarkGreen, "darkgreen");
             chmap.Add(ConsoleColor.DarkMagenta, "darkmagenta");
 
-            chmap.Add(ConsoleColor.DarkRed,       "darkred");
+            chmap.Add(ConsoleColor.DarkRed, "darkred");
             chmap.Add(ConsoleColor.DarkYellow, "darkyellow");
-            chmap.Add(ConsoleColor.Gray,             "gray");
-            chmap.Add(ConsoleColor.Green,            "green");
+            chmap.Add(ConsoleColor.Gray, "gray");
+            chmap.Add(ConsoleColor.Green, "green");
 
             chmap.Add(ConsoleColor.Magenta, "magenta");
             chmap.Add(ConsoleColor.Red, "red");
             chmap.Add(ConsoleColor.White, "white");
             chmap.Add(ConsoleColor.Yellow, "yellow");
         }
-     }
+    }
 
     class SharedCanvas
     {
@@ -285,7 +285,7 @@ namespace uassociit
 
         public SharedCanvas(Force side, int order, string[,] b)
         {
-            state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD"   + " METHOD: SharedCanvas ";
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: SharedCanvas ";
             if (sglobal.logger.entry_exit)
             {
                 //sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
@@ -306,7 +306,7 @@ namespace uassociit
             DefaultColors = new FgBg[order, order];
 
             for (int i = 0; i < order; i++)
-            { 
+            {
                 for (int j = 0; j < order; j++)
                 {
                     DefaultColors[i, j] = new FgBg(ConsoleColor.Black, ConsoleColor.White);
@@ -354,7 +354,7 @@ namespace uassociit
                         //Cluster c = new Cluster(initial_canvas[i,j], 
                         //(ConsoleColor)colbg, (ConsoleColor)colfg);
                         Cluster c = new Cluster(i, j, i, j, initial_canvas[i, j]);
-                        Clusters.Add(c);         
+                        Clusters.Add(c);
                     }
                 }
             }
@@ -412,16 +412,16 @@ namespace uassociit
                 //sglobal.logger.WriteLine("input0 " + "this.phi " + phi);
             }
 
-            sglobal.logger.WriteMat("Clearing Canvas...",sglobal.single_star, sglobal.single_star, 
-                                    Canvas,  this.SkyOrder, this.SkyOrder,  CanvasColors, top, left);
+            sglobal.logger.WriteMat("Clearing Canvas...", sglobal.single_star, sglobal.single_star,
+                                    Canvas, this.SkyOrder, this.SkyOrder, CanvasColors, top, left);
 
             Console.WriteLine();
         }
 
 
-        public void Compose(List<Cluster>clusters_to_compose, bool print_cluster)
+        public void Compose(List<Cluster> clusters_to_compose, bool print_cluster)
         {
-            
+
             state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: Compose ";
             if (sglobal.logger.entry_exit)
             {
@@ -431,7 +431,7 @@ namespace uassociit
 
             foreach (Cluster c in clusters_to_compose)
             {
-                
+
                 for (int i = c.top; i <= c.bottom; i++)
                 {
                     for (int j = c.left; j <= c.right; j++)
@@ -452,16 +452,59 @@ namespace uassociit
                                             Canvas, this.SkyOrder, this.SkyOrder, CanvasColors, c.top, c.left, c.bottom, c.right);
                 }
             }
-            state = "@Exit: Compose ";
+            state = "@Exit: Compose..printing done in parent function ";
+            sglobal.logger.WriteLine(state);
+
+        }
+
+        //TODO Compose Canvas should be called from inside this function
+        public void Compose(ref string[,]iomat, ref FgBg[,] iomat_colors,
+                            int rows, int cols, List<Cluster> pClusters, bool print_cluster)
+        {
 
             if (sglobal.logger.entry_exit)
             {
 
-                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Black);
+                //sglobal.logger.WriteLine("@Entry Compose, ConsoleColor.White, ConsoleColor.Black);
                 //sglobal.logger.WriteMat("Composed Canvas", sglobal.single_star, sglobal.single_star,
                 //                        Canvas, this.SkyOrder, this.SkyOrder, CanvasColors, top, left, bottom, c.right);
+                state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: Compose ";
+                if (sglobal.logger.entry_exit)
+                {
+                    sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                    //sglobal.logger.WriteLine("input0 " + "this.phi " + phi);
+                }
+
+                //Compose the loop
+                foreach (Cluster c in pClusters)
+                {
+                    for (int i = c.top; i <= c.bottom; i++)
+                    {
+                        for (int j = c.left; j <= c.right; j++)
+                        {
+
+                            //sglobal.logger.WriteLine("DEBUG: " + i + " " + j);
+
+                            //iomat[i, j] = sglobal.Sky[i, j];
+                            iomat_colors[i, j] = new FgBg(c.fc, c.bc);
+                        }
+                    }
+
+                    if (print_cluster)
+                    {
+
+                        sglobal.logger.WriteLine("Cluster id = " + c + " ", ConsoleColor.White, ConsoleColor.Black);
+                        sglobal.logger.WriteMat("Composed Canvas", sglobal.single_star, sglobal.single_star,
+                                                Canvas, this.SkyOrder, this.SkyOrder, CanvasColors, c.top, c.left, c.bottom, c.right);
+                    }
+                }
+
+                state = "@Exit: Compose..printing done in parent function ";
+                sglobal.logger.WriteLine(state);
+
             }
         }
+
 
         public void PaintWithHeader(string Token, TestCase tc, int tick_count, string title)
         {
@@ -469,10 +512,10 @@ namespace uassociit
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
-                sglobal.logger.WriteLine("input0 " + "param tick_count "   + tick_count);
+                sglobal.logger.WriteLine("input0 " + "param tick_count " + tick_count);
                 sglobal.logger.WriteLine("input0 " + "param title " + "\"" + title + "\"");
             }
-            
+
             //Print Next
             Compose(Clusters, true);
 
@@ -480,12 +523,12 @@ namespace uassociit
             Console.BackgroundColor = ConsoleColor.Cyan;
 
 
-            sglobal.logger.WriteMat( "Painted Canvas...", sglobal.single_star, sglobal.single_star,
+            sglobal.logger.WriteMat("Painted Canvas...", sglobal.single_star, sglobal.single_star,
                                      Canvas, SkyOrder, SkyOrder, CanvasColors);
 
 
-            state = "@Exit: PaintWithHeader:  "        ;             
-            state +=" Clusters.Count " + Clusters.Count;
+            state = "@Exit: PaintWithHeader:  ";
+            state += " Clusters.Count " + Clusters.Count;
 
             if (sglobal.logger.entry_exit)
             {
@@ -500,8 +543,9 @@ namespace uassociit
             //TODO IMPORTANT We can write GetCluster which tells the cluster to which a Mat[i,j] belongs to
             //Based on that both cluster-members and surrounding neighbors (same and non cluster) can be used to represent values
             //Cluster members represent functional cohesion whereas grid neibhorhood repesents spatial or temportal cohesion
+            //currently kernet unchanges the matrix. so focus is on clustering.
 
-            state  = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: kernel ";
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: kernel ";
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
@@ -509,39 +553,38 @@ namespace uassociit
 
                 //string[,] kernelCanvas = sglobal.Sky;
                 //FgBg[,] kernelColors = DefaultColors; // new FgBg[SkyOrder, SkyOrder];
+            }
 
-                for (i = 0; i < rows; i++)
-                {
-                    for (j = 0; j < cols; j++)
-                    {
-                        Mat[i, j] = Mat[i, j];
-                    }
-                }
+ 
 
 
-                //for (int i1=0; i1 < SkyOrder; i1++)
-                //{
-                //    for (int j1=0; j1 < SkyOrder; j1++)
-                //    {
-                //        kernelColors[i1, j1]  = DefaultColors[i1, j1];
-                //    }
-                //}
-                
-                //for (int row = c.top; row <= c.bottom; row++)
-                //{
-                //    for (int col = c.left; col <= c.right; col++)
-                //    {
-                //        kernelCanvas[row, col] = Canvas[row,col];// c.pivot;
-                //        //kernelColors[row, col] = kernelColors[row, col];
-                //        //new FgBg(c.fc, c.bc);
-                //        //kernelColors[c.top + row, c.left + col] = new FgBg(c.fc, c.bc);
-                //    }
-                //}
+            //for (int i1=0; i1 < SkyOrder; i1++)
+            //{
+            //    for (int j1=0; j1 < SkyOrder; j1++)
+            //    {
+            //        kernelColors[i1, j1]  = DefaultColors[i1, j1];
+            //    }
+            //}
 
-                sglobal.logger.WriteMat("c-mat kernel", CanvasIndices, CanvasIndices, Mat,
-                                        rows, cols, 
-                                        DefaultColors);                
-                
+            //for (int row = c.top; row <= c.bottom; row++)
+            //{
+            //    for (int col = c.left; col <= c.right; col++)
+            //    {
+            //        kernelCanvas[row, col] = Canvas[row,col];// c.pivot;
+            //        //kernelColors[row, col] = kernelColors[row, col];
+            //        //new FgBg(c.fc, c.bc);
+            //        //kernelColors[c.top + row, c.left + col] = new FgBg(c.fc, c.bc);
+            //    }
+            //}
+            if (sglobal.logger.entry_exit)
+            {
+                //Composing entry sky to which kernel is applied
+                Compose(Clusters, false);
+
+                sglobal.logger.WriteMat("entry c-mat kernel", CanvasIndices, CanvasIndices, Canvas,
+                                        rows, cols,
+                                        CanvasColors);
+
             }
 
             //Dictionary<string, int> phi_hist = new Dictionary<string, int>();
@@ -566,7 +609,7 @@ namespace uassociit
 
 
 
-            state = "@Exit kernel ";// + rslt.ElementAt(0).Key;
+            state = "@Exit kernel...";// + rslt.ElementAt(0).Key;
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state);
@@ -592,6 +635,23 @@ namespace uassociit
             //Currently kernel is doing nothing. 
             //It should be member of Cluster Members and Spatial neighborhood
             kernel(ref sglobal.Sky, SkyOrder, SkyOrder);
+
+            //sglobal.logger.WriteLine("in SharedCanvas.next:After Kernel Operation...");
+            string[,] tempMat    = new string[SkyOrder, SkyOrder];
+            FgBg[,]   tempColors = new FgBg[SkyOrder, SkyOrder];
+
+            for(int i=0; i < SkyOrder; i++)
+            {
+                for (int j=0; j < SkyOrder; j++)
+                {
+                    tempMat[i, j] = sglobal.Sky[i, j];
+                    tempColors[i, j] = DefaultColors[i, j];
+                }
+            }
+
+            Compose(ref tempMat, ref tempColors, SkyOrder, SkyOrder, Clusters, false);
+            sglobal.logger.WriteMat("in SharedCanvas.next:After Kernel Operation...", sglobal.single_star, sglobal.single_star, 
+                                     tempMat, SkyOrder, SkyOrder, tempColors);
 
             //foreach (Cluster c in Clusters)
             //{
@@ -626,14 +686,14 @@ namespace uassociit
             //        sglobal.Sky[midrow + 1, midcol + 1] = s;
             //    }
             //}  
-            
+
 
 
 
             foreach (Cluster c in Clusters)
             {
                 c.ComputeSmallPhi();
-                
+
             }
 
             Cluster System = new Cluster();
@@ -641,7 +701,7 @@ namespace uassociit
             System.ComputeSmallPhi();
             PHI = System.phi;
 
-            state =  "@Exit: SharedCanvas.next" +  " tick_count " + tick_count;
+            state = "@Exit: SharedCanvas.next" + " tick_count " + tick_count;
             state += " Clusters.Count " + Clusters.Count;
             if (sglobal.logger.entry_exit)
             {
@@ -654,7 +714,7 @@ namespace uassociit
             //sglobal.logger.WriteLine("@Exit SharedCanvas.next Cluster Count: " + Clusters.Count);
         }
 
-        
+
     }
 
     //========================================================================================================================
@@ -681,9 +741,9 @@ namespace uassociit
 
         public override string ToString()
         {
-            string s = this.GetType().Name + " OBJECT id " + id + " pivot " + pivot  + " phi "   + phi +
-                       " [ top " + top  + " left "  + left  + " bottom "      + bottom + " right  " + right + " ] px, py, pvel " +
-                       " background " + bc.ToString()     + " foreground "  + fc.ToString();
+            string s = this.GetType().Name + " OBJECT id " + id + " pivot " + pivot + " phi " + phi +
+                       " [ top " + top + " left " + left + " bottom " + bottom + " right  " + right + " ] px, py, pvel " +
+                       " background " + bc.ToString() + " foreground " + fc.ToString();
 
             return s;
         }
@@ -734,7 +794,7 @@ namespace uassociit
                this()
         {
 
-            
+
             if (cfg != ConsoleColor.Black && cbg != ConsoleColor.White)
             {
                 fc = cfg;
@@ -769,10 +829,10 @@ namespace uassociit
 
         public void print(string text)
         {
-            string[] cluster_row_indices  = new string[sglobal.SkyRow];
+            string[] cluster_row_indices = new string[sglobal.SkyRow];
             string[] cluster_col_indices = new string[sglobal.SkyCol];
-            
-            FgBg[,]  cluster_colors   = new FgBg[sglobal.SkyRow, sglobal.SkyCol];
+
+            FgBg[,] cluster_colors = new FgBg[sglobal.SkyRow, sglobal.SkyCol];
 
 
 
@@ -787,7 +847,7 @@ namespace uassociit
                 cluster_col_indices[j] = j.ToString();
             }
 
-            for (int i = 0; i < sglobal.SkyRow; i++) 
+            for (int i = 0; i < sglobal.SkyRow; i++)
             {
                 for (int j = 0; j < sglobal.SkyCol; j++)
                 {
@@ -800,14 +860,14 @@ namespace uassociit
                         cluster_colors[i, j] = new FgBg(ConsoleColor.Black, ConsoleColor.White);
                     }
                 }
-            }              
-            
+            }
+
 
             sglobal.logger.WriteLine(text);
             //(bottom - top + 1), (right - left + 1);
             sglobal.logger.WriteMat("c-mat ", cluster_row_indices, cluster_col_indices, sglobal.Sky,
                        sglobal.SkyRow, sglobal.SkyCol,
-                       cluster_colors , top, left, bottom, right);
+                       cluster_colors, top, left, bottom, right);
         }
 
         public void ComputeSmallPhi()
@@ -824,10 +884,10 @@ namespace uassociit
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
-                sglobal.logger.WriteLine("input0 " + "this.phi " + phi) ;               
+                sglobal.logger.WriteLine("input0 " + "this.phi " + phi);
             }
 
-     
+
 
             Dictionary<string, int> phi_hist = new Dictionary<string, int>();
 
@@ -946,16 +1006,16 @@ namespace uassociit
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
-                
+
                 sglobal.logger.WriteLine("input0 : " + "Cluster 0: " + c1.ToString());
                 sglobal.logger.WriteLine("input1 : " + "Cluster 1: " + c2.ToString());
                 List<Cluster> toBeClusters = new List<Cluster>();
                 toBeClusters.Add(c1);
                 toBeClusters.Add(c2);
                 SharedCanvas sc = new SharedCanvas(Force.BLUE, sglobal.SkyRow, sglobal.Sky);
-                for (int i=0; i < sglobal.SkyRow; i++)
+                for (int i = 0; i < sglobal.SkyRow; i++)
                 {
-                    for (int j=0; j < sglobal.SkyCol; j++)
+                    for (int j = 0; j < sglobal.SkyCol; j++)
                     {
                         sc.Canvas[i, j] = sglobal.Sky[i, j];
                         sc.CanvasColors[i, j] = new FgBg(ConsoleColor.White, ConsoleColor.Black);
@@ -966,9 +1026,9 @@ namespace uassociit
                 sglobal.logger.WriteMat("Would be Cluster Couple...", sglobal.single_star, sglobal.single_star,
                                         sc.Canvas, sglobal.SkyRow, sglobal.SkyCol, sc.CanvasColors);
 
-                
+
             }
-    
+
 
             Cluster c = new Cluster();
 
@@ -1008,12 +1068,12 @@ namespace uassociit
                 }
             }
 
- 
+
             state = "@Exit :canBeCombined " + "cbcombined: " + cbcombined;
             if (sglobal.logger.entry_exit)
             {
-                sglobal.logger.WriteLine(state);               
-            }          
+                sglobal.logger.WriteLine(state);
+            }
 
             return cbcombined;
         }
@@ -1036,7 +1096,7 @@ namespace uassociit
                 foreach (Cluster cc in top_level_clusters)
                 {
                     sglobal.logger.WriteLine(cc.ToString());
-                }                
+                }
             }
 
             //except_list.AddRange(near_max_sc);          
@@ -1045,7 +1105,7 @@ namespace uassociit
             {
                 combined = false;
                 Cluster c1 = top_level_clusters[iter1];
-                
+
                 //check whether c1 is of low fitness or high
                 if (sglobal.wheel.NextDouble() < phi)
                 {
@@ -1062,7 +1122,7 @@ namespace uassociit
                     {
                         Cluster c2 = top_level_clusters[iter2];
                         //Math.Abs(c1.phi - c2.phi) < phi_tolerance
-                        if (!c1.deleted && !c2.deleted && c1.id != c2.id && canBeCombined(c1, c2) && 
+                        if (!c1.deleted && !c2.deleted && c1.id != c2.id && canBeCombined(c1, c2) &&
                             c1.phi > c1.phi_tolerance && c2.phi > c2.phi_tolerance)
                         {
                             //sited.Add(c2.id);
@@ -1074,7 +1134,7 @@ namespace uassociit
 
                             c = top_level_clusters.Find(x => x.id == c1.id);
 
-                            for (int i=0; i < top_level_clusters.Count; i++)
+                            for (int i = 0; i < top_level_clusters.Count; i++)
                             {
                                 if (top_level_clusters[i].id == c1.id)
                                 {
@@ -1085,14 +1145,14 @@ namespace uassociit
                                 {
                                     top_level_clusters[i].deleted = true;
                                 }
-                            }                          
+                            }
 
                             c = top_level_clusters.Find(x => x.id == c2.id);
                             top_level_clusters.Remove(c);
                             combined = true;
                             //c2 loop
-                            break;                           
-                        }                        
+                            break;
+                        }
                     }
 
                     top_level_clusters.RemoveAll(x => x.deleted);
@@ -1126,7 +1186,7 @@ namespace uassociit
 
             state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: CombineTwoClusters ";
             if (sglobal.logger.entry_exit)
-            {   
+            {
                 sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
                 sglobal.logger.WriteLine("input0 param : c1 " + c1);
                 sglobal.logger.WriteLine("input0 param : c2 " + c2);
@@ -1134,9 +1194,9 @@ namespace uassociit
                 foreach (Cluster cc in parent_clusters)
                 {
                     sglobal.logger.WriteLine(cc.ToString());
-                }                
+                }
             }
-           
+
 
             if (c1.top == c2.top || c1.bottom == c2.bottom)
             {
@@ -1174,7 +1234,7 @@ namespace uassociit
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state);
-            }          
+            }
             return c;
         }
     }
@@ -1238,25 +1298,25 @@ namespace uassociit
             sglobal.logger.entry_exit = true;
 
             //***Test Configuration.....
-            int test_case_id = 0;
-            InitTestCases();            
+            int test_case_id = 2;
+            InitTestCases();
             TestCase input_tc = TestCases.ElementAt(test_case_id);
             sglobal.logger.Open("log_" + input_tc.id + "_" + date + ".htm", false);
             SharedCanvas skyscope = new SharedCanvas(Force.BLUE, 2, input_tc.tc);
             skyscope.initCanvas(input_tc.tc);
 
 
-            int tick_count = 0;            
+            int tick_count = 0;
             string title = "TC:" + input_tc.id.ToString() + "  " + input_tc.desc +
                           "Input Sky: in BEGINNING " + tick_count + " Num of Clusters " + skyscope.Clusters.Count;
-            
+
             sglobal.init_chmap();
             sglobal.logger.WriteHead();
             sglobal.logger.WriteLine("UAS SWARM Attrition/Reinforcement Recommendion System......");
             sglobal.logger.WriteLine("Class Program Method: Main @Entry ", ConsoleColor.White, ConsoleColor.Blue);
             sglobal.logger.WriteLine(title, ConsoleColor.Red, ConsoleColor.Yellow);
-           
-            
+
+
             //sglobal.logger.WriteLine("Input RED Sky: ", );
             //sglobal.logger.Save(true);
             //skyscope.initCanvas(globals.Sky);
