@@ -506,14 +506,14 @@ namespace uassociit
         }
 
 
-        public void PaintWithHeader(string Token, TestCase tc, int tick_count, string title)
+        public void PaintWithHeader(TestCase tc, int tick_count)
         {
             state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: PaintWithHeader ";
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
                 sglobal.logger.WriteLine("input0 " + "param tick_count " + tick_count);
-                sglobal.logger.WriteLine("input0 " + "param title " + "\"" + title + "\"");
+                //sglobal.logger.WriteLine("input0 " + "param title " + "\"" + title + "\"");
             }
 
             //Print Next
@@ -618,7 +618,7 @@ namespace uassociit
             //return rslt.ElementAt(0).Key;
         }
 
-        public void next(int tick_count)
+        public void next(TestCase tc, int tick_count)
         {
             state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: next tick_count " + tick_count;
             if (sglobal.logger.entry_exit)
@@ -640,7 +640,9 @@ namespace uassociit
             string[,] tempMat    = new string[SkyOrder, SkyOrder];
             FgBg[,]   tempColors = new FgBg[SkyOrder, SkyOrder];
 
-            for(int i=0; i < SkyOrder; i++)
+            //Kernel
+            sglobal.logger.WriteLine("1.0 Applying Kernel: #Clusters: " + Clusters.Count);
+            for (int i=0; i < SkyOrder; i++)
             {
                 for (int j=0; j < SkyOrder; j++)
                 {
@@ -650,7 +652,8 @@ namespace uassociit
             }
 
             Compose(ref tempMat, ref tempColors, SkyOrder, SkyOrder, Clusters, false);
-            sglobal.logger.WriteMat("in SharedCanvas.next:After Kernel Operation...", sglobal.single_star, sglobal.single_star, 
+            sglobal.logger.WriteMat("in SharedCanvas.next:After Kernel Operation...", 
+                                     sglobal.single_star, sglobal.single_star, 
                                      tempMat, SkyOrder, SkyOrder, tempColors);
 
             //foreach (Cluster c in Clusters)
@@ -688,21 +691,33 @@ namespace uassociit
             //}  
 
 
-
-
+            //Compute Small Phi
+            sglobal.logger.WriteLine("2.0 Computing Small Phi of Clusters. #Clusters: " + Clusters.Count);
             foreach (Cluster c in Clusters)
             {
                 c.ComputeSmallPhi();
 
             }
 
+            //SplitAndCombine
+            sglobal.logger.WriteLine("3.0 Split and Combine.  #Clusters: " + Clusters.Count);
             Cluster System = new Cluster();
             System.SplitAndCombine(ref Clusters);
+
+            sglobal.logger.WriteLine("4.0 Compute System PHI  #Clusters: " + Clusters.Count);
+            System.top    = 0;
+            System.left   = 0;
+            System.bottom = SkyOrder - 1;
+            System.right  = SkyOrder - 1;
             System.ComputeSmallPhi();
             PHI = System.phi;
 
-            state = "@Exit: SharedCanvas.next" + " tick_count " + tick_count;
-            state += " Clusters.Count " + Clusters.Count;
+            sglobal.logger.WriteLine("5.0 PaintWithHeader  after next ");
+            PaintWithHeader(tc, tick_count);
+
+
+            state  =  " @Exit: SharedCanvas.next" + " tick_count " + tick_count;
+            state  += " Clusters.Count " + Clusters.Count;
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state);
@@ -723,16 +738,17 @@ namespace uassociit
     {
         public static int? sid;
         public int id;
-        double phi_tolerance = 0.001;
+        double min_combine_phi =-1.0; //force combining always
+        double max_split_phi   =-1.0; //disable splitting
 
         //public int locn;
         //public int numClusters;
         public ConsoleColor bc, fc;
-        public string pivot;
-        public int px, py, pvel;
-        public int top, left, right, bottom;
-        public string state;
-        public bool deleted = false;
+        public string       pivot;
+        public int          px, py, pvel;
+        public int          top, left, right, bottom;
+        public string       state;
+        public bool         deleted = false;
 
         //Cluster is mechanism of IIT 3.0
         //Cluster is cell which experinces toppling or avalanche of SOC
@@ -883,7 +899,7 @@ namespace uassociit
             state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: ComputeSmallPhi ";
             if (sglobal.logger.entry_exit)
             {
-                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue); 
                 sglobal.logger.WriteLine("input0 " + "this.phi " + phi);
             }
 
@@ -1107,7 +1123,7 @@ namespace uassociit
                 Cluster c1 = top_level_clusters[iter1];
 
                 //check whether c1 is of low fitness or high
-                if (sglobal.wheel.NextDouble() < phi)
+                if (phi < max_split_phi)
                 {
                     //c1 fitness is low. Split it
                     SplitMinPhi(ref top_level_clusters);
@@ -1123,7 +1139,7 @@ namespace uassociit
                         Cluster c2 = top_level_clusters[iter2];
                         //Math.Abs(c1.phi - c2.phi) < phi_tolerance
                         if (!c1.deleted && !c2.deleted && c1.id != c2.id && canBeCombined(c1, c2) &&
-                            c1.phi > c1.phi_tolerance && c2.phi > c2.phi_tolerance)
+                            c1.phi > c1.min_combine_phi && c2.phi > c2.min_combine_phi)
                         {
                             //sited.Add(c2.id);
                             //spinning random roulette, for selection
@@ -1326,21 +1342,18 @@ namespace uassociit
 
             string tick = "y";
 
-            while (tick_count < 2 && tick != "n" && tick != "q")
+            while (tick_count < 3 && tick != "n" && tick != "q")
             {
-                skyscope.next(tick_count);
-                skyscope.PaintWithHeader("TC:", input_tc, tick_count, " after next ");
+                skyscope.next(input_tc, tick_count);                
 
                 //Move tick to next state
                 tick_count++;
                 sglobal.tick_count = tick_count;
-
                 //tick = Console.ReadKey().KeyChar.ToString().ToLower();
             }
 
             sglobal.logger.WriteLine("PROGRAM RAN TO COMPLETION");
             sglobal.logger.Close(true, true);
-
         }
     }
 }
