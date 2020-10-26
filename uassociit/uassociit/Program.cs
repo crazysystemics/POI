@@ -1197,146 +1197,82 @@ namespace uassociit
             return cbcombined;
         }
 
-        //Containment Check
-        //TODO:Check whether Combine can be made separate routine...
-        //TODO:Check whether to preserve splitcount == combinecount
-        //TODO:  => i.e.. preserve population count;
-
         public List<Cluster> SplitAndCombine(ref List<Cluster> top_level_clusters)
         {
             bool combined = false;
             List<int> visited = new List<int>();
-            int iter1 = 0;
 
             state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: SplitAndCombine ";
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
                 sglobal.logger.WriteLine("input0 param top_level_clusters ", ConsoleColor.White, ConsoleColor.Blue);
-
                 foreach (Cluster cc in top_level_clusters)
                 {
                     sglobal.logger.WriteLine(cc.ToString());
                 }
             }
 
-            for (iter1 = 0; iter1 < top_level_clusters.Count; iter1++)
-            {
-                top_level_clusters[iter1].visited = false;
-            }
+            //except_list.AddRange(near_max_sc);          
 
-            int iter_start = -2;
-            int inter_end = top_level_clusters.Count;
-           // Dictionary<int, int> pairs = new Dictionary<int, int>();
-            
-            
-            while (!combined)
+            for (int iter1 = 0; iter1 < top_level_clusters.Count; iter1++)
             {
-                bool first_iter = true;
-                iter_start++;
-                iter1 = iter_start;
-                
-                for (int i=0; i < top_level_clusters.Count; i++)
+                combined = false;
+                Cluster c1 = top_level_clusters[iter1];
+
+                //check whether c1 is of low fitness or high
+                if (phi < max_split_phi)
                 {
-                    top_level_clusters[i].selected = false;
+                    //c1 fitness is low. Split it
+                    SplitMinPhi(ref top_level_clusters);
                 }
+                else
+                {
+                    //c1 fitness is high. Combine it with another high phi top-level cluster                    {
+                    //check whether it is already visited
+                    //var rslt = visited.Find(x => x == c2.id);
 
-                
-
-
-                ////while (true)
-                //{
-                //    //Console.WriteLine("In Loop...");
-                //    var rslt = top_level_clusters.FindAll(x => x.selected);
-                //    if (!first_iter && ( rslt.Count == 0))
-                //    {
-                //        break;
-                //    }
-                //    first_iter = false;
-                    
-
-                //    combined = false;
-                //    iter1 = (iter1 + 1) % top_level_clusters.Count;
-                //    top_level_clusters[iter1].selected = true;
-                    
-                    
-                    Cluster c1 = top_level_clusters[iter1];
-
-                    //overlap check. check whether two clusters overlap
-                    //for (int i=0; i < top_level_clusters.Count; i++)
-                    //{
-                    //    if ((c1.id != top_level_clusters[i].id) &&
-                    //        (top_level_clu.contains(c2.top, c2.left) || c1.contains(c2.bottom, c2.right)))
-                    //    {
-                    //        //yes overlap is there, cannot be combined
-                    //        return false;
-                    //    }
-
-                    //}
-
-
-
-                    //check whether c1 is of low fitness or high
-                    if (c1.phi < max_split_phi)
+                    for (int iter2 = 0; iter2 < top_level_clusters.Count; iter2++)
                     {
-                        //c1 fitness is low. Split it
-                        //Split cluster will be deleted and newly added will be marked visited
-                        //inside the SplitMinPhi
-                        if (!c1.deleted && !c1.visited)
+                        Cluster c2 = top_level_clusters[iter2];
+                        //Math.Abs(c1.phi - c2.phi) < phi_tolerance
+                        if (!c1.deleted && !c2.deleted && c1.id != c2.id && canBeCombined(c1, c2) &&
+                            c1.phi > c1.min_combine_phi && c2.phi > c2.min_combine_phi)
                         {
-                            SplitMinPhi(ref top_level_clusters);
-                        }
-                    }
-                    else
-                    {
-                        //c1 fitness is high. Combine it with another high phi top-level cluster                    {
-                        //check whether it is already visited
-                        //var rslt = visited.Find(x => x == c2.id);
+                            //sited.Add(c2.id);
+                            //spinning random roulette, for selection
+                            //wheel will generate a random number between 0 and 0.1; So if it is less than phi,
+                            //it will be combined. Very high phis will not be combined where as intermediate will
+                            Cluster c = CombineTwoClusters(c1, c2, top_level_clusters);
+                            top_level_clusters.Add(c);
 
-                        for (int iter2 = 0; iter2 < top_level_clusters.Count; iter2++)
-                        {
-                            Cluster c2 = top_level_clusters[iter2];
-                            //Math.Abs(c1.phi - c2.phi) < phi_tolerance
-                            if (!c1.deleted && !c2.deleted && !c1.visited && !c1.visited &&
-                                c1.id != c2.id && canBeCombined(c1, c2) &&
-                                c1.phi > c1.min_combine_phi && c2.phi > c2.min_combine_phi)
+                            c = top_level_clusters.Find(x => x.id == c1.id);
+
+                            for (int i = 0; i < top_level_clusters.Count; i++)
                             {
-                                //sited.Add(c2.id);
-                                //spinning random roulette, for selection
-                                //wheel will generate a random number between 0 and 0.1; So if it is less than phi,
-                                //it will be combined. Very high phis will not be combined where as intermediate will
-                                Cluster c = CombineTwoClusters(c1, c2, top_level_clusters);
-                                top_level_clusters.Add(c);
-
-                                c = top_level_clusters.Find(x => x.id == c1.id);
-
-                                for (int i = 0; i < top_level_clusters.Count; i++)
+                                if (top_level_clusters[i].id == c1.id)
                                 {
-                                    if (top_level_clusters[i].id == c1.id)
-                                    {
-                                        top_level_clusters[i].deleted = true;
-                                    }
-
-                                    if (top_level_clusters[i].id == c2.id)
-                                    {
-                                        top_level_clusters[i].deleted = true;
-                                    }
+                                    top_level_clusters[i].deleted = true;
                                 }
 
-                                c = top_level_clusters.Find(x => x.id == c2.id);
-                                top_level_clusters.Remove(c);
-                                combined = true;
-                                //c2 loop
-                                break;
+                                if (top_level_clusters[i].id == c2.id)
+                                {
+                                    top_level_clusters[i].deleted = true;
+                                }
                             }
-                        }
-                        //top_level_clusters.RemoveAll(x => x.deleted);
 
- 
-                        
+                            c = top_level_clusters.Find(x => x.id == c2.id);
+                            top_level_clusters.Remove(c);
+                            combined = true;
+                            //c2 loop
+                            break;
+                        }
                     }
+
+                    top_level_clusters.RemoveAll(x => x.deleted);
                 }
             }
+
             state = this.GetType().Name + "OBJECT: id " + id + " METHOD: SplitAndCombine";
             if (sglobal.logger.entry_exit)
             {
@@ -1356,6 +1292,167 @@ namespace uassociit
 
             return top_level_clusters;
         }
+
+
+        //Containment Check
+        //TODO:Check whether Combine can be made separate routine...
+        //TODO:Check whether to preserve splitcount == combinecount
+        //TODO:  => i.e.. preserve population count;
+
+        //public List<Cluster> SplitAndCombine(ref List<Cluster> top_level_clusters)
+        //{
+        //    bool combined = false;
+        //    List<int> visited = new List<int>();
+        //    int iter1 = 0;
+
+        //    state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: SplitAndCombine ";
+        //    if (sglobal.logger.entry_exit)
+        //    {
+        //        sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+        //        sglobal.logger.WriteLine("input0 param top_level_clusters ", ConsoleColor.White, ConsoleColor.Blue);
+
+        //        foreach (Cluster cc in top_level_clusters)
+        //        {
+        //            sglobal.logger.WriteLine(cc.ToString());
+        //        }
+        //    }
+
+        //    for (iter1 = 0; iter1 < top_level_clusters.Count; iter1++)
+        //    {
+        //        top_level_clusters[iter1].visited = false;
+        //    }
+
+        //    int iter_start = -2;
+        //    int inter_end = top_level_clusters.Count;
+        //   // Dictionary<int, int> pairs = new Dictionary<int, int>();
+
+
+        //    while (!combined)
+        //    {
+        //        bool first_iter = true;
+        //        iter_start++;
+        //        iter1 = iter_start;
+
+        //        for (int i=0; i < top_level_clusters.Count; i++)
+        //        {
+        //            top_level_clusters[i].selected = false;
+        //        }
+
+
+
+
+        //        ////while (true)
+        //        //{
+        //        //    //Console.WriteLine("In Loop...");
+        //        //    var rslt = top_level_clusters.FindAll(x => x.selected);
+        //        //    if (!first_iter && ( rslt.Count == 0))
+        //        //    {
+        //        //        break;
+        //        //    }
+        //        //    first_iter = false;
+
+
+        //        //    combined = false;
+        //        //    iter1 = (iter1 + 1) % top_level_clusters.Count;
+        //        //    top_level_clusters[iter1].selected = true;
+
+
+        //            Cluster c1 = top_level_clusters[iter1];
+
+        //            //overlap check. check whether two clusters overlap
+        //            //for (int i=0; i < top_level_clusters.Count; i++)
+        //            //{
+        //            //    if ((c1.id != top_level_clusters[i].id) &&
+        //            //        (top_level_clu.contains(c2.top, c2.left) || c1.contains(c2.bottom, c2.right)))
+        //            //    {
+        //            //        //yes overlap is there, cannot be combined
+        //            //        return false;
+        //            //    }
+
+        //            //}
+
+
+
+        //            //check whether c1 is of low fitness or high
+        //            if (c1.phi < max_split_phi)
+        //            {
+        //                //c1 fitness is low. Split it
+        //                //Split cluster will be deleted and newly added will be marked visited
+        //                //inside the SplitMinPhi
+        //                if (!c1.deleted && !c1.visited)
+        //                {
+        //                    SplitMinPhi(ref top_level_clusters);
+        //                }
+        //            }
+        //            else
+        //            {
+        //                //c1 fitness is high. Combine it with another high phi top-level cluster                    {
+        //                //check whether it is already visited
+        //                //var rslt = visited.Find(x => x == c2.id);
+
+        //                for (int iter2 = 0; iter2 < top_level_clusters.Count; iter2++)
+        //                {
+        //                    Cluster c2 = top_level_clusters[iter2];
+        //                    //Math.Abs(c1.phi - c2.phi) < phi_tolerance
+        //                    if (!c1.deleted && !c2.deleted && !c1.visited && !c1.visited &&
+        //                        c1.id != c2.id && canBeCombined(c1, c2) &&
+        //                        c1.phi > c1.min_combine_phi && c2.phi > c2.min_combine_phi)
+        //                    {
+        //                        //sited.Add(c2.id);
+        //                        //spinning random roulette, for selection
+        //                        //wheel will generate a random number between 0 and 0.1; So if it is less than phi,
+        //                        //it will be combined. Very high phis will not be combined where as intermediate will
+        //                        Cluster c = CombineTwoClusters(c1, c2, top_level_clusters);
+        //                        top_level_clusters.Add(c);
+
+        //                        c = top_level_clusters.Find(x => x.id == c1.id);
+
+        //                        for (int i = 0; i < top_level_clusters.Count; i++)
+        //                        {
+        //                            if (top_level_clusters[i].id == c1.id)
+        //                            {
+        //                                top_level_clusters[i].deleted = true;
+        //                            }
+
+        //                            if (top_level_clusters[i].id == c2.id)
+        //                            {
+        //                                top_level_clusters[i].deleted = true;
+        //                            }
+        //                        }
+
+        //                        c = top_level_clusters.Find(x => x.id == c2.id);
+        //                        top_level_clusters.Remove(c);
+        //                        combined = true;
+        //                        //c2 loop
+        //                        break;
+        //                    }
+        //                }
+        //                //top_level_clusters.RemoveAll(x => x.deleted);
+
+
+
+        //            }
+        //        }
+        //    }
+        //    state = this.GetType().Name + "OBJECT: id " + id + " METHOD: SplitAndCombine";
+        //    if (sglobal.logger.entry_exit)
+        //    {
+        //        sglobal.logger.WriteLine(state);
+        //    }
+        //    state = "@Exit: SplitAndCombine " + "Output ref Param: top_level_list ";
+        //    if (sglobal.logger.entry_exit)
+        //    {
+        //        sglobal.logger.WriteLine(state);
+        //        sglobal.logger.WriteLine("top_level_clusters....");
+        //        foreach (Cluster cc in top_level_clusters)
+        //        {
+        //            sglobal.logger.WriteLine(cc.ToString());
+        //            cc.print(".............cc.id.ToString()............");
+        //        }
+        //    }
+
+        //    return top_level_clusters;
+        //}
 
         public Cluster CombineTwoClusters(Cluster c1, Cluster c2, List<Cluster> parent_clusters)
         {
