@@ -66,6 +66,7 @@ namespace uassociit
             plog.slist.Add("#darkgray");plog.slist.Add("{background-color:darkgray; color:white;}");
             plog.slist.Add("#darkgreen");plog.slist.Add("{background-color:darkgreen; color:white;}");
             plog.slist.Add("#darkmagenta");plog.slist.Add("{background-color:darkmagenta;color:white;}");
+            
 
             plog.slist.Add("#darkred");   plog.slist.Add("{background-color:darkred;color:white;}");
             plog.slist.Add("#darkyellow");plog.slist.Add("{background-color:darkyellow; color:white;}");
