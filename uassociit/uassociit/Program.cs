@@ -95,12 +95,13 @@ namespace uassociit
 
     class Log
     {
-        public int level;
+        public int level=0;
+        public int call_level = 0;
         public StreamWriter logp;
         public string log_file_name;
         public List<string> slist = new List<string>();
         public bool entry_exit = false;
-        public int call_level = 0;
+        
 
 
         public Log()
@@ -126,6 +127,10 @@ namespace uassociit
 
         public void WriteLine(string text, ConsoleColor fg = ConsoleColor.Black, ConsoleColor bg = ConsoleColor.White)
         {
+            if (level < 0)
+            {
+                return;
+            }
             //WriteOnConsole
             Console.BackgroundColor = bg;
             Console.ForegroundColor = fg;
@@ -140,12 +145,19 @@ namespace uassociit
         public void WriteMat(string title, string[] rh, string[] ch, string[,] Mat, int rows, int cols, FgBg[,] MatColors,
                                     int top = -1, int left = -1, int bottom = -1, int right = -1)
         {
+ 
+            if (level < 0)
+            {
+                return;
+            }
+
             //WriteOnConsole
             //Write In HTML
-            top = (top == -1 ? 0 : top);
+
+            top  = (top == -1 ? 0 : top);
             left = (left == -1 ? 0 : left);
             bottom = (bottom == -1 ? sglobal.SkyRow - 1 : bottom);
-            right = (right == -1 ? sglobal.SkyCol - 1 : right);
+            right  = (right == -1 ? sglobal.SkyCol - 1 : right);
             Debug.Assert(top <= bottom && left <= right);
 
             HtmlWriter htw = new HtmlWriter();
@@ -769,7 +781,7 @@ namespace uassociit
         public int top, left, right, bottom;
         public string state;
         public bool deleted = false;
-        public bool visited = false;
+        public bool ignore = false;
         public bool selected = false;
 
         //Cluster is mechanism of IIT 3.0
@@ -779,7 +791,7 @@ namespace uassociit
 
         public override string ToString()
         {
-            string s = this.GetType().Name + " OBJECT id " + id + " pivot " + pivot + " phi " + phi +
+            string s = this.GetType().Name + ":id " + id + " deleted: " + deleted.ToString() + " pivot " + pivot + " phi " + phi +
                        " [ top " + top + " left " + left + " bottom " + bottom + " right  " + right + " ] px, py, pvel " +
                        " background " + bc.ToString() + " foreground " + fc.ToString();
 
@@ -1025,7 +1037,11 @@ namespace uassociit
 
                 if (cluster_height %2 != 0 && cluster_width % 2 != 0 )
                 {
-                    Debug.Assert(true, "Oops! Forbidden Area");                                     
+                    
+                    //Can't be split horizontally or vertically
+                    //let c0 hold the incoming cluster as it is
+                    c0 = new Cluster();
+                    c0.top = cc.top; c0.left = cc.left; c0.bottom = cc.bottom; c0.right = cc.right;
                 }
                 else if (cluster_height % 2 != 0 && cluster_width % 2 == 0)
                 {
@@ -1054,15 +1070,23 @@ namespace uassociit
                 }
                 
                 Cluster tempc = new Cluster();
+                string cc_pivot = cc.pivot;
 
                 temp_parent_cluster.RemoveAll(x => x.id == cc.id);
+                for (int i=0; i < temp_parent_cluster.Count; i++)
+                {
+                    if (temp_parent_cluster[i].id == cc.id)
+                    {
+                        temp_parent_cluster[i].deleted = true;
+                    }
+                }
 
                 //inherit characteristics from current cluster
                 if (c0 != null)
                 {
                     tempc = new Cluster();
-                    tempc.pivot = cc.pivot;
-                    tempc.visited = true;
+                    tempc.pivot = cc_pivot;
+                    tempc.ignore = true;
                     tempc.top = c0.top; tempc.left = c0.left; tempc.bottom = c0.bottom; tempc.right = c0.right;
                     temp_parent_cluster.Add(tempc);
                 }
@@ -1070,8 +1094,8 @@ namespace uassociit
                 if (c1 != null)
                 {
                     tempc = new Cluster();
-                    tempc.pivot = cc.pivot;
-                    tempc.visited = true;
+                    tempc.pivot = cc_pivot;
+                    tempc.ignore = true;
                     tempc.top = c1.top; tempc.left = c1.left; tempc.bottom = c1.bottom; tempc.right = c1.right;
                     temp_parent_cluster.Add(tempc);
                 }
@@ -1079,8 +1103,8 @@ namespace uassociit
                 if (c2 != null)
                 {
                     tempc = new Cluster();
-                    tempc.pivot = cc.pivot;
-                    tempc.visited = true;
+                    tempc.pivot = cc_pivot;
+                    tempc.ignore = true;
                     tempc.top = c2.top; tempc.left = c2.left; tempc.bottom = c2.bottom; tempc.right = c2.right;
                     temp_parent_cluster.Add(tempc);
                 }
@@ -1089,7 +1113,7 @@ namespace uassociit
                 {
                     tempc = new Cluster();
                     tempc.pivot = cc.pivot;
-                    tempc.visited = true;
+                    tempc.ignore = true;
                     tempc.top = c3.top; tempc.left = c3.left; tempc.bottom = c3.bottom; tempc.right = c3.right;
                     temp_parent_cluster.Add(tempc);
                 }
@@ -1200,16 +1224,17 @@ namespace uassociit
         public List<Cluster> SplitAndCombine(ref List<Cluster> top_level_clusters)
         {
             bool combined = false;
-            List<int> visited = new List<int>();
+            //List<int> visited = new List<int>();
 
             state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: SplitAndCombine ";
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
                 sglobal.logger.WriteLine("input0 param top_level_clusters ", ConsoleColor.White, ConsoleColor.Blue);
-                foreach (Cluster cc in top_level_clusters)
+                for (int i = 0; i < top_level_clusters.Count; i++)
                 {
-                    sglobal.logger.WriteLine(cc.ToString());
+                    top_level_clusters[i].ignore = false;
+                    sglobal.logger.WriteLine(top_level_clusters[i].ToString());
                 }
             }
 
@@ -1221,9 +1246,11 @@ namespace uassociit
                 Cluster c1 = top_level_clusters[iter1];
 
                 //check whether c1 is of low fitness or high
-                if (phi < max_split_phi)
+                if (c1.phi < max_split_phi)
                 {
                     //c1 fitness is low. Split it
+                    //ANCHOR-HERE: WHY C1 REFERENCE NOT GIVEN
+                    //WHY .ignore IS NOT BEING CHECKED
                     SplitMinPhi(ref top_level_clusters);
                 }
                 else
@@ -1232,21 +1259,22 @@ namespace uassociit
                     //check whether it is already visited
                     //var rslt = visited.Find(x => x == c2.id);
 
-                    for (int iter2 = 0; iter2 < top_level_clusters.Count; iter2++)
+                    for (int iter2 = 0; !combined && iter2 < top_level_clusters.Count; iter2++)
                     {
                         Cluster c2 = top_level_clusters[iter2];
                         //Math.Abs(c1.phi - c2.phi) < phi_tolerance
                         if (!c1.deleted && !c2.deleted && c1.id != c2.id && canBeCombined(c1, c2) &&
+                            !c1.ignore && !c2.ignore &&
                             c1.phi > c1.min_combine_phi && c2.phi > c2.min_combine_phi)
                         {
-                            //sited.Add(c2.id);
+                            //sited.Add(c2.id); 
                             //spinning random roulette, for selection
                             //wheel will generate a random number between 0 and 0.1; So if it is less than phi,
                             //it will be combined. Very high phis will not be combined where as intermediate will
                             Cluster c = CombineTwoClusters(c1, c2, top_level_clusters);
                             top_level_clusters.Add(c);
 
-                            c = top_level_clusters.Find(x => x.id == c1.id);
+                            //c = top_level_clusters.Find(x => x.id == c1.id);
 
                             for (int i = 0; i < top_level_clusters.Count; i++)
                             {
@@ -1261,15 +1289,11 @@ namespace uassociit
                                 }
                             }
 
-                            c = top_level_clusters.Find(x => x.id == c2.id);
-                            top_level_clusters.Remove(c);
-                            combined = true;
-                            //c2 loop
-                            break;
+                            //c = top_level_clusters.Find(x => x.id == c2.id);
+                            //top_level_clusters.Remove(c);
+                            combined = true;                          
                         }
                     }
-
-                    top_level_clusters.RemoveAll(x => x.deleted);
                 }
             }
 
@@ -1290,6 +1314,7 @@ namespace uassociit
                 }
             }
 
+            top_level_clusters.RemoveAll(x => x.deleted);
             return top_level_clusters;
         }
 
@@ -1606,7 +1631,7 @@ namespace uassociit
 
             string tick = "y";
 
-            while (tick_count < 10 && tick != "n" && tick != "q")
+            while (tick_count < 1 && tick != "n" && tick != "q")
             {
                 skyscope.next(input_tc, tick_count);
 
