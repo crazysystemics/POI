@@ -997,7 +997,7 @@ namespace uassociit
             }
         }
 
-        public List<Cluster> SplitMinPhi(ref List<Cluster> parent_cluster)
+        public List<Cluster> SplitMinPhi(Cluster cc, ref List<Cluster> parent_cluster)
         {
             //split among all subclusters
             //split based on intracluster integreties - phis
@@ -1013,20 +1013,20 @@ namespace uassociit
                 //sglobal.logger.WriteLine("input0 " + "parameter Cluster c " + c);
                 sglobal.logger.WriteLine("input0 : " + "parameter Parent Cluster List", 
                                           ConsoleColor.Blue, ConsoleColor.White);
-                foreach (Cluster cc in parent_cluster)
-                {
+                //foreach (Cluster cc in parent_cluster)
+                //{
 
                     sglobal.logger.WriteLine(cc.ToString(), ConsoleColor.Black, ConsoleColor.White);
                     //cc.print("...split min phi...");
-                }
+                //}
 
             }
 
             List<Cluster> temp_parent_cluster = new List<Cluster>(parent_cluster);
 
-            foreach (Cluster cc in parent_cluster)
+            //foreach (Cluster cc in parent_cluster)
             {
-                Cluster c0=null, c1=null, c2=null, c3=null;
+                Cluster c0 = null, c1 = null, c2 = null, c3 = null;
                  
 
                 int lr = (cc.left + cc.right)  / 2;
@@ -1251,7 +1251,7 @@ namespace uassociit
                     //c1 fitness is low. Split it
                     //ANCHOR-HERE: WHY C1 REFERENCE NOT GIVEN
                     //WHY .ignore IS NOT BEING CHECKED
-                    SplitMinPhi(ref top_level_clusters);
+                    SplitMinPhi(c1, ref top_level_clusters);
                 }
                 else
                 {
@@ -1484,7 +1484,7 @@ namespace uassociit
             //...similarly select nearly_max_c
             Cluster c = new Cluster();
 
-            state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: CombineTwoClusters ";
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id " + c.id + " METHOD: CombineTwoClusters ";
             if (sglobal.logger.entry_exit)
             {
 
@@ -1504,6 +1504,7 @@ namespace uassociit
                 if (c1.right == c2.left - 1)
                 {
                     //aligned side-by-side c1-left, c2-right
+                    c.pivot = c1.pivot;
                     c.top = c1.top; c.left = c1.left; c.bottom = c2.bottom; c.right = c2.right;
                 }
                 else if (c1.left == c2.right + 1)
@@ -1519,6 +1520,7 @@ namespace uassociit
                 if (c1.bottom == c2.top - 1)
                 {
                     //aligned one below another c1-top, c2-below
+                    
                     c.top = c1.top; c.left = c1.left; c.bottom = c2.bottom; c.right = c2.right;
                 }
                 else if (c2.bottom == c1.top - 1)
@@ -1528,6 +1530,7 @@ namespace uassociit
                 }
             }
 
+ 
             //logging begins
             state = "@Exit : CombineTwoClusters Combined Cluster c: " + c;
             c.print("...combined cluster");
@@ -1631,7 +1634,7 @@ namespace uassociit
 
             string tick = "y";
 
-            while (tick_count < 1 && tick != "n" && tick != "q")
+            while (tick_count < 5 && tick != "n" && tick != "q")
             {
                 skyscope.next(input_tc, tick_count);
 
