@@ -95,13 +95,13 @@ namespace uassociit
 
     class Log
     {
-        public int level=0;
+        public int level = 0;
         public int call_level = 0;
         public StreamWriter logp;
         public string log_file_name;
         public List<string> slist = new List<string>();
         public bool entry_exit = false;
-        
+
 
 
         public Log()
@@ -145,7 +145,7 @@ namespace uassociit
         public void WriteMat(string title, string[] rh, string[] ch, string[,] Mat, int rows, int cols, FgBg[,] MatColors,
                                     int top = -1, int left = -1, int bottom = -1, int right = -1)
         {
- 
+
             if (level < 0)
             {
                 return;
@@ -154,10 +154,10 @@ namespace uassociit
             //WriteOnConsole
             //Write In HTML
 
-            top  = (top == -1 ? 0 : top);
+            top = (top == -1 ? 0 : top);
             left = (left == -1 ? 0 : left);
             bottom = (bottom == -1 ? sglobal.SkyRow - 1 : bottom);
-            right  = (right == -1 ? sglobal.SkyCol - 1 : right);
+            right = (right == -1 ? sglobal.SkyCol - 1 : right);
             Debug.Assert(top <= bottom && left <= right);
 
             HtmlWriter htw = new HtmlWriter();
@@ -173,7 +173,7 @@ namespace uassociit
                     Console.BackgroundColor = MatColors[i, j].Bg;
                     Console.ForegroundColor = MatColors[i, j].Fg;
                     Console.Write(Mat[i, j] + " ");
-                    
+
                 }
                 Console.WriteLine();
             }
@@ -214,6 +214,7 @@ namespace uassociit
             Open(log_file_name, true);
         }
     }
+
     enum Force { BLUE, RED }
 
     public static class Helpers
@@ -236,6 +237,11 @@ namespace uassociit
         }
     }
 
+    public enum Direction
+    {
+        LEFT, RIGHT, TOP, BOTTOM
+    }
+
     //renamed globals to sglobal to avoid conflict with global in intellisense
     static class sglobal
     {
@@ -245,6 +251,7 @@ namespace uassociit
         public static int tick_count = 0;
         public static string[] single_star = new string[] { "*" };
         public static Log logger = new Log();
+        public static Direction SearchDir = Direction.LEFT;
 
         public static bool doublediff(double d1, double d2, double tolerance)
         {
@@ -260,7 +267,7 @@ namespace uassociit
         public static Dictionary<ConsoleColor, string> chmap = new Dictionary<ConsoleColor, string>();
 
         //var copy2d = orig2d.Select(a => a.ToArray()).ToArray();
-        public static string[,] getcopy(ref string[,] srcmat, int rows, int cols )
+        public static string[,] getcopy(ref string[,] srcmat, int rows, int cols)
         {
             string[,] destmat = new string[rows, cols];
             rows = (rows == -1) ? SkyRow : rows;
@@ -330,6 +337,7 @@ namespace uassociit
         public List<Cluster> Clusters;
         public double PHI = 0.0;
         public string state = String.Empty;
+        public List<double> prev_phiscape = new List<double>();
 
         public SharedCanvas(Force side, int order, string[,] b)
         {
@@ -406,6 +414,7 @@ namespace uassociit
                     }
                 }
             }
+
         }
 
 
@@ -641,7 +650,7 @@ namespace uassociit
             {
                 //Composing entry sky to which kernel is applied
                 Compose(ref Canvas, ref CanvasColors, SkyOrder, SkyOrder, Clusters, false);
-               //Compose(Clusters, false);
+                //Compose(Clusters, false);
 
                 sglobal.logger.WriteMat("entry c-mat kernel", CanvasIndices, CanvasIndices, Canvas,
                                         rows, cols,
@@ -686,7 +695,7 @@ namespace uassociit
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state, ConsoleColor.Black, ConsoleColor.Cyan);
-                sglobal.logger.WriteLine("input member Clusters.Count: " + Clusters.Count);                
+                sglobal.logger.WriteLine("input member Clusters.Count: " + Clusters.Count);
             }
 
             //========================1.0 Apply Kernel================================
@@ -702,8 +711,8 @@ namespace uassociit
             kernel(ref sglobal.Sky, SkyOrder, SkyOrder);
 
 
-            var tempCanvas   = sglobal.getcopy(ref sglobal.Sky, SkyOrder, SkyOrder);
-            var tempColors = sglobal.getcopy(ref DefaultColors, SkyOrder, SkyOrder); 
+            var tempCanvas = sglobal.getcopy(ref sglobal.Sky, SkyOrder, SkyOrder);
+            var tempColors = sglobal.getcopy(ref DefaultColors, SkyOrder, SkyOrder);
             Compose(ref tempCanvas, ref tempColors, SkyOrder, SkyOrder, Clusters, false);
             sglobal.logger.WriteMat("in SharedCanvas.next:After Kernel Operation...",
                                      sglobal.single_star, sglobal.single_star,
@@ -718,15 +727,52 @@ namespace uassociit
                 c.ComputeSmallPhi();
             }
 
+            List<double> phiscape = new List<double>();
+            foreach (Cluster c in Clusters)
+            {
+                phiscape.Add(c.phi);
+            }
+
+
+            bool max_phiscape_change = false;
+            if (prev_phiscape.Count == 0) 
+            {
+                max_phiscape_change = true;
+            }
+            else
+            {
+                double curphimax = phiscape.Max();
+                double prevphimax = prev_phiscape.Max();
+                {
+                    if (curphimax != prevphimax)
+                    {
+                        max_phiscape_change = true;
+                        //break;
+                    }
+
+
+                    if (!max_phiscape_change)
+                    {
+                        sglobal.SearchDir = (Direction)(((int)sglobal.SearchDir + 1) % 4);
+                    }
+                }
+            }
+
+            prev_phiscape = new List<double>(phiscape);
             //======================= 3.0 SplitAndCombine ==============================
             sglobal.logger.WriteLine("3.0 Split and Combine.  #Clusters: " + Clusters.Count,
                                       ConsoleColor.White, ConsoleColor.Magenta);
             Cluster System = new Cluster();
             System.SplitAndCombine(ref Clusters);
+
+
+
+
+
             tempCanvas = sglobal.getcopy(ref sglobal.Sky, SkyOrder, SkyOrder);
             tempColors = sglobal.getcopy(ref DefaultColors, SkyOrder, SkyOrder);
             Compose(ref tempCanvas, ref tempColors, SkyOrder, SkyOrder, Clusters, false);
-            sglobal.logger.WriteMat("After System.SplitAndCombine... ", 
+            sglobal.logger.WriteMat("After System.SplitAndCombine... ",
                                      sglobal.single_star, sglobal.single_star,
                                      tempCanvas, SkyOrder, SkyOrder, tempColors);
 
@@ -828,7 +874,7 @@ namespace uassociit
                 colint++;
             }
 
-            bc = (ConsoleColor)(colint); 
+            bc = (ConsoleColor)(colint);
             if (bc == ConsoleColor.Gray || bc == ConsoleColor.White || bc == ConsoleColor.Yellow)
             {
                 fc = ConsoleColor.Black;
@@ -928,7 +974,7 @@ namespace uassociit
 
         public bool contains(int posr, int posc)
         {
-            if ( posr >= top && posr <= bottom && posc >= left && posc <= bottom)
+            if (posr >= top && posr <= bottom && posc >= left && posc <= bottom)
             {
                 return true;
             }
@@ -1006,18 +1052,18 @@ namespace uassociit
             //if there are edges check strenth {if both are mixes} and then split
 
             //Split Currrent Cluster into 4-Sub Clusters
-            state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: SplitMinPhi ";
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id " + cc.id + " METHOD: SplitMinPhi ";
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
                 //sglobal.logger.WriteLine("input0 " + "parameter Cluster c " + c);
-                sglobal.logger.WriteLine("input0 : " + "parameter Parent Cluster List", 
+                sglobal.logger.WriteLine("input0 : " + "parameter Parent Cluster List",
                                           ConsoleColor.Blue, ConsoleColor.White);
                 //foreach (Cluster cc in parent_cluster)
                 //{
 
-                    sglobal.logger.WriteLine(cc.ToString(), ConsoleColor.Black, ConsoleColor.White);
-                    //cc.print("...split min phi...");
+                sglobal.logger.WriteLine(cc.ToString(), ConsoleColor.Black, ConsoleColor.White);
+                //cc.print("...split min phi...");
                 //}
 
             }
@@ -1027,17 +1073,17 @@ namespace uassociit
             //foreach (Cluster cc in parent_cluster)
             {
                 Cluster c0 = null, c1 = null, c2 = null, c3 = null;
-                 
 
-                int lr = (cc.left + cc.right)  / 2;
-                int tb = (cc.top  + cc.bottom) / 2;
+
+                int lr = (cc.left + cc.right) / 2;
+                int tb = (cc.top + cc.bottom) / 2;
 
                 int cluster_height = cc.bottom - cc.top + 1;
                 int cluster_width = cc.right - cc.left + 1;
 
-                if (cluster_height %2 != 0 && cluster_width % 2 != 0 )
+                if (cluster_height % 2 != 0 && cluster_width % 2 != 0)
                 {
-                    
+
                     //Can't be split horizontally or vertically
                     //let c0 hold the incoming cluster as it is
                     c0 = new Cluster();
@@ -1047,7 +1093,7 @@ namespace uassociit
                 {
                     //cluster split into 2 clusters, vertically, along y-axis
                     c0 = new Cluster(); c1 = new Cluster();
-                    c0.top = cc.top; c0.left = cc.left; c0.bottom  = (tb); c0.right = (lr);                    
+                    c0.top = cc.top; c0.left = cc.left; c0.bottom = (tb); c0.right = (lr);
                     c1.top = cc.top; c1.left = (lr + 1); c1.bottom = (tb); c1.right = cc.right;
                 }
                 else if (cluster_height % 2 == 0 && cluster_width % 2 != 0)
@@ -1055,7 +1101,7 @@ namespace uassociit
                     //cluster split into 2 clusters, horizontally, along x-axis
                     c2 = new Cluster(); c3 = new Cluster();
                     c2.top = cc.top; c2.left = cc.left; c2.bottom = (tb); c2.right = right;
-                    c3.top = (tb + 1); c3.left = cc.left ; c3.bottom = cc.bottom; c3.right = right;                    
+                    c3.top = (tb + 1); c3.left = cc.left; c3.bottom = cc.bottom; c3.right = right;
                 }
                 else
                 {
@@ -1063,17 +1109,17 @@ namespace uassociit
                     //Cluster is split both horizontally and vertically
                     c0 = new Cluster(); c1 = new Cluster(); c2 = new Cluster(); c3 = new Cluster();
 
-                    c0.top = cc.top;   c0.left = cc.left;  c0.bottom  = (tb);      c0.right = (lr);
-                    c1.top = cc.top;   c1.left = (lr + 1); c1.bottom  = (tb);      c1.right = cc.right;
-                    c2.top = (tb + 1); c2.left = cc.left;  c2.bottom  = cc.bottom; c2.right = (lr);
-                    c3.top = (tb + 1); c3.left = (lr + 1); c3.bottom  = cc.bottom; c3.right = cc.right;
+                    c0.top = cc.top; c0.left = cc.left; c0.bottom = (tb); c0.right = (lr);
+                    c1.top = cc.top; c1.left = (lr + 1); c1.bottom = (tb); c1.right = cc.right;
+                    c2.top = (tb + 1); c2.left = cc.left; c2.bottom = cc.bottom; c2.right = (lr);
+                    c3.top = (tb + 1); c3.left = (lr + 1); c3.bottom = cc.bottom; c3.right = cc.right;
                 }
-                
+
                 Cluster tempc = new Cluster();
                 string cc_pivot = cc.pivot;
 
-                temp_parent_cluster.RemoveAll(x => x.id == cc.id);
-                for (int i=0; i < temp_parent_cluster.Count; i++)
+                //temp_parent_cluster.RemoveAll(x => x.id == cc.id);
+                for (int i = 0; i < temp_parent_cluster.Count; i++)
                 {
                     if (temp_parent_cluster[i].id == cc.id)
                     {
@@ -1121,13 +1167,14 @@ namespace uassociit
 
             parent_cluster = temp_parent_cluster;
 
-            state = "@Exit SplitMinPhi: " + " Output ref Param: Parent Cluster List";
+            state = "@Exit SplitMinPhi: " + " Output ref Param: Parent Cluster List Count: " 
+                                          + parent_cluster.Count;
             sglobal.logger.WriteLine(state);
 
             return parent_cluster;
         }
 
-        public bool canBeCombined(Cluster c1, Cluster c2)
+        public bool canBeCombined(Direction d, Cluster c1, Cluster c2)
         {
             bool cbcombined = false;
 
@@ -1152,7 +1199,7 @@ namespace uassociit
                             sc.CanvasColors[i, j] = new FgBg(c1.fc, c1.bc);
                         }
 
-                        if (c2.contains(i,j))
+                        if (c2.contains(i, j))
                         {
                             sc.CanvasColors[i, j] = new FgBg(c2.fc, c2.bc);
                         }
@@ -1164,7 +1211,7 @@ namespace uassociit
                 }
                 //sc.CanvasColors = sc.DefaultColors;
                 //sc.Compose(toBeClusters, false);
-               
+
 
                 sc.Compose(ref sc.Canvas, ref sc.CanvasColors, sc.SkyOrder, sc.SkyOrder, sc.Clusters, false);
                 sglobal.logger.WriteMat("Would be Cluster Couple...", sglobal.single_star, sglobal.single_star,
@@ -1176,14 +1223,15 @@ namespace uassociit
 
 
             //Adjacency check
+            //ANCHOR: Should make RANDOM JUMP POSSIBLE
             if (c1.top == c2.top || c1.bottom == c2.bottom)
             {
-                if (c1.right == c2.left - 1)
+                if ((d == Direction.RIGHT) && (c1.right == c2.left - 1))
                 {
                     //aligned side-by-side c1-left, c2-right
                     cbcombined = true;
                 }
-                else if (c1.left == c2.right + 1)
+                else if ((d == Direction.LEFT) && (c1.left == c2.right + 1))
                 {
                     cbcombined = true;
                 }
@@ -1194,13 +1242,12 @@ namespace uassociit
             }
             else if (c1.left == c2.left || c1.right == c2.right)
             {    //aligned on vertical (left or right) edges, so one above another
-
-                if (c1.bottom == c2.top - 1)
+                if ((d == Direction.BOTTOM) && (c1.bottom == c2.top - 1))
                 {
                     //c1 on top of c2
                     cbcombined = true;
                 }
-                else if (c2.bottom == c1.top - 1)
+                else if ((d == Direction.TOP) && (c2.bottom == c1.top - 1))
                 {
                     //c2 on top of c
                     cbcombined = true;
@@ -1211,7 +1258,6 @@ namespace uassociit
                 }
             }
 
-
             state = "@Exit :canBeCombined " + "cbcombined: " + cbcombined;
             if (sglobal.logger.entry_exit)
             {
@@ -1221,9 +1267,73 @@ namespace uassociit
             return cbcombined;
         }
 
+        public Cluster CombineTwoClusters(Cluster c1, Cluster c2, List<Cluster> parent_clusters)
+        {
+            //...similarly select nearly_max_c
+            Cluster c = new Cluster();
+
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id " + c.id + " METHOD: CombineTwoClusters ";
+            if (sglobal.logger.entry_exit)
+            {
+
+                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+                sglobal.logger.WriteLine("input0 param : c1 " + c1);
+                sglobal.logger.WriteLine("input0 param : c2 " + c2);
+                //sglobal.logger.WriteLine("input0 param : parent_clusters");
+                //foreach (Cluster cc in parent_clusters)
+                //{
+                //    sglobal.logger.WriteLine(cc.ToString());
+                //}
+            }
+
+
+            if (c1.top == c2.top || c1.bottom == c2.bottom)
+            {
+                if (c1.right == c2.left - 1)
+                {
+                    //aligned side-by-side c1-left, c2-right
+                    c.pivot = c1.pivot;
+                    c.top = c1.top; c.left = c1.left; c.bottom = c2.bottom; c.right = c2.right;
+                }
+                else if (c1.left == c2.right + 1)
+                {
+                    //aligned side-by-side c2-left, c1-right
+                    c.top = c2.top; c.left = c2.left; c.bottom = c1.bottom; c.right = c1.right;
+                }
+
+            }
+            else if (c1.left == c2.left || c1.right == c2.right)
+            {
+
+                if (c1.bottom == c2.top - 1)
+                {
+                    //aligned one below another c1-top, c2-below
+
+                    c.top = c1.top; c.left = c1.left; c.bottom = c2.bottom; c.right = c2.right;
+                }
+                else if (c2.bottom == c1.top - 1)
+                {
+                    //aligned one below another c2-top, c1-below
+                    c.top = c2.top; c.left = c2.left; c.bottom = c1.bottom; c.right = c1.right;
+                }
+            }
+
+
+            //logging begins
+            state = "@Exit : CombineTwoClusters Combined Cluster c: " + c;
+            c.print("...combined cluster");
+
+            if (sglobal.logger.entry_exit)
+            {
+                sglobal.logger.WriteLine(state);
+            }
+            return c;
+        }
+
         public List<Cluster> SplitAndCombine(ref List<Cluster> top_level_clusters)
         {
             bool combined = false;
+            bool split = false;
             //List<int> visited = new List<int>();
 
             state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: SplitAndCombine ";
@@ -1240,58 +1350,62 @@ namespace uassociit
 
             //except_list.AddRange(near_max_sc);          
 
-            for (int iter1 = 0; iter1 < top_level_clusters.Count; iter1++)
+            int iter1 = 0;
+            while (!combined && !split)
             {
-                combined = false;
+                combined = split = false;
+                iter1 = (iter1 + 1) % top_level_clusters.Count;
                 Cluster c1 = top_level_clusters[iter1];
 
                 //check whether c1 is of low fitness or high
-                if (c1.phi < max_split_phi)
+                if (!split && c1.phi < max_split_phi)
                 {
-                    //c1 fitness is low. Split it
-                    //ANCHOR-HERE: WHY C1 REFERENCE NOT GIVEN
-                    //WHY .ignore IS NOT BEING CHECKED
+                    //c1 fitness is low. Split it                                      
                     SplitMinPhi(c1, ref top_level_clusters);
+                    
                 }
                 else
                 {
                     //c1 fitness is high. Combine it with another high phi top-level cluster                    {
                     //check whether it is already visited
                     //var rslt = visited.Find(x => x == c2.id);
-
-                    for (int iter2 = 0; !combined && iter2 < top_level_clusters.Count; iter2++)
+                    //for (int dir = 0; dir < 4; dir++)
                     {
-                        Cluster c2 = top_level_clusters[iter2];
-                        //Math.Abs(c1.phi - c2.phi) < phi_tolerance
-                        if (!c1.deleted && !c2.deleted && c1.id != c2.id && canBeCombined(c1, c2) &&
-                            !c1.ignore && !c2.ignore &&
-                            c1.phi > c1.min_combine_phi && c2.phi > c2.min_combine_phi)
+                        //Direction SearchDir = (Direction)dir;
+                        for (int iter2 = 0; !combined && iter2 < top_level_clusters.Count; iter2++)
                         {
-                            //sited.Add(c2.id); 
-                            //spinning random roulette, for selection
-                            //wheel will generate a random number between 0 and 0.1; So if it is less than phi,
-                            //it will be combined. Very high phis will not be combined where as intermediate will
-                            Cluster c = CombineTwoClusters(c1, c2, top_level_clusters);
-                            top_level_clusters.Add(c);
-
-                            //c = top_level_clusters.Find(x => x.id == c1.id);
-
-                            for (int i = 0; i < top_level_clusters.Count; i++)
+                            Cluster c2 = top_level_clusters[iter2];
+                            //Math.Abs(c1.phi - c2.phi) < phi_tolerance
+                            //So if it is more than minimum phi, it will branch
+                            if (!c1.deleted && !c2.deleted && c1.id != c2.id && canBeCombined(sglobal.SearchDir, c1, c2) &&
+                                !c1.ignore && !c2.ignore &&
+                                c1.phi > c1.min_combine_phi && c2.phi > c2.min_combine_phi)
                             {
-                                if (top_level_clusters[i].id == c1.id)
+                                //sited.Add(c2.id);                                
+                                //it will be combined.                                
+                                Cluster c = CombineTwoClusters(c1, c2, top_level_clusters);
+                                top_level_clusters.Add(c);
+
+                                //c = top_level_clusters.Find(x => x.id == c1.id);
+
+                                //mark parents of combined clusters as 'deleted'
+                                for (int i = 0; i < top_level_clusters.Count; i++)
                                 {
-                                    top_level_clusters[i].deleted = true;
+                                    if (top_level_clusters[i].id == c1.id)
+                                    {
+                                        top_level_clusters[i].deleted = true;
+                                    }
+
+                                    if (top_level_clusters[i].id == c2.id)
+                                    {
+                                        top_level_clusters[i].deleted = true;
+                                    }
                                 }
 
-                                if (top_level_clusters[i].id == c2.id)
-                                {
-                                    top_level_clusters[i].deleted = true;
-                                }
+                                //c = top_level_clusters.Find(x => x.id == c2.id);
+                                //top_level_clusters.Remove(c);
+                                combined = true;
                             }
-
-                            //c = top_level_clusters.Find(x => x.id == c2.id);
-                            //top_level_clusters.Remove(c);
-                            combined = true;                          
                         }
                     }
                 }
@@ -1317,7 +1431,6 @@ namespace uassociit
             top_level_clusters.RemoveAll(x => x.deleted);
             return top_level_clusters;
         }
-
 
         //Containment Check
         //TODO:Check whether Combine can be made separate routine...
@@ -1477,72 +1590,8 @@ namespace uassociit
         //    }
 
         //    return top_level_clusters;
-        //}
-
-        public Cluster CombineTwoClusters(Cluster c1, Cluster c2, List<Cluster> parent_clusters)
-        {
-            //...similarly select nearly_max_c
-            Cluster c = new Cluster();
-
-            state = "@Entry: Class:" + this.GetType().Name + " Object: id " + c.id + " METHOD: CombineTwoClusters ";
-            if (sglobal.logger.entry_exit)
-            {
-
-                sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
-                sglobal.logger.WriteLine("input0 param : c1 " + c1);
-                sglobal.logger.WriteLine("input0 param : c2 " + c2);
-                //sglobal.logger.WriteLine("input0 param : parent_clusters");
-                //foreach (Cluster cc in parent_clusters)
-                //{
-                //    sglobal.logger.WriteLine(cc.ToString());
-                //}
-            }
-
-
-            if (c1.top == c2.top || c1.bottom == c2.bottom)
-            {
-                if (c1.right == c2.left - 1)
-                {
-                    //aligned side-by-side c1-left, c2-right
-                    c.pivot = c1.pivot;
-                    c.top = c1.top; c.left = c1.left; c.bottom = c2.bottom; c.right = c2.right;
-                }
-                else if (c1.left == c2.right + 1)
-                {
-                    //aligned side-by-side c2-left, c1-right
-                    c.top = c2.top; c.left = c2.left; c.bottom = c1.bottom; c.right = c1.right;
-                }
-
-            }
-            else if (c1.left == c2.left || c1.right == c2.right)
-            {
-
-                if (c1.bottom == c2.top - 1)
-                {
-                    //aligned one below another c1-top, c2-below
-                    
-                    c.top = c1.top; c.left = c1.left; c.bottom = c2.bottom; c.right = c2.right;
-                }
-                else if (c2.bottom == c1.top - 1)
-                {
-                    //aligned one below another c2-top, c1-below
-                    c.top = c2.top; c.left = c2.left; c.bottom = c1.bottom; c.right = c1.right;
-                }
-            }
-
- 
-            //logging begins
-            state = "@Exit : CombineTwoClusters Combined Cluster c: " + c;
-            c.print("...combined cluster");
-
-            if (sglobal.logger.entry_exit)
-            {
-                sglobal.logger.WriteLine(state);
-            }
-            return c;
-        }
+        //}       
     }
-
 
     class TestCase
     {
@@ -1612,7 +1661,7 @@ namespace uassociit
 
             int tick_count = 0;
             string title = "TC:" + input_tc.id.ToString() + "  " + input_tc.desc +
-                           "Input Sky: in BEGINNING "     + 
+                           "Input Sky: in BEGINNING " +
                             tick_count + " Num of Clusters " + skyscope.Clusters.Count;
 
             sglobal.init_chmap();
@@ -1634,7 +1683,7 @@ namespace uassociit
 
             string tick = "y";
 
-            while (tick_count < 5 && tick != "n" && tick != "q")
+            while (tick_count < 10 && tick != "n" && tick != "q")
             {
                 skyscope.next(input_tc, tick_count);
 
