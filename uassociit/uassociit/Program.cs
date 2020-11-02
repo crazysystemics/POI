@@ -93,7 +93,7 @@ using System.Diagnostics;
 namespace uassociit
 {
 
-    class Log
+    class   Log
     {
         public int level = 0;
         public int call_level = 0;
@@ -243,11 +243,13 @@ namespace uassociit
     }
 
     //renamed globals to sglobal to avoid conflict with global in intellisense
-    static class sglobal
+
+   static class sglobal
     {
         public static Random wheel = new Random();
         public static bool debug = false, info = false, error = false;
         public static bool close_stream = false;
+        public static int tick_limit = 1;
         public static int tick_count = 0;
         public static string[] single_star = new string[] { "*" };
         public static Log logger = new Log();
@@ -324,6 +326,7 @@ namespace uassociit
             chmap.Add(ConsoleColor.Yellow, "yellow");
         }
     }
+
 
     class SharedCanvas
     {
@@ -575,13 +578,13 @@ namespace uassociit
 
 
 
-        public void PaintWithHeader(TestCase tc, int tick_count)
+        public void PaintWithHeader(TestCase tc)
         {
             state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: PaintWithHeader ";
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
-                sglobal.logger.WriteLine("input0 " + "param tick_count " + tick_count);
+                sglobal.logger.WriteLine("input0 " + "param tick_count " + sglobal.tick_count);
                 //sglobal.logger.WriteLine("input0 " + "param title " + "\"" + title + "\"");
             }
 
@@ -689,9 +692,9 @@ namespace uassociit
             //return rslt.ElementAt(0).Key;
         }
 
-        public void next(TestCase tc, int tick_count)
+        public void next(TestCase tc)
         {
-            state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: next tick_count " + tick_count;
+            state = "@Entry: Class:" + this.GetType().Name + " Object: id TBD" + " METHOD: next tick_count " + sglobal.tick_count;
             if (sglobal.logger.entry_exit)
             {
                 sglobal.logger.WriteLine(state, ConsoleColor.Black, ConsoleColor.Cyan);
@@ -789,12 +792,12 @@ namespace uassociit
 
 
             //========================5.0 Paint the Sky =======================
-            sglobal.logger.WriteLine("5.0 PaintWithHeader at end of next tick_count " + tick_count,
+            sglobal.logger.WriteLine("5.0 PaintWithHeader at end of next tick_count " + sglobal.tick_count,
                                       ConsoleColor.White, ConsoleColor.Magenta);
-            PaintWithHeader(tc, tick_count);
+            PaintWithHeader(tc);
 
 
-            state = " @Exit: SharedCanvas.next" + " tick_count " + tick_count;
+            state = " @Exit: SharedCanvas.next" + " tick_count " + sglobal.tick_count;
             state += " Clusters.Count " + Clusters.Count;
             if (sglobal.logger.entry_exit)
             {
@@ -1043,7 +1046,7 @@ namespace uassociit
             }
         }
 
-        public List<Cluster> SplitMinPhi(Cluster cc, ref List<Cluster> parent_cluster)
+        public List<Cluster> SplitMinPhi(Cluster cc)
         {
             //split among all subclusters
             //split based on intracluster integreties - phis
@@ -1068,7 +1071,7 @@ namespace uassociit
 
             }
 
-            List<Cluster> temp_parent_cluster = new List<Cluster>(parent_cluster);
+            List<Cluster> temp_parent_cluster = new List<Cluster>();
 
             //foreach (Cluster cc in parent_cluster)
             {
@@ -1165,13 +1168,12 @@ namespace uassociit
                 }
             }
 
-            parent_cluster = temp_parent_cluster;
-
+            
             state = "@Exit SplitMinPhi: " + " Output ref Param: Parent Cluster List Count: " 
-                                          + parent_cluster.Count;
+                                          + temp_parent_cluster.Count;
             sglobal.logger.WriteLine(state);
 
-            return parent_cluster;
+            return temp_parent_cluster;
         }
 
         public bool canBeCombined(Direction d, Cluster c1, Cluster c2)
@@ -1334,6 +1336,7 @@ namespace uassociit
         {
             bool combined = false;
             bool split = false;
+            List<Cluster> next_gen_clusters = new List<Cluster>();
             //List<int> visited = new List<int>();
 
             state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: SplitAndCombine ";
@@ -1351,18 +1354,24 @@ namespace uassociit
             //except_list.AddRange(near_max_sc);          
 
             int iter1 = 0;
-            while (!combined && !split)
+            for (iter1=0; iter1 < top_level_clusters.Count; iter1++)
             {
+                if (top_level_clusters[iter1].deleted)
+                {
+                    //Deleted Cluster. Move forward.
+                    continue;
+                }
                 combined = split = false;
-                iter1 = (iter1 + 1) % top_level_clusters.Count;
+                //iter1 = (iter1 + 1) % top_level_clusters.Count;
                 Cluster c1 = top_level_clusters[iter1];
 
                 //check whether c1 is of low fitness or high
-                if (!split && c1.phi < max_split_phi)
+                if (c1.phi < max_split_phi)
                 {
-                    //c1 fitness is low. Split it                                      
-                    SplitMinPhi(c1, ref top_level_clusters);
+                    //c1 fitness is low. Split it    
                     
+                    next_gen_clusters.AddRange(SplitMinPhi(c1));
+                    top_level_clusters[iter1].deleted = true;
                 }
                 else
                 {
@@ -1384,7 +1393,7 @@ namespace uassociit
                                 //sited.Add(c2.id);                                
                                 //it will be combined.                                
                                 Cluster c = CombineTwoClusters(c1, c2, top_level_clusters);
-                                top_level_clusters.Add(c);
+                                next_gen_clusters.Add(c);
 
                                 //c = top_level_clusters.Find(x => x.id == c1.id);
 
@@ -1429,6 +1438,7 @@ namespace uassociit
             }
 
             top_level_clusters.RemoveAll(x => x.deleted);
+            top_level_clusters.AddRange(next_gen_clusters);
             return top_level_clusters;
         }
 
@@ -1638,7 +1648,7 @@ namespace uassociit
 
             ConsoleUiManager cuim = new ConsoleUiManager();
 
-            //logger configuration
+            //logger configuration   
             //logger file
             Console.WriteLine("UAS SWARM Attrition/Reinforcement Recommendion System......");
             Console.WriteLine("Started...");
@@ -1650,8 +1660,11 @@ namespace uassociit
             //logger on/off types
             sglobal.logger.entry_exit = true;
 
-            //***Test Configuration.....
-            int test_case_id = 3;
+            //***Run Configurations.....
+
+            int test_case_id   = 3;
+            sglobal.tick_limit = 2;
+            sglobal.tick_count = 0;
             InitTestCases();
             TestCase input_tc = TestCases.ElementAt(test_case_id);
             sglobal.logger.Open("log_" + input_tc.id + "_" + date + ".htm", false);
@@ -1659,10 +1672,10 @@ namespace uassociit
             skyscope.initCanvas(input_tc.tc);
 
 
-            int tick_count = 0;
+            
             string title = "TC:" + input_tc.id.ToString() + "  " + input_tc.desc +
                            "Input Sky: in BEGINNING " +
-                            tick_count + " Num of Clusters " + skyscope.Clusters.Count;
+                            sglobal.tick_count + " Num of Clusters " + skyscope.Clusters.Count;
 
             sglobal.init_chmap();
             sglobal.logger.WriteHead();
@@ -1683,15 +1696,16 @@ namespace uassociit
 
             string tick = "y";
 
-            while (tick_count < 10 && tick != "n" && tick != "q")
+            while (sglobal.tick_count < sglobal.tick_limit && tick != "n" && tick != "q")
             {
-                skyscope.next(input_tc, tick_count);
+                skyscope.next(input_tc);
 
                 //Move tick to next state
-                tick_count++;
-                sglobal.tick_count = tick_count;
-                //tick = Console.ReadKey().KeyChar.ToString().ToLower();
+                //TODO: Delete tick_count and keep only sglobal.tick_count
+                sglobal.tick_count++;               
             }
+            Console.WriteLine("Press Any Key...");
+            tick = Console.ReadKey().KeyChar.ToString().ToLower();
 
             sglobal.logger.WriteLine("PROGRAM RAN TO COMPLETION");
             sglobal.logger.Close(true, true);
@@ -1701,13 +1715,13 @@ namespace uassociit
 
 
 
-//string[,] tempCanvas = new string[SkyOrder, SkyOrder];
-//FgBg[,] tempColors1 = new FgBg[SkyOrder, SkyOrder];
-//for (int i = 0; i < SkyOrder; i++)
-//{
-//    for (int j = 0; j < SkyOrder; j++)
-//    {
-//        tempCanvas[i, j] = sglobal.Sky[i, j];
-//        tempColors1[i, j] = DefaultColors[i, j];
-//    }
-//}
+    //string[,] tempCanvas = new string[SkyOrder, SkyOrder];
+    //FgBg[,] tempColors1 = new FgBg[SkyOrder, SkyOrder];
+    //for (int i = 0; i < SkyOrder; i++)
+    //{
+    //    for (int j = 0; j < SkyOrder; j++)
+    //    {
+    //        tempCanvas[i, j] = sglobal.Sky[i, j];
+    //        tempColors1[i, j] = DefaultColors[i, j];
+    //    }
+    //}
