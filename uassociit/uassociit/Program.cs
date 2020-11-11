@@ -963,16 +963,25 @@ class Mechanism
         return -1;
     }
 
-    
-
-
-
-
     public Mechanism Kernel()
     {
-        return new Mechanism((FreqLock("B") > 0| (locn("C") == 1,
-                             ((int)MElement.B & (int)MElement.A) == 1,
-                             ((int)MElement.A ^ (int)MElement.C) == 1);
+        //Every uas receives all signatures sig 0 to sig2 (sig n-1)
+        //each cell attempts lock signature[i] 
+        //e.g., signatre[0] == "A" means UAS 0 trying to track/jam  in freq "A"
+        //if it is effective locked[UAS-0] => locked[0] becomes true
+        //Every UAS in cluster switch their locking frequency simultaneously
+        //For the sake of modeling they are governed by  
+        //(UAS-1 | UAS-2), (UAS-0 & UAS-1), (UAS-1 ^ UAS-2)  
+        Mechanism m = new Mechanism(locked[1]| locked[2],
+                                    locked[0] & locked[1],               
+                                    locked[1] ^ locked[2]);
+        string temp;
+        temp = m.signatures[2];
+        m.signatures[2] = m.signatures[1];
+        m.signatures[1] = m.signatures[0];
+        m.signatures[0] = temp;
+
+        return m;
     }
 
     //Get Cause Effect Reportoire of this Mechanism
@@ -989,7 +998,7 @@ class Mechanism
             for (int cid = 0; cid < 8; cid++)
             {
                 Mechanism cause = new Mechanism(false, false, false);
-                if (cause.Kernel().signatures == this.signatures)
+                if (cause.Kernel().locked == this.locked)
                 {
                     CauseRep.Add(cause);
                 }
@@ -1062,10 +1071,6 @@ class Mechanism
             p.insidePurview.CauseReportoire = p.InsidePurviewGiven.GetCauseReportoire(p.outOfPurview);
             p.insidePurview.EffectReportoire = p.outOfPurview.GetEffectReportoire(p.outOfPurview);
             p.imp = GetMIP();
-
-
-
-
 
             //double[] cause_phis = p.OutPurviewResult.CauseReportoire[index].GetPhis();
             //double cause_phi_max[index] = max(cause_phis);
@@ -1146,13 +1151,15 @@ class Mechanism
 class Triplet<T>
 {
     public T left, center, right;
+    public int nbase;
 
     //Generics Constructor is not allowed
-    public void Set(T left, T center, T right)
+    public void Set(T left, T center, T right, int nbase=10)
     {
         this.left = left;
         this.center = center;
         this.right = right;
+        this.nbase = nbase;
     }
 
     public Triplet<T> Get()
@@ -1173,6 +1180,17 @@ class Triplet<T>
             center = value.center;
             right = value.right;
         }
+    }
+
+    //public static Counter operator ++(Counter c)
+    //{
+    //    return new Counter(c.v + 1);
+    //}
+
+    public static Triplet<T> operator ++(Triplet<T> t)
+    {
+       // int nval = t.left * t.nbase * t.nbase +
+        return new Triplet<T>();
     }
 
 }
