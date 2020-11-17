@@ -275,7 +275,28 @@ namespace uassociit
         public static string[,] Sky;
         public static int SkyRow, SkyCol;
 
+        public static bool? ui2bool(uint? ui)
+        {
+            if (!ui.HasValue)
+            {
+                return null;
+            }
+            return ui.Value == 1 ? true : false;
+        }
+
+        public static uint? bool2ui(bool? b)
+        {
+            if (!b.HasValue)
+            {
+                return null;
+            }
+
+            return (uint?)(b.Value ? 1 : 0);
+        }
+
         public static Dictionary<ConsoleColor, string> chmap = new Dictionary<ConsoleColor, string>();
+
+
 
 
 
@@ -850,8 +871,6 @@ namespace uassociit
     }
 
 
-
-
     class Purview
     {
         public static int sid = 0;
@@ -894,6 +913,13 @@ namespace uassociit
         }
     }
 
+    class ProbDistribn
+    {
+        public int dist_index;
+        public int count;
+        public double prob;
+    }
+
     class Partition
     {
         //when we derive from whole, the parts that are not derived are made null.
@@ -910,9 +936,35 @@ namespace uassociit
         // BCc/Ap = (Cc/[]) X (Bc/Ap)
         // Result/Given = (P1Result/P1Given) * (P2Result/P2Given)
 
-        public Mechanism Distance;
-        public double Phi;
+        public int P1count = 0;
+        public int P2count = 0;
+        public int P1xP2count = 0;
+        public int Wholecount = 0;
+        
+        
 
+        public ProbDistribn[] P1ProbDistribn = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+        public ProbDistribn[] P2ProbDistribn = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+        public ProbDistribn[] P1xP2 = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+        public ProbDistribn[] WholePurviewProbDistribn = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+
+        public double getmaxProbOfPartn ()
+        {
+            maxP1xP2 = 0.0;
+            for (int i = 0; i < P1xP2count; i++)
+            {
+                if (P1xP2[i].prob > maxP1xP2)
+                {
+                    maxP1xP2 = P1xP2[i].prob;
+                }
+            }
+
+            return maxP1xP2;
+        }
+        Mechanism Distance;
+        double maxP1xP2 = 0.0;
+
+        public double Phi;
     }
 
 
@@ -1013,7 +1065,36 @@ namespace uassociit
             return -1;
         }
 
-        public Mechanism Kernel()
+        public uint? GetPackedLock()
+        {
+            return locked[2] * 100 + locked[10] + locked[0];
+        }
+
+        public void SetLockSig(Triplet<uint?> locks = null, uint? packed_locks = null, string[] sigs = null)
+        {
+            if (locks != null)
+            {
+                locked[0] = locks.left;
+                locked[1] = locks.center % 2;
+                locked[2] = locks.right % 4;
+            }
+
+            if (locks != null)
+            {
+                locked[0] = packed_locks % 2;
+                locked[1] = (packed_locks / 2) % 2;
+                locked[2] = packed_locks % 4;
+            }
+
+            if (sigs != null)
+            {
+                signatures[0] = sigs[(uint)locked[0]];
+                signatures[1] = sigs[(uint)locked[1]];
+                signatures[2] = sigs[(uint)locked[2]];
+            }
+        }
+
+        public uint?[] Kernel(uint?[] in_locked)
         {
             //Every uas receives all signatures sig 0 to sig2 (sig n-1)
             //each cell attempts lock signature[i] 
@@ -1022,9 +1103,9 @@ namespace uassociit
             //Every UAS in cluster switch their locking frequency simultaneously
             //For the sake of modeling they are governed by  
             //(UAS-1 | UAS-2), (UAS-0 & UAS-1), (UAS-1 ^ UAS-2)
-            Mechanism m = new Mechanism(locked[1] | locked[2],
-                                        locked[0] & locked[1],
-                                        locked[1] ^ locked[2]);
+            Mechanism m = new Mechanism(in_locked[1] | in_locked[2],
+                                        in_locked[0] & in_locked[2],
+                                        in_locked[0] ^ in_locked[1]);
 
             //or-and-xor
             //sig[0]=sig[1] or sig[2]
@@ -1043,7 +1124,7 @@ namespace uassociit
             m.signatures[1] = m.signatures[0];
             m.signatures[0] = temp;
 
-            return m;
+            return m.locked;
         }
 
         //Get Cause Effect Reportoire of this Mechanism
@@ -1056,35 +1137,173 @@ namespace uassociit
             return 0.0;
 
         }
-        public List<Mechanism> GetCauseReportoire()
-        {
-            //Triplet<bool> token = new Triplet<bool>();
-            //token.left = (bool)LEFT; token.center = (bool)CENTER; token.right = (bool)RIGHT;
-            //foreach(Partition p in CausePartitions)
-            //{
-            //}
-            List<Mechanism> CauseRep = new List<Mechanism>();
-            if (partition2 == null)
-            {
-                for (uint cid = 0; cid < 8; cid++)
-                {
-                    uint nbase = 2;
-                    uint d2 = cid / (nbase * nbase);
-                    uint d1 = (cid % d2) / nbase;
-                    uint d0 = cid % (d1 * nbase + d2);
 
-                    Mechanism cause = new Mechanism(d2, d1, d0);
-                    if (cause.Kernel().locked[0] == this.locked[0] &&
-                        cause.Kernel().locked[1] == this.locked[1] &&
-                        cause.Kernel().locked[2] == this.locked[2])
+        enum ePartition { P1, P2 };
+        enum Row { SLNO, Ap, Bp, Cp, Ac, Bc, Cc, Va, Vb, Vc };
+
+        
+
+        public double GetPhi(Purview inpurview)
+        { 
+            List<Mechanism> CauseRep = new List<Mechanism>();
+            uint?[,] shadow_counter = new uint?[Size * 3 + 1, 8];
+            int[] outsiders = new int[Size * 3,];
+           // string[] header = string ["Ap", "Bp", "Cp", "Ac", "Bc", "Cc"];
+            double[] Partitions = new double[(int)Math.Round(Math.Pow(2, Size))];
+
+
+            //minority, ie., 1 element is set to null
+            ePartition[] PartInfo = { ePartition.P1, ePartition.P1, ePartition.P2, ePartition.P1, ePartition.P1, ePartition.P2 };//Should be initialized;
+            uint?[,] PartnInfoTable = { { null, 1, 2 }, { 0, null, 2 }, { 0, 1, null }, { 0, 1, 2 } };
+
+            uint?[] inp_locked = { 0, 0, 0 };
+            int[] vcols = new int[2]; 
+            uint? null_ele = null;
+            double phi = 0.0;
+            Partition p = new Partition();
+
+            //Process Each Partition
+            for (int partn_index = 0; partn_index < 4; partn_index++)
+            {
+                uint?[] partn_info = new uint?[Size];
+                partn_info[0] = PartnInfoTable[partn_index, 0];//sglobal.bool2ui(inpurview.ElementState.left);
+                partn_info[1] = PartnInfoTable[partn_index, 0]; sglobal.bool2ui(inpurview.ElementState.center);
+                partn_info[2] = PartnInfoTable[partn_index, 0]; sglobal.bool2ui(inpurview.ElementState.center);
+
+                //mark partition boundary, ie null-found and null-ele
+                for (int j = 0; j < Size; j++)
+                {
+                    if (partn_info[j] == null)
                     {
-                        CauseRep.Add(cause);
+                        //vcols[0] = (int)Row.Va + (j + 1) % 3;
+                        //vcols[1] = (int)Row.Va + (vcols[0] + 1) % 3;
+                        //null_found = true;
+                        null_ele = (uint?)j;                       
+                        break;
+                    }
+                }
+
+                //construct truth-table
+                for (uint count = 0; count < 8; count++)
+                {
+                    //Ap, Bp, Cp
+                    uint? Cp = (count & 0x04) >> 2;
+                    uint? Bp = (count & 0x02) >> 1;
+                    uint? Ap = (count & 0x01);
+
+                    //uint d2 = count / (nbase * nbase);
+                    //uint d1 = (count % d2) / nbase;
+                    //uint d0 = (count % (d1 * nbase + d2));
+
+                    //for (int output = (int)Row.Ac; output <= (int)Row.Cc; output++)
+                    //{
+                    shadow_counter[(int)count, (int)Row.SLNO] = count;
+                    shadow_counter[(int)count, (int)Row.Ap] = locked[0];
+                    shadow_counter[(int)count, (int)Row.Bp] = locked[1];
+                    shadow_counter[(int)count, (int)Row.Cp] = locked[2];
+
+                    uint?[] temp_locked = new uint?[3];
+                    temp_locked[0] = locked[0];
+                    temp_locked[1] = locked[1];
+                    temp_locked[2] = locked[2];
+
+                    //Calculate Ac, Bc, Cc
+                    temp_locked = Kernel(temp_locked);
+                    shadow_counter[(int)count, (int)Row.Ac] = temp_locked[0];
+                    shadow_counter[(int)count, (int)Row.Bc] = temp_locked[1];
+                    shadow_counter[(int)count, (int)Row.Cc] = temp_locked[2];
+
+                    uint prob_index1 = 0;
+                    uint prob_index2 = 0;
+
+
+                    //Current row {Ac, Bc, Cc} met purview conditions. Note its past, partitionwise and whollistically
+                    if ((inpurview.ElementState.left == null || sglobal.ui2bool(temp_locked[0]) == inpurview.ElementState.left) &&
+                         (inpurview.ElementState.center == null || sglobal.ui2bool(temp_locked[1]) == inpurview.ElementState.center) &&
+                         (inpurview.ElementState.right == null || sglobal.ui2bool(temp_locked[2]) == inpurview.ElementState.right))
+                    {
+                        p.P1count = 0;
+                        p.P2count = 0;
+                        for (int col_index = (int)Row.Ap; col_index < (int)Row.Cp; col_index++)
+                        {
+                            if (col_index - (int)Row.Ap == null_ele)
+                            {
+                                //current column is null ie., current element is partition 2
+                                prob_index2 = prob_index2 | 1;
+                                prob_index2 <<= 1;
+                            }
+                            else
+                            {
+                                //current column is not null ie., current element is partition 1
+                                prob_index1 = prob_index1 | 1;
+                                prob_index1 <<= 1;
+                            }
+                        }
+
+                        //A row is processed where hit is found. update hit counts of both partitions
+                        p.P1ProbDistribn[p.P1count].dist_index = (int)prob_index1;
+                        p.P1ProbDistribn[p.P1count].count++;
+
+                        p.P2ProbDistribn[p.P2count].dist_index = (int)prob_index2;
+                        p.P2ProbDistribn[p.P2count].count++;
+                    }
+
+                }
+
+                //truth-table is completed. Partition p's both parts reportoire's are processed
+                //Find probabilities from counts
+                for (int p1 = 0; p1 < p.P1count; p1++)
+                {
+                    p.P1ProbDistribn[p1].prob = (double)p.P1ProbDistribn[p1].count / (double)p.P1count;
+                }
+
+                for (int p2 = 0; p2 < p.P1count; p2++)
+                {
+                    p.P1ProbDistribn[p2].prob = (double)p.P2ProbDistribn[p2].count / (double)p.P2count;
+                }
+
+                //Find cross-product
+                p.P1xP2count = 0;
+                if (p.P1count == 0)
+                {
+                    //P1 partition is NULL, P2 is whole
+                    p.P1xP2count = p.P1count;
+                    p.P1xP2 = p.P1ProbDistribn;
+
+                }
+                else if (p.P2count == 0)
+                {
+                    //P2 partition is NULL, P1 is whole
+                    p.P1xP2count = p.P1count;
+                    p.P1xP2 = p.P1ProbDistribn;
+                }
+                else {
+                    //Both P1 and P2 are not NULL, Take Cross Product P1xP2
+                    for (int p1 = 0; p1 < p.P1count; p1++)
+                    {
+                        for (int p2 = 0; p2 < p.P2count; p2++)
+                        {
+                            p.P1xP2[p.P1xP2count].dist_index = p.P1xP2count;
+                            p.P1xP2[p.P1xP2count].prob = p.P1ProbDistribn[p1].prob * p.P2ProbDistribn[p2].prob;
+                            p.P1xP2count++;
+                        }
+                    }
+                }
+
+                double max = p.getmaxProbOfPartn();
+                
+                if ( > phi)
+                {
+                    if (max > phi)
+                    {
+                        phi = max;                        
                     }
                 }
             }
 
-            return CauseRep;
+            return phi;
         }
+
 
         public double GetEffectInformation() { return 0.0; }
         public List<Mechanism> GetEffectReportoire()
@@ -1112,129 +1331,74 @@ namespace uassociit
 
             return EffectRep;
         }
-        public Mechanism GetCauseMIP()
-        {
-            return new Mechanism(0, 0, 0);
-        }
-
-
-        public List<Purview> GetPurviewList(Purview ()
+        
+        public void GetPhiMax(Triplet<bool> ElemState, ref double cause_phi_max,  ref Purview ccphimax)
         {
             //null,false,false
-
+            List<Purview> PurviewList = new List<Purview>();
+            double cause_phi_max = 0.0;
+            Purview core_cause;
 
             //int boundary = 0;
             for (int cause = 0; cause < Math.Round(Math.Pow(2, Size)); cause++)
             {
-                int cd0 = cause % 2;
-                int cd1 = (cause / 2) % 2;
-                int cd2 = cause / 4;
+                //a, b, c, ab, bc, ac, abc
+                //bcc = null-0-0
+                //ap     1-null-null
+                // .nn, n.n, nn., ..n, .n., n..
+                //   001, 010,  011,100, 101, 110, 111
+                //
+                int[] counter = new int[3];
+                counter[2] = cause % 4;
+                counter[1] = (cause / 2) % 2;
+                counter[0] = cause % 2;
+
 
                 Purview p = new Purview();
                 p.Whole = this;
 
-                //BCc/Ap, BCc/Bp
+                //::BCc/Ap, BCc/Bp
                 for (int k = 0; k < p.Whole.Size; k++)
                 {
-                    uint cur_digit = (uint)p.Whole.locked[k];
-                    if (cur_digit == 1)
+                    //Bc=00 means Whole.locked = { null, 0, 0 }
+                    //BCc/Ap means purviewlist[0]cause = {111, null, null} that means Ap can assume only those values that can make BCc 00
+                    //where as BCp can have unconstrained distribution
+                    //BCc/Ap effect means purviewlist effect = {222, null, null} means Ap should become kernel result of BCc 
+                    //Ac can have unconstrained distributin uc.
+                    if (counter[k] == locked[k])
                     {
-                        p.InPurviewCurrent.locked[k] = 1;
-                        p.InPurviewCause.locked[k] = 1;
-                        p.InPurviewEffect.locked[k] = 1;
+                        //here 111 means not null 
+                        p.InPurviewCause.locked[k] = 111;
+                        //222 means current purview becomes nont null effect
+                        p.InPurviewEffect.locked[k] = 222;
                     }
                     else
                     {
-                        p.InPurviewCurrent.locked[k] = 0;
+                        //
                         p.InPurviewCause.locked[k] = null;
-                        p.InPurviewEffect.locked[k] = 1;
+                        p.InPurviewEffect.locked[k] = null;
                     }
                 }
 
+
                 //P1 is given result, it should be evaluated against all other MIP-Cause Reportoires
                 //Every iteration gives phi of current Purview with its cause and effect
-                p.InPurviewCurrent.CauseReportoire = p.InPurviewCurrent.GetCauseReportoire();
+                p.InPurviewCurrent.Phi= GetPhi(p);
+
+                if (p.InPurviewCurrent.Phi > cause_phi_max)
+                {
+                    cause_phi_max = p.InPurviewCurrent.Phi;
+                    ccphimax = p;
+                }
                 p.InPurviewCurrent.EffectReportoire = p.InPurviewCurrent.GetEffectReportoire();
 
-
-                //double[] cause_phis = p.OutPurviewResult.CauseReportoire[index].GetPhis();
-                //double cause_phi_max[index] = max(cause_phis);
-
-                //double[] effect_phi = p.OutPurviewResult.CauseReportoire[index].GetPhi();
-                //double effect_phi_max = cause_phi_max(effect_phi);
-
-                //Phi_Max = cause_phi_max, effect_phi_max;
-
-
-                //Phi = min(ComputeCausePhi(p.OutPurviewResult, p.OutPurviewResult), ComputeEffectPhi(p.P2Given, p.P2Result));
+                PurviewList.Add(p);
             }
 
-            return new List<Purview>();
-        }
-        public List<Partition> GetPartitionList(Mechanism inpurview)
-        {
-            return new List<Partition>();
+            
         }
 
-        //public double GetPhi()
-        //{
-        //    //cause-phi
-        //    double minphi = 1.0;
-        //    Mechanism mip = new Mechanism(false, false, false);
-        //    foreach (Mechanism cr in CauseReportoire)
-        //    {
-        //        double distance = p.GetDistance(cr);
-        //        if (distance < minphi)
-        //        {
-        //            minphi = distance;
-        //            mip = cr;
-        //        }
-        //    }
 
-        //    double cphi = minphi;
-        //    Mechanism cmip = mip;
-
-        //    //effect-phi
-        //    minphi = 1.0;
-        //    mip = new Mechanism(false, false, false);
-        //    foreach (Mechanism cr in CauseReportoire)
-        //    {
-        //        double distance = GetDistance(cr);
-        //        if (distance < minphi)
-        //        {
-        //            minphi = distance;
-        //            mip = cr;
-        //        }
-        //    }
-
-        //    double ephi = minphi;
-        //    Mechanism emip = mip;
-
-        //    return (cphi < ephi) ? cphi : ephi;
-        //}
-
-        //public List<Partition> GetPartitionList(Triplet<string> whole, ref int minIndex)
-        //{
-        //    return null;
-        //}
-
-        ////Different prob distributions will be caused only when random inputs are there
-        //public double PhiOfCauseReportoire(Triplet<string> whole, int cause_reportoire_id)
-        //{
-
-        //    return 0.0;
-        //}
-
-        //public double PhiOfEffectReportoire(Triplet<string> whole, int cause_reportoire_id)
-        //{
-
-        //    return 0.0;
-        //}
-
-        //public void Distance(double[] reportoire1, double[] reportoire2)
-        //{
-
-        //}
     }
 
     class Triplet<T>
@@ -1275,14 +1439,6 @@ namespace uassociit
         //{
         //    return new Counter(c.v + 1);
         //}
-
-        public static Triplet<T> operator ++(Triplet<T> t)
-        {
-            // int nval = t.left * t.nbase * t.nbase +
-            return new Triplet<T>();
-        }
-
-
 
     }
 
@@ -1376,33 +1532,7 @@ namespace uassociit
                 {
                     BlueCluster[pos] = "*";
                 }
-                //else 
-                //if (BlueScore[pos] >= BlueScore[pos - 1] &&
-                //         BlueScore[pos] >= BlueScore[pos + 1])
-                //{ 
 
-                //it does'nt matter which cluster has engaged each other.
-                //this enables the arrangement of two forces standing face to face
-                //every cluster will try to engage dead-opposite cluster to them. only difference
-                //in locking-signature
-
-
-                //Triplet<string> bluecode = new Triplet<string>();
-                //bluecode.Set(BlueForce[pos - 1], BlueForce[pos], BlueForce[pos + 1]);
-
-                //Triplet<string> redcode = new Triplet<string>();
-                //redcode.Set(RedForce[pos - 1], RedForce[pos], RedForce[pos + 1]);
-
-                //it does'nt matter which cluster has engaged each other.
-                //this enables the arrangement of two forces standing face to face
-                //every cluster will try to engage dead-opposite cluster to them. only difference
-                //in locking-signature
-                //distance = new Triplet<bool>();
-                //distance.Set(BlueForce[pos - 1] == RedForce[pos - 1],
-                //             BlueForce[pos] == RedForce[pos],
-                //             BlueForce[pos + 1] == RedForce[pos + 1]);
-
-                //Mechansisms[pos] = new Mechanism(distance.left, distance.center, distance.right);
 
             }
         }
@@ -1411,11 +1541,42 @@ namespace uassociit
         {
             //process every element but first and last in BlueForce
             //The state at this state is t0 or tcur
+            //MECHANISM is XOR for RED AND BLUE
+            //BUT WHICH CLUSTER
             double min_cephimax = 1.0;
             double avg_phi = 0.0;
             int mincepos = 0;
             int mutation_begin = -4;
             int mutation_end = 4;
+            Purview core_cause = new Purview();
+            Triplet<bool> elemstate = new Triplet<bool?>();
+
+            double mincphi = 0.0;
+
+            for (int pos = 1; pos < num_elems - 1; pos++)
+            {
+                int sindex=0;
+
+                uint?[] cur_locked = Mechanisms[pos].locked;
+                double cphi = 0.0;
+                Purview ccphimax;
+
+                //current state of tracking with RED UAS
+                Mechanism m = new Mechanism(cur_locked[0], cur_locked[1], cur_locked[2]);
+                elemstate.left = (bool)(sglobal.ui2bool(cur_locked[0]));
+                elemstate.center = (bool)sglobal.ui2bool(cur_locked[1]);
+                elemstate.right = (bool)sglobal.ui2bool(cur_locked[2]);
+
+                m.GetPhiMax(elemstate, ref cphi, ref core_cause);
+                
+                if (cphi < mincphi)
+                {
+                    mincphi = cphi;
+                    mincepos = pos;
+                }
+
+                        
+            }
 
             for (int pos = 1; pos < num_elems - 1; pos++)
             {
@@ -1462,78 +1623,7 @@ namespace uassociit
                 Mechanisms[pos].locked[1] = Diff1cur;
                 Mechanisms[pos].locked[2] = Diff2cur;
 
-                //Find Core Cause and Effect with correspondin phimax
 
-                List<Purview> purviews = Mechanisms[pos].GetPurviewList();
-                List<Purview> new_purviews = new List<Purview>();
-
-                //Cause Side
-                foreach (Purview pur in purviews)
-                {
-                    List<Partition> partition_list = pur.Whole.GetPartitionList(pur.InPurviewCurrent);
-                    pur.cause_phi_max = 0.0;
-                    Mechanism core_mech;
-                    foreach (Partition partn in partition_list)
-                    {
-                        double info1 = partn.P1Cause.GetCauseInformation();
-                        double info2 = partn.P1Current.GetCauseInformation();
-                        double phi;
-
-                        if (info1 <= info2)
-                        {
-                            phi = partn.P1Current.DistanceFrom(partn.P1Cause);
-                            core_mech = partn.P1Current;
-                        }
-                        else
-                        {
-                            phi = partn.P1Cause.DistanceFrom(partn.P1Current);
-                            core_mech = partn.P1Cause;
-                        }
-
-                        if (phi > pur.cause_phi_max)
-                        {
-                            pur.cause_phi_max = phi;
-                            pur.CoreCause = core_mech;
-                        }
-                    }
-
-                    //List<Partition> partition_list = pur.Whole.GetPartitionList(pur.InPurviewCurrent);
-                    //Effect Side
-                    pur.effect_phi_max = 0.0;
-                    foreach (Partition partn in partition_list)
-                    {
-                        double info1 = partn.P2Effect.GetEffectInformation();
-                        double info2 = partn.P2Current.GetEffectInformation();
-                        double phi;
-                        if (info1 <= info2)
-                        {
-                            phi = partn.P2Current.DistanceFrom(partn.P2Effect);
-                            core_mech = partn.P2Current;
-                        }
-                        else
-                        {
-                            phi = partn.P2Effect.DistanceFrom(partn.P2Current);
-                            core_mech = partn.P2Effect;
-                        }
-
-                        if (phi > pur.effect_phi_max)
-                        {
-                            pur.effect_phi_max = phi;
-                            pur.CoreEffect = core_mech;
-                        }
-
-                        pur.ce_phi_max = pur.cause_phi_max <= pur.effect_phi_max ? pur.cause_phi_max : pur.effect_phi_max;
-                    }
-
-                    new_purviews.Add(new Purview(pur));
-                    if (min_cephimax < pur.ce_phi_max)
-                    {
-                        //every position will define one purview
-                        avg_phi += pur.ce_phi_max;
-                        min_cephimax = pur.ce_phi_max;
-                        mincepos = pos;
-                    }
-                }
             }
 
         }
@@ -2438,6 +2528,264 @@ namespace uassociit
         }
     }
 }
+
+    //        foreach (Partition partn in partition_list)
+    //        {
+    //            double info1 = partn.P1Cause.GetCauseInformation();
+    //            double info2 = partn.P1Current.GetCauseInformation();
+    //            double phi;
+
+    //            if (info1 <= info2)
+    //            {
+    //                phi = partn.P1Current.DistanceFrom(partn.P1Cause);
+    //                core_mech = partn.P1Current;
+    //            }
+    //            else
+    //            {
+    //                phi = partn.P1Cause.DistanceFrom(partn.P1Current);
+    //                core_mech = partn.P1Cause;
+    //            }
+
+    //            if (phi > pur.cause_phi_max)
+    //            {
+    //                pur.cause_phi_max = phi;
+    //                pur.CoreCause = core_mech;
+    //            }
+    //        }
+
+    //        //List<Partition> partition_list = pur.Whole.GetPartitionList(pur.InPurviewCurrent);
+    //        //Effect Side
+    //        pur.effect_phi_max = 0.0;
+    //        foreach (Partition partn in partition_list)
+    //        {
+    //            double info1 = partn.P2Effect.GetEffectInformation();
+    //            double info2 = partn.P2Current.GetEffectInformation();
+    //            double phi;
+    //            if (info1 <= info2)
+    //            {
+    //                phi = partn.P2Current.DistanceFrom(partn.P2Effect);
+    //                core_mech = partn.P2Current;
+    //            }
+    //            else
+    //            {
+    //                phi = partn.P2Effect.DistanceFrom(partn.P2Current);
+    //                core_mech = partn.P2Effect;
+    //            }
+
+    //            if (phi > pur.effect_phi_max)
+    //            {
+    //                pur.effect_phi_max = phi;
+    //                pur.CoreEffect = core_mech;
+    //            }
+
+    //            pur.ce_phi_max = pur.cause_phi_max <= pur.effect_phi_max ? pur.cause_phi_max : pur.effect_phi_max;
+    //        }
+
+    //        new_purviews.Add(new Purview(pur));
+    //        if (min_cephimax < pur.ce_phi_max)
+    //        {
+    //            //every position will define one purview
+    //            avg_phi += pur.ce_phi_max;
+    //            min_cephimax = pur.ce_phi_max;
+    //            mincepos = pos;
+    //        }
+    //    }
+    //}
+
+    //        for (uint cid = 0; cid < 8; cid++)
+    //        {
+
+
+    //            Mechanism cause = new Mechanism(d2, d1, d0);
+    //            if (cause.Kernel().locked[0] == this.locked[0] &&
+    //                cause.Kernel().locked[1] == this.locked[1] &&
+    //                cause.Kernel().locked[2] == this.locked[2])
+    //            {
+    //                CauseRep.Add(cause);
+    //            }
+    //        }
+    //    }
+
+    //    return CauseRep;
+    //}
+
+    ////enable virtual columns
+    //if ( j == 0)
+    //{
+    //    vcol1 = Row.Vb;
+    //    vcol2 = Row.Vc;
+    //}
+    //else if (j ==1)
+    //{
+    //    vcol1 = Row.Va;
+    //    vcol2 = Row.Vc;
+    //}
+    //else
+    //{
+    //    vcol1 = Row.Va;
+    //    vcol2 = Row.Vb;
+    //}
+
+    //shadow_counter[0] = shadow_counter[1] = shadow_counter[2] = 0;
+    //string mode = "IPV_NORMAL_OPV_NOISE"; //IPV Inside Purview Variable, OPV = Outside....
+    //if (locked[p] == NULL)
+    //{
+
+    //}
+
+
+    //else 
+    //if (BlueScore[pos] >= BlueScore[pos - 1] &&
+    //         BlueScore[pos] >= BlueScore[pos + 1])
+    //{ 
+
+    //it does'nt matter which cluster has engaged each other.
+    //this enables the arrangement of two forces standing face to face
+    //every cluster will try to engage dead-opposite cluster to them. only difference
+    //in locking-signature
+
+
+    //Triplet<string> bluecode = new Triplet<string>();
+    //bluecode.Set(BlueForce[pos - 1], BlueForce[pos], BlueForce[pos + 1]);
+
+    //Triplet<string> redcode = new Triplet<string>();
+    //redcode.Set(RedForce[pos - 1], RedForce[pos], RedForce[pos + 1]);
+
+    //it does'nt matter which cluster has engaged each other.
+    //this enables the arrangement of two forces standing face to face
+    //every cluster will try to engage dead-opposite cluster to them. only difference
+    //in locking-signature
+    //distance = new Triplet<bool>();
+    //distance.Set(BlueForce[pos - 1] == RedForce[pos - 1],
+    //             BlueForce[pos] == RedForce[pos],
+    //             BlueForce[pos + 1] == RedForce[pos + 1]);
+
+    //Mechansisms[pos] = new Mechanism(distance.left, distance.center, distance.right);
+
+
+    //public List<Partition> GetPartitionList(Purview inpurview)
+    //{
+    //    //this is supposed to be current
+    //    List<Partition> PartitionList = new List<Partition>();
+
+    //    Partition p = new Partition();
+    //    p.P1Cause.SetLockSig(null, 900);
+    //    p.P1Current.SetLockSig(null, 900);
+
+    //    PartitionList.Add(p);
+
+    //    return PartitionList;
+
+
+
+
+
+    //This  generates partitions of  inpurview.StateElement.
+    //inpurview.StateElements => BCc:00 
+    //inpurview.InPurviewCurrent => BCc 
+    //inpurview.InPurviewCause   => Ap
+    //------------------------------------------------------------
+    //PartitionList p
+    //p.P1CauseGiven   => [] =>null, null,  null
+    //p.P1CauseP1Result => Cc
+    //
+    //p.P2CauseGiven = Ap = 1, null, null
+    //p.P2CauseRslt = []
+    //generate binary counter till 0 to 2^(n-1), for 3 values 2^(3-1) => 2^2 => 4
+    //000, ,001 010, 011, 100
+
+    //Find Core Cause and Effect with correspondin phimax
+
+    //List<Purview> purviews = Mechanisms[pos].GetPurviewList();
+    //List<Purview> new_purviews = new List<Purview>();
+
+                //Cause Side
+//                foreach (Purview pur in purviews)
+//                {
+//                    List<Partition> partition_list = pur.Whole.GetPartitionList(pur.InPurviewCurrent);
+//    pur.cause_phi_max = 0.0;
+//                    Mechanism core_mech;
+//}
+
+
+
+    //{phi|ABC}, {A|BC}, {B|AC}, {C|AB}
+    //partitions can be generated with nC0 + nC1 +......nCn
+    //for (int count = 0; count < Math.Round(Math.Pow(2, inpurview.Whole.Size)-1); count++)
+    //in interest of time, we will hardcode combinations for three literals.
+    //{
+    //    for (int partn_bar = 0; partn_bar < inpurview.Whole.Size; partn_bar++)
+    //    {
+
+    //        inpurview.InPurviewCurrent.locked[partn_bar] = ;
+    //        p.P1Cause = inpurview.InPurviewCause;
+
+    //        p.P2Current = inpurview.InPurviewCurrent.locked[xxx];
+    //        p.P2Effect = inpurview.InPurviewEffect.locked[xxx];
+    //    }
+    //}
+    //return new List<Partition>();
+}
+
+//public double GetPhi()
+//{
+//    //cause-phi
+//    double minphi = 1.0;
+//    Mechanism mip = new Mechanism(false, false, false);
+//    foreach (Mechanism cr in CauseReportoire)
+//    {
+//        double distance = p.GetDistance(cr);
+//        if (distance < minphi)
+//        {
+//            minphi = distance;
+//            mip = cr;
+//        }
+//    }
+
+//    double cphi = minphi;
+//    Mechanism cmip = mip;
+
+//    //effect-phi
+//    minphi = 1.0;
+//    mip = new Mechanism(false, false, false);
+//    foreach (Mechanism cr in CauseReportoire)
+//    {
+//        double distance = GetDistance(cr);
+//        if (distance < minphi)
+//        {
+//            minphi = distance;
+//            mip = cr;
+//        }
+//    }
+
+//    double ephi = minphi;
+//    Mechanism emip = mip;
+
+//    return (cphi < ephi) ? cphi : ephi;
+//}
+
+//public List<Partition> GetPartitionList(Triplet<string> whole, ref int minIndex)
+//{
+//    return null;
+//}
+
+////Different prob distributions will be caused only when random inputs are there
+//public double PhiOfCauseReportoire(Triplet<string> whole, int cause_reportoire_id)
+//{
+
+//    return 0.0;
+//}
+
+//public double PhiOfEffectReportoire(Triplet<string> whole, int cause_reportoire_id)
+//{
+
+//    return 0.0;
+//}
+
+//public void Distance(double[] reportoire1, double[] reportoire2)
+//{
+
+//}
 
 
 
