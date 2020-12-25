@@ -893,7 +893,8 @@ namespace uassociit
 
         public List<Partition> Partitions = new List<Partition>();
 
-        public double phi_max;
+        public double cause_phi=0.0;
+        public double effect_phi=0.0;
 
         public Purview()
         {
@@ -936,26 +937,50 @@ namespace uassociit
         // BCc/Ap = (Cc/[]) X (Bc/Ap)
         // Result/Given = (P1Result/P1Given) * (P2Result/P2Given)
 
-        public int P1count = 0;
-        public int P2count = 0;
-        public int P1xP2count = 0;
-        public int Wholecount = 0;
-        
-        
+        public int P1countC = 0;
+        public int P2countC = 0;
+        public int P1xP2countC = 0;
+        public int WholecountC = 0;
 
-        public ProbDistribn[] P1ProbDistribn = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
-        public ProbDistribn[] P2ProbDistribn = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
-        public ProbDistribn[] P1xP2 = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
-        public ProbDistribn[] WholePurviewProbDistribn = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+        public int P1countE = 0;
+        public int P2countE = 0;
+        public int P1xP2countE = 0;
+        public int WholecountE = 0;
 
-        public double getmaxProbOfPartn ()
+
+
+        public ProbDistribn[] P1C = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+        public ProbDistribn[] P2C = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+        public ProbDistribn[] P1xP2C = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+        public ProbDistribn[] WholeC = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+
+        public ProbDistribn[] P1E = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+        public ProbDistribn[] P2E = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+        public ProbDistribn[] P1xP2E = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+        public ProbDistribn[] WholeE = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+
+
+        public double getmaxProbOfPartn (CE c)
         {
             maxP1xP2 = 0.0;
-            for (int i = 0; i < P1xP2count; i++)
+            if (c == CE.CAUSE)
             {
-                if (P1xP2[i].prob > maxP1xP2)
+                for (int i = 0; i < P1xP2countC; i++)
                 {
-                    maxP1xP2 = P1xP2[i].prob;
+                    if (P1xP2C[i].prob > maxP1xP2)
+                    {
+                        maxP1xP2 = P1xP2C[i].prob;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < P1xP2countE; i++)
+                {
+                    if (P1xP2E[i].prob > maxP1xP2)
+                    {
+                        maxP1xP2 = P1xP2E[i].prob;
+                    }
                 }
             }
 
@@ -1139,36 +1164,59 @@ namespace uassociit
         }
 
         enum ePartition { P1, P2 };
-        enum Row { SLNO, Ap, Bp, Cp, Ac, Bc, Cc, Va, Vb, Vc };
+        enum Cols { Ap, Bp, Cp, Ac, Bc, Cc, Af, Bf, Cf };
+
+        public bool match_with_null(Triplet<bool?> v1, uint?[] v2)
+        {
+
+            if (!v1.left.HasValue   || ((bool)(v1.left.Value) == (v2[0] == 1)) &&
+                !v1.center.HasValue || ((bool)(v1.center.Value) == (v2[1] == 1)) &&
+                !v1.right.HasValue || ((bool)(v1.right.Value) == (v2[0] == 1)))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
         
 
         public double GetPhi(Purview inpurview)
-        { 
+        {
+            
             List<Mechanism> CauseRep = new List<Mechanism>();
             uint?[,] shadow_counter = new uint?[Size * 3 + 1, 8];
-            int[] outsiders = new int[Size * 3,];
-           // string[] header = string ["Ap", "Bp", "Cp", "Ac", "Bc", "Cc"];
-            double[] Partitions = new double[(int)Math.Round(Math.Pow(2, Size))];
 
+            // int[]    outsiders = new int[Size * 3,];
+            // string[] header = string ["Ap", "Bp", "Cp", "Ac", "Bc", "Cc"];
+            double[] Partitions = new double[(int)Math.Round(Math.Pow(2, Size))];
+           
 
             //minority, ie., 1 element is set to null
-            ePartition[] PartInfo = { ePartition.P1, ePartition.P1, ePartition.P2, ePartition.P1, ePartition.P1, ePartition.P2 };//Should be initialized;
-            uint?[,] PartnInfoTable = { { null, 1, 2 }, { 0, null, 2 }, { 0, 1, null }, { 0, 1, 2 } };
+            ePartition[] PartInfo       = {
+                                            ePartition.P1, ePartition.P1,
+                                            ePartition.P2, ePartition.P1,
+                                            ePartition.P1, ePartition.P2
+                                          };   //Should be initialized;
 
-            uint?[] inp_locked = { 0, 0, 0 };
-            int[] vcols = new int[2]; 
-            uint? null_ele = null;
-            double phi = 0.0;
-            Partition p = new Partition();
+            //========================****************************************================================
+            uint?[,]     PartnInfoTable = { { null, 1, 2 }, { 0, null, 2 }, { 0, 1, null }, { 0, 1, 2 } };
+            uint?[]      inp_locked     = { 0, 0, 0 };
+            int[]        vcols          = new int[2]; 
+            uint?        null_ele       = null;
+            double       phi            = 0.0;
+            Partition    pc             = new Partition();
+            Partition    pe             = new Partition();
 
             //Process Each Partition
             for (int partn_index = 0; partn_index < 4; partn_index++)
             {
                 uint?[] partn_info = new uint?[Size];
                 partn_info[0] = PartnInfoTable[partn_index, 0];//sglobal.bool2ui(inpurview.ElementState.left);
-                partn_info[1] = PartnInfoTable[partn_index, 0]; sglobal.bool2ui(inpurview.ElementState.center);
-                partn_info[2] = PartnInfoTable[partn_index, 0]; sglobal.bool2ui(inpurview.ElementState.center);
+                partn_info[1] = PartnInfoTable[partn_index, 0];//sglobal.bool2ui(inpurview.ElementState.center);
+                partn_info[2] = PartnInfoTable[partn_index, 0];//sglobal.bool2ui(inpurview.ElementState.center);
 
                 //mark partition boundary, ie null-found and null-ele
                 for (int j = 0; j < Size; j++)
@@ -1182,6 +1230,7 @@ namespace uassociit
                         break;
                     }
                 }
+
 
                 //construct truth-table
                 for (uint count = 0; count < 8; count++)
@@ -1197,208 +1246,263 @@ namespace uassociit
 
                     //for (int output = (int)Row.Ac; output <= (int)Row.Cc; output++)
                     //{
-                    shadow_counter[(int)count, (int)Row.SLNO] = count;
-                    shadow_counter[(int)count, (int)Row.Ap] = locked[0];
-                    shadow_counter[(int)count, (int)Row.Bp] = locked[1];
-                    shadow_counter[(int)count, (int)Row.Cp] = locked[2];
+                    //shadow_counter[(int)count, (int)Row.SLNO] = count;
+                    shadow_counter[(int)count, (int)Cols.Ap] = locked[0];
+                    shadow_counter[(int)count, (int)Cols.Bp] = locked[1];
+                    shadow_counter[(int)count, (int)Cols.Cp] = locked[2];
 
-                    uint?[] temp_locked = new uint?[3];
-                    temp_locked[0] = locked[0];
-                    temp_locked[1] = locked[1];
-                    temp_locked[2] = locked[2];
+                    //from loop index count, Calculate Ap, Bp, Cp
+                    uint?[] cause_locked = new uint?[3];
+                    cause_locked[0] = Ap;
+                    cause_locked[1] = Bp;
+                    cause_locked[2] = Cp;
 
-                    //Calculate Ac, Bc, Cc
-                    temp_locked = Kernel(temp_locked);
-                    shadow_counter[(int)count, (int)Row.Ac] = temp_locked[0];
-                    shadow_counter[(int)count, (int)Row.Bc] = temp_locked[1];
-                    shadow_counter[(int)count, (int)Row.Cc] = temp_locked[2];
+                    //from Ap, Bp,Cp and Kernel, Calculate Ac, Bc, Cc
+                    uint?[] current_locked = Kernel(cause_locked);
+                    shadow_counter[(int)count, (int)Cols.Ac] = current_locked[0];
+                    shadow_counter[(int)count, (int)Cols.Bc] = current_locked[1];
+                    shadow_counter[(int)count, (int)Cols.Cc] = current_locked[2];
 
-                    uint prob_index1 = 0;
-                    uint prob_index2 = 0;
+                    //from Ac, Bc,Cc and Kernel, Calculate Af, Bf, Cf
+                    uint?[] effect_locked = Kernel(current_locked);
+                    shadow_counter[(int)count, (int)Cols.Af] = effect_locked[0];
+                    shadow_counter[(int)count, (int)Cols.Bf] = effect_locked[1];
+                    shadow_counter[(int)count, (int)Cols.Cf] = effect_locked[2];
 
+
+                    //uint prob_index1 = 0;
+                    //uint prob_index2 = 0;
 
                     //Current row {Ac, Bc, Cc} met purview conditions. Note its past, partitionwise and whollistically
-                    if ((inpurview.ElementState.left == null || sglobal.ui2bool(temp_locked[0]) == inpurview.ElementState.left) &&
-                         (inpurview.ElementState.center == null || sglobal.ui2bool(temp_locked[1]) == inpurview.ElementState.center) &&
-                         (inpurview.ElementState.right == null || sglobal.ui2bool(temp_locked[2]) == inpurview.ElementState.right))
+                    if (match_with_null(inpurview.ElementState, current_locked))                    
                     {
-                        p.P1count = 0;
-                        p.P2count = 0;
-                        for (int col_index = (int)Row.Ap; col_index < (int)Row.Cp; col_index++)
+                        pc.P1countC = 0;
+                        pc.P2countC = 0;
+                        pc.P1countE = 0;
+                        pc.P2countE = 0;
+
+                        //process cause
+                        uint cause_prob_index1 = 0;
+                        uint cause_prob_index2 = 0;
+                        for (int col_index = (int)Cols.Ap; col_index < (int)Cols.Cp; col_index++)
                         {
-                            if (col_index - (int)Row.Ap == null_ele)
+                            if (col_index - (int)Cols.Ap == null_ele)
                             {
                                 //current column is null ie., current element is partition 2
-                                prob_index2 = prob_index2 | 1;
-                                prob_index2 <<= 1;
+                                cause_prob_index2 = cause_prob_index2 | 1;
+                                cause_prob_index2 <<= 1;
                             }
                             else
                             {
                                 //current column is not null ie., current element is partition 1
-                                prob_index1 = prob_index1 | 1;
-                                prob_index1 <<= 1;
+                                cause_prob_index1 = cause_prob_index1 | 1;
+                                cause_prob_index1 <<= 1;
                             }
                         }
 
-                        //A row is processed where hit is found. update hit counts of both partitions
-                        p.P1ProbDistribn[p.P1count].dist_index = (int)prob_index1;
-                        p.P1ProbDistribn[p.P1count].count++;
+                        //process effect
+                        uint effect_prob_index1 = 0;
+                        uint effect_prob_index2 = 0;
+                        for (int col_index = (int)Cols.Af; col_index < (int)Cols.Cf; col_index++)
+                        {
+                            if (col_index - (int)Cols.Af == null_ele)
+                            {
+                                //current column is null ie., current element is partition 2
+                                effect_prob_index2 = effect_prob_index2 | 1;
+                                effect_prob_index2 <<= 1;
+                            }
+                            else
+                            {
+                                //current column is not null ie., current element is partition 1
+                                effect_prob_index1 = effect_prob_index1 | 1;
+                                effect_prob_index1 <<= 1;
+                            }
+                        }
 
-                        p.P2ProbDistribn[p.P2count].dist_index = (int)prob_index2;
-                        p.P2ProbDistribn[p.P2count].count++;
+
+                        //A row is processed where hit is found. update hit counts of both partitions
+                        pc.P1C[pc.P1countC].dist_index = (int)cause_prob_index1;
+                        pc.P1C[pc.P1countC].count++;
+
+                        pc.P2C[pc.P2countC].dist_index = (int)cause_prob_index2;
+                        pc.P2C[pc.P2countC].count++;
+
+                        pc.P1E[pc.P1countE].dist_index = (int)effect_prob_index1;
+                        pc.P1C[pc.P1countE].count++;
+
+                        pc.P2C[pc.P2countE].dist_index = (int)effect_prob_index2;
+                        pc.P2C[pc.P2countE].count++;
+
+
                     }
 
                 }
 
                 //truth-table is completed. Partition p's both parts reportoire's are processed
                 //Find probabilities from counts
-                for (int p1 = 0; p1 < p.P1count; p1++)
+                for (int p1 = 0; p1 < pc.P1countC; p1++)
                 {
-                    p.P1ProbDistribn[p1].prob = (double)p.P1ProbDistribn[p1].count / (double)p.P1count;
+                    pc.P1C[p1].prob = (double)pc.P1C[p1].count / (double)pc.P1countC;
                 }
 
-                for (int p2 = 0; p2 < p.P1count; p2++)
+                for (int p2 = 0; p2 < pc.P2countC; p2++)
                 {
-                    p.P1ProbDistribn[p2].prob = (double)p.P2ProbDistribn[p2].count / (double)p.P2count;
+                    pc.P2C[p2].prob = (double)pc.P2C[p2].count / (double)pc.P2countC;
                 }
 
                 //Find cross-product
-                p.P1xP2count = 0;
-                if (p.P1count == 0)
+                pc.P1xP2countC = 0;
+                if (pc.P1countC == 0)
                 {
                     //P1 partition is NULL, P2 is whole
-                    p.P1xP2count = p.P1count;
-                    p.P1xP2 = p.P1ProbDistribn;
-
+                    pc.P1xP2countC = pc.P2countC;
+                    pc.P1xP2C = pc.P2C;
                 }
-                else if (p.P2count == 0)
+                else if (pc.P2countC== 0)
                 {
                     //P2 partition is NULL, P1 is whole
-                    p.P1xP2count = p.P1count;
-                    p.P1xP2 = p.P1ProbDistribn;
+                    pc.P1xP2countC = pc.P1countC;
+                    pc.P1xP2C = pc.P1C;
                 }
                 else {
                     //Both P1 and P2 are not NULL, Take Cross Product P1xP2
-                    for (int p1 = 0; p1 < p.P1count; p1++)
+                    for (int p1 = 0; p1 < pc.P1countC; p1++)
                     {
-                        for (int p2 = 0; p2 < p.P2count; p2++)
+                        for (int p2 = 0; p2 < pc.P2countC; p2++)
                         {
-                            p.P1xP2[p.P1xP2count].dist_index = p.P1xP2count;
-                            p.P1xP2[p.P1xP2count].prob = p.P1ProbDistribn[p1].prob * p.P2ProbDistribn[p2].prob;
-                            p.P1xP2count++;
+                            pc.P1xP2C[pc.P1xP2countC].dist_index = pc.P1xP2countC;
+                            pc.P1xP2C[pc.P1xP2countC].prob = pc.P1C[p1].prob * pc.P2C[p2].prob;
+                            pc.P1xP2countC++;
                         }
                     }
                 }
 
-                double max = p.getmaxProbOfPartn();
-                
-                if ( > phi)
+                double max_cause = pc.getmaxProbOfPartn(CE.CAUSE);                
+                inpurview.cause_phi = phi > inpurview.cause_phi? phi : inpurview.cause_phi;
+
+
+                //Effect Side
+                for (int p1 = 0; p1 < pc.P1countE; p1++)
                 {
-                    if (max > phi)
+                    pc.P1E[p1].prob = (double)pc.P1E[p1].count / (double)pc.P1countE;
+                }
+
+                for (int p2 = 0; p2 < pc.P2countE; p2++)
+                {
+                    pc.P2E[p2].prob = (double)pc.P2E[p2].count / (double)pc.P2countE;
+                }
+
+                //Find cross-product
+                pc.P1xP2countE= 0;
+                if (pc.P1countE == 0)
+                {
+                    //P1 partition is NULL, P2 is whole
+                    pc.P1xP2countE = pc.P2countE;
+                    pc.P1xP2E = pc.P2E;
+                }
+                else if (pc.P2countE == 0)
+                {
+                    //P2 partition is NULL, P1 is whole
+                    pc.P1xP2countE = pc.P1countE;
+                    pc.P1xP2E = pc.P1E;
+                }
+                else
+                {
+                    //Both P1 and P2 are not NULL, Take Cross Product P1xP2
+                    for (int p1 = 0; p1 < pc.P1countE; p1++)
                     {
-                        phi = max;                        
+                        for (int p2 = 0; p2 < pc.P2countE; p2++)
+                        {
+                            pc.P1xP2E[pc.P1xP2countE].dist_index = pc.P1xP2countE;
+                            pc.P1xP2E[pc.P1xP2countE].prob = pc.P1E[p1].prob * pc.P2E[p2].prob;
+                            pc.P1xP2countE++;
+                        }
                     }
                 }
+
+                max_effect = pc.getmaxProbOfPartn(CE.EFFECT);
+                inpurview.effect_phi = phi > inpurview.effect_phi ? phi : inpurview.effect_phi;
             }
 
-            return phi;
+            return inpurview.cause_phi < inpurview.effect_phi ? inpurview.cause_phi : inpurview.effect_phi;
         }
 
 
-        public double GetEffectInformation() { return 0.0; }
-        public List<Mechanism> GetEffectReportoire()
-        {
-            List<Mechanism> EffectRep = new List<Mechanism>();
-            if (partition2 == null)
-            {
-                for (uint cid = 0; cid < 8; cid++)
-                {
-                    uint nbase = 2;
-                    uint d2 = cid / (nbase * nbase);
-                    uint d1 = (cid % d2) / nbase;
-                    uint d0 = cid % (d1 * nbase + d2);
-
-                    //which among 8 effects are this's effects
-                    Mechanism effect = new Mechanism(d2, d1, d0);
-                    if (effect.Kernel().locked[0] == this.locked[0] &&
-                         effect.Kernel().locked[1] == this.locked[1] &&
-                         effect.Kernel().locked[2] == this.locked[2])
-                    {
-                        EffectRep.Add(effect);
-                    }
-                }
-            }
-
-            return EffectRep;
-        }
         
-        public void GetPhiMax(Triplet<bool> ElemState, ref double cause_phi_max,  ref Purview ccphimax)
+        
+        public void GetPhiMax(Triplet<bool?> ElemState,   
+                              ref double cphi_max, ref double ephi_max,
+                              ref Purview core_cause, ref Purview core_effect)
         {
             //null,false,false
-            List<Purview> PurviewList = new List<Purview>();
-            double cause_phi_max = 0.0;
-            Purview core_cause;
+            //List<Purview> PurviewList = new List<Purview>();
+            
 
             //int boundary = 0;
-            for (int cause = 0; cause < Math.Round(Math.Pow(2, Size)); cause++)
+            for (int cepur = 0; cepur < Math.Round(Math.Pow(2, Size)); cepur++)
             {
                 //a, b, c, ab, bc, ac, abc
                 //bcc = null-0-0
                 //ap     1-null-null
-                // .nn, n.n, nn., ..n, .n., n..
-                //   001, 010,  011,100, 101, 110, 111
+                //.nn, n.n, nn., ..n, .n., n.., ...
+                //001, 010, 011, 100, 101, 110, 111
                 //
-                int[] counter = new int[3];
-                counter[2] = cause % 4;
-                counter[1] = (cause / 2) % 2;
-                counter[0] = cause % 2;
+                //
+                int[] purview_ce = new int[3];
+                purview_ce[2] = cepur % 4;
+                purview_ce[1] = (cepur / 2) % 2;
+                purview_ce[0] = cepur % 2;
 
 
                 Purview p = new Purview();
                 p.Whole = this;
+                p.Whole.locked[0] = sglobal.bool2ui(ElemState.left);
+                p.Whole.locked[1] = sglobal.bool2ui(ElemState.center);
+                p.Whole.locked[2] = sglobal.bool2ui(ElemState.right);
 
                 //::BCc/Ap, BCc/Bp
                 for (int k = 0; k < p.Whole.Size; k++)
                 {
-                    //Bc=00 means Whole.locked = { null, 0, 0 }
+                    //BCc=00 means Whole.locked = { null, 0, 0 }
                     //BCc/Ap means purviewlist[0]cause = {111, null, null} that means Ap can assume only those values that can make BCc 00
                     //where as BCp can have unconstrained distribution
                     //BCc/Ap effect means purviewlist effect = {222, null, null} means Ap should become kernel result of BCc 
-                    //Ac can have unconstrained distributin uc.
-                    if (counter[k] == locked[k])
+                    //Ac can have unconstrained distribution.                    
+                    if ( purview_ce[k] == 1)
                     {
                         //here 111 means not null 
                         p.InPurviewCause.locked[k] = 111;
-                        //222 means current purview becomes nont null effect
+                        //222 means current purview becomes not null effect
                         p.InPurviewEffect.locked[k] = 222;
                     }
                     else
                     {
-                        //
-                        p.InPurviewCause.locked[k] = null;
+                        p.InPurviewCause.locked[k]  = null;
                         p.InPurviewEffect.locked[k] = null;
                     }
                 }
 
-
                 //P1 is given result, it should be evaluated against all other MIP-Cause Reportoires
                 //Every iteration gives phi of current Purview with its cause and effect
+                //------------------Compute Phi-----------------------------------------
                 p.InPurviewCurrent.Phi= GetPhi(p);
 
-                if (p.InPurviewCurrent.Phi > cause_phi_max)
+                if (p.InPurviewCurrent.CausePhi > cphi_max)
                 {
-                    cause_phi_max = p.InPurviewCurrent.Phi;
-                    ccphimax = p;
+                    cphi_max = p.InPurviewCurrent.CausePhi;
+                    core_cause = p;
                 }
-                p.InPurviewCurrent.EffectReportoire = p.InPurviewCurrent.GetEffectReportoire();
 
-                PurviewList.Add(p);
-            }
+                if (p.InPurviewCurrent.EffectPhi > ephi_max)
+                {
+                    ephi_max = p.InPurviewCurrent.EffectPhi;
+                    core_effect = p;
+                }
 
-            
+                //p.InPurviewCurrent.EffectReportoire = p.InPurviewCurrent.GetEffectReportoire();
+                //PurviewList.Add(p);
+            }            
         }
-
-
     }
 
     class Triplet<T>
@@ -1441,6 +1545,8 @@ namespace uassociit
         //}
 
     }
+
+    enum  CE { CAUSE, EFFECT };
 
     class UAS_SOC_IIT_Engine
     {
@@ -1543,41 +1649,43 @@ namespace uassociit
             //The state at this state is t0 or tcur
             //MECHANISM is XOR for RED AND BLUE
             //BUT WHICH CLUSTER
-            double min_cephimax = 1.0;
-            double avg_phi = 0.0;
+            
             int mincepos = 0;
             int mutation_begin = -4;
             int mutation_end = 4;
-            Purview core_cause = new Purview();
-            Triplet<bool> elemstate = new Triplet<bool?>();
+            
+            Triplet<bool?> elemstate = new Triplet<bool?>();
 
             double mincphi = 0.0;
 
+            //IIT-Phase. find least fit (phi) position
             for (int pos = 1; pos < num_elems - 1; pos++)
             {
-                int sindex=0;
-
                 uint?[] cur_locked = Mechanisms[pos].locked;
                 double cphi = 0.0;
-                Purview ccphimax;
+                double ephi = 0.0;
+                Purview core_cause = new Purview();
+                Purview core_effect = new Purview();
+
 
                 //current state of tracking with RED UAS
-                Mechanism m = new Mechanism(cur_locked[0], cur_locked[1], cur_locked[2]);
-                elemstate.left = (bool)(sglobal.ui2bool(cur_locked[0]));
-                elemstate.center = (bool)sglobal.ui2bool(cur_locked[1]);
-                elemstate.right = (bool)sglobal.ui2bool(cur_locked[2]);
+                Mechanism m = new Mechanism(cur_locked[pos-1], cur_locked[pos], cur_locked[pos+1]);
+                elemstate.left   = sglobal.ui2bool(cur_locked[pos-1]);
+                elemstate.center = sglobal.ui2bool(cur_locked[pos]);
+                elemstate.right  = sglobal.ui2bool(cur_locked[pos+1]);
 
-                m.GetPhiMax(elemstate, ref cphi, ref core_cause);
+                m.GetPhiMax(elemstate,  ref cphi, ref ephi, ref core_cause, ref core_effect);
+                double phi = cphi < ephi ? cphi : ephi;
                 
-                if (cphi < mincphi)
+                if (phi < mincphi)
                 {
                     mincphi = cphi;
                     mincepos = pos;
-                }
-
-                        
+                }                        
             }
 
+
+            //SOC-Phase. Mutate or Hill Climb based on mincepos
             for (int pos = 1; pos < num_elems - 1; pos++)
             {
                 mutation_begin = mincepos - 4;
@@ -1601,7 +1709,7 @@ namespace uassociit
                     //Mechanism cur_mech = new Mechanism(distance.left, distance.center, distance.right);
                     //Multiple Reportoires possible only in case of multiple distributions
                     //Compute Probability Distribution of Causes
-                    Mechanism km = Mechanisms[pos].Kernel();
+                    Mechanisms[pos].locked = Mechanisms[pos].Kernel(Mechanisms[pos].locked);
                 }
 
 
@@ -1622,8 +1730,6 @@ namespace uassociit
                 Mechanisms[pos].locked[0] = Diff0cur;
                 Mechanisms[pos].locked[1] = Diff1cur;
                 Mechanisms[pos].locked[2] = Diff2cur;
-
-
             }
 
         }
@@ -2529,6 +2635,33 @@ namespace uassociit
     }
 }
 
+//public double GetEffectInformation() { return 0.0; }
+        //public List<Mechanism> GetEffectReportoire()
+        //{
+        //    List<Mechanism> EffectRep = new List<Mechanism>();
+        //    if (partition2 == null)
+        //    {
+        //        for (uint cid = 0; cid < 8; cid++)
+        //        {
+        //            uint nbase = 2;
+        //            uint d2 = cid / (nbase * nbase);
+        //            uint d1 = (cid % d2) / nbase;
+        //            uint d0 = cid % (d1 * nbase + d2);
+
+        //            //which among 8 effects are this's effects
+        //            Mechanism effect = new Mechanism(d2, d1, d0);
+        //            if (effect.Kernel().locked[0] == this.locked[0] &&
+        //                 effect.Kernel().locked[1] == this.locked[1] &&
+        //                 effect.Kernel().locked[2] == this.locked[2])
+        //            {
+        //                EffectRep.Add(effect);
+        //            }
+        //        }
+        //    }
+
+        //    return EffectRep;
+        //}
+
     //        foreach (Partition partn in partition_list)
     //        {
     //            double info1 = partn.P1Cause.GetCauseInformation();
@@ -2725,7 +2858,7 @@ namespace uassociit
     //    }
     //}
     //return new List<Partition>();
-}
+
 
 //public double GetPhi()
 //{

@@ -157,7 +157,8 @@ to go
   ]
 
   ;;tick-advance 100 * 0.0001
-  ifelse asset_hit = 0 [set me 0 ] [set me plane_hit / asset_hit]
+  ;set me (me + 0.001)
+  ifelse plane_hit = 0 [set me 0 ] [set me asset_hit / plane_hit]
 
   if not any? planes [stop]
 
@@ -234,7 +235,7 @@ NumberofPlanes
 NumberofPlanes
 1
 50
-5.0
+28.0
 1
 1
 NIL
@@ -249,7 +250,7 @@ NumberofAssets
 NumberofAssets
 1
 50
-5.0
+18.0
 1
 1
 NIL
@@ -318,7 +319,7 @@ Effectiveness
 10.0
 true
 true
-"set-plot-y-range 0 10" ""
+"set-plot-y-range 0 1" ""
 PENS
 "Effectiveness" 1.0 0 -2674135 true "" "plot me"
 
