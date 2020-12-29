@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 //first commit
+//first commit + delta1
 
 namespace selfoc_evoln
 {
@@ -57,7 +58,7 @@ namespace selfoc_evoln
     class soc_population
     {
         public  int size;
-        double[]    buf;      
+        public double[]    buf;      
                
         public soc_population(int psize)
         {
@@ -112,78 +113,17 @@ namespace selfoc_evoln
         public static cyclic_counter ci = new cyclic_counter(32);
         public static Random r = new Random(5);
         public static StreamWriter sw;
+        public static double[] prev_bu;
 
-        public static void init_population()
-        {
-            bool first = true;
-            for (ci = 0;ci < ci.size; ci++)
-            {
-                if (ci == 0)
-                {
-                    if (first)
-                    {
-                        first = false;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                blue_uas[ci] = r.NextDouble();
-            }
-        }
-
-        static public cyclic_counter minfit(soc_population sp)
-        {
-            double minf = 1.0;
-            cyclic_counter minci = 0;
-            bool first = true;
-            for (cyclic_counter ci = 0; ci < blue_uas.size; ci++)
-            {
-                if (ci == 0)
-                {
-                    if (first)
-                    {
-                        first = false;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                
-
-
-                if (blue_uas[ci] < minf)
-                {
-                    minf = blue_uas[ci];
-                    minci.count = ci.count;
-                }
-            }
-            return minci;
-        }
-
-        static public void evolve_next_step()
-        {
-            cyclic_counter minci = minfit(blue_uas);
-
-            //replace 1-left, 1-cur, 1-right with random numbers
-            //totally 3 clusters and 3 cells for each totally 3*3 =9
-            //since 9 cells have to be replaced, 4-left 1-cur 4-right
-            for(cyclic_counter index = minci - 4; index < minci + 4; minci++)
-            {
-                blue_uas[index] = r.NextDouble();
-                sw.WriteLine(blue_uas.ToString());
-                
-            }
-
-        }        
+       
         
         static void Main(string[] args)
         {
             sw  = new StreamWriter("soc.csv");
             init_population();
-            for (int step = 0; step < 10; step++)
+            
+            sw.WriteLine(blue_uas[minfit(blue_uas)]);
+            for (int step = 0; step <  1000 ; step++)
             {
                 evolve_next_step();
             }

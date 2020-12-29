@@ -1005,7 +1005,7 @@ namespace uassociit
 
         //locked will be indexed by MElements.A, MElements.B, MElements.C
         //eg locked[MElements.A] = true
-        public uint?[] locked = new uint?[3];
+        public uint?[] rx_xmit_status = new uint?[3];
         public string[] signatures = new string[3];
 
         Dictionary<string, bool> FreqLock = new Dictionary<string, bool>();
@@ -1055,9 +1055,9 @@ namespace uassociit
             id++;
             sid = id;
 
-            locked[0] = a;
-            locked[1] = b;
-            locked[2] = c;
+            rx_xmit_status[0] = a;
+            rx_xmit_status[1] = b;
+            rx_xmit_status[2] = c;
 
             Size = 3;
             Base = 2;
@@ -1092,30 +1092,30 @@ namespace uassociit
 
         public uint? GetPackedLock()
         {
-            return locked[2] * 100 + locked[10] + locked[0];
+            return rx_xmit_status[2] * 100 + rx_xmit_status[10] + rx_xmit_status[0];
         }
 
         public void SetLockSig(Triplet<uint?> locks = null, uint? packed_locks = null, string[] sigs = null)
         {
             if (locks != null)
             {
-                locked[0] = locks.left;
-                locked[1] = locks.center % 2;
-                locked[2] = locks.right % 4;
+                rx_xmit_status[0] = locks.left;
+                rx_xmit_status[1] = locks.center % 2;
+                rx_xmit_status[2] = locks.right % 4;
             }
 
             if (locks != null)
             {
-                locked[0] = packed_locks % 2;
-                locked[1] = (packed_locks / 2) % 2;
-                locked[2] = packed_locks % 4;
+                rx_xmit_status[0] = packed_locks % 2;
+                rx_xmit_status[1] = (packed_locks / 2) % 2;
+                rx_xmit_status[2] = packed_locks % 4;
             }
 
             if (sigs != null)
             {
-                signatures[0] = sigs[(uint)locked[0]];
-                signatures[1] = sigs[(uint)locked[1]];
-                signatures[2] = sigs[(uint)locked[2]];
+                signatures[0] = sigs[(uint)rx_xmit_status[0]];
+                signatures[1] = sigs[(uint)rx_xmit_status[1]];
+                signatures[2] = sigs[(uint)rx_xmit_status[2]];
             }
         }
 
@@ -1149,7 +1149,7 @@ namespace uassociit
             m.signatures[1] = m.signatures[0];
             m.signatures[0] = temp;
 
-            return m.locked;
+            return m.rx_xmit_status;
         }
 
         //Get Cause Effect Reportoire of this Mechanism
@@ -1247,9 +1247,9 @@ namespace uassociit
                     //for (int output = (int)Row.Ac; output <= (int)Row.Cc; output++)
                     //{
                     //shadow_counter[(int)count, (int)Row.SLNO] = count;
-                    shadow_counter[(int)count, (int)Cols.Ap] = locked[0];
-                    shadow_counter[(int)count, (int)Cols.Bp] = locked[1];
-                    shadow_counter[(int)count, (int)Cols.Cp] = locked[2];
+                    shadow_counter[(int)count, (int)Cols.Ap] = rx_xmit_status[0];
+                    shadow_counter[(int)count, (int)Cols.Bp] = rx_xmit_status[1];
+                    shadow_counter[(int)count, (int)Cols.Cp] = rx_xmit_status[2];
 
                     //from loop index count, Calculate Ap, Bp, Cp
                     uint?[] cause_locked = new uint?[3];
@@ -1428,6 +1428,8 @@ namespace uassociit
         }
 
 
+
+
         
         
         public void GetPhiMax(Triplet<bool?> ElemState,   
@@ -1456,9 +1458,9 @@ namespace uassociit
 
                 Purview p = new Purview();
                 p.Whole = this;
-                p.Whole.locked[0] = sglobal.bool2ui(ElemState.left);
-                p.Whole.locked[1] = sglobal.bool2ui(ElemState.center);
-                p.Whole.locked[2] = sglobal.bool2ui(ElemState.right);
+                p.Whole.rx_xmit_status[0] = sglobal.bool2ui(ElemState.left);
+                p.Whole.rx_xmit_status[1] = sglobal.bool2ui(ElemState.center);
+                p.Whole.rx_xmit_status[2] = sglobal.bool2ui(ElemState.right);
 
                 //::BCc/Ap, BCc/Bp
                 for (int k = 0; k < p.Whole.Size; k++)
@@ -1471,14 +1473,14 @@ namespace uassociit
                     if ( purview_ce[k] == 1)
                     {
                         //here 111 means not null 
-                        p.InPurviewCause.locked[k] = 111;
+                        p.InPurviewCause.rx_xmit_status[k] = 111;
                         //222 means current purview becomes not null effect
-                        p.InPurviewEffect.locked[k] = 222;
+                        p.InPurviewEffect.rx_xmit_status[k] = 222;
                     }
                     else
                     {
-                        p.InPurviewCause.locked[k]  = null;
-                        p.InPurviewEffect.locked[k] = null;
+                        p.InPurviewCause.rx_xmit_status[k]  = null;
+                        p.InPurviewEffect.rx_xmit_status[k] = null;
                     }
                 }
 
@@ -1557,7 +1559,7 @@ namespace uassociit
         string[] RedForce;
         public int num_elems;
         public int cluster_size;
-        string[] RedSignatures = { "C", "A", "B" };
+        bool[] RedXmitStatus = { false, false, false };
 
         //double[] RedScore = new double[num_elems];
         //simple right-rotate is considered. random permutation also can be considered
@@ -1661,7 +1663,7 @@ namespace uassociit
             //IIT-Phase. find least fit (phi) position
             for (int pos = 1; pos < num_elems - 1; pos++)
             {
-                uint?[] cur_locked = Mechanisms[pos].locked;
+                uint?[] cur_locked = Mechanisms[pos].rx_xmit_status;
                 double cphi = 0.0;
                 double ephi = 0.0;
                 Purview core_cause = new Purview();
@@ -1709,7 +1711,7 @@ namespace uassociit
                     //Mechanism cur_mech = new Mechanism(distance.left, distance.center, distance.right);
                     //Multiple Reportoires possible only in case of multiple distributions
                     //Compute Probability Distribution of Causes
-                    Mechanisms[pos].locked = Mechanisms[pos].Kernel(Mechanisms[pos].locked);
+                    Mechanisms[pos].rx_xmit_status = Mechanisms[pos].Kernel(Mechanisms[pos].rx_xmit_status);
                 }
 
 
@@ -1717,19 +1719,20 @@ namespace uassociit
                 int cluster_len = 3;
                 for (int sindex = 0; sindex < cluster_len; sindex++)
                 {
-                    Mechanisms[pos].locked[sindex] =
-                        (Mechanisms[pos].signatures[sindex] == RedSignatures[sindex]) ? (uint)1 : (uint)0;
+                    //Mechanisms[pos].locked[sindex] 
+                    //Blue UAS captures Red Signatures
+                    Mechanisms[pos].rx_xmit_status[sindex] = RedSignatures[sindex]; 
                 }
 
                 //Using OAX machine, and presereving current ones what would be core effect?
-                uint? Diff0cur = (Convert.ToInt32(Mechanisms[pos].locked) == 1) ? (uint?)1 : (uint?)null;
-                uint? Diff1cur = (Convert.ToInt32(Mechanisms[pos].locked) == 1) ? (uint?)1 : (uint?)null;
-                uint? Diff2cur = (Convert.ToInt32(Mechanisms[pos].locked) == 1) ? (uint?)1 : (uint?)null;
+                //uint? Diff0cur = (Convert.ToInt32(Mechanisms[pos].locked) == 1) ? (uint?)1 : (uint?)null;
+                //uint? Diff1cur = (Convert.ToInt32(Mechanisms[pos].locked) == 1) ? (uint?)1 : (uint?)null;
+                //uint? Diff2cur = (Convert.ToInt32(Mechanisms[pos].locked) == 1) ? (uint?)1 : (uint?)null;
 
                 //Find DIFF (with true as is and false as null)
-                Mechanisms[pos].locked[0] = Diff0cur;
-                Mechanisms[pos].locked[1] = Diff1cur;
-                Mechanisms[pos].locked[2] = Diff2cur;
+                //Mechanisms[pos].locked[0] = Diff0cur;
+                //Mechanisms[pos].locked[1] = Diff1cur;
+                //Mechanisms[pos].locked[2] = Diff2cur;
             }
 
         }
@@ -2364,165 +2367,7 @@ namespace uassociit
             return top_level_clusters;
         }
 
-        //Containment Check
-        //TODO:Check whether Combine can be made separate routine...
-        //TODO:Check whether to preserve splitcount == combinecount
-        //TODO:  => i.e.. preserve population count;
-
-        //public List<Cluster> SplitAndCombine(ref List<Cluster> top_level_clusters)
-        //{
-        //    bool combined = false;
-        //    List<int> visited = new List<int>();
-        //    int iter1 = 0;
-
-        //    state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: SplitAndCombine ";
-        //    if (sglobal.logger.entry_exit)
-        //    {
-        //        sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
-        //        sglobal.logger.WriteLine("input0 param top_level_clusters ", ConsoleColor.White, ConsoleColor.Blue);
-
-        //        foreach (Cluster cc in top_level_clusters)
-        //        {
-        //            sglobal.logger.WriteLine(cc.ToString());
-        //        }
-        //    }
-
-        //    for (iter1 = 0; iter1 < top_level_clusters.Count; iter1++)
-        //    {
-        //        top_level_clusters[iter1].visited = false;
-        //    }
-
-        //    int iter_start = -2;
-        //    int inter_end = top_level_clusters.Count;
-        //   // Dictionary<int, int> pairs = new Dictionary<int, int>();
-
-
-        //    while (!combined)
-        //    {
-        //        bool first_iter = true;
-        //        iter_start++;
-        //        iter1 = iter_start;
-
-        //        for (int i=0; i < top_level_clusters.Count; i++)
-        //        {
-        //            top_level_clusters[i].selected = false;
-        //        }
-
-
-
-
-        //        ////while (true)
-        //        //{
-        //        //    //Console.WriteLine("In Loop...");
-        //        //    var rslt = top_level_clusters.FindAll(x => x.selected);
-        //        //    if (!first_iter && ( rslt.Count == 0))
-        //        //    {
-        //        //        break;
-        //        //    }
-        //        //    first_iter = false;
-
-
-        //        //    combined = false;
-        //        //    iter1 = (iter1 + 1) % top_level_clusters.Count;
-        //        //    top_level_clusters[iter1].selected = true;
-
-
-        //            Cluster c1 = top_level_clusters[iter1];
-
-        //            //overlap check. check whether two clusters overlap
-        //            //for (int i=0; i < top_level_clusters.Count; i++)
-        //            //{
-        //            //    if ((c1.id != top_level_clusters[i].id) &&
-        //            //        (top_level_clu.contains(c2.top, c2.left) || c1.contains(c2.bottom, c2.right)))
-        //            //    {
-        //            //        //yes overlap is there, cannot be combined
-        //            //        return false;
-        //            //    }
-
-        //            //}
-
-
-
-        //            //check whether c1 is of low fitness or high
-        //            if (c1.phi < max_split_phi)
-        //            {
-        //                //c1 fitness is low. Split it
-        //                //Split cluster will be deleted and newly added will be marked visited
-        //                //inside the SplitMinPhi
-        //                if (!c1.deleted && !c1.visited)
-        //                {
-        //                    SplitMinPhi(ref top_level_clusters);
-        //                }
-        //            }
-        //            else
-        //            {
-        //                //c1 fitness is high. Combine it with another high phi top-level cluster                    {
-        //                //check whether it is already visited
-        //                //var rslt = visited.Find(x => x == c2.id);
-
-        //                for (int iter2 = 0; iter2 < top_level_clusters.Count; iter2++)
-        //                {
-        //                    Cluster c2 = top_level_clusters[iter2];
-        //                    //Math.Abs(c1.phi - c2.phi) < phi_tolerance
-        //                    if (!c1.deleted && !c2.deleted && !c1.visited && !c1.visited &&
-        //                        c1.id != c2.id && canBeCombined(c1, c2) &&
-        //                        c1.phi > c1.min_combine_phi && c2.phi > c2.min_combine_phi)
-        //                    {
-        //                        //sited.Add(c2.id);
-        //                        //spinning random roulette, for selection
-        //                        //wheel will generate a random number between 0 and 0.1; So if it is less than phi,
-        //                        //it will be combined. Very high phis will not be combined where as intermediate will
-        //                        Cluster c = CombineTwoClusters(c1, c2, top_level_clusters);
-        //                        top_level_clusters.Add(c);
-
-        //                        c = top_level_clusters.Find(x => x.id == c1.id);
-
-        //                        for (int i = 0; i < top_level_clusters.Count; i++)
-        //                        {
-        //                            if (top_level_clusters[i].id == c1.id)
-        //                            {
-        //                                top_level_clusters[i].deleted = true;
-        //                            }
-
-        //                            if (top_level_clusters[i].id == c2.id)
-        //                            {
-        //                                top_level_clusters[i].deleted = true;
-        //                            }
-        //                        }
-
-        //                        c = top_level_clusters.Find(x => x.id == c2.id);
-        //                        top_level_clusters.Remove(c);
-        //                        combined = true;
-        //                        //c2 loop
-        //                        break;
-        //                    }
-        //                }
-        //                //top_level_clusters.RemoveAll(x => x.deleted);
-
-
-
-        //            }
-        //        }
-        //    }
-        //    state = this.GetType().Name + "OBJECT: id " + id + " METHOD: SplitAndCombine";
-        //    if (sglobal.logger.entry_exit)
-        //    {
-        //        sglobal.logger.WriteLine(state);
-        //    }
-        //    state = "@Exit: SplitAndCombine " + "Output ref Param: top_level_list ";
-        //    if (sglobal.logger.entry_exit)
-        //    {
-        //        sglobal.logger.WriteLine(state);
-        //        sglobal.logger.WriteLine("top_level_clusters....");
-        //        foreach (Cluster cc in top_level_clusters)
-        //        {
-        //            sglobal.logger.WriteLine(cc.ToString());
-        //            cc.print(".............cc.id.ToString()............");
-        //        }
-        //    }
-
-        //    return top_level_clusters;
-        //}       
+        
     }
 
     class TestCase
@@ -2636,203 +2481,203 @@ namespace uassociit
 }
 
 //public double GetEffectInformation() { return 0.0; }
-        //public List<Mechanism> GetEffectReportoire()
-        //{
-        //    List<Mechanism> EffectRep = new List<Mechanism>();
-        //    if (partition2 == null)
-        //    {
-        //        for (uint cid = 0; cid < 8; cid++)
-        //        {
-        //            uint nbase = 2;
-        //            uint d2 = cid / (nbase * nbase);
-        //            uint d1 = (cid % d2) / nbase;
-        //            uint d0 = cid % (d1 * nbase + d2);
+//public List<Mechanism> GetEffectReportoire()
+//{
+//    List<Mechanism> EffectRep = new List<Mechanism>();
+//    if (partition2 == null)
+//    {
+//        for (uint cid = 0; cid < 8; cid++)
+//        {
+//            uint nbase = 2;
+//            uint d2 = cid / (nbase * nbase);
+//            uint d1 = (cid % d2) / nbase;
+//            uint d0 = cid % (d1 * nbase + d2);
 
-        //            //which among 8 effects are this's effects
-        //            Mechanism effect = new Mechanism(d2, d1, d0);
-        //            if (effect.Kernel().locked[0] == this.locked[0] &&
-        //                 effect.Kernel().locked[1] == this.locked[1] &&
-        //                 effect.Kernel().locked[2] == this.locked[2])
-        //            {
-        //                EffectRep.Add(effect);
-        //            }
-        //        }
-        //    }
+//            //which among 8 effects are this's effects
+//            Mechanism effect = new Mechanism(d2, d1, d0);
+//            if (effect.Kernel().locked[0] == this.locked[0] &&
+//                 effect.Kernel().locked[1] == this.locked[1] &&
+//                 effect.Kernel().locked[2] == this.locked[2])
+//            {
+//                EffectRep.Add(effect);
+//            }
+//        }
+//    }
 
-        //    return EffectRep;
-        //}
+//    return EffectRep;
+//}
 
-    //        foreach (Partition partn in partition_list)
-    //        {
-    //            double info1 = partn.P1Cause.GetCauseInformation();
-    //            double info2 = partn.P1Current.GetCauseInformation();
-    //            double phi;
+//        foreach (Partition partn in partition_list)
+//        {
+//            double info1 = partn.P1Cause.GetCauseInformation();
+//            double info2 = partn.P1Current.GetCauseInformation();
+//            double phi;
 
-    //            if (info1 <= info2)
-    //            {
-    //                phi = partn.P1Current.DistanceFrom(partn.P1Cause);
-    //                core_mech = partn.P1Current;
-    //            }
-    //            else
-    //            {
-    //                phi = partn.P1Cause.DistanceFrom(partn.P1Current);
-    //                core_mech = partn.P1Cause;
-    //            }
+//            if (info1 <= info2)
+//            {
+//                phi = partn.P1Current.DistanceFrom(partn.P1Cause);
+//                core_mech = partn.P1Current;
+//            }
+//            else
+//            {
+//                phi = partn.P1Cause.DistanceFrom(partn.P1Current);
+//                core_mech = partn.P1Cause;
+//            }
 
-    //            if (phi > pur.cause_phi_max)
-    //            {
-    //                pur.cause_phi_max = phi;
-    //                pur.CoreCause = core_mech;
-    //            }
-    //        }
+//            if (phi > pur.cause_phi_max)
+//            {
+//                pur.cause_phi_max = phi;
+//                pur.CoreCause = core_mech;
+//            }
+//        }
 
-    //        //List<Partition> partition_list = pur.Whole.GetPartitionList(pur.InPurviewCurrent);
-    //        //Effect Side
-    //        pur.effect_phi_max = 0.0;
-    //        foreach (Partition partn in partition_list)
-    //        {
-    //            double info1 = partn.P2Effect.GetEffectInformation();
-    //            double info2 = partn.P2Current.GetEffectInformation();
-    //            double phi;
-    //            if (info1 <= info2)
-    //            {
-    //                phi = partn.P2Current.DistanceFrom(partn.P2Effect);
-    //                core_mech = partn.P2Current;
-    //            }
-    //            else
-    //            {
-    //                phi = partn.P2Effect.DistanceFrom(partn.P2Current);
-    //                core_mech = partn.P2Effect;
-    //            }
+//        //List<Partition> partition_list = pur.Whole.GetPartitionList(pur.InPurviewCurrent);
+//        //Effect Side
+//        pur.effect_phi_max = 0.0;
+//        foreach (Partition partn in partition_list)
+//        {
+//            double info1 = partn.P2Effect.GetEffectInformation();
+//            double info2 = partn.P2Current.GetEffectInformation();
+//            double phi;
+//            if (info1 <= info2)
+//            {
+//                phi = partn.P2Current.DistanceFrom(partn.P2Effect);
+//                core_mech = partn.P2Current;
+//            }
+//            else
+//            {
+//                phi = partn.P2Effect.DistanceFrom(partn.P2Current);
+//                core_mech = partn.P2Effect;
+//            }
 
-    //            if (phi > pur.effect_phi_max)
-    //            {
-    //                pur.effect_phi_max = phi;
-    //                pur.CoreEffect = core_mech;
-    //            }
+//            if (phi > pur.effect_phi_max)
+//            {
+//                pur.effect_phi_max = phi;
+//                pur.CoreEffect = core_mech;
+//            }
 
-    //            pur.ce_phi_max = pur.cause_phi_max <= pur.effect_phi_max ? pur.cause_phi_max : pur.effect_phi_max;
-    //        }
+//            pur.ce_phi_max = pur.cause_phi_max <= pur.effect_phi_max ? pur.cause_phi_max : pur.effect_phi_max;
+//        }
 
-    //        new_purviews.Add(new Purview(pur));
-    //        if (min_cephimax < pur.ce_phi_max)
-    //        {
-    //            //every position will define one purview
-    //            avg_phi += pur.ce_phi_max;
-    //            min_cephimax = pur.ce_phi_max;
-    //            mincepos = pos;
-    //        }
-    //    }
-    //}
+//        new_purviews.Add(new Purview(pur));
+//        if (min_cephimax < pur.ce_phi_max)
+//        {
+//            //every position will define one purview
+//            avg_phi += pur.ce_phi_max;
+//            min_cephimax = pur.ce_phi_max;
+//            mincepos = pos;
+//        }
+//    }
+//}
 
-    //        for (uint cid = 0; cid < 8; cid++)
-    //        {
-
-
-    //            Mechanism cause = new Mechanism(d2, d1, d0);
-    //            if (cause.Kernel().locked[0] == this.locked[0] &&
-    //                cause.Kernel().locked[1] == this.locked[1] &&
-    //                cause.Kernel().locked[2] == this.locked[2])
-    //            {
-    //                CauseRep.Add(cause);
-    //            }
-    //        }
-    //    }
-
-    //    return CauseRep;
-    //}
-
-    ////enable virtual columns
-    //if ( j == 0)
-    //{
-    //    vcol1 = Row.Vb;
-    //    vcol2 = Row.Vc;
-    //}
-    //else if (j ==1)
-    //{
-    //    vcol1 = Row.Va;
-    //    vcol2 = Row.Vc;
-    //}
-    //else
-    //{
-    //    vcol1 = Row.Va;
-    //    vcol2 = Row.Vb;
-    //}
-
-    //shadow_counter[0] = shadow_counter[1] = shadow_counter[2] = 0;
-    //string mode = "IPV_NORMAL_OPV_NOISE"; //IPV Inside Purview Variable, OPV = Outside....
-    //if (locked[p] == NULL)
-    //{
-
-    //}
+//        for (uint cid = 0; cid < 8; cid++)
+//        {
 
 
-    //else 
-    //if (BlueScore[pos] >= BlueScore[pos - 1] &&
-    //         BlueScore[pos] >= BlueScore[pos + 1])
-    //{ 
+//            Mechanism cause = new Mechanism(d2, d1, d0);
+//            if (cause.Kernel().locked[0] == this.locked[0] &&
+//                cause.Kernel().locked[1] == this.locked[1] &&
+//                cause.Kernel().locked[2] == this.locked[2])
+//            {
+//                CauseRep.Add(cause);
+//            }
+//        }
+//    }
 
-    //it does'nt matter which cluster has engaged each other.
-    //this enables the arrangement of two forces standing face to face
-    //every cluster will try to engage dead-opposite cluster to them. only difference
-    //in locking-signature
+//    return CauseRep;
+//}
 
+////enable virtual columns
+//if ( j == 0)
+//{
+//    vcol1 = Row.Vb;
+//    vcol2 = Row.Vc;
+//}
+//else if (j ==1)
+//{
+//    vcol1 = Row.Va;
+//    vcol2 = Row.Vc;
+//}
+//else
+//{
+//    vcol1 = Row.Va;
+//    vcol2 = Row.Vb;
+//}
 
-    //Triplet<string> bluecode = new Triplet<string>();
-    //bluecode.Set(BlueForce[pos - 1], BlueForce[pos], BlueForce[pos + 1]);
+//shadow_counter[0] = shadow_counter[1] = shadow_counter[2] = 0;
+//string mode = "IPV_NORMAL_OPV_NOISE"; //IPV Inside Purview Variable, OPV = Outside....
+//if (locked[p] == NULL)
+//{
 
-    //Triplet<string> redcode = new Triplet<string>();
-    //redcode.Set(RedForce[pos - 1], RedForce[pos], RedForce[pos + 1]);
-
-    //it does'nt matter which cluster has engaged each other.
-    //this enables the arrangement of two forces standing face to face
-    //every cluster will try to engage dead-opposite cluster to them. only difference
-    //in locking-signature
-    //distance = new Triplet<bool>();
-    //distance.Set(BlueForce[pos - 1] == RedForce[pos - 1],
-    //             BlueForce[pos] == RedForce[pos],
-    //             BlueForce[pos + 1] == RedForce[pos + 1]);
-
-    //Mechansisms[pos] = new Mechanism(distance.left, distance.center, distance.right);
-
-
-    //public List<Partition> GetPartitionList(Purview inpurview)
-    //{
-    //    //this is supposed to be current
-    //    List<Partition> PartitionList = new List<Partition>();
-
-    //    Partition p = new Partition();
-    //    p.P1Cause.SetLockSig(null, 900);
-    //    p.P1Current.SetLockSig(null, 900);
-
-    //    PartitionList.Add(p);
-
-    //    return PartitionList;
+//}
 
 
+//else 
+//if (BlueScore[pos] >= BlueScore[pos - 1] &&
+//         BlueScore[pos] >= BlueScore[pos + 1])
+//{ 
+
+//it does'nt matter which cluster has engaged each other.
+//this enables the arrangement of two forces standing face to face
+//every cluster will try to engage dead-opposite cluster to them. only difference
+//in locking-signature
+
+
+//Triplet<string> bluecode = new Triplet<string>();
+//bluecode.Set(BlueForce[pos - 1], BlueForce[pos], BlueForce[pos + 1]);
+
+//Triplet<string> redcode = new Triplet<string>();
+//redcode.Set(RedForce[pos - 1], RedForce[pos], RedForce[pos + 1]);
+
+//it does'nt matter which cluster has engaged each other.
+//this enables the arrangement of two forces standing face to face
+//every cluster will try to engage dead-opposite cluster to them. only difference
+//in locking-signature
+//distance = new Triplet<bool>();
+//distance.Set(BlueForce[pos - 1] == RedForce[pos - 1],
+//             BlueForce[pos] == RedForce[pos],
+//             BlueForce[pos + 1] == RedForce[pos + 1]);
+
+//Mechansisms[pos] = new Mechanism(distance.left, distance.center, distance.right);
+
+
+//public List<Partition> GetPartitionList(Purview inpurview)
+//{
+//    //this is supposed to be current
+//    List<Partition> PartitionList = new List<Partition>();
+
+//    Partition p = new Partition();
+//    p.P1Cause.SetLockSig(null, 900);
+//    p.P1Current.SetLockSig(null, 900);
+
+//    PartitionList.Add(p);
+
+//    return PartitionList;
 
 
 
-    //This  generates partitions of  inpurview.StateElement.
-    //inpurview.StateElements => BCc:00 
-    //inpurview.InPurviewCurrent => BCc 
-    //inpurview.InPurviewCause   => Ap
-    //------------------------------------------------------------
-    //PartitionList p
-    //p.P1CauseGiven   => [] =>null, null,  null
-    //p.P1CauseP1Result => Cc
-    //
-    //p.P2CauseGiven = Ap = 1, null, null
-    //p.P2CauseRslt = []
-    //generate binary counter till 0 to 2^(n-1), for 3 values 2^(3-1) => 2^2 => 4
-    //000, ,001 010, 011, 100
 
-    //Find Core Cause and Effect with correspondin phimax
 
-    //List<Purview> purviews = Mechanisms[pos].GetPurviewList();
-    //List<Purview> new_purviews = new List<Purview>();
+//This  generates partitions of  inpurview.StateElement.
+//inpurview.StateElements => BCc:00 
+//inpurview.InPurviewCurrent => BCc 
+//inpurview.InPurviewCause   => Ap
+//------------------------------------------------------------
+//PartitionList p
+//p.P1CauseGiven   => [] =>null, null,  null
+//p.P1CauseP1Result => Cc
+//
+//p.P2CauseGiven = Ap = 1, null, null
+//p.P2CauseRslt = []
+//generate binary counter till 0 to 2^(n-1), for 3 values 2^(3-1) => 2^2 => 4
+//000, ,001 010, 011, 100
 
-                //Cause Side
+//Find Core Cause and Effect with correspondin phimax
+
+//List<Purview> purviews = Mechanisms[pos].GetPurviewList();
+//List<Purview> new_purviews = new List<Purview>();
+
+//Cause Side
 //                foreach (Purview pur in purviews)
 //                {
 //                    List<Partition> partition_list = pur.Whole.GetPartitionList(pur.InPurviewCurrent);
@@ -2842,22 +2687,22 @@ namespace uassociit
 
 
 
-    //{phi|ABC}, {A|BC}, {B|AC}, {C|AB}
-    //partitions can be generated with nC0 + nC1 +......nCn
-    //for (int count = 0; count < Math.Round(Math.Pow(2, inpurview.Whole.Size)-1); count++)
-    //in interest of time, we will hardcode combinations for three literals.
-    //{
-    //    for (int partn_bar = 0; partn_bar < inpurview.Whole.Size; partn_bar++)
-    //    {
+//{phi|ABC}, {A|BC}, {B|AC}, {C|AB}
+//partitions can be generated with nC0 + nC1 +......nCn
+//for (int count = 0; count < Math.Round(Math.Pow(2, inpurview.Whole.Size)-1); count++)
+//in interest of time, we will hardcode combinations for three literals.
+//{
+//    for (int partn_bar = 0; partn_bar < inpurview.Whole.Size; partn_bar++)
+//    {
 
-    //        inpurview.InPurviewCurrent.locked[partn_bar] = ;
-    //        p.P1Cause = inpurview.InPurviewCause;
+//        inpurview.InPurviewCurrent.locked[partn_bar] = ;
+//        p.P1Cause = inpurview.InPurviewCause;
 
-    //        p.P2Current = inpurview.InPurviewCurrent.locked[xxx];
-    //        p.P2Effect = inpurview.InPurviewEffect.locked[xxx];
-    //    }
-    //}
-    //return new List<Partition>();
+//        p.P2Current = inpurview.InPurviewCurrent.locked[xxx];
+//        p.P2Effect = inpurview.InPurviewEffect.locked[xxx];
+//    }
+//}
+//return new List<Partition>();
 
 
 //public double GetPhi()
@@ -2931,4 +2776,162 @@ namespace uassociit
 //        tempCanvas[i, j] = sglobal.Sky[i, j];
 //        tempColors1[i, j] = DefaultColors[i, j];
 //    }
+//}
+
+//Containment Check
+//TODO:Check whether Combine can be made separate routine...
+//TODO:Check whether to preserve splitcount == combinecount
+//TODO:  => i.e.. preserve population count;
+
+//public List<Cluster> SplitAndCombine(ref List<Cluster> top_level_clusters)
+//{
+//    bool combined = false;
+//    List<int> visited = new List<int>();
+//    int iter1 = 0;
+
+//    state = "@Entry: Class:" + this.GetType().Name + " Object: id " + id + " METHOD: SplitAndCombine ";
+//    if (sglobal.logger.entry_exit)
+//    {
+//        sglobal.logger.WriteLine(state, ConsoleColor.White, ConsoleColor.Blue);
+//        sglobal.logger.WriteLine("input0 param top_level_clusters ", ConsoleColor.White, ConsoleColor.Blue);
+
+//        foreach (Cluster cc in top_level_clusters)
+//        {
+//            sglobal.logger.WriteLine(cc.ToString());
+//        }
+//    }
+
+//    for (iter1 = 0; iter1 < top_level_clusters.Count; iter1++)
+//    {
+//        top_level_clusters[iter1].visited = false;
+//    }
+
+//    int iter_start = -2;
+//    int inter_end = top_level_clusters.Count;
+//   // Dictionary<int, int> pairs = new Dictionary<int, int>();
+
+
+//    while (!combined)
+//    {
+//        bool first_iter = true;
+//        iter_start++;
+//        iter1 = iter_start;
+
+//        for (int i=0; i < top_level_clusters.Count; i++)
+//        {
+//            top_level_clusters[i].selected = false;
+//        }
+
+
+
+
+//        ////while (true)
+//        //{
+//        //    //Console.WriteLine("In Loop...");
+//        //    var rslt = top_level_clusters.FindAll(x => x.selected);
+//        //    if (!first_iter && ( rslt.Count == 0))
+//        //    {
+//        //        break;
+//        //    }
+//        //    first_iter = false;
+
+
+//        //    combined = false;
+//        //    iter1 = (iter1 + 1) % top_level_clusters.Count;
+//        //    top_level_clusters[iter1].selected = true;
+
+
+//            Cluster c1 = top_level_clusters[iter1];
+
+//            //overlap check. check whether two clusters overlap
+//            //for (int i=0; i < top_level_clusters.Count; i++)
+//            //{
+//            //    if ((c1.id != top_level_clusters[i].id) &&
+//            //        (top_level_clu.contains(c2.top, c2.left) || c1.contains(c2.bottom, c2.right)))
+//            //    {
+//            //        //yes overlap is there, cannot be combined
+//            //        return false;
+//            //    }
+
+//            //}
+
+
+
+//            //check whether c1 is of low fitness or high
+//            if (c1.phi < max_split_phi)
+//            {
+//                //c1 fitness is low. Split it
+//                //Split cluster will be deleted and newly added will be marked visited
+//                //inside the SplitMinPhi
+//                if (!c1.deleted && !c1.visited)
+//                {
+//                    SplitMinPhi(ref top_level_clusters);
+//                }
+//            }
+//            else
+//            {
+//                //c1 fitness is high. Combine it with another high phi top-level cluster                    {
+//                //check whether it is already visited
+//                //var rslt = visited.Find(x => x == c2.id);
+
+//                for (int iter2 = 0; iter2 < top_level_clusters.Count; iter2++)
+//                {
+//                    Cluster c2 = top_level_clusters[iter2];
+//                    //Math.Abs(c1.phi - c2.phi) < phi_tolerance
+//                    if (!c1.deleted && !c2.deleted && !c1.visited && !c1.visited &&
+//                        c1.id != c2.id && canBeCombined(c1, c2) &&
+//                        c1.phi > c1.min_combine_phi && c2.phi > c2.min_combine_phi)
+//                    {
+//                        //sited.Add(c2.id);
+//                        //spinning random roulette, for selection
+//                        //wheel will generate a random number between 0 and 0.1; So if it is less than phi,
+//                        //it will be combined. Very high phis will not be combined where as intermediate will
+//                        Cluster c = CombineTwoClusters(c1, c2, top_level_clusters);
+//                        top_level_clusters.Add(c);
+
+//                        c = top_level_clusters.Find(x => x.id == c1.id);
+
+//                        for (int i = 0; i < top_level_clusters.Count; i++)
+//                        {
+//                            if (top_level_clusters[i].id == c1.id)
+//                            {
+//                                top_level_clusters[i].deleted = true;
+//                            }
+
+//                            if (top_level_clusters[i].id == c2.id)
+//                            {
+//                                top_level_clusters[i].deleted = true;
+//                            }
+//                        }
+
+//                        c = top_level_clusters.Find(x => x.id == c2.id);
+//                        top_level_clusters.Remove(c);
+//                        combined = true;
+//                        //c2 loop
+//                        break;
+//                    }
+//                }
+//                //top_level_clusters.RemoveAll(x => x.deleted);
+//
+//            }
+//        }
+//    }
+//    state = this.GetType().Name + "OBJECT: id " + id + " METHOD: SplitAndCombine";
+//    if (sglobal.logger.entry_exit)
+//    {
+//        sglobal.logger.WriteLine(state);
+//    }
+//    state = "@Exit: SplitAndCombine " + "Output ref Param: top_level_list ";
+//    if (sglobal.logger.entry_exit)
+//    {
+//        sglobal.logger.WriteLine(state);
+//        sglobal.logger.WriteLine("top_level_clusters....");
+//        foreach (Cluster cc in top_level_clusters)
+//        {
+//            sglobal.logger.WriteLine(cc.ToString());
+//            cc.print(".............cc.id.ToString()............");
+//        }
+//    }
+
+//    return top_level_clusters;
 //}
