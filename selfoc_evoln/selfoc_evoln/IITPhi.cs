@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,12 @@ using System.Threading.Tasks;
 
 namespace selfoc_evoln
 {
+    static class sglobal
+    {
+        public static Random r;
+        public static StreamWriter sw;
+    }
+
     class IIT_Phi
     {
         string[] BlueForce;
