@@ -34,6 +34,7 @@ namespace uassociit
                 permutations = permutations.Join(digits, permutation => true, digit => true, (permutation, digit) => permutation.Contains(digit) ? null : string.Concat(permutation, digit)).Where(permutation => permutation != null);
             }
             return permutations.Select(permutation => Convert.ToInt32(permutation)).OrderBy(permutation => permutation).ToArray();
+
         }
 
         public static int[] FindPermutations(this int[] self)

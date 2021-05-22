@@ -437,6 +437,8 @@ namespace uassociit
             sglobal.SkyCol = order;
         }
 
+
+
         public void initCanvas(string[,] initial_canvas)
         {
 
@@ -476,10 +478,7 @@ namespace uassociit
                     }
                 }
             }
-
         }
-
-
 
         public void Clear()
         {
@@ -936,7 +935,6 @@ namespace uassociit
 
         // BCc/Ap = (Cc/[]) X (Bc/Ap)
         // Result/Given = (P1Result/P1Given) * (P2Result/P2Given)
-
         public int P1countC = 0;
         public int P2countC = 0;
         public int P1xP2countC = 0;
@@ -947,10 +945,8 @@ namespace uassociit
         public int P1xP2countE = 0;
         public int WholecountE = 0;
 
-
-
-        public ProbDistribn[] P1C = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
-        public ProbDistribn[] P2C = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+        public ProbDistribn[] P1C    = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
+        public ProbDistribn[] P2C    = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
         public ProbDistribn[] P1xP2C = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
         public ProbDistribn[] WholeC = new ProbDistribn[(int)Math.Round(Math.Pow(2, 3))];
 
@@ -986,7 +982,9 @@ namespace uassociit
 
             return maxP1xP2;
         }
+
         Mechanism Distance;
+
         double maxP1xP2 = 0.0;
 
         public double Phi;
@@ -1179,9 +1177,7 @@ namespace uassociit
             {
                 return false;
             }
-        }
-
-        
+        }        
 
         public double GetPhi(Purview inpurview)
         {
@@ -1425,12 +1421,7 @@ namespace uassociit
             }
 
             return inpurview.cause_phi < inpurview.effect_phi ? inpurview.cause_phi : inpurview.effect_phi;
-        }
-
-
-
-
-        
+        }        
         
         public void GetPhiMax(Triplet<bool?> ElemState,   
                               ref double cphi_max, ref double ephi_max,
@@ -2410,7 +2401,7 @@ namespace uassociit
         }
 
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
 
             ConsoleUiManager cuim = new ConsoleUiManager();
