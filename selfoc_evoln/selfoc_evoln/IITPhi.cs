@@ -87,7 +87,13 @@ namespace selfoc_evoln
         int SYM_NUM_4 = 4;
         int pcount;
 
-        public bool[] locked = new bool[3];
+        //only one state per radar
+        //making locked variable than array
+        //public bool[] locked = new bool[3];
+
+        //three entries refer to past, present and future of 
+        //current mechanism - not to be confused with left-current-right
+        public bool[] locked = { false, false, false };
 
         bool[,] state_table = new bool[8, 9];
         bool[] cause_s = { false, false, false, false, false, false, false, false };
@@ -257,7 +263,7 @@ namespace selfoc_evoln
 
                 if (areEqual(state_table[row_index, d2], state_table[row_index, d1], state_table[row_index, d0], Acs, Bcs, Ccs))
                 {
-                    cause_s[row_index] = true;
+                    cause_s[row_index] = true;  
                 }
             }
 
