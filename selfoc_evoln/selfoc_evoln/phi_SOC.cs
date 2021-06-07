@@ -62,17 +62,18 @@ namespace selfoc_evoln
 
     class soc_population
     {
-        public int size;
+        public int population_size;
+        public int cluster_size;
         public int generation = 0;
         public Mechanism[] buf;
-        
-
-         
-        public soc_population(int psize)
+        //public int min_fit_pos;
+        //public double min_fitness;
+                 
+        public soc_population(int psize, int csize = 3)
         {
-            size = psize;
-            buf = new Mechanism[size];
-
+            population_size = psize;
+            buf             = new Mechanism[population_size];
+            cluster_size    = csize;
         }
 
         public Mechanism this[cyclic_counter key]
@@ -83,14 +84,14 @@ namespace selfoc_evoln
 
         public Mechanism GetValue(cyclic_counter index)
         {
-            Debug.Assert(index < 2 * size);
+            Debug.Assert(index < 2 * population_size);
             if (index < 0)
             {
-                index = size - index;
+                index = population_size - index;
             }
-            else if (index >= size)
+            else if (index >= population_size)
             {
-                index = size + index;
+                index = population_size + index;
             }
             return buf[index];
         }
@@ -140,14 +141,14 @@ namespace selfoc_evoln
 
         }
 
-        public cyclic_counter minfit()
+        public int minfit()
         {
             double minf = 1.0;
-            cyclic_counter minci = 0;
+            int mini = 0;
             //bool first = true;
 
 
-            for (cyclic_counter ci = 0; ci.deltas < size; ci++)
+            for (int i = 0; i < population_size; i++)
             {
                 //if (ci == 0)
                 //{
@@ -161,84 +162,74 @@ namespace selfoc_evoln
                 //    }
                 //}
 
-                if (buf[ci].fitness < minf)
+                if (buf[i].fitness < minf)
                 {
-                    minf = buf[ci].fitness;
-                    minci.count = ci.count;
+                    minf = buf[i].fitness;
+                    mini = i;
                 }
             }
-            return minci;
+            return mini;
         }
         
         public void evolve_next_step()
         {
             generation++;
-            cyclic_counter minci = minfit();
+            int minci = minfit();
             double minf = buf[minci].fitness;
-            //sglobal.sw.WriteLine(minf.ToString());
-            double[] fitness = new double[32];
-            
-            
+
+            //min_fit_pos = minci;
+            //min_fitness = minf;
+
+            //sglobal.sw.WriteLine(minf.ToString());                       
+           
 
             //replace 1-left, 1-cur, 1-right with random numbers
             //totally 3 clusters and 3 cells for each totally 3*3 =9
             //since 9 cells have to be replaced, 4-left 1-cur 4-right
             int index;
-            int min_index = minci.count;
-            int brndm_index = (min_index + size - 4) % size;
-            int erndm_index = (min_index + size + 4 + 1) % size;
+            int min_index = minci;
+            int brndm_index = (min_index + population_size - 4) % population_size;
+            int erndm_index = (min_index + population_size + 4 + 1) % population_size;
 
             string fitness_csv = string.Empty;
 
-            //for (index = brndm_index; index != erndm_index; index = (index + 1) % size)
-            //{
-            //    buf[index].locked[index] = Convert.ToBoolean(sglobal.r.Next(2));
-            //    buf[index].ComputePhi(); ;
-            //}
+            
+            int REAL = 0;
+            int DUMMY = 1;
+            int mode_comp_fitness = DUMMY;
 
-            //index = brndm_index;
-            //double phi = buf[index].ComputePhi();
+            if (mode_comp_fitness == REAL)
+            {
 
-            //brute-force and short-cut computation of fitness
-            //of a Species (Mechanism or UAV)
-            //just get random number
-            for (index = brndm_index; index != erndm_index;)                              
-            {                                
-                buf[index].fitness = sglobal.r.Next(2);
+                for (index = 0; index < buf.Length; index++)
+                {
+                    buf[index].fitness = buf[index].ComputePhi();
+                    //fitness of all species in population
+                    //fitness_csv += buf[index].fitness + ",";
+                }
 
-                fitness_csv += buf[index].fitness + ",";
-
-                //buf[index].locked[0] = Convert.ToBoolean(sglobal.r.Next(2));
-                //buf[index].locked[1] = Convert.ToBoolean(sglobal.r.Next(2));
-                //buf[index].locked[2] = Convert.ToBoolean(sglobal.r.Next(2));
-                index = (index + 1) % size;
             }
+            else
+            {
+                //brute-force and short-cut computation of fitness
+                //of a Species (Mechanism or UAV)
+                //just get random number
+                double total_fitness = 0.0, average_fitness = 0.0;
 
-            //Code for real scenario. Should be uncommented.
-             
-            //for (index = 0; index < buf.Length; index++)
-            //{
-            //    buf[index].fitness = buf[index].ComputePhi();
-            //    //fitness of all species in population
-            //    fitness_csv += buf[index].fitness + ",";
-            //}
+                for (index = brndm_index; index != erndm_index;)
+                {
+                    buf[index].fitness = sglobal.r.NextDouble();
+                    total_fitness += buf[index].fitness;
 
-            //sglobal.dsw.Write("hello");
-
-            //fitness_csv.TrimEnd(',');
-            //string s = fitness_csv;
-
-            //bool onClose = false;
-            //if (generation < 5)
-            //{
-            //    sglobal.dsw.WriteLine(fitness_csv);
-            //}
-
-            //if (generation ==5)
-            //{
-            //    sglobal.dsw.Close();                
-            //}
-            //generation++;
+                    //fitness_csv += buf[index].fitness + ",";
+                    //buf[index].locked[0] = Convert.ToBoolean(sglobal.r.Next(2));
+                    //buf[index].locked[1] = Convert.ToBoolean(sglobal.r.Next(2));
+                    //buf[index].locked[2] = Convert.ToBoolean(sglobal.r.Next(2));
+                    index = (index + 1) % population_size;
+                }
+                average_fitness = (total_fitness / population_size);
+                //fitness_csv += average_fitness;
+            }    
         }
     }
 }

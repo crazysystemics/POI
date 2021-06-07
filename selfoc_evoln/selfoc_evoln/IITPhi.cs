@@ -17,7 +17,7 @@ namespace selfoc_evoln
     {
         public static Random r;
         public static StreamWriter sw; //= new StreamWriter("debug.csv");
-        public static StreamWriter dsw = new StreamWriter("ddebug.csv");
+        //public static StreamWriter dsw = new StreamWriter("ddebug.csv");
         public static row_lbls rl;
         public static col_lbls cl;
         public static bool store_debug;
@@ -25,12 +25,12 @@ namespace selfoc_evoln
 
     class Partition
     {
-        public int[] p1 = new int[3];
-        public int p1_count;
-        public int[] p2 = new int[3];
-        public int p2_count;
+        public int[]  p1 = new int[3];
+        public int    p1_count;
+        public int[]  p2 = new int[3];
+        public int    p2_count;
         public bool[] p1p2 = new bool[8];
-        public int p1p2_count;
+        public int    p1p2_count;
     }
 
 
