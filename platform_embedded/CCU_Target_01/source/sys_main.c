@@ -71,6 +71,7 @@ int main(void)
 {
 /* USER CODE BEGIN (3) */
     int i;
+    int test_var=0;
     static unsigned char command;
      /* spiDAT1_t dataconfig_t;
       uint16_t txBuffer[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0xAA, 0x55, 0x99};
