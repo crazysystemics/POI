@@ -17,11 +17,27 @@ using System.Threading.Tasks;
 //00_06: UAS_Swarm => (IIT Network) => phi => phi as SOC parameter
 //00_07: Merging with earlier code. blue_uas[i].evolve_next_step
 //00_08: Conditiona formatting for cluster should be seen, Marking VVV before mutation...
-namespace selfoc_evoln
+//git test 01
+namespace uas_soc_iit_dt
 {
 
     class Program
     {
+        //Algorithm: 
+        //1. Compute Clusters based on Algorithm
+        //2. Given Current State s and previous purview p
+        //3. When same cluster continues, with noisy state s (noisy a, b or c)
+        //4. When same 
+
+        //1. Every Mechanism in Population is candidate for center of cluster.
+        //2. Its fitness is computed by taking its and its neighbors data.
+        //3. Transitions in sequence formed by its LEFT, ITSELF, its RIGHT are observed
+        //4. and fitness computed. Thus phi is nothing but fitness of Mechanism-x is 
+        //5. fitness of Cluster with Mechanism-x as center and its neighbors following OAX sequence
+
+        //6. By replacing random fitness, in fact random cluster centers are being declared in the 
+        //7. neighborhood thus disturbing equillibrium in ad-hoc way (mutation)
+
         public static soc_population blue_uas = new soc_population(32);
         public static cyclic_counter ci = new cyclic_counter(32);
         public static Random r = new Random(5);
@@ -96,63 +112,79 @@ namespace selfoc_evoln
                                        + blue_uas.population_size % blue_uas.population_size;
                 int right_limit = count + blue_uas.cluster_size % blue_uas.population_size;
 
-                bool boundary_crossed = false;
-                int index = min_index;
-                while (index != left_limit)
+                foreach (string s in current_population_species_fitness_list)
                 {
-                    //change
-                    if (!boundary_crossed)
+                    // (min_fit_pos + 1 ) is to skip "step" column
+                    //left_limit <= right_limit:  a1
+                    //left_limit > right_limit:   !a1
+                    //count >= left_limit         a2
+                    // count <= right_limit       a3
+                    //count >=  0                 b2
+                    //count < right_limit         b3
+                    //count >= left_limit         b4
+                    //count <= blue_uas.population_size   b5
+
+                    //(a1 * a2 * a3) + (b1 * (b2 * b3) * (b4 + b5))
+                    //= (a1 + !a1) * ((b1 * b2 * b3) * (b4 +b5))
+                    //= (a1.a2.a3) + (b1.b2.b3.b4 + b1.b2.b3.b5)
+                    //= a1..a13 + b1..b5 + b2..b5
+
+                    if (( //[a * b * c]
+                        left_limit <= right_limit &&
+                        count >= left_limit && count <= right_limit
+                    )
+                    ||
+                    ( //[b1b2b3]
+                        left_limit > right_limit
+                         && count >= 0 && count < right_limit
+                         && count >= left_limit
+                    ))
                     {
-                        //change state
-                        index--;
+                        //||
+                        //(
+                        //        count >= 0 && count < right_limit
+                        //     && count >= left_limit
+                        //     && count <= blue_uas.population_size
+                        //)
                     }
-                    else if (index == 0)
+
+
+       
+      
+     )
+ )
+
+                    if (
+                          ( 
+                             left_limit <= right_limit &&
+                             count >= left_limit && count <= right_limit
+                           )
+                          ||
+                          ( //[!a * d * e]
+                            //nested compound statements
+                              left_limit > right_limit
+                              &&
+                              (
+                                count >= 0 && count < right_limit
+                                ||
+                                count >= left_limit && count <= blue_uas.population_size
+                              )
+                          )
+                    )
                     {
-                        //change state
-                        index = current_population_species_fitness_list.Count - 1;
-                        boundary_crossed = true;
-                    }
-                    else if (boundary_crossed)
-                    {
-                        //change state
-                        index++;
+                        sglobal.sw.Write("," + "VVV " + s);
                     }
                     else
                     {
-                        Debug.Assert(false, "Invalid  LEFT Side Mutation");
+                        sglobal.sw.Write("," + s);
                     }
+
+                    count++;
                 }
-
-                boundary_crossed = false;
-                index = min_index;
-                while (index != right_limit)
-                {
-                    //change
-                    if (!boundary_crossed)
-                    {
-                        //change state
-                        index = 0;
-                    }
-                    else if (index == current_population_species_fitness_list.Count - 1)
-                    {
-                        //change state
-                        index = 0;
-                        boundary_crossed = true;
-                    }
-                    else if (boundary_crossed)
-                    {
-                        //change state
-                        index--;
-                    }
-                    else
-                    {
-                        Debug.Assert(false, "Invalid  RIGHT Side Mutation");
-                    }
+                sglobal.sw.WriteLine();
 
 
-                }
-
-                evolve_next_step();
+                blue_uas.evolve_next_step();
 
             }
 
