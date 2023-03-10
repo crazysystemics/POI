@@ -1,9 +1,10 @@
-﻿ using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+//test-comment
 namespace soc_battle
 {
     enum info_attrib_t { RADAR=0, RWR, EA, EP};
