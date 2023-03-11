@@ -63,7 +63,7 @@ class OotadaAata
                               "correspondence",
                               true,
                               Utilities.apriori);
-        poetic_properties.Add(first_line_list,
+    poetic_properties.Add(first_line_list,
                               "sequence",
                               false,
                               Utilities.isSequence);
