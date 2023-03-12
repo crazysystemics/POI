@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="BlockWalker.cs" />
+    <Compile Remove="OotadaAata_01.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="BlockWalker.cs" />
+    <None Include="OotadaAata_01.cs" />
+  </ItemGroup>
+
+</Project>

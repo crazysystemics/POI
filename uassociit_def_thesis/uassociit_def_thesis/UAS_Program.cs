@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 //00_06: UAS_Swarm => (IIT Network) => phi => phi as SOC parameter
 //00_07: Merging with earlier code. blue_uas[i].evolve_next_step
 //00_08: Conditiona formatting for cluster should be seen, Marking VVV before mutation...
-//git test 01
+
 namespace uas_soc_iit_dt
 {
 
@@ -114,25 +114,11 @@ namespace uas_soc_iit_dt
 
                 foreach (string s in current_population_species_fitness_list)
                 {
-                    // (min_fit_pos + 1 ) is to skip "step" column
-                    //left_limit <= right_limit:  a1
-                    //left_limit > right_limit:   !a1
-                    //count >= left_limit         a2
-                    // count <= right_limit       a3
-                    //count >=  0                 b2
-                    //count < right_limit         b3
-                    //count >= left_limit         b4
-                    //count <= blue_uas.population_size   b5
-
-                    //(a1 * a2 * a3) + (b1 * (b2 * b3) * (b4 + b5))
-                    //= (a1 + !a1) * ((b1 * b2 * b3) * (b4 +b5))
-                    //= (a1.a2.a3) + (b1.b2.b3.b4 + b1.b2.b3.b5)
-                    //= a1..a13 + b1..b5 + b2..b5
+ 
 
                     if (( //[a * b * c]
                         left_limit <= right_limit &&
-                        count >= left_limit && count <= right_limit
-                    )
+                        count >= left_limit && count <= right_limit)
                     ||
                     ( //[b1b2b3]
                         left_limit > right_limit
@@ -147,53 +133,16 @@ namespace uas_soc_iit_dt
                         //     && count <= blue_uas.population_size
                         //)
                     }
-
-
-       
-      
-     )
- )
-
-                    if (
-                          ( 
-                             left_limit <= right_limit &&
-                             count >= left_limit && count <= right_limit
-                           )
-                          ||
-                          ( //[!a * d * e]
-                            //nested compound statements
-                              left_limit > right_limit
-                              &&
-                              (
-                                count >= 0 && count < right_limit
-                                ||
-                                count >= left_limit && count <= blue_uas.population_size
-                              )
-                          )
-                    )
-                    {
-                        sglobal.sw.Write("," + "VVV " + s);
-                    }
-                    else
-                    {
-                        sglobal.sw.Write("," + s);
-                    }
-
-                    count++;
                 }
-                sglobal.sw.WriteLine();
-
-
-                blue_uas.evolve_next_step();
-
             }
 
-            sglobal.sw.Close();
         }
 
 
     }
+ 
 
+  
 
 }
 

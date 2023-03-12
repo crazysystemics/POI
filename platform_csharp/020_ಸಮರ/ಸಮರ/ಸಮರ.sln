@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ಸಮರ", "ಸಮರ.csproj", "{31D0B2B8-053F-47F4-B567-6B940ACFEE7F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{31D0B2B8-053F-47F4-B567-6B940ACFEE7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31D0B2B8-053F-47F4-B567-6B940ACFEE7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31D0B2B8-053F-47F4-B567-6B940ACFEE7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31D0B2B8-053F-47F4-B567-6B940ACFEE7F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0DA53865-FFAA-400F-AF52-706C4F746443}
+	EndGlobalSection
+EndGlobal
