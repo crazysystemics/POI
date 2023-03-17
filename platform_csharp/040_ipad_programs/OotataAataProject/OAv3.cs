@@ -13,7 +13,10 @@ using System.Security.AccessControl;
 
 public abstract class Predicate
 {
-    private bool ;
+    //pvalue stands for predicate value
+    //p is prefixed to  disambiguate
+    //with keyword value
+    private bool pvalue;
 }
 
 

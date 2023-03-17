@@ -14,6 +14,6 @@ bool q = p;
 if (p) { Console.WriteLine("Not working"); }
 
 abstract class Predicate
-{     public bool Value { get; set; }   }
+{     private bool Value { get; set; }   }
 
 class isSymmetric : Predicate { }
