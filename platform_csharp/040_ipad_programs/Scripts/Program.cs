@@ -1,18 +1,19 @@
 ﻿// See https://aka.ms/new-console-template for more information
 Console.WriteLine("Hello, Script World!");
 
-isSymmetric p;
+isSymmetric p = new isSymmetric();
 
+//these below work
+p.Value = true;
+if (p.Value) { Console.WriteLine("Worked"); }
+if (p.Equals(true)) { Console.WriteLine("Worked"); }
 
-p=true;
+//these are not working
+p =true;
 bool q = p;
+if (p) { Console.WriteLine("Not working"); }
 
 abstract class Predicate
-{
-    public bool Value { get; set; }     
-}
+{     public bool Value { get; set; }   }
 
-class isSymmetric : Predicate
-{
-
-}
+class isSymmetric : Predicate { }
