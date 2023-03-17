@@ -9,6 +9,13 @@ using static System.Console;
 using System.Collections.Generic;
 using System;
 using System.Diagnostics;
+using System.Security.AccessControl;
+
+public abstract class Predicate
+{
+    private bool ;
+}
+
 
 static class sglobal
 { 
@@ -19,13 +26,22 @@ static class sglobal
         "elu entu;palyake dantu:" +
         "ombattu hattu;ele mudirettu:" +
         "ondarinda hattu heegittu;ootada aata mugidittu:";
+
+    
+
+    public static class apriori
+    {
+        public static List<NestedString> sequences = new List<NestedString>();
+
+
+    }
+
     
 
     public static void print_first_two_words(string text)
     {
         Console.WriteLine(text.Split(':')[0]);
     }
-
 }
 
 class NestedString
@@ -38,7 +54,6 @@ class NestedString
     {
 
     }
-
     public NestedString(string Terminal)
     {
         isTerminal = true;
@@ -50,16 +65,61 @@ class NestedString
         isTerminal = false;
         this.NonTerminal = NonTerminal;
     }
-
     //will traverse through foreach iterator
-
 }
 
-abstract class AttributeValidator
-{    
-    public abstract bool isAttributeValid();
+
+
+
+
+
+
+
+
+
+
+
+class OotadaAata
+{
+    public NestedString first_line_list = new NestedString();
+    public NestedString second_line_list = new NestedString();
+
+    public bool isSequence(NestedString ns, NestedString referredString=null)
+    {       
+        bool ret = false;
+        
+        //Does this construct match with a priori sequence
+        NestedString? apriori_match_ns = sglobal.apriori_sequences.Find(x => x == ns); 
+        ret = (apriori_match_ns != null);
+
+        //no apriori sequence exists, contiue to check other means
+        if (!ret)
+        {
+            if (referredString != null)
+            {
+                if (Correspond(ns, referredString) && isSequence(referredString))
+                {
+                    ret = true;
+                }
+            }
+        }
+        return ret;
+    }
+    public OotadaAata()
+    {
+
+    }    
+
+    public void Parse(ref NestedString first_line_list,
+                      ref NestedString second_line_list)
+    {
+        
+    }
 }
 
+/*
+ 
+//=================================================================
 
 //NS -> Nested String
 //Attrib->Attribute
@@ -71,6 +131,14 @@ abstract class AttributeValidator
 //i.e., every element's next element is also it's successor in domain.
 //this also means they are ORDERED. By checking the integrity of  the list an ATTRIBUTE of SEQUENCE is
 //assigned to list.
+abstract class AttributeValidator
+{    
+    public abstract bool isAttributeValid();
+}
+
+
+//public List<PoeticProperty> 
+/poetic_properties=new List<PoeticProperty()
 
 class NsSequenceValidatorByCO : AttributeValidator
 {
@@ -89,108 +157,8 @@ class NsSequenceValidatorByCO : AttributeValidator
 
 }
 
-class AttribNameVal
-{
-    public delegate bool TestAttribute(NestedString ns,  NestedString rs = null);
 
-    string attribute = "";
-    string value = "";
-    TestAttribute fn_isAttribNameValid;
-    
-    public AttribNameVal(string attribute, string value, TestAttribute fn_is_tattrib_valid)
-    {
-        this.attribute = attribute;
-        this.value = value;
-        this.fn_isAttribNameValid = fn_is_tattrib_valid;
-    }
-}
-
-/*
-
-class OotadaAata
-{
-    public NestedString first_line_list = new NestedString();
-    public NestedString second_line_list = new NestedString();
-    public List<PoeticProperty> 
-        poetic_properties=new List<PoeticProperty>();
-
-    public class PoeticProperty
-    {
-        private NestedString entity;
-        private List<AttribNameVal> attributes;
-        public PoeticProperty( NestedString entity, List<AttribNameVal> attributes )                          
-        {
-            this.entity = entity;
-            this.attributes = attributes;          
-        }
-    }
-
-    public OotadaAata()
-    {
-        poetic_properties.Add(first_line_list,
-                              second_line_list,
-                              "correspondence",
-                              true);
-        poetic_properties.Add(first_line_list,
-                                  "sequence",
-                                  false,
-                                  Utilities.isSequence);
-
-        poetic_properties.Add(second_line_list,
-                               "sequence",
-                               false,
-                               Utilities.isSequence);
-    }
-
-    
-
-    public void Parse(ref NestedString first_line_list,
-                      ref NestedString second_line_list)
-    {
-        
-    }
-
-    
-
-    List<AttributeValidator> attributeValidators = new List<AttributeValidator>();
-
-    
-
-    public bool isFirstLineListSequence()
-    {
-        bool do_first_second_list_correspond = false;
-        bool is_second_line_list_ordered = false;
-        bool is_second_line_list_sequence = false;
-        bool is_first_line_list_sequence = false;
-
-        is_second_line_list_ordered =
-                Utilities.isOrdered(second_line_list);
-        if (is_second_line_list_ordered)
-        {
-            is_second_line_list_sequence =
-                Utilities.isSequence(second_line_list);
-        }
-
-        if (is_second_line_list_sequence)
-        {
-            do_first_second_list_correspond =
-                Utilities.correspond(first_line_list, second_line_list);
-        }
-
-        is_first_line_list_sequence = Utilities.isSequence(first_line_list, second_line_list);
-
-        Debug.Assert(is_first_line_list_sequence ==
-                     do_first_second_list_correspond &&
-                     is_second_line_list_sequence);
-
-        return is_first_line_list_sequence;
-    }
-
-
-
-
-}
-
+List<AttributeValidator> attributeValidators = new List<AttributeValidator>();
 static class Utilities
 {
     //procedure
@@ -266,6 +234,79 @@ class NestedStringSequenceIterator
         return ref NestedStringSequence.ToArray()[pos];
     }
 }
+
+
+class AttribNameVal
+{
+    public delegate bool TestAttribute(NestedString ns, NestedString rs = null);
+
+    string attribute = "";
+    string value = "";
+    TestAttribute fn_isAttribNameValid;
+
+    public AttribNameVal(string attribute, string value, TestAttribute fn_is_tattrib_valid)
+    {
+        this.attribute = attribute;
+        this.value = value;
+        this.fn_isAttribNameValid = fn_is_tattrib_valid;
+    }
+
+    poetic_properties.Add(first_line_list,
+                  second_line_list,
+                              "correspondence",
+                              true);
+        poetic_properties.Add(first_line_list,
+                                  "sequence",
+                                  false,
+                                  Utilities.isSequence);
+
+        poetic_properties.Add(second_line_list,
+                               "sequence",
+                               false,
+                               Utilities.isSequence);
+
+         public bool isFirstLineListSequence()
+    {
+        bool do_first_second_list_correspond = false;
+        bool is_second_line_list_ordered = false;
+        bool is_second_line_list_sequence = false;
+        bool is_first_line_list_sequence = false;
+
+        is_second_line_list_ordered =
+                Utilities.isOrdered(second_line_list);
+        if (is_second_line_list_ordered)
+        {
+            is_second_line_list_sequence =
+                Utilities.isSequence(second_line_list);
+        }
+
+        if (is_second_line_list_sequence)
+        {
+            do_first_second_list_correspond =
+                Utilities.correspond(first_line_list, second_line_list);
+        }
+
+        is_first_line_list_sequence = Utilities.isSequence(first_line_list, second_line_list);
+
+        Debug.Assert(is_first_line_list_sequence ==
+                     do_first_second_list_correspond &&
+                     is_second_line_list_sequence);
+
+        return is_first_line_list_sequence;
+    }
+
+        public class PoeticProperty
+    {
+        private NestedString entity;
+        private List<string> attributes;
+        public PoeticProperty(NestedString entity, List<AttribNameVal> attributes)
+        {
+            this.entity = entity;
+            this.attributes = attributes;
+        }
+    }
+}
+
 */
 
 
