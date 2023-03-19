@@ -16,38 +16,24 @@ public abstract class Predicate
     //pvalue stands for predicate value
     //p is prefixed to  disambiguate
     //with keyword value
-    private bool pvalue;
+    public abstract bool istrue();
 }
-
-
-static class sglobal
-{ 
-
-    public static string poem = "ondu eradu;balele haradu:" +
-        "mooru naaku;anna haaku:" +
-        "aidu aaru;bele saaru:"   +
-        "elu entu;palyake dantu:" +
-        "ombattu hattu;ele mudirettu:" +
-        "ondarinda hattu heegittu;ootada aata mugidittu:";
-
-    
-
-    public static class apriori
+class IsSequence : Predicate
+{
+    public override bool istrue()
     {
-        public static List<NestedString> sequences = new List<NestedString>();
-
-
+        throw new NotImplementedException();
     }
-
-    
-
-    public static void print_first_two_words(string text)
+}
+class DoCorrespond : Predicate
+{
+    public override bool istrue()
     {
-        Console.WriteLine(text.Split(':')[0]);
+        throw new NotImplementedException();
     }
 }
 
-class NestedString
+public class NestedString
 {
     public bool   isTerminal;
     public string Terminal = String.Empty;
@@ -55,7 +41,7 @@ class NestedString
 
     public NestedString()
     {
-
+        //throw new NotImplementedException();
     }
     public NestedString(string Terminal)
     {
@@ -71,52 +57,107 @@ class NestedString
     //will traverse through foreach iterator
 }
 
-
-
-
-
-
-
-
-
-
-
-
-class OotadaAata
+class Poem
 {
-    public NestedString first_line_list = new NestedString();
-    public NestedString second_line_list = new NestedString();
+    public Dictionary<NestedString, List<Predicate>> architecturalAttributes 
+                = new Dictionary<NestedString, List<Predicate>>();
 
-    public bool isSequence(NestedString ns, NestedString referredString=null)
-    {       
-        bool ret = false;
+    public string text;
+    public NestedString parsedPoem = new NestedString();
+    public NestedString firstHalfOfStanzas = new NestedString();
+    public NestedString secondHalfOfStanzas = new NestedString();
+    
+    //File I/O Management, Pre-Processing and Getting Next Token for Parsing
+    public string LexicalGetToken()
+    {throw new NotImplementedException();}
+
+    //Build Architectural Constructs
+    //will initialize firstHalfOfStanzas and secondHalfOfStanzas
+    public string Parse()
+    {throw new NotImplementedException();}
+
+    public string GetFirstLine()
+    {throw new NotImplementedException();}
+    
+    public List<string> GetFirstHalfOfStanzas()
+    {throw new NotImplementedException();}
+
+    public List<string> GetSecondHalfOfStanzas()
+    {throw new NotImplementedException();}
+
+    public bool CheckAttribute(NestedString ns, Predicate p)
+    {throw new NotImplementedException();}
+
+    public bool CheckAttribute(NestedString ns, NestedString referredNs, Predicate p)
+    { throw new NotImplementedException(); }
+
+    public void AddAttribute(NestedString ns, Predicate p)
+    { throw new NotImplementedException();}    
+}
+
+static class sglobal
+{
+
+    public static string poem_text = "ondu eradu;balele haradu:" +
+        "mooru naaku;anna haaku:" +
+        "aidu aaru;bele saaru:" +
+        "elu entu;palyake dantu:" +
+        "ombattu hattu;ele mudirettu:" +
+        "ondarinda hattu heegittu;ootada aata mugidittu:";
+
+    public static class apriori
+    {
+        public static List<NestedString> sequences = new List<NestedString>();
+
         
-        //Does this construct match with a priori sequence
-        NestedString? apriori_match_ns = sglobal.apriori_sequences.Find(x => x == ns); 
-        ret = (apriori_match_ns != null);
 
-        //no apriori sequence exists, contiue to check other means
-        if (!ret)
+        
+
+
+        public static void print_first_two_words(string text)
         {
-            if (referredString != null)
+            Console.WriteLine(text.Split(':')[0]);
+        }
+
+
+    }
+
+    class OotadaAata
+    {
+        public NestedString first_line_list = new NestedString();
+        public NestedString second_line_list = new NestedString();
+
+        public bool isSequence(NestedString ns, NestedString referredString = null)
+        {
+            bool ret = false;
+
+            //Does this construct match with a priori sequence
+            NestedString? apriori_match_ns = sglobal.apriori.sequences.Find(x => x == ns);
+            ret = (apriori_match_ns != null);
+
+            //no apriori sequence exists, contiue to check other means
+            if (!ret)
             {
-                if (Correspond(ns, referredString) && isSequence(referredString))
+                if (referredString != null)
                 {
-                    ret = true;
+                    if (DoCorrespond(ns, referredString) && isSequence(referredString))
+                    {
+                        ret = true;
+                    }
                 }
             }
+            return ret;
         }
-        return ret;
-    }
-    public OotadaAata()
-    {
+        public OotadaAata()
+        {
 
-    }    
+        }
 
-    public void Parse(ref NestedString first_line_list,
-                      ref NestedString second_line_list)
-    {
-        
+        public void Parse(ref NestedString first_line_list,
+                          ref NestedString second_line_list)
+        {
+
+        }
     }
 }
 
