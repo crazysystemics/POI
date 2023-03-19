@@ -5,21 +5,13 @@ using System.Collections.Generic;
 using System;
 using System.Diagnostics;
 
-Poem ಊಟದ_ಆಟ = new Poem();
+Poem ಊಟದ_ಆಟ = new Poem(sglobal.poem_text);
 ಊಟದ_ಆಟ.Parse();
-WriteLine(ಊಟದ_ಆಟ.GetFirstLine());
+WriteLine(ಊಟದ_ಆಟ.GetFirstLine(ಊಟದ_ಆಟ.firstHalfOfStanzas));
 
-List<string> firstLines = ಊಟದ_ಆಟ.GetFirstHalfOfStanzas();
-foreach (string line in firstLines)
-{
-    WriteLine(line);
-}
+sglobal.apriori.sequences.Add(ಊಟದ_ಆಟ.secondHalfOfStanzas);
 
-List<string> secondLines = ಊಟದ_ಆಟ.GetSecondHalfOfStanzas();
-foreach (string line in firstLines)
-{
-    WriteLine(line);
-}
+
 
 //"ಬಾಳೆಲೆ ಹರಡು, ಅನ್ನ ಹಾಕು..
 NestedString secondLinesNs = new NestedString();
@@ -31,7 +23,7 @@ if (isSecondHalfSequence)
 
 //"ಒಂದು ಎರಡು, ಮೂರು ನಾಕು...
 NestedString firstLinesNs = new NestedString();
-bool isFirstHalfSequence = ಊಟದ_ಆಟ.CheckAttribute(firstLinesNs, secondLinesNs, new DoCorrespond());
+bool isFirstHalfSequence = ಊಟದ_ಆಟ.CheckAttribute(firstLinesNs, new IsSequence());
 if (isFirstHalfSequence)
 {
     ಊಟದ_ಆಟ.AddAttribute(firstLinesNs, new IsSequence());

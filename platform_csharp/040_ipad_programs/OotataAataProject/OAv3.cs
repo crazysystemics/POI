@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System;
 using System.Diagnostics;
 using System.Security.AccessControl;
+using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 
 public abstract class Predicate
 {
@@ -27,15 +29,20 @@ class IsSequence : Predicate
 }
 class DoCorrespond : Predicate
 {
+    
     public override bool istrue()
-    {
-        throw new NotImplementedException();
+    {   //check if there is a unique correspondence-id
+        //in firstHalfStanzaList and secondHalfStanzaList
+        //This id can be installed in apriori way.        
+        return true;
     }
 }
 
+
+
 public class NestedString
 {
-    public bool   isTerminal;
+    public bool isTerminal;
     public string Terminal = String.Empty;
     public List<NestedString> NonTerminal = new List<NestedString>();
 
@@ -55,11 +62,14 @@ public class NestedString
         this.NonTerminal = NonTerminal;
     }
     //will traverse through foreach iterator
+    public string nextString()
+    { throw new NotImplementedException(); }
+
 }
 
 class Poem
 {
-    public Dictionary<NestedString, List<Predicate>> architecturalAttributes 
+    public Dictionary<NestedString, List<Predicate>> architecturalAttributes
                 = new Dictionary<NestedString, List<Predicate>>();
 
     public string text;
@@ -67,32 +77,163 @@ class Poem
     public NestedString firstHalfOfStanzas = new NestedString();
     public NestedString secondHalfOfStanzas = new NestedString();
     
-    //File I/O Management, Pre-Processing and Getting Next Token for Parsing
-    public string LexicalGetToken()
-    {throw new NotImplementedException();}
+
+
+    public Poem(string text)
+    {
+        this.text = text;
+    }
+
+    //Lexical Part, Pre-Processing and Getting Next Token for Parsing
+    public int token_index = 0;
+    public string GetToken()
+    {
+        string ret_string = String.Empty;
+        string[] stanzas = text.Split(':');
+
+        if (token_index < stanzas.Length)
+        {
+            ret_string = stanzas[token_index / 2].Split(';')[token_index % 2];
+            token_index++;
+        }
+
+        return ret_string;
+    }
 
     //Build Architectural Constructs
     //will initialize firstHalfOfStanzas and secondHalfOfStanzas
     public string Parse()
-    {throw new NotImplementedException();}
+    {
+        string poemLine = GetToken();
+        int lineCount = 0;
+        while (poemLine != String.Empty)
+        {
+            if (lineCount % 2 == 0)
+            {
+                firstHalfOfStanzas.NonTerminal.Add(new NestedString(poemLine));
+            }
+            else
+            {
+                secondHalfOfStanzas.NonTerminal.Add(new NestedString(poemLine));
+            }
+            poemLine = GetToken();
+        }
 
-    public string GetFirstLine()
-    {throw new NotImplementedException();}
-    
-    public List<string> GetFirstHalfOfStanzas()
-    {throw new NotImplementedException();}
+        return poemLine;
+    }
 
-    public List<string> GetSecondHalfOfStanzas()
-    {throw new NotImplementedException();}
 
+    public string GetFirstLine(NestedString ns)
+    {
+        if (!String.IsNullOrEmpty(firstHalfOfStanzas.Terminal))
+        {
+            return firstHalfOfStanzas.Terminal;
+        }
+        else
+        {
+            return GetFirstLine(firstHalfOfStanzas.NonTerminal.First());
+        }
+    }
+
+    //checks whether predicate P applies to ns by evaluating it on every element of ns
+    //checks whether every (but last) element is predecessor of its next element
+    //in list. Note the p should be predecessor not sequence. If every element is 
+    //predecessor ns naturally is sequence
     public bool CheckAttribute(NestedString ns, Predicate p)
-    {throw new NotImplementedException();}
+    {
+        //check whether ns is equivalent to any of the 
+        //remembered sequences
 
-    public bool CheckAttribute(NestedString ns, NestedString referredNs, Predicate p)
-    { throw new NotImplementedException(); }
+        if (ns.Terminal != null)
+        {
+            return false;
+        }
+
+        //checking equality with apriory sequence (genetic memory)
+        foreach (NestedString apriorySequence in sglobal.apriori.sequences)
+        {
+            if (ns == apriorySequence)
+            {
+                return true;
+            }
+        }
+
+        //Checking equality with any of learnt sequences
+
+        List<Predicate> attributes = new List<Predicate>();
+        attributes = architecturalAttributes[ns];
+        Predicate? matchp = attributes.Find(x => x == p);
+        if (matchp != null && matchp is IsSequence)
+        { return true; }
+
+
+        return false;
+    }
+
+    //checks attribute by correspondence between ns and referredNs over predicate P
+    public bool CheckAtrribute(NestedString ns, NestedString referredString, Predicate p)
+    {
+        List<Predicate> first_predicates = architecturalAttributes[firstHalfOfStanzas];
+        List<Predicate> second_predicates = architecturalAttributes[firstHalfOfStanzas];
+
+        bool correspondenceExists = false;
+        foreach (Predicate first_pred in first_predicates)
+        {
+            if (first_pred is DoCorrespond)
+            {
+                foreach (Predicate second_pred in second_predicates)
+                {
+                    if (second_pred is DoCorrespond)
+                    {
+                        if (((DoCorrespond)first_pred).correspondenceId
+                             == ((DoCorrespond)second_pred).correspondenceId)
+                        {
+                            correspondenceExists = true;
+                        }
+                    }
+                }
+            }
+
+        }
+
+        //search for correspondence complete
+        if (!correspondenceExists)
+        {
+            return false;
+        }
+
+        //correspondence exists, check whether referred string is sequence
+        if (referredString == firstHalfOfStanzas)
+        {
+            if (CheckAttribute(firstHalfOfStanzas, p))
+            {
+                return true;
+            }
+        }
+
+        if (referredString == secondHalfOfStanzas)
+        {
+            if (CheckAttribute(secondHalfOfStanzas, p))
+            {
+                return true;
+            }           
+        }
+
+        return false;
+
+    }
 
     public void AddAttribute(NestedString ns, Predicate p)
-    { throw new NotImplementedException();}    
+    {
+        if (ns == firstHalfOfStanzas)
+        {
+            architecturalAttributes[firstHalfOfStanzas].Add(p);
+        }
+        else if (ns == secondHalfOfStanzas)
+        {
+            architecturalAttributes[secondHalfOfStanzas].Add(p);
+        }
+    }
 }
 
 static class sglobal
@@ -109,10 +250,6 @@ static class sglobal
     {
         public static List<NestedString> sequences = new List<NestedString>();
 
-        
-
-        
-
 
         public static void print_first_two_words(string text)
         {
@@ -127,27 +264,7 @@ static class sglobal
         public NestedString first_line_list = new NestedString();
         public NestedString second_line_list = new NestedString();
 
-        public bool isSequence(NestedString ns, NestedString referredString = null)
-        {
-            bool ret = false;
-
-            //Does this construct match with a priori sequence
-            NestedString? apriori_match_ns = sglobal.apriori.sequences.Find(x => x == ns);
-            ret = (apriori_match_ns != null);
-
-            //no apriori sequence exists, contiue to check other means
-            if (!ret)
-            {
-                if (referredString != null)
-                {
-                    if (DoCorrespond(ns, referredString) && isSequence(referredString))
-                    {
-                        ret = true;
-                    }
-                }
-            }
-            return ret;
-        }
+        
         public OotadaAata()
         {
 
