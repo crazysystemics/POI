@@ -29,6 +29,8 @@ class IsSequence : Predicate
 }
 class DoCorrespond : Predicate
 {
+
+    public int correspondenceId;
     
     public override bool istrue()
     {   //check if there is a unique correspondence-id
@@ -62,8 +64,45 @@ public class NestedString
         this.NonTerminal = NonTerminal;
     }
     //will traverse through foreach iterator
-    public string nextString()
-    { throw new NotImplementedException(); }
+    public List<string> ToStringList(NestedString ns=null)
+    {
+        List<string> out_ns_list = new List<string>();
+
+        if (ns == null)
+        {
+            ns = this;
+        }
+
+        if (ns.isTerminal)
+        {
+            out_ns_list.Add(ns.Terminal);
+        }
+        else
+        {
+            foreach (NestedString rest_of_ns in ns.NonTerminal)
+            {
+                out_ns_list.AddRange(ToStringList(rest_of_ns));
+            }
+        }
+
+        return out_ns_list;
+    }
+
+    public override string ToString()
+    {
+        if (isTerminal)
+            return Terminal;
+        else
+        {
+            List<string> strings = new List<string>();
+            string out_str = String.Empty;
+            foreach(string str in strings)
+            {
+                out_str += str;
+            }
+            return out_str;
+        }
+    }
 
 }
 
@@ -77,8 +116,6 @@ class Poem
     public NestedString firstHalfOfStanzas = new NestedString();
     public NestedString secondHalfOfStanzas = new NestedString();
     
-
-
     public Poem(string text)
     {
         this.text = text;
@@ -91,7 +128,7 @@ class Poem
         string ret_string = String.Empty;
         string[] stanzas = text.Split(':');
 
-        if (token_index < stanzas.Length)
+        if (token_index < stanzas.Length * 2 )
         {
             ret_string = stanzas[token_index / 2].Split(';')[token_index % 2];
             token_index++;
@@ -106,6 +143,9 @@ class Poem
     {
         string poemLine = GetToken();
         int lineCount = 0;
+        firstHalfOfStanzas.isTerminal  = false;
+        secondHalfOfStanzas.isTerminal = false;
+
         while (poemLine != String.Empty)
         {
             if (lineCount % 2 == 0)
@@ -116,6 +156,10 @@ class Poem
             {
                 secondHalfOfStanzas.NonTerminal.Add(new NestedString(poemLine));
             }
+
+            lineCount++;
+
+
             poemLine = GetToken();
         }
 
@@ -125,13 +169,13 @@ class Poem
 
     public string GetFirstLine(NestedString ns)
     {
-        if (!String.IsNullOrEmpty(firstHalfOfStanzas.Terminal))
+        if (ns.isTerminal)
         {
-            return firstHalfOfStanzas.Terminal;
+            return ns.Terminal;
         }
         else
         {
-            return GetFirstLine(firstHalfOfStanzas.NonTerminal.First());
+            return GetFirstLine(ns.NonTerminal.First());
         }
     }
 
@@ -141,25 +185,29 @@ class Poem
     //predecessor ns naturally is sequence
     public bool CheckAttribute(NestedString ns, Predicate p)
     {
-        //check whether ns is equivalent to any of the 
-        //remembered sequences
-
-        if (ns.Terminal != null)
+        Debug.Assert(p is IsSequence);
+ 
+        //a terminal cannot be sequence. hence returning false.
+        if (ns.isTerminal)
         {
             return false;
         }
 
-        //checking equality with apriory sequence (genetic memory)
+        //checking equality with apriory sequence (inherited or genetic memory)
+        //check whether ns is equivalent to any of the remembered sequences
+        string debug_ns_string = ns.ToString(); 
         foreach (NestedString apriorySequence in sglobal.apriori.sequences)
         {
+            string debug_approp_sequence = apriorySequence.ToString();
+            
             if (ns == apriorySequence)
             {
                 return true;
             }
         }
 
-        //Checking equality with any of learnt sequences
-
+        //Checking EQUALITY (note not CORRESPONDENCE)
+        //with any of learnt sequences
         List<Predicate> attributes = new List<Predicate>();
         attributes = architecturalAttributes[ns];
         Predicate? matchp = attributes.Find(x => x == p);
@@ -220,24 +268,19 @@ class Poem
         }
 
         return false;
-
     }
 
     public void AddAttribute(NestedString ns, Predicate p)
     {
-        if (ns == firstHalfOfStanzas)
-        {
-            architecturalAttributes[firstHalfOfStanzas].Add(p);
-        }
-        else if (ns == secondHalfOfStanzas)
-        {
-            architecturalAttributes[secondHalfOfStanzas].Add(p);
-        }
+            //TODO: Extend Dictionary Type to throw when key is not found
+            if (!architecturalAttributes.ContainsKey(ns))
+            { architecturalAttributes.Add(ns, new List<Predicate>()); }          
     }
 }
 
 static class sglobal
 {
+    public static string debug_string = String.Empty; 
 
     public static string poem_text = "ondu eradu;balele haradu:" +
         "mooru naaku;anna haaku:" +
