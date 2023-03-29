@@ -38,6 +38,11 @@ class DoCorrespond : Predicate
         //This id can be installed in apriori way.        
         return true;
     }
+
+    public DoCorrespond(int correspondenceId)
+    {
+        this.correspondenceId = correspondenceId;
+    }
 }
 
 
@@ -94,12 +99,14 @@ public class NestedString
             return Terminal;
         else
         {
-            List<string> strings = new List<string>();
+            var stringList = ToStringList();
             string out_str = String.Empty;
-            foreach(string str in strings)
+            foreach (string str in stringList)
             {
-                out_str += str;
+                out_str += str + ',';
             }
+            out_str.TrimEnd(',');
+
             return out_str;
         }
     }
@@ -179,6 +186,26 @@ class Poem
         }
     }
 
+    public void UpdateArchitecturalRelations()
+    {
+        //if first of stanza exhibit some architectural attribute
+        //second half will also do the same by correspondence
+        //and vice-versa. This correspondence is indicated by correspondence-id
+        //TODO: This is hard-coded. Try to generalize, by generalizing the concepts
+        //of firstHalfOfStanzas and secondHalfOfStanza. It can be called inStanzaCorrespondence.
+        if (!architecturalAttributes.ContainsKey(firstHalfOfStanzas))
+        {
+            architecturalAttributes.Add(firstHalfOfStanzas, new List<Predicate>());
+        }
+        architecturalAttributes[firstHalfOfStanzas].Add(new DoCorrespond(0));
+
+        if (!architecturalAttributes.ContainsKey(secondHalfOfStanzas))
+        {
+            architecturalAttributes.Add(secondHalfOfStanzas, new List<Predicate>());
+        }
+        architecturalAttributes[secondHalfOfStanzas].Add(new DoCorrespond(0));
+    }
+
     //checks whether predicate P applies to ns by evaluating it on every element of ns
     //checks whether every (but last) element is predecessor of its next element
     //in list. Note the p should be predecessor not sequence. If every element is 
@@ -209,17 +236,19 @@ class Poem
         //Checking EQUALITY (note not CORRESPONDENCE)
         //with any of learnt sequences
         List<Predicate> attributes = new List<Predicate>();
-        attributes = architecturalAttributes[ns];
-        Predicate? matchp = attributes.Find(x => x == p);
-        if (matchp != null && matchp is IsSequence)
-        { return true; }
-
-
-        return false;
-    }
+        if (architecturalAttributes.ContainsKey(ns))
+        {
+            attributes = architecturalAttributes[ns];
+            Predicate? matchp = attributes.Find(x => x == p);
+            if (matchp != null && matchp is IsSequence)
+            { return true; }
+        }
+        
+         return false;
+    }    
 
     //checks attribute by correspondence between ns and referredNs over predicate P
-    public bool CheckAtrribute(NestedString ns, NestedString referredString, Predicate p)
+    public bool CheckAttribute(NestedString ns, NestedString referredString, Predicate p)
     {
         List<Predicate> first_predicates = architecturalAttributes[firstHalfOfStanzas];
         List<Predicate> second_predicates = architecturalAttributes[firstHalfOfStanzas];

@@ -23,9 +23,12 @@ partial class Program
         ಊಟದ_ಆಟ.Parse();
         WriteLine(ಊಟದ_ಆಟ.GetFirstLine(ಊಟದ_ಆಟ.firstHalfOfStanzas));
         sglobal.apriori.sequences.Add(ಊಟದ_ಆಟ.secondHalfOfStanzas);
-
         List<string> first_half_list  = ಊಟದ_ಆಟ.firstHalfOfStanzas.ToStringList();
         List<string> second_half_list = ಊಟದ_ಆಟ.secondHalfOfStanzas.ToStringList();
+
+       
+
+
 
         //Discover Properties of Architectural Components
         //"ಬಾಳೆಲೆ ಹರಡು, ಅನ್ನ ಹಾಕು..
@@ -42,6 +45,15 @@ partial class Program
         if (isFirstHalfSequence)
         {
             ಊಟದ_ಆಟ.AddAttribute(firstLinesNs, new IsSequence());
+        }
+        else
+        {
+            if (isSecondHalfSequence)
+            {
+                isFirstHalfSequence = ಊಟದ_ಆಟ.CheckAttribute(firstLinesNs, secondLinesNs, new IsSequence());
+                if (isFirstHalfSequence)
+                { ಊಟದ_ಆಟ.AddAttribute(firstLinesNs, new IsSequence()); }
+            }
         }
 
         //Lesson Learnt
