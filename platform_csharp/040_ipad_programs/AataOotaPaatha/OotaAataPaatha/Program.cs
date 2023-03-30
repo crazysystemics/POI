@@ -9,53 +9,71 @@ partial class Program
 {
     private static void Main(string[] args)
     {
-        Console.WriteLine("ಊಟದ ಆಟ");
-
+        WriteLine("Ootada Aata...");
         // See https://aka.ms/new-console-template for more information
-
+        WriteLine(sglobal.poem_text);
         
         //Poem is Application Model
         //ಊಟದ_ಆಟ is Application Instance With Persitence Instance (sglobal.poem_txt)
-        Poem ಊಟದ_ಆಟ = new Poem(sglobal.poem_text);
-
+        Poem Ootada_Aata = new Poem(sglobal.poem_text);
         //Lexical and Syntax Analysis Phase (semantic also??)
         //Architectural Components are Created
-        ಊಟದ_ಆಟ.Parse();
-        WriteLine(ಊಟದ_ಆಟ.GetFirstLine(ಊಟದ_ಆಟ.firstHalfOfStanzas));
-        sglobal.apriori.sequences.Add(ಊಟದ_ಆಟ.secondHalfOfStanzas);
-        List<string> first_half_list  = ಊಟದ_ಆಟ.firstHalfOfStanzas.ToStringList();
-        List<string> second_half_list = ಊಟದ_ಆಟ.secondHalfOfStanzas.ToStringList();
-        ಊಟದ_ಆಟ.UpdateArchitecturalRelations();
+        Ootada_Aata.Parse();
+        WriteLine("First Line after parsing...");
+        WriteLine(Ootada_Aata.GetFirstLine(Ootada_Aata.firstHalfOfStanzas));
+        sglobal.apriori.sequences.Add(Ootada_Aata.secondHalfOfStanzas);
+
+        List<string> first_half_list  = Ootada_Aata.firstHalfOfStanzas.ToStringList();
+        List<string> second_half_list = Ootada_Aata.secondHalfOfStanzas.ToStringList();
+        WriteLine("\n\nList of First Half of Stanzas...");
+        WriteLine(Ootada_Aata.firstHalfOfStanzas);        
+        WriteLine("List of Second Half of Stanzas...");
+        WriteLine(Ootada_Aata.secondHalfOfStanzas);
+        Ootada_Aata.UpdateArchitecturalRelations();
 
         //Discover Properties of Architectural Components
         //"ಬಾಳೆಲೆ ಹರಡು, ಅನ್ನ ಹಾಕು..
-        NestedString secondLinesNs = ಊಟದ_ಆಟ.secondHalfOfStanzas;
-        bool isSecondHalfSequence  = ಊಟದ_ಆಟ.CheckAttribute(secondLinesNs, new IsSequence());
+        NestedString secondLinesNs = Ootada_Aata.secondHalfOfStanzas;
+        bool isSecondHalfSequence  = Ootada_Aata.CheckAttribute(secondLinesNs, new IsSequence());
         if (isSecondHalfSequence)
         {
-            ಊಟದ_ಆಟ.AddAttribute(secondLinesNs, new IsSequence());
+            //WriteLine("[ಬಾಳೆಲೆ ಹರಡು, ಅನ್ನ ಹಾಕು..] is a Sequence");
+            WriteLine("\n\n[BaaLele haradu, anna haaku..] is a Sequence");
+            WriteLine("based on its equivalence to apriori sequence");
+            WriteLine("It is like knowing by experience...");
+            Ootada_Aata.AddAttribute(secondLinesNs, new IsSequence());
         }
         //Discover Properties of Architectural Components
         //"ಒಂದು ಎರಡು, ಮೂರು ನಾಕು...
-        NestedString firstLinesNs = ಊಟದ_ಆಟ.firstHalfOfStanzas;
-        bool isFirstHalfSequence = ಊಟದ_ಆಟ.CheckAttribute(firstLinesNs, new IsSequence());
+        NestedString firstLinesNs = Ootada_Aata.firstHalfOfStanzas;
+        bool isFirstHalfSequence = Ootada_Aata.CheckAttribute(firstLinesNs, new IsSequence());
         if (isFirstHalfSequence)
         {
-            ಊಟದ_ಆಟ.AddAttribute(firstLinesNs, new IsSequence());
+                    
+            Ootada_Aata.AddAttribute(firstLinesNs, new IsSequence());
         }
         else
         {
+            //WriteLine("No memory of [ಒಂದು ಎರಡು, ಮೂರು ನಾಕು...] being a sequence");
             if (isSecondHalfSequence)
             {
-                isFirstHalfSequence = ಊಟದ_ಆಟ.CheckAttribute(firstLinesNs, secondLinesNs, new IsSequence());
+                WriteLine("\n\nNo memory of [Ondu Eradu, Mooru Naaku...] being a sequence");
+                WriteLine("There is a rule in poetry. Second half of stanza correspnds");
+                WriteLine("to First half of stanza. If one half list has a property");
+                WriteLine("other one will have same attribute/property. This poem obeys ");
+                WriteLine("this rule of correspondence. Sencce Second Half Stanza List has ");
+                WriteLine("Sequence property First Half will have too...");
+                isFirstHalfSequence = Ootada_Aata.CheckAttribute(firstLinesNs, secondLinesNs, new IsSequence());
                 if (isFirstHalfSequence)
-                { ಊಟದ_ಆಟ.AddAttribute(firstLinesNs, new IsSequence()); }
+                { Ootada_Aata.AddAttribute(firstLinesNs, new IsSequence()); }
             }
         }
 
         //Lesson Learnt
         //Relatively complex insight discovered, learnt!!
         //"ಒಂದು ಎರಡು, ಮೂರು ನಾಕು...is a Sequence !!!
-        Debug.Assert(ಊಟದ_ಆಟ.architecturalAttributes[firstLinesNs].Find(x => x == new IsSequence()) != null);
+        
+        Debug.Assert(Ootada_Aata.architecturalAttributes[firstLinesNs].Find(x => x is IsSequence) != null);
+        WriteLine("\nCode reached here means First Half of Stanzas has been added Sequence Property");
     }
 }
