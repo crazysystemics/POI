@@ -9,7 +9,7 @@ partial class Program
 {
     private static void Main(string[] args)
     {
-        Console.WriteLine("hello");
+        Console.WriteLine("ಊಟದ ಆಟ");
 
         // See https://aka.ms/new-console-template for more information
 
@@ -25,15 +25,12 @@ partial class Program
         sglobal.apriori.sequences.Add(ಊಟದ_ಆಟ.secondHalfOfStanzas);
         List<string> first_half_list  = ಊಟದ_ಆಟ.firstHalfOfStanzas.ToStringList();
         List<string> second_half_list = ಊಟದ_ಆಟ.secondHalfOfStanzas.ToStringList();
-
-       
-
-
+        ಊಟದ_ಆಟ.UpdateArchitecturalRelations();
 
         //Discover Properties of Architectural Components
         //"ಬಾಳೆಲೆ ಹರಡು, ಅನ್ನ ಹಾಕು..
         NestedString secondLinesNs = ಊಟದ_ಆಟ.secondHalfOfStanzas;
-        bool isSecondHalfSequence = ಊಟದ_ಆಟ.CheckAttribute(secondLinesNs, new IsSequence());
+        bool isSecondHalfSequence  = ಊಟದ_ಆಟ.CheckAttribute(secondLinesNs, new IsSequence());
         if (isSecondHalfSequence)
         {
             ಊಟದ_ಆಟ.AddAttribute(secondLinesNs, new IsSequence());
