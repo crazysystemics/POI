@@ -71,8 +71,7 @@ partial class Program
 
         //Lesson Learnt
         //Relatively complex insight discovered, learnt!!
-        //"ಒಂದು ಎರಡು, ಮೂರು ನಾಕು...is a Sequence !!!
-        
+        //"ಒಂದು ಎರಡು, ಮೂರು ನಾಕು...is a Sequence !!!        
         Debug.Assert(Ootada_Aata.architecturalAttributes[firstLinesNs].Find(x => x is IsSequence) != null);
         WriteLine("\nCode reached here means First Half of Stanzas has been added Sequence Property");
     }
