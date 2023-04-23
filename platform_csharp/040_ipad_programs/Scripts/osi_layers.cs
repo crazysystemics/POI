@@ -248,19 +248,19 @@ namespace OO_OSI
     {
         List<Layer<Payload>> OsiSevenLayers = new List<OO_OSI.Layer<Payload>>();
         
-        class ApplicationPayload
+        class ApplicationPayload:Payload
         {  }
 
-        class Presentation
+        class PresentationPayload:Payload
         { }
 
-        class Session
+        class SessionPayload:Payload
         { }
         public OSIStack()
         {            
-            Layer<Application>  applicationLayer    = new Layer<Application>();
-            Layer<Presentation> presentationLayer   = new Layer<Presentation>();
-            Layer<Session>      sessionLayer        = new Layer<Session>();
+            Layer<ApplicationPayload>  applicationLayer    = new Layer<ApplicationPayload>();
+            Layer<PresentationPayload> presentationLayer   = new Layer<PresentationPayload>();
+            Layer<SessionPayload>      sessionLayer        = new Layer<SessionPayload>();
 
             
             applicationLayer.toLowerQ = 
@@ -272,14 +272,18 @@ namespace OO_OSI
             presentationLayer.toLowerQ =
                 sessionLayer.GetPingPongQueueReference(ref sessionLayer.fromUpperQ);
 
-            sessionLayer.fromLowerQ =
+            presentationLayer.fromLowerQ =
                 sessionLayer.GetPingPongQueueReference(ref sessionLayer.toUpperQ);
+
+            OsiSevenLayers.Add();
         }
     }
 
     public class Node
     {
         public OSIStack stack = new OSIStack();
+
+        public Hardware hardware = new Hardware();
 
         public void send(string s)
         {
@@ -323,7 +327,7 @@ namespace OO_OSI
                     n1.send("hello");
                 }
 
-                foreach (Layer<Payload> l in n1.stack.)
+                n1.stack.
             }
             return false;
         }
