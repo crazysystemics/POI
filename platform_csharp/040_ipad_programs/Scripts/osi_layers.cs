@@ -6,8 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-
+using System.Diagnostics;
 
 namespace OO_OSI
 {
@@ -94,6 +93,14 @@ namespace OO_OSI
     //and prepended. Header determines which is the layer.
     //Layer<Transport> determines Head and Tail of Transport Layer
     public enum Buffer { PING, PONG }
+    public enum StackPosition { TOP, BOTTOM, MIDDLE }
+
+    public static class sglobal
+    {
+        public static string data = String.Empty;
+    }
+
+    public abstract class Payload { public string data; }
 
     public class PingPongQueue<T>:Queue<T>
     {
@@ -146,9 +153,24 @@ namespace OO_OSI
         }
 
     }
-    
-    public class Layer<PayloadT> where PayloadT : Payload 
+
+    class ApplicationPayload : Payload
+    { 
+        public ApplicationPayload(string data)
+        {
+            this.data = data;
+        }
+    }
+
+    class PresentationPayload : Payload
+    { }
+
+    class SessionPayload : Payload
+    { }
+
+    public class Layer  
     {
+        StackPosition position;        
         //Current Layer Layer<PayLoadT>  packet<payloadT> = header + PayLoadT + tailer
         //On upward journey upper layer is enqueued with payLoadT
         //packet of upper layer is payload of current layer
@@ -164,32 +186,46 @@ namespace OO_OSI
 
         //Queue<Transport> fromUpperQ, toUpperQ
         public class Head
-        { }
+        { 
+            string data;
+            public Head()
+            {
+                data = "<head>";
+            }                
+        }
         public class Tail
-        { }
+        { 
+            string data;
+            public Tail()
+            {
+                data = "<tail>";
+            }
+        }
         public Head head = new Head();
         public Tail tail = new Tail();
-        public Head ComputeHead(PayloadT upperPacket)
+        public Head ComputeHead(Payload upperPacket)
         { return new Head(); }
+        public Tail ComputeTail(Payload upperPacket)
+        { return new Tail(); }
 
         public class Packet:Payload
         {
             public Head head;
-            public PayloadT payload;
+            public Payload payload;
             public Tail tail;
 
             public Packet()
             { }
 
-            public Packet(Head head, PayloadT payload, Tail tail)
+            public Packet(Head head, Payload payload, Tail tail)
             { this.head = head; this.payload = payload; this.tail = tail; }            
         }
 
-
-        public Tail ComputeTail(PayloadT upperPacket)
-        { return new Tail(); }
-
+        public Layer(StackPosition position)
+        { this.position = position; }
         public Packet layer_packet  = new Packet();
+
+ 
 
         //public PingPongQueue<Packet<Head, PayloadT, Tail>> toLowerQ
         //    = new PingPongQueue<Packet<Head, PayloadT, Tail>>();
@@ -213,14 +249,30 @@ namespace OO_OSI
             toggledBuffer = toLowerQ.Toggle(toLowerQ.readBuffer);
             toLowerQ.SetReadBuffer(toggledBuffer);
 
-            while (fromUpperQ.Count > 0)
+            if (position == StackPosition.TOP)
             {
-                PayloadT upper_packet = fromUpperQ.Dequeue();
-                head = ComputeHead(upper_packet);
-                tail = ComputeTail(upper_packet);
-                Packet<Head, PayloadT, Tail> layer_packet =
-                              new Packet<Head, PayloadT, Tail>(head, upper_packet, tail);
-                toLowerQ.Enqueue(layer_packet);
+                Packet packet = new Packet();
+                packet.head = new Head();
+                packet.payload.data = sglobal.data;
+                toLowerQ.Enqueue(packet);
+            }
+            else if (position == StackPosition.BOTTOM)
+            {
+                Payload p = fromUpperQ.Dequeue();
+                Console.WriteLine(p.data);
+            }
+            else
+            {
+                Debug.Assert(position ==StackPosition.MIDDLE);
+                while (fromUpperQ.Count > 0)
+                {
+                    Payload upper_packet = fromUpperQ.Dequeue();
+                    head = ComputeHead(upper_packet);
+                    tail = ComputeTail(upper_packet);
+                    Packet layer_packet =
+                                  new Packet(head, upper_packet, tail);
+                    toLowerQ.Enqueue(layer_packet);
+                }
             }
         }
 
@@ -242,26 +294,24 @@ namespace OO_OSI
             }
         }
 
+        public void tick()
+        {
+            TransferFromUpperToLower();
+            //TransferFromLowerToUpper();
+        }
+
     }
-    public abstract class Payload { public string data; }
+    
     public class OSIStack
     {
-        List<Layer<Payload>> OsiSevenLayers = new List<OO_OSI.Layer<Payload>>();
+        public List<Layer> OsiSevenLayers = new List<Layer>();
         
-        class ApplicationPayload:Payload
-        {  }
-
-        class PresentationPayload:Payload
-        { }
-
-        class SessionPayload:Payload
-        { }
+ 
         public OSIStack()
         {            
-            Layer<ApplicationPayload>  applicationLayer    = new Layer<ApplicationPayload>();
-            Layer<PresentationPayload> presentationLayer   = new Layer<PresentationPayload>();
-            Layer<SessionPayload>      sessionLayer        = new Layer<SessionPayload>();
-
+            Layer  applicationLayer    = new Layer(StackPosition.TOP);
+            Layer  presentationLayer   = new Layer(StackPosition.MIDDLE);
+            Layer  sessionLayer        = new Layer(StackPosition.BOTTOM);
             
             applicationLayer.toLowerQ = 
                 presentationLayer.GetPingPongQueueReference(ref presentationLayer.fromUpperQ);
@@ -275,7 +325,9 @@ namespace OO_OSI
             presentationLayer.fromLowerQ =
                 sessionLayer.GetPingPongQueueReference(ref sessionLayer.toUpperQ);
 
-            OsiSevenLayers.Add();
+            OsiSevenLayers.Add(applicationLayer);
+            OsiSevenLayers.Add(presentationLayer);
+            OsiSevenLayers.Add(sessionLayer);
         }
     }
 
@@ -283,11 +335,13 @@ namespace OO_OSI
     {
         public OSIStack stack = new OSIStack();
 
-        public Hardware hardware = new Hardware();
+        //public Hardware hardware = new Hardware();
 
         public void send(string s)
         {
-
+            sglobal.data = "<hello>";
+            Layer topLayer = stack.OsiSevenLayers[0];
+            topLayer.TransferFromUpperToLower();
         }
 
         public string receive()
@@ -295,8 +349,6 @@ namespace OO_OSI
             return String.Empty;
         }
     }
-
-
 
     public class Hardware
     {
@@ -327,7 +379,14 @@ namespace OO_OSI
                     n1.send("hello");
                 }
 
-                n1.stack.
+                //In rest of 90% time
+                List<Layer> layers = n1.stack.OsiSevenLayers;
+                foreach(Layer layer in layers)
+                {
+                    layer.tick();
+                }
+
+                
             }
             return false;
         }
@@ -339,18 +398,18 @@ namespace OO_OSI
         int node_two_period = 2;
         public void Run()
         {
-            int tick = 0;
-            while (true)
-            {
+        //    int tick = 0;
+        //    while (true)
+        //    {
 
-                foreach(Layer<Payload> l in node1.layers)
-                {
-                    //dequeue phase
-                    l.TransferFromUpperToLower();
-                    l.TransferFromLowerToUpper();
-                }
+        //        foreach(Layer<Payload> l in node1.layers)
+        //        {
+        //            //dequeue phase
+        //            l.TransferFromUpperToLower();
+        //            l.TransferFromLowerToUpper();
+        //        }
 
-            }            
+        //    }            
         }
     }
 
