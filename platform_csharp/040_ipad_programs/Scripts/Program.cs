@@ -1,7 +1,15 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, Script World!");
+﻿using OO_OSI;
 
-isSymmetric p = new isSymmetric();
+// See https://aka.ms/new-console-template for more information
+Console.WriteLine("Hello, Script World!");
+Console.WriteLine("Script is OO_OSI... ");
+
+TestHarness osiTestHarness = new TestHarness();
+osiTestHarness.test_case_01();
+
+
+
+//isSymmetric p = new isSymmetric();
 
 //these below work
 //p.Value = true;

@@ -102,7 +102,7 @@ namespace OO_OSI
 
     public abstract class Payload { public string data; }
 
-    public class PingPongQueue<T>:Queue<T>
+    public class PingPongQueue<T>:Queue<T> where T:class?
     {
         public Queue<T> pingBuffer = new Queue<T>();
         public Queue<T> pongBuffer = new Queue<T>();
@@ -136,12 +136,20 @@ namespace OO_OSI
         {
             if (buffer == Buffer.PING)
             {
-                return pingBuffer.Dequeue();
+                if (pingBuffer.Count > 0)
+                {
+                    return pingBuffer.Dequeue();
+                }
             }
             else
             {
-                return pongBuffer.Dequeue();
+                if (pongBuffer.Count > 0)
+                {
+                    return pongBuffer.Dequeue();
+                }
             }
+            
+            return null;
         }
 
         public Buffer Toggle(Buffer b)
@@ -251,8 +259,9 @@ namespace OO_OSI
 
             if (position == StackPosition.TOP)
             {
-                Packet packet = new Packet();
-                packet.head = new Head();
+                Packet packet   = new Packet();
+                packet.head     = new Head();
+                packet.payload  = new ApplicationPayload("<app_data>");
                 packet.payload.data = sglobal.data;
                 toLowerQ.Enqueue(packet);
             }
@@ -270,7 +279,7 @@ namespace OO_OSI
                     head = ComputeHead(upper_packet);
                     tail = ComputeTail(upper_packet);
                     Packet layer_packet =
-                                  new Packet(head, upper_packet, tail);
+                           new Packet(head, upper_packet, tail);
                     toLowerQ.Enqueue(layer_packet);
                 }
             }
@@ -288,8 +297,9 @@ namespace OO_OSI
             while (fromLowerQ.Count > 0)
             {
                 Packet lower_packet = (Packet)fromLowerQ.Dequeue();
-                //We are interested only in Payload
-                //Head and Tail can be stripped off
+
+                //We are interested only in Payload, Head and Tail
+                //can be stripped off
                 toUpperQ.Enqueue(lower_packet.payload);
             }
         }
@@ -384,9 +394,7 @@ namespace OO_OSI
                 foreach(Layer layer in layers)
                 {
                     layer.tick();
-                }
-
-                
+                }              
             }
             return false;
         }
