@@ -102,7 +102,7 @@ namespace OO_OSI
 
     public abstract class Payload { public string data; }
 
-    public class PingPongQueue<T>:Queue<T> where T:class?
+    public class PingPongQueue<T> : Queue<T> where T : class?
     {
         public Queue<T> pingBuffer = new Queue<T>();
         public Queue<T> pongBuffer = new Queue<T>();
@@ -110,10 +110,10 @@ namespace OO_OSI
         public Buffer buffer;
         public PingPongQueue()
         {
-            readBuffer  = Buffer.PING;
+            readBuffer = Buffer.PING;
             writeBuffer = Buffer.PONG;
-        } 
-        
+        }
+
         public void SetReadBuffer(Buffer readBuffer)
         {
             this.readBuffer = readBuffer;
@@ -129,7 +129,7 @@ namespace OO_OSI
             else
             {
                 pongBuffer.Enqueue(item);
-            }         
+            }
         }
 
         public new T Dequeue()
@@ -148,7 +148,7 @@ namespace OO_OSI
                     return pongBuffer.Dequeue();
                 }
             }
-            
+
             return null;
         }
 
@@ -163,7 +163,7 @@ namespace OO_OSI
     }
 
     class ApplicationPayload : Payload
-    { 
+    {
         public ApplicationPayload(string data)
         {
             this.data = data;
@@ -176,47 +176,9 @@ namespace OO_OSI
     class SessionPayload : Payload
     { }
 
-    public class Layer  
+    public class Layer
     {
-        StackPosition position;        
-        //Current Layer Layer<PayLoadT>  packet<payloadT> = header + PayLoadT + tailer
-        //On upward journey upper layer is enqueued with payLoadT
-        //packet of upper layer is payload of current layer
-        //By similar, logic Packet<PayloadT> would be payload of lower layer
-        public PingPongQueue<Payload> fromUpperQ = new PingPongQueue<Payload>();
-        public PingPongQueue<Payload> toUpperQ = new PingPongQueue<Payload>();
-
-        public ref PingPongQueue<Payload> 
-        GetPingPongQueueReference(ref PingPongQueue<Payload> ppQueue)
-        {
-            return ref ppQueue; 
-        }
-
-        //Queue<Transport> fromUpperQ, toUpperQ
-        public class Head
-        { 
-            string data;
-            public Head()
-            {
-                data = "<head>";
-            }                
-        }
-        public class Tail
-        { 
-            string data;
-            public Tail()
-            {
-                data = "<tail>";
-            }
-        }
-        public Head head = new Head();
-        public Tail tail = new Tail();
-        public Head ComputeHead(Payload upperPacket)
-        { return new Head(); }
-        public Tail ComputeTail(Payload upperPacket)
-        { return new Tail(); }
-
-        public class Packet:Payload
+        public class Packet : Payload
         {
             public Head head;
             public Payload payload;
@@ -226,28 +188,63 @@ namespace OO_OSI
             { }
 
             public Packet(Head head, Payload payload, Tail tail)
-            { this.head = head; this.payload = payload; this.tail = tail; }            
+            { this.head = head; this.payload = payload; this.tail = tail; }
+        }
+        public class Head
+        {
+            string data;
+            public Head()
+            {
+                data = "<head>";
+            }
+        }
+        public class Tail
+        {
+            string data;
+            public Tail()
+            {
+                data = "<tail>";
+            }
         }
 
-        public Layer(StackPosition position)
-        { this.position = position; }
-        public Packet layer_packet  = new Packet();
-
- 
-
-        //public PingPongQueue<Packet<Head, PayloadT, Tail>> toLowerQ
-        //    = new PingPongQueue<Packet<Head, PayloadT, Tail>>();
-        //public PingPongQueue<Packet<Head, PayloadT, Tail>> fromLowerQ
-        //    = new PingPongQueue<Packet<Head, PayloadT, Tail>>();
-
+        //Members
+        public string Name;
+        public StackPosition position;        
+        public PingPongQueue<Payload> fromUpperQ = new PingPongQueue<Payload>();
+        public PingPongQueue<Payload> toUpperQ = new PingPongQueue<Payload>();
+           
+        public Head head = new Head();
+        public Tail tail = new Tail();
+  
         public PingPongQueue<Payload> toLowerQ
             = new PingPongQueue<Payload>();
         public PingPongQueue<Payload> fromLowerQ
             = new PingPongQueue<Payload>();
+        public Packet layer_packet = new Packet();
 
+        //Methods
+        public Layer(StackPosition position, string Name = "undefined")
+        {
+            this.Name = Name;
+            this.position = position; 
+        }
+        public void tick()
+        {
+            TransferFromUpperToLower();
+            //TransferFromLowerToUpper();
+        }       
+        public Head ComputeHead(Payload upperPacket)
+        { return new Head(); }
+        public Tail ComputeTail(Payload upperPacket)
+        { return new Tail(); }
         //On deque from upper layer, PayloadT i.e., Payload of Transport come
         //On enque to   upper layer, Payloadt i.e.., Payload of Transform is sent upwards
         //Payload(Transform)=Session
+        public ref PingPongQueue<Payload>
+        GetPingPongQueueReference(ref PingPongQueue<Payload> ppQueue)
+        {
+            return ref ppQueue;
+        }
         public void TransferFromUpperToLower()
         {
             //switch buffers of upper and lower queues
@@ -259,9 +256,9 @@ namespace OO_OSI
 
             if (position == StackPosition.TOP)
             {
-                Packet packet   = new Packet();
-                packet.head     = new Head();
-                packet.payload  = new ApplicationPayload("<app_data>");
+                Packet packet = new Packet();
+                packet.head = new Head();
+                packet.payload = new ApplicationPayload("<app_data>");
                 packet.payload.data = sglobal.data;
                 toLowerQ.Enqueue(packet);
             }
@@ -272,7 +269,7 @@ namespace OO_OSI
             }
             else
             {
-                Debug.Assert(position ==StackPosition.MIDDLE);
+                Debug.Assert(position == StackPosition.MIDDLE);
                 while (fromUpperQ.Count > 0)
                 {
                     Payload upper_packet = fromUpperQ.Dequeue();
@@ -284,7 +281,6 @@ namespace OO_OSI
                 }
             }
         }
-
         public void TransferFromLowerToUpper()
         {
             //switch buffers of upper and lower queues
@@ -302,36 +298,29 @@ namespace OO_OSI
                 //can be stripped off
                 toUpperQ.Enqueue(lower_packet.payload);
             }
-        }
-
-        public void tick()
-        {
-            TransferFromUpperToLower();
-            //TransferFromLowerToUpper();
-        }
-
+        }      
     }
-    
+
     public class OSIStack
     {
         public List<Layer> OsiSevenLayers = new List<Layer>();
-        
- 
-        public OSIStack()
-        {            
-            Layer  applicationLayer    = new Layer(StackPosition.TOP);
-            Layer  presentationLayer   = new Layer(StackPosition.MIDDLE);
-            Layer  sessionLayer        = new Layer(StackPosition.BOTTOM);
-            
-            applicationLayer.toLowerQ = 
-                presentationLayer.GetPingPongQueueReference(ref presentationLayer.fromUpperQ);
 
+
+        public OSIStack()
+        {
+            Layer applicationLayer  = new Layer(StackPosition.TOP, "application");
+            Layer presentationLayer = new Layer(StackPosition.MIDDLE, "presentation");
+            Layer sessionLayer      = new Layer(StackPosition.BOTTOM,  "session");
+
+            //Connect application layer to presentation layer
+            applicationLayer.toLowerQ =
+                presentationLayer.GetPingPongQueueReference(ref presentationLayer.fromUpperQ);
             applicationLayer.fromLowerQ =
                 presentationLayer.GetPingPongQueueReference(ref presentationLayer.toUpperQ);
-
+            
+            //Connect presentation layer to session layer
             presentationLayer.toLowerQ =
                 sessionLayer.GetPingPongQueueReference(ref sessionLayer.fromUpperQ);
-
             presentationLayer.fromLowerQ =
                 sessionLayer.GetPingPongQueueReference(ref sessionLayer.toUpperQ);
 
@@ -369,8 +358,8 @@ namespace OO_OSI
             hwChannel = new Queue<byte>(size);
             this.size = size;
         }
-    } 
-   
+    }
+
 
     public class TestHarness
     {
@@ -391,10 +380,10 @@ namespace OO_OSI
 
                 //In rest of 90% time
                 List<Layer> layers = n1.stack.OsiSevenLayers;
-                foreach(Layer layer in layers)
+                foreach (Layer layer in layers)
                 {
                     layer.tick();
-                }              
+                }
             }
             return false;
         }
@@ -406,18 +395,18 @@ namespace OO_OSI
         int node_two_period = 2;
         public void Run()
         {
-        //    int tick = 0;
-        //    while (true)
-        //    {
+            //    int tick = 0;
+            //    while (true)
+            //    {
 
-        //        foreach(Layer<Payload> l in node1.layers)
-        //        {
-        //            //dequeue phase
-        //            l.TransferFromUpperToLower();
-        //            l.TransferFromLowerToUpper();
-        //        }
+            //        foreach(Layer<Payload> l in node1.layers)
+            //        {
+            //            //dequeue phase
+            //            l.TransferFromUpperToLower();
+            //            l.TransferFromLowerToUpper();
+            //        }
 
-        //    }            
+            //    }            
         }
     }
 
