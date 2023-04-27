@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Data.Common;
 
 namespace OO_OSI
 {
@@ -94,14 +95,16 @@ namespace OO_OSI
     //Layer<Transport> determines Head and Tail of Transport Layer
     public enum Buffer { PING, PONG }
     public enum StackPosition { TOP, BOTTOM, MIDDLE }
-
     public static class sglobal
     {
         public static string data = String.Empty;
+        private static int global_id = 0;
+        public static int GetGlobalId() { return global_id++; }
+
     }
 
-    public abstract class Payload { public string data; }
 
+    public abstract class Payload { public string data; }
     public class PingPongQueue<T> : Queue<T> where T : class?
     {
         public Queue<T> pingBuffer = new Queue<T>();
@@ -160,8 +163,13 @@ namespace OO_OSI
                 return Buffer.PING;
         }
 
-    }
+        public void ToggleReadWriteBuffers()
+        {
+            Toggle(readBuffer);
+            Toggle(writeBuffer);
+        }
 
+    }
     class ApplicationPayload : Payload
     {
         public ApplicationPayload(string data)
@@ -169,15 +177,14 @@ namespace OO_OSI
             this.data = data;
         }
     }
-
     class PresentationPayload : Payload
     { }
-
     class SessionPayload : Payload
     { }
-
     public class Layer
     {
+        int id;
+        
         public class Packet : Payload
         {
             public Head head;
@@ -223,12 +230,14 @@ namespace OO_OSI
         public Packet layer_packet = new Packet();
 
         //Methods
-        public Layer(StackPosition position, string Name = "undefined")
+        public Layer(StackPosition position, 
+                     string Name = "undefined")
         {
+            this.id = sglobal.GetGlobalId();
             this.Name = Name;
             this.position = position; 
         }
-        public void tick()
+        public void Ontick()
         {
             TransferFromUpperToLower();
             //TransferFromLowerToUpper();
@@ -248,11 +257,13 @@ namespace OO_OSI
         public void TransferFromUpperToLower()
         {
             //switch buffers of upper and lower queues
-            Buffer toggledBuffer = fromUpperQ.Toggle(fromUpperQ.readBuffer);
-            fromUpperQ.SetReadBuffer(toggledBuffer);
+            //Buffer toggledBuffer = fromUpperQ.Toggle(fromUpperQ.readBuffer);
+            //fromUpperQ.SetReadBuffer(toggledBuffer);
 
-            toggledBuffer = toLowerQ.Toggle(toLowerQ.readBuffer);
-            toLowerQ.SetReadBuffer(toggledBuffer);
+            //toggledBuffer = toLowerQ.Toggle(toLowerQ.readBuffer);
+            //toLowerQ.SetReadBuffer(toggledBuffer);
+            fromUpperQ.ToggleReadWriteBuffers();
+            toLowerQ.ToggleReadWriteBuffers();
 
             if (position == StackPosition.TOP)
             {
@@ -300,7 +311,6 @@ namespace OO_OSI
             }
         }      
     }
-
     public class OSIStack
     {
         public List<Layer> OsiSevenLayers = new List<Layer>();
@@ -329,7 +339,6 @@ namespace OO_OSI
             OsiSevenLayers.Add(sessionLayer);
         }
     }
-
     public class Node
     {
         public OSIStack stack = new OSIStack();
@@ -348,7 +357,6 @@ namespace OO_OSI
             return String.Empty;
         }
     }
-
     public class Hardware
     {
         Queue<byte> hwChannel;
@@ -359,8 +367,6 @@ namespace OO_OSI
             this.size = size;
         }
     }
-
-
     public class TestHarness
     {
         public bool test_case_01()
@@ -382,13 +388,12 @@ namespace OO_OSI
                 List<Layer> layers = n1.stack.OsiSevenLayers;
                 foreach (Layer layer in layers)
                 {
-                    layer.tick();
+                    layer.Ontick();
                 }
             }
             return false;
         }
     }
-
     public class Simulation
     {
         int node_one_period = 1;
@@ -409,7 +414,6 @@ namespace OO_OSI
             //    }            
         }
     }
-
 }
 
 
