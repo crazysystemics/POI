@@ -257,23 +257,44 @@ namespace OO_OSI
         public void TransferFromUpperToLower()
         {
             //switch buffers of upper and lower queues
-            //Buffer toggledBuffer = fromUpperQ.Toggle(fromUpperQ.readBuffer);
-            //fromUpperQ.SetReadBuffer(toggledBuffer);
+            Buffer toggledBuffer = fromUpperQ.Toggle(fromUpperQ.readBuffer);
+            fromUpperQ.SetReadBuffer(toggledBuffer);
 
-            //toggledBuffer = toLowerQ.Toggle(toLowerQ.readBuffer);
-            //toLowerQ.SetReadBuffer(toggledBuffer);
+            toggledBuffer = toLowerQ.Toggle(toLowerQ.readBuffer);
+            toLowerQ.SetReadBuffer(toggledBuffer);
             fromUpperQ.ToggleReadWriteBuffers();
-            toLowerQ.ToggleReadWriteBuffers();
 
-            if (position == StackPosition.TOP)
-            {
-                Packet packet = new Packet();
-                packet.head = new Head();
-                packet.payload = new ApplicationPayload("<app_data>");
-                packet.payload.data = sglobal.data;
-                toLowerQ.Enqueue(packet);
-            }
-            else if (position == StackPosition.BOTTOM)
+            //TODO: Idea: Using IIT in recursive connected component algorithm (fitness of a cluster)
+            //TODO: Idea: Phi can be used as distance metric between components
+
+            //TODO: Idea: Tool: Probably scalable with recursive connected component algorithm??
+            //TODO: Idea: Tool: Connected Components in  Module(Class)wise
+            //TODO: Idea: Tool: Threadwise (Call Graph, Call Stack)
+            //TODO: Idea: Stack as well as (logic-data flow, flowchart)
+
+            //TODO: Idea: Tool: MBSE-Product Program (OFP.EXE) Flow Visualizer(UML Diagrams?? Flowcharts??)
+            //TODO: Idea: Tool: MBSE-Product Should link with Data Analysis and Visualization (.RECDATA, Plots and Charts)
+            //TODO: Idea: Tool: MBSE-Product Evolved Configuration: Resulting in Improved Plans,.Configs and Weights (.PFMG)
+            //TODO: Idea: Tool: MBSE-Product Evolved Product Feature: Resulting in improved Features, Programs
+            //TODO: Idea: Tool: MBSE-Product Warning/Health Monitoring Analysis MFWS-LSS-FLT (BIT of Systems)
+
+            //TODO: Idea: Tool: MBSE-Product Battle Management System Evaluator
+            //TODO: Idea: Tool: MBSE-Product Mission with multiple Systems
+            //TODO: Idea: Tool: MBSE-Product SACCIN kind of Battle Visualization
+            //TODO: Idea: Tool: MBSE-Product Multi-System Monitoring, Recording, Visualization (RED/BLUE, COPE INDIA)
+            //TODO: Idea: Tool: MBSE-Product MSDF-SSA
+
+
+            //TODO: Idea: Tool: MBSE-Process Engineering - Documentation, VnV 
+            //TODO: Idea: Tool: MBSE-Process SE-[SDLC]
+            //                  [SDLC-V, Integration, VnV(Review, Testing), CM, Documentation]
+            //                  Product Backlog-Model Repository or Knowledge Base 
+            //                  Dimensions        : Normalized Peformance Measure [SPEC-SET](a Product Feature)
+            //                                      Time/Spec, Cost/Spec, Defect/Spec                        
+            //                  Capabilit Maturity: Continuous Improvement
+
+            toLowerQ.ToggleReadWriteBuffers();            
+            if (position == StackPosition.BOTTOM)
             {
                 Payload p = fromUpperQ.Dequeue();
                 Console.WriteLine(p.data);
@@ -310,6 +331,8 @@ namespace OO_OSI
                 toUpperQ.Enqueue(lower_packet.payload);
             }
         }      
+
+  
     }
     public class OSIStack
     {
@@ -347,9 +370,19 @@ namespace OO_OSI
 
         public void send(string s)
         {
-            sglobal.data = "<hello>";
+           
+            sglobal.data = "<hello>"; 
+            Layer.Packet applicationPacket = new Layer.Packet();
+            applicationPacket.data = sglobal.data;
+            applicationPacket.head = new Layer.Head();
+            applicationPacket.tail = new Layer.Tail();
+
             Layer topLayer = stack.OsiSevenLayers[0];
-            topLayer.TransferFromUpperToLower();
+
+                     
+            topLayer.toUpperQ.SetReadBuffer(Buffer.PING);
+            topLayer.toUpperQ.Enqueue(applicationPacket);
+            //topLayer.TransferFromUpperToLower();
         }
 
         public string receive()
