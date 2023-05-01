@@ -94,6 +94,7 @@ namespace OO_OSI
     //and prepended. Header determines which is the layer.
     //Layer<Transport> determines Head and Tail of Transport Layer
     public enum Buffer { PING, PONG }
+ 
     public enum StackPosition { TOP, BOTTOM, MIDDLE }
     public static class sglobal
     {
@@ -102,71 +103,49 @@ namespace OO_OSI
         public static int GetGlobalId() { return global_id++; }
 
     }
-
-
     public abstract class Payload { public string data; }
     public class PingPongQueue<T> : Queue<T> where T : class?
     {
         public Queue<T> pingBuffer = new Queue<T>();
         public Queue<T> pongBuffer = new Queue<T>();
         public Buffer readBuffer, writeBuffer;
-        public Buffer buffer;
-        public PingPongQueue()
-        {
-            readBuffer = Buffer.PING;
-            writeBuffer = Buffer.PONG;
-        }
-
-        public void SetReadBuffer(Buffer readBuffer)
-        {
-            this.readBuffer = readBuffer;
-            writeBuffer = Toggle(readBuffer);
-        }
-
-        public new void Enqueue(T item)
-        {
-            if (buffer == Buffer.PING)
-            {
-                pingBuffer.Enqueue(item);
-            }
-            else
-            {
-                pongBuffer.Enqueue(item);
-            }
-        }
-
-        public new T Dequeue()
-        {
-            if (buffer == Buffer.PING)
-            {
-                if (pingBuffer.Count > 0)
-                {
-                    return pingBuffer.Dequeue();
-                }
-            }
-            else
-            {
-                if (pongBuffer.Count > 0)
-                {
-                    return pongBuffer.Dequeue();
-                }
-            }
-
-            return null;
-        }
-
-        public Buffer Toggle(Buffer b)
+        public Buffer ToggleBuffer(Buffer b)
         {
             if (b == Buffer.PING)
                 return Buffer.PONG;
             else
                 return Buffer.PING;
         }
-
-        public void ToggleReadWriteBuffers()
+        public PingPongQueue()
         {
-            Toggle(readBuffer);
-            Toggle(writeBuffer);
+            readBuffer  = Buffer.PING;
+            writeBuffer = Buffer.PONG;
+        }
+        public PingPongQueue(Queue<T> baseQueue, Buffer b):base(baseQueue)
+        {
+            this.readBuffer = b;
+            this.writeBuffer = ToggleBuffer(b);
+        }      
+        public PingPongQueue<T> SetReadBuffer(Buffer readBuffer)
+        {
+            this.readBuffer = readBuffer;
+            writeBuffer     = ToggleBuffer(readBuffer);
+            if (readBuffer == Buffer.PING)
+            {
+                return new PingPongQueue<T>(pingBuffer, readBuffer);
+            }
+            else
+            {
+                return new PingPongQueue<T>(pongBuffer, readBuffer);
+            }                
+        }
+        public PingPongQueue<T> Toggle()
+        {
+            Buffer temp = readBuffer;
+            readBuffer = writeBuffer;
+            writeBuffer = temp;
+
+            return SetReadBuffer(readBuffer);
         }
 
     }
@@ -257,12 +236,11 @@ namespace OO_OSI
         public void TransferFromUpperToLower()
         {
             //switch buffers of upper and lower queues
-            Buffer toggledBuffer = fromUpperQ.Toggle(fromUpperQ.readBuffer);
-            fromUpperQ.SetReadBuffer(toggledBuffer);
-
-            toggledBuffer = toLowerQ.Toggle(toLowerQ.readBuffer);
-            toLowerQ.SetReadBuffer(toggledBuffer);
-            fromUpperQ.ToggleReadWriteBuffers();
+            //Buffer toggledBuffer = fromUpperQ.ToggleBuffer(fromUpperQ.readBuffer);
+            //fromUpperQ.SetReadBuffer(toggledBuffer);
+            //toggledBuffer = toLowerQ.ToggleBuffer(toLowerQ.readBuffer);
+            //toLowerQ.SetReadBuffer(toggledBuffer);
+            fromUpperQ.Toggle();
 
             //TODO: Idea: Using IIT in recursive connected component algorithm (fitness of a cluster)
             //TODO: Idea: Phi can be used as distance metric between components
@@ -293,7 +271,7 @@ namespace OO_OSI
             //                                      Time/Spec, Cost/Spec, Defect/Spec                        
             //                  Capabilit Maturity: Continuous Improvement
 
-            toLowerQ.ToggleReadWriteBuffers();            
+            toLowerQ.Toggle();            
             if (position == StackPosition.BOTTOM)
             {
                 Payload p = fromUpperQ.Dequeue();
@@ -301,7 +279,7 @@ namespace OO_OSI
             }
             else
             {
-                Debug.Assert(position == StackPosition.MIDDLE);
+                //Debug.Assert(position != StackPosition.TOP);
                 while (fromUpperQ.Count > 0)
                 {
                     Payload upper_packet = fromUpperQ.Dequeue();
@@ -316,11 +294,11 @@ namespace OO_OSI
         public void TransferFromLowerToUpper()
         {
             //switch buffers of upper and lower queues
-            Buffer toggledBuffer = fromLowerQ.Toggle(fromLowerQ.readBuffer);
-            fromLowerQ.SetReadBuffer(toggledBuffer);
+            //Buffer toggledBuffer = fromLowerQ.Toggle(fromLowerQ.readBuffer);
+            //fromLowerQ.SetReadBuffer(toggledBuffer);
 
-            toggledBuffer = toUpperQ.Toggle(toUpperQ.readBuffer);
-            toUpperQ.SetReadBuffer(toggledBuffer);
+            //toggledBuffer = toUpperQ.Toggle(toUpperQ.readBuffer);
+            //toUpperQ.SetReadBuffer(toggledBuffer);
 
             while (fromLowerQ.Count > 0)
             {
@@ -380,8 +358,8 @@ namespace OO_OSI
             Layer topLayer = stack.OsiSevenLayers[0];
 
                      
-            topLayer.toUpperQ.SetReadBuffer(Buffer.PING);
-            topLayer.toUpperQ.Enqueue(applicationPacket);
+            topLayer.fromUpperQ.SetReadBuffer(Buffer.PING);
+            topLayer.fromUpperQ.Enqueue(applicationPacket);
             //topLayer.TransferFromUpperToLower();
         }
 
