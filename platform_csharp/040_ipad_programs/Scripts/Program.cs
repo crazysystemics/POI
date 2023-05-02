@@ -4,7 +4,7 @@
 Console.WriteLine("Hello, Script World!");
 Console.WriteLine("Script is OO_OSI... ");
 
-TestHarness osiTestHarness = new TestHarness();
+TestHarness osiTestHarness = new TestHarness("th01");
 osiTestHarness.test_case_01();
 
 

@@ -8,6 +8,37 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Data.Common;
+using System.Reflection;
+
+
+//TODO: Idea: Using IIT in recursive connected component algorithm (fitness of a cluster)
+//TODO: Idea: Phi can be used as distance metric between components
+
+//TODO: Idea: Tool: Probably scalable with recursive connected component algorithm??
+//TODO: Idea: Tool: Connected Components in  Module(Class)wise
+//TODO: Idea: Tool: Threadwise (Call Graph, Call Stack)
+//TODO: Idea: Stack as well as (logic-data flow, flowchart)
+
+//TODO: Idea: Tool: MBSE-Product Program (OFP.EXE) Flow Visualizer(UML Diagrams?? Flowcharts??)
+//TODO: Idea: Tool: MBSE-Product Should link with Data Analysis and Visualization (.RECDATA, Plots and Charts)
+//TODO: Idea: Tool: MBSE-Product Evolved Configuration: Resulting in Improved Plans,.Configs and Weights (.PFMG)
+//TODO: Idea: Tool: MBSE-Product Evolved Product Feature: Resulting in improved Features, Programs
+//TODO: Idea: Tool: MBSE-Product Warning/Health Monitoring Analysis MFWS-LSS-FLT (BIT of Systems)
+
+//TODO: Idea: Tool: MBSE-Product Battle Management System Evaluator
+//TODO: Idea: Tool: MBSE-Product Mission with multiple Systems
+//TODO: Idea: Tool: MBSE-Product SACCIN kind of Battle Visualization
+//TODO: Idea: Tool: MBSE-Product Multi-System Monitoring, Recording, Visualization (RED/BLUE, COPE INDIA)
+//TODO: Idea: Tool: MBSE-Product MSDF-SSA
+
+
+//TODO: Idea: Tool: MBSE-Process Engineering - Documentation, VnV 
+//TODO: Idea: Tool: MBSE-Process SE-[SDLC]
+//                  [SDLC-V, Integration, VnV(Review, Testing), CM, Documentation]
+//                  Product Backlog-Model Repository or Knowledge Base 
+//                  Dimensions        : Normalized Peformance Measure [SPEC-SET](a Product Feature)
+//                                      Time/Spec, Cost/Spec, Defect/Spec                        
+//                  Capabilit Maturity: Continuous Improvement
 
 namespace OO_OSI
 {
@@ -94,13 +125,29 @@ namespace OO_OSI
     //and prepended. Header determines which is the layer.
     //Layer<Transport> determines Head and Tail of Transport Layer
     public enum Buffer { PING, PONG }
- 
+    public enum BufferCycle { PING_READ_PONG_WRITE, PONG_READ_PING_WRITE } 
     public enum StackPosition { TOP, BOTTOM, MIDDLE }
     public static class sglobal
     {
         public static string data = String.Empty;
         private static int global_id = 0;
+        public static BufferCycle OsiStackCycle;
         public static int GetGlobalId() { return global_id++; }
+        public static void InitOsiCycle(BufferCycle OsiCycle= 
+                            BufferCycle.PING_READ_PONG_WRITE)
+        {
+            OsiStackCycle = OsiCycle;
+        }
+
+        public static void ToggleOsiCycle()
+        {
+            if (OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE)
+                OsiStackCycle = BufferCycle.PONG_READ_PING_WRITE;
+            else
+                OsiStackCycle = BufferCycle.PING_READ_PONG_WRITE;
+        }
+
+
 
     }
     public abstract class Payload { public string data; }
@@ -130,7 +177,7 @@ namespace OO_OSI
         {
             this.readBuffer = readBuffer;
             writeBuffer     = ToggleBuffer(readBuffer);
-            if (readBuffer == Buffer.PING)
+             if (readBuffer == Buffer.PING)
             {
                 return new PingPongQueue<T>(pingBuffer, readBuffer);
             }
@@ -240,38 +287,8 @@ namespace OO_OSI
             //fromUpperQ.SetReadBuffer(toggledBuffer);
             //toggledBuffer = toLowerQ.ToggleBuffer(toLowerQ.readBuffer);
             //toLowerQ.SetReadBuffer(toggledBuffer);
-            fromUpperQ.Toggle();
-
-            //TODO: Idea: Using IIT in recursive connected component algorithm (fitness of a cluster)
-            //TODO: Idea: Phi can be used as distance metric between components
-
-            //TODO: Idea: Tool: Probably scalable with recursive connected component algorithm??
-            //TODO: Idea: Tool: Connected Components in  Module(Class)wise
-            //TODO: Idea: Tool: Threadwise (Call Graph, Call Stack)
-            //TODO: Idea: Stack as well as (logic-data flow, flowchart)
-
-            //TODO: Idea: Tool: MBSE-Product Program (OFP.EXE) Flow Visualizer(UML Diagrams?? Flowcharts??)
-            //TODO: Idea: Tool: MBSE-Product Should link with Data Analysis and Visualization (.RECDATA, Plots and Charts)
-            //TODO: Idea: Tool: MBSE-Product Evolved Configuration: Resulting in Improved Plans,.Configs and Weights (.PFMG)
-            //TODO: Idea: Tool: MBSE-Product Evolved Product Feature: Resulting in improved Features, Programs
-            //TODO: Idea: Tool: MBSE-Product Warning/Health Monitoring Analysis MFWS-LSS-FLT (BIT of Systems)
-
-            //TODO: Idea: Tool: MBSE-Product Battle Management System Evaluator
-            //TODO: Idea: Tool: MBSE-Product Mission with multiple Systems
-            //TODO: Idea: Tool: MBSE-Product SACCIN kind of Battle Visualization
-            //TODO: Idea: Tool: MBSE-Product Multi-System Monitoring, Recording, Visualization (RED/BLUE, COPE INDIA)
-            //TODO: Idea: Tool: MBSE-Product MSDF-SSA
-
-
-            //TODO: Idea: Tool: MBSE-Process Engineering - Documentation, VnV 
-            //TODO: Idea: Tool: MBSE-Process SE-[SDLC]
-            //                  [SDLC-V, Integration, VnV(Review, Testing), CM, Documentation]
-            //                  Product Backlog-Model Repository or Knowledge Base 
-            //                  Dimensions        : Normalized Peformance Measure [SPEC-SET](a Product Feature)
-            //                                      Time/Spec, Cost/Spec, Defect/Spec                        
-            //                  Capabilit Maturity: Continuous Improvement
-
-            toLowerQ.Toggle();            
+            //fromUpperQ = fromUpperQ.Toggle();            
+            toLowerQ = toLowerQ.Toggle();            
             if (position == StackPosition.BOTTOM)
             {
                 Payload p = fromUpperQ.Dequeue();
@@ -308,9 +325,7 @@ namespace OO_OSI
                 //can be stripped off
                 toUpperQ.Enqueue(lower_packet.payload);
             }
-        }      
-
-  
+        }        
     }
     public class OSIStack
     {
@@ -342,9 +357,16 @@ namespace OO_OSI
     }
     public class Node
     {
+        public int id;
+        public string? Name;
         public OSIStack stack = new OSIStack();
 
         //public Hardware hardware = new Hardware();
+        public Node(string Name="Undefined")
+        {
+            this.id = sglobal.GetGlobalId();
+            this.Name = Name;
+        }
 
         public void send(string s)
         {
@@ -357,8 +379,11 @@ namespace OO_OSI
 
             Layer topLayer = stack.OsiSevenLayers[0];
 
-                     
-            topLayer.fromUpperQ.SetReadBuffer(Buffer.PING);
+            if (sglobal.OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE)
+                topLayer.fromUpperQ = topLayer.fromUpperQ.SetReadBuffer(Buffer.PONG);
+            else
+                topLayer.fromUpperQ = topLayer.fromUpperQ.SetReadBuffer(Buffer.PING);
+
             topLayer.fromUpperQ.Enqueue(applicationPacket);
             //topLayer.TransferFromUpperToLower();
         }
@@ -380,27 +405,55 @@ namespace OO_OSI
     }
     public class TestHarness
     {
+        public int id;
+        public string Name;
+
+        public TestHarness(string Name = "Undefined")
+        {
+            id = sglobal.GetGlobalId();
+            this.Name = Name;
+        }
         public bool test_case_01()
         {
             //Two point to point connected computers
             //exchanging a single packet
             //application-data link-physical
-            Node n1 = new Node();
-            Node n2 = new Node();
-            int tick = 0;
+            Node n1 = new Node("n1");
+            Node n2 = new Node("n2");
+            
+            sglobal.InitOsiCycle(BufferCycle.PING_READ_PONG_WRITE);
+            int tick = 0;            
             while (tick < 10)
             {
                 if (tick % 10 == 0)
                 {
                     n1.send("hello");
                 }
-
                 //In rest of 90% time
+                
                 List<Layer> layers = n1.stack.OsiSevenLayers;
                 foreach (Layer layer in layers)
                 {
+                    if (sglobal.OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE)
+                    {
+                        layer.fromUpperQ = layer.fromUpperQ.SetReadBuffer(Buffer.PING);
+                        layer.toUpperQ = layer.toUpperQ.SetReadBuffer(Buffer.PING);
+                        layer.toLowerQ = layer.toLowerQ.SetReadBuffer(Buffer.PING);
+                        layer.toUpperQ = layer.toUpperQ.SetReadBuffer(Buffer.PING);
+                    }
+                    else
+                    {
+                        layer.fromUpperQ = layer.fromUpperQ.SetReadBuffer(Buffer.PONG);
+                        layer.toUpperQ = layer.toUpperQ.SetReadBuffer(Buffer.PONG);
+                        layer.toLowerQ = layer.toLowerQ.SetReadBuffer(Buffer.PONG);
+                        layer.toUpperQ = layer.toUpperQ.SetReadBuffer(Buffer.PONG);
+                    }
+
                     layer.Ontick();
                 }
+
+                tick++;
+                sglobal.ToggleOsiCycle();
             }
             return false;
         }
