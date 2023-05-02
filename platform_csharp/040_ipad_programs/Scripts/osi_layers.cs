@@ -40,6 +40,8 @@ using System.Reflection;
 //                                      Time/Spec, Cost/Spec, Defect/Spec                        
 //                  Capabilit Maturity: Continuous Improvement
 
+//TODO: Jupyter Notebook type in C#
+
 namespace OO_OSI
 {
     //public class Packet<HeadT, PayloadT, TailT>
@@ -124,7 +126,7 @@ namespace OO_OSI
     //Basically Layer specific Header/Tail is computed in this layer
     //and prepended. Header determines which is the layer.
     //Layer<Transport> determines Head and Tail of Transport Layer
-    public enum Buffer { PING, PONG }
+    public enum BufferType { PING, PONG }
     public enum BufferCycle { PING_READ_PONG_WRITE, PONG_READ_PING_WRITE } 
     public enum StackPosition { TOP, BOTTOM, MIDDLE }
     public static class sglobal
@@ -151,50 +153,52 @@ namespace OO_OSI
 
     }
     public abstract class Payload { public string data; }
-    public class PingPongQueue<T> : Queue<T> where T : class?
+    class BufferSemaphore
+    {
+       
+    }
+    
+    public class PingPongQueue<T> 
     {
         public Queue<T> pingBuffer = new Queue<T>();
         public Queue<T> pongBuffer = new Queue<T>();
-        public Buffer readBuffer, writeBuffer;
-        public Buffer ToggleBuffer(Buffer b)
+
+        private BufferType pingPongFlag;
+
+        
+        public BufferType Inverse(BufferType b)
         {
-            if (b == Buffer.PING)
-                return Buffer.PONG;
+            if (b == BufferType.PING)
+                return BufferType.PONG;
             else
-                return Buffer.PING;
+                return BufferType.PING;
         }
+
         public PingPongQueue()
         {
-            readBuffer  = Buffer.PING;
-            writeBuffer = Buffer.PONG;
+            readBufferType  = BufferType.PING;
+            writeBuffer = BufferType.PONG;
         }
-        public PingPongQueue(Queue<T> baseQueue, Buffer b):base(baseQueue)
+        public PingPongQueue(BufferType b)
         {
-            this.readBuffer = b;
-            this.writeBuffer = ToggleBuffer(b);
+            pingPongFlag = b;             
         }      
-        public PingPongQueue<T> SetReadBuffer(Buffer readBuffer)
+        public Queue<T> Get(BufferType b)
         {
-            this.readBuffer = readBuffer;
-            writeBuffer     = ToggleBuffer(readBuffer);
-             if (readBuffer == Buffer.PING)
+            
+            if (b == BufferType.PING)
             {
-                return new PingPongQueue<T>(pingBuffer, readBuffer);
+                return pingBuffer;
             }
             else
             {
-                return new PingPongQueue<T>(pongBuffer, readBuffer);
+                return pongBuffer;
             }                
         }
-        public PingPongQueue<T> Toggle()
-        {
-            Buffer temp = readBuffer;
-            readBuffer = writeBuffer;
-            writeBuffer = temp;
-
-            return SetReadBuffer(readBuffer);
+        public void Toggle(BufferType b)
+        {           
+            //Get the Q after Toggling
         }
-
     }
     class ApplicationPayload : Payload
     {
@@ -380,9 +384,9 @@ namespace OO_OSI
             Layer topLayer = stack.OsiSevenLayers[0];
 
             if (sglobal.OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE)
-                topLayer.fromUpperQ = topLayer.fromUpperQ.SetReadBuffer(Buffer.PONG);
+                topLayer.fromUpperQ = topLayer.fromUpperQ.Get(BufferType.PONG);
             else
-                topLayer.fromUpperQ = topLayer.fromUpperQ.SetReadBuffer(Buffer.PING);
+                topLayer.fromUpperQ = topLayer.fromUpperQ.Get(BufferType.PING);
 
             topLayer.fromUpperQ.Enqueue(applicationPacket);
             //topLayer.TransferFromUpperToLower();
@@ -436,20 +440,21 @@ namespace OO_OSI
                 {
                     if (sglobal.OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE)
                     {
-                        layer.fromUpperQ = layer.fromUpperQ.SetReadBuffer(Buffer.PING);
-                        layer.toUpperQ = layer.toUpperQ.SetReadBuffer(Buffer.PING);
-                        layer.toLowerQ = layer.toLowerQ.SetReadBuffer(Buffer.PING);
-                        layer.toUpperQ = layer.toUpperQ.SetReadBuffer(Buffer.PING);
+                        layer.fromUpperQ = layer.fromUpperQ.Get(BufferType.PING);
+                        layer.toUpperQ = layer.toUpperQ.Get(BufferType.PING);
+                        layer.toLowerQ = layer.toLowerQ.Get(BufferType.PING);
+                        layer.toUpperQ = layer.toUpperQ.Get(BufferType.PING);
                     }
                     else
                     {
-                        layer.fromUpperQ = layer.fromUpperQ.SetReadBuffer(Buffer.PONG);
-                        layer.toUpperQ = layer.toUpperQ.SetReadBuffer(Buffer.PONG);
-                        layer.toLowerQ = layer.toLowerQ.SetReadBuffer(Buffer.PONG);
-                        layer.toUpperQ = layer.toUpperQ.SetReadBuffer(Buffer.PONG);
+                        layer.fromUpperQ = layer.fromUpperQ.Get(BufferType.PONG);
+                        layer.toUpperQ = layer.toUpperQ.Get(BufferType.PONG);
+                        layer.toLowerQ = layer.toLowerQ.Get(BufferType.PONG);
+                        layer.toUpperQ = layer.toUpperQ.Get(BufferType.PONG);
                     }
 
                     layer.Ontick();
+
                 }
 
                 tick++;
