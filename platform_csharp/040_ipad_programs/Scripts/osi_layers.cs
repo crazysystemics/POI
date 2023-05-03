@@ -153,20 +153,45 @@ namespace OO_OSI
 
     }
     public abstract class Payload { public string data; }
-    class BufferSemaphore
-    {
-       
-    }
+    
     
     public class PingPongQueue<T> 
     {
+        public Queue<T> readQ
+        {
+            //readQ is readOnly. It does not have set operator
+            //But dynamically it can be evaluated to ping or pong
+            get
+            {
+                return sglobal.OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE ?
+                         pingBuffer : pongBuffer;
+            }
+        }
+
+        public Queue<T> writeQ
+        {
+            //writeQ is writeOOnly. It does not have get  operator
+            //But dynamically it can be evaluated to ping or pong
+            set
+            {
+                if (sglobal.OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE)
+                {
+                    pingBuffer = value;
+                }
+                else
+                {
+                    pongBuffer = value;
+                }
+                        
+            }
+
+        }
+
         public Queue<T> pingBuffer = new Queue<T>();
         public Queue<T> pongBuffer = new Queue<T>();
 
-        private BufferType pingPongFlag;
-
-        
-        public BufferType Inverse(BufferType b)
+        private BufferType pingPongFlag;        
+        public BufferType Invert(BufferType b)
         {
             if (b == BufferType.PING)
                 return BufferType.PONG;
@@ -214,7 +239,7 @@ namespace OO_OSI
     public class Layer
     {
         int id;
-        
+
         public class Packet : Payload
         {
             public Head head;
@@ -244,11 +269,30 @@ namespace OO_OSI
             }
         }
 
+        public Queue<Payload> FromUpperQ
+        {
+            get
+            {
+                return fromUpperQ.readQ;
+            }
+        }
+
+        public Queue<Payload> ToUpperQ
+        {
+            set
+            {
+                 toUpperQ.writeQ = value;
+            }
+        }
+
+
         //Members
         public string Name;
-        public StackPosition position;        
-        public PingPongQueue<Payload> fromUpperQ = new PingPongQueue<Payload>();
-        public PingPongQueue<Payload> toUpperQ = new PingPongQueue<Payload>();
+        public StackPosition position;   
+        
+
+        private  PingPongQueue<Payload> fromUpperQ = new PingPongQueue<Payload>();
+        private  PingPongQueue<Payload> toUpperQ = new PingPongQueue<Payload>();
            
         public Head head = new Head();
         public Tail tail = new Tail();
@@ -343,16 +387,18 @@ namespace OO_OSI
             Layer sessionLayer      = new Layer(StackPosition.BOTTOM,  "session");
 
             //Connect application layer to presentation layer
-            applicationLayer.toLowerQ =
-                presentationLayer.GetPingPongQueueReference(ref presentationLayer.fromUpperQ);
-            applicationLayer.fromLowerQ =
-                presentationLayer.GetPingPongQueueReference(ref presentationLayer.toUpperQ);
-            
-            //Connect presentation layer to session layer
-            presentationLayer.toLowerQ =
-                sessionLayer.GetPingPongQueueReference(ref sessionLayer.fromUpperQ);
-            presentationLayer.fromLowerQ =
-                sessionLayer.GetPingPongQueueReference(ref sessionLayer.toUpperQ);
+            //applicationLayer.toLowerQ =
+            //    presentationLayer.GetPingPongQueueReference(ref presentationLayer.FromUpperQ);
+            //applicationLayer.fromLowerQ =
+            //    presentationLayer.GetPingPongQueueReference(ref presentationLayer.ToUpperQ);
+
+            ////Connect presentation layer to session layer
+            //presentationLayer.toLowerQ =
+            //    sessionLayer.GetPingPongQueueReference(ref sessionLayer.fromUpperQ);
+            //presentationLayer.fromLowerQ =
+            //    sessionLayer.GetPingPongQueueReference(ref sessionLayer.toUpperQ);
+
+            presentationLayer.FromUpperQ = applicationLayer.ToLowerQ;
 
             OsiSevenLayers.Add(applicationLayer);
             OsiSevenLayers.Add(presentationLayer);
