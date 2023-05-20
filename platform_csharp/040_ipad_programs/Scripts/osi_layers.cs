@@ -269,11 +269,16 @@ namespace OO_OSI
             }
         }
 
-        public Queue<Payload> FromUpperQ
+        public Queue<Payload>  FromUpperQ
         {
             get
             {
                 return fromUpperQ.readQ;
+            }
+            
+            set
+            {
+                fromUpperQ.writeQ = value;
             }
         }
 
@@ -486,8 +491,8 @@ namespace OO_OSI
                 {
                     if (sglobal.OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE)
                     {
-                        layer.fromUpperQ = layer.fromUpperQ.Get(BufferType.PING);
-                        layer.toUpperQ = layer.toUpperQ.Get(BufferType.PING);
+                        layer.FromUpperQ = layer.FromUpperQ;
+                        layer.UpperQ = layer.toUpperQ.Get(BufferType.PING);
                         layer.toLowerQ = layer.toLowerQ.Get(BufferType.PING);
                         layer.toUpperQ = layer.toUpperQ.Get(BufferType.PING);
                     }
