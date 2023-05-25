@@ -293,11 +293,10 @@ namespace OO_OSI
 
         //Members
         public string Name;
-        public StackPosition position;   
-        
+        public StackPosition position;           
 
-        private  PingPongQueue<Payload> fromUpperQ = new PingPongQueue<Payload>();
-        private  PingPongQueue<Payload> toUpperQ = new PingPongQueue<Payload>();
+        private  PingPongQueue<Payload> fromUpperQ  = new PingPongQueue<Payload>();
+        private  PingPongQueue<Payload> toUpperQ    = new PingPongQueue<Payload>();
            
         public Head head = new Head();
         public Tail tail = new Tail();
@@ -403,7 +402,7 @@ namespace OO_OSI
             //presentationLayer.fromLowerQ =
             //    sessionLayer.GetPingPongQueueReference(ref sessionLayer.toUpperQ);
 
-            presentationLayer.FromUpperQ = applicationLayer.ToLowerQ;
+            //presentationLayer.FromUpperQ = applicationLayer.To;
 
             OsiSevenLayers.Add(applicationLayer);
             OsiSevenLayers.Add(presentationLayer);
@@ -491,8 +490,9 @@ namespace OO_OSI
                 {
                     if (sglobal.OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE)
                     {
+                        //what is this?
                         layer.FromUpperQ = layer.FromUpperQ;
-                        layer.UpperQ = layer.toUpperQ.Get(BufferType.PING);
+                        layer.FromUpperQ = layer.toUpperQ.Get(BufferType.PING);
                         layer.toLowerQ = layer.toLowerQ.Get(BufferType.PING);
                         layer.toUpperQ = layer.toUpperQ.Get(BufferType.PING);
                     }
