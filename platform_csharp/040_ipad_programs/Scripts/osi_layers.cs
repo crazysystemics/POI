@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Data.Common;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 
 //TODO: Idea: Using IIT in recursive connected component algorithm (fitness of a cluster)
@@ -127,7 +128,7 @@ namespace OO_OSI
     //and prepended. Header determines which is the layer.
     //Layer<Transport> determines Head and Tail of Transport Layer
     public enum BufferType { PING, PONG }
-    public enum BufferCycle { PING_READ_PONG_WRITE, PONG_READ_PING_WRITE } 
+    public enum BufferCycle { PING_READ_PONG_WRITE, PONG_READ_PING_WRITE }
     public enum StackPosition { TOP, BOTTOM, MIDDLE }
     public static class sglobal
     {
@@ -135,7 +136,7 @@ namespace OO_OSI
         private static int global_id = 0;
         public static BufferCycle OsiStackCycle;
         public static int GetGlobalId() { return global_id++; }
-        public static void InitOsiCycle(BufferCycle OsiCycle= 
+        public static void InitOsiCycle(BufferCycle OsiCycle =
                             BufferCycle.PING_READ_PONG_WRITE)
         {
             OsiStackCycle = OsiCycle;
@@ -153,9 +154,7 @@ namespace OO_OSI
 
     }
     public abstract class Payload { public string data; }
-    
-    
-    public class PingPongQueue<T> 
+    public class PingPongQueue<T>
     {
         public Queue<T> readQ
         {
@@ -163,8 +162,23 @@ namespace OO_OSI
             //But dynamically it can be evaluated to ping or pong
             get
             {
+                //TODO: Depending on global flag is not very modular
+                //TODO: Should change to a flag within a limit
                 return sglobal.OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE ?
                          pingBuffer : pongBuffer;
+            }
+        }
+
+        public class WriteQ<T1> : Queue<T1>
+        {
+            public new T1 Dequeue()
+            {
+                throw new Exception();
+            }
+
+            public WriteQ(Queue<T1> qt1)
+            {
+
             }
         }
 
@@ -172,17 +186,18 @@ namespace OO_OSI
         {
             //writeQ is writeOOnly. It does not have get  operator
             //But dynamically it can be evaluated to ping or pong
-            set
+            //TODO: Dequeue should throw exception on WriteQ and vice versa
+            //Check WriteQ1  implementation
+            get
             {
                 if (sglobal.OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE)
                 {
-                    pingBuffer = value;
+                    return pingBuffer;
                 }
                 else
                 {
-                    pongBuffer = value;
+                    return pongBuffer;
                 }
-                        
             }
 
         }
@@ -190,52 +205,8 @@ namespace OO_OSI
         public Queue<T> pingBuffer = new Queue<T>();
         public Queue<T> pongBuffer = new Queue<T>();
 
-        private BufferType pingPongFlag;        
-        public BufferType Invert(BufferType b)
-        {
-            if (b == BufferType.PING)
-                return BufferType.PONG;
-            else
-                return BufferType.PING;
-        }
 
-        public PingPongQueue()
-        {
-            readBufferType  = BufferType.PING;
-            writeBuffer = BufferType.PONG;
-        }
-        public PingPongQueue(BufferType b)
-        {
-            pingPongFlag = b;             
-        }      
-        public Queue<T> Get(BufferType b)
-        {
-            
-            if (b == BufferType.PING)
-            {
-                return pingBuffer;
-            }
-            else
-            {
-                return pongBuffer;
-            }                
-        }
-        public void Toggle(BufferType b)
-        {           
-            //Get the Q after Toggling
-        }
-    }
-    class ApplicationPayload : Payload
-    {
-        public ApplicationPayload(string data)
-        {
-            this.data = data;
-        }
-    }
-    class PresentationPayload : Payload
-    { }
-    class SessionPayload : Payload
-    { }
+    }    
     public class Layer
     {
         int id;
@@ -254,7 +225,7 @@ namespace OO_OSI
         }
         public class Head
         {
-            string data;
+            public string data;
             public Head()
             {
                 data = "<head>";
@@ -262,45 +233,52 @@ namespace OO_OSI
         }
         public class Tail
         {
-            string data;
+            public string data;
             public Tail()
             {
                 data = "<tail>";
             }
         }
 
-        public Queue<Payload>  FromUpperQ
+        public Queue<Payload> FromUpperQ
         {
             get
             {
                 return fromUpperQ.readQ;
             }
-            
-            set
-            {
-                fromUpperQ.writeQ = value;
-            }
         }
-
         public Queue<Payload> ToUpperQ
         {
-            set
+            get
             {
-                 toUpperQ.writeQ = value;
+                return toUpperQ.writeQ;
             }
         }
-
+        public Queue<Payload> FromLowerQ
+        {
+            get
+            {
+                return fromLowerQ.readQ;
+            }
+        }
+        public Queue<Payload> ToLowerQ
+        {
+            get
+            {
+                return toLowerQ.writeQ;
+            }
+        }
 
         //Members
         public string Name;
-        public StackPosition position;           
+        public StackPosition position;
 
-        private  PingPongQueue<Payload> fromUpperQ  = new PingPongQueue<Payload>();
-        private  PingPongQueue<Payload> toUpperQ    = new PingPongQueue<Payload>();
-           
+        private PingPongQueue<Payload> fromUpperQ = new PingPongQueue<Payload>();
+        private PingPongQueue<Payload> toUpperQ = new PingPongQueue<Payload>();
+
         public Head head = new Head();
         public Tail tail = new Tail();
-  
+
         public PingPongQueue<Payload> toLowerQ
             = new PingPongQueue<Payload>();
         public PingPongQueue<Payload> fromLowerQ
@@ -308,31 +286,62 @@ namespace OO_OSI
         public Packet layer_packet = new Packet();
 
         //Methods
-        public Layer(StackPosition position, 
+
+        //TODO: To promote as an extension method of string library
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="search"></param>
+        /// <param name="replace"></param>
+        /// https://stackoverflow.com/questions/8809354/replace-first-occurrence-of-pattern-in-a-string
+        /// <returns>
+        /// </returns>
+        public string ReplaceFirst(string text, string search, string replace)
+        {
+            int pos = text.IndexOf(search);
+            if (pos < 0)
+            {
+                return text;
+            }
+            return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
+        }
+
+        public string ReplaceLast(string text, string search, string replace)
+        {
+            int pos = text.LastIndexOf(search);
+
+            if (pos < 0)
+            {
+                return text;
+            }
+            return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
+        }
+        public Layer(StackPosition position,
                      string Name = "undefined")
         {
             this.id = sglobal.GetGlobalId();
             this.Name = Name;
-            this.position = position; 
+            this.position = position;
         }
-        public void Ontick()
+        public void Toggle()
         {
-            TransferFromUpperToLower();
+            sglobal.ToggleOsiCycle();
+        }
+
+        public void Ontick(int layerIndex, List<Layer> layers)
+        {
+            TransferFromUpperToLower(layerIndex, layers);
             //TransferFromLowerToUpper();
-        }       
+        }
+
         public Head ComputeHead(Payload upperPacket)
         { return new Head(); }
         public Tail ComputeTail(Payload upperPacket)
         { return new Tail(); }
-        //On deque from upper layer, PayloadT i.e., Payload of Transport come
-        //On enque to   upper layer, Payloadt i.e.., Payload of Transform is sent upwards
-        //Payload(Transform)=Session
-        public ref PingPongQueue<Payload>
-        GetPingPongQueueReference(ref PingPongQueue<Payload> ppQueue)
-        {
-            return ref ppQueue;
-        }
-        public void TransferFromUpperToLower()
+
+
+        public void TransferFromUpperToLower(int layerIndex, List<Layer> layers)
         {
             //switch buffers of upper and lower queues
             //Buffer toggledBuffer = fromUpperQ.ToggleBuffer(fromUpperQ.readBuffer);
@@ -340,55 +349,102 @@ namespace OO_OSI
             //toggledBuffer = toLowerQ.ToggleBuffer(toLowerQ.readBuffer);
             //toLowerQ.SetReadBuffer(toggledBuffer);
             //fromUpperQ = fromUpperQ.Toggle();            
-            toLowerQ = toLowerQ.Toggle();            
+            Toggle();
+
+
             if (position == StackPosition.BOTTOM)
             {
-                Payload p = fromUpperQ.Dequeue();
+                Payload p = FromUpperQ.Dequeue();
                 Console.WriteLine(p.data);
             }
             else
             {
-                //Debug.Assert(position != StackPosition.TOP);
-                while (fromUpperQ.Count > 0)
+                //This entire operation will happen in one tick. 
+                //If current layer reads from ping buffer of two lower and writes into
+                //pong of write buffer, 
+                //next layer-Transfer from toLowerQ of upperLayer to
+                //fromUpperQ of currentLayer
+                while (layers[layerIndex - 1].ToLowerQ.Count > 0)
                 {
-                    Payload upper_packet = fromUpperQ.Dequeue();
+                    Payload payload = layers[layerIndex - 1].ToLowerQ.Dequeue();
+                    FromUpperQ.Enqueue(payload);
+                }
+
+                //Debug.Assert(position != StackPosition.TOP);
+                //Transfer from upperQ of the Layer to lowerQ
+                //of Layer
+                while (FromUpperQ.Count > 0)
+                {
+                    Payload upper_packet = FromUpperQ.Dequeue();
                     head = ComputeHead(upper_packet);
                     tail = ComputeTail(upper_packet);
                     Packet layer_packet =
                            new Packet(head, upper_packet, tail);
-                    toLowerQ.Enqueue(layer_packet);
+                    ToLowerQ.Enqueue(layer_packet);
                 }
             }
         }
-        public void TransferFromLowerToUpper()
+        public void TransferFromLowerToUpper(int layerIndex, List<Layer> layers)
         {
-            //switch buffers of upper and lower queues
-            //Buffer toggledBuffer = fromLowerQ.Toggle(fromLowerQ.readBuffer);
-            //fromLowerQ.SetReadBuffer(toggledBuffer);
-
-            //toggledBuffer = toUpperQ.Toggle(toUpperQ.readBuffer);
-            //toUpperQ.SetReadBuffer(toggledBuffer);
-
-            while (fromLowerQ.Count > 0)
+            while (layers[layerIndex + 1].ToUpperQ.Count > 0)
             {
-                Packet lower_packet = (Packet)fromLowerQ.Dequeue();
-
+                //Transferring from lower layer to current layer
+                Payload payload = (Packet)layers[layerIndex + 1].ToUpperQ.Dequeue();
                 //We are interested only in Payload, Head and Tail
                 //can be stripped off
-                toUpperQ.Enqueue(lower_packet.payload);
+                FromLowerQ.Enqueue(payload);
             }
-        }        
+
+            while (FromLowerQ.Count > 0)
+            {
+                Packet lowerQPacket = (Packet)FromLowerQ.Dequeue();
+                //string layerData = ReplaceFirst(lowerQ_Payload.data, "<head>", "");
+                //layerData = ReplaceLast(lowerQ_Payload.data, "<tail>", "");                
+
+                //payload(data) from lower layer packet is packet for upper layer
+                string payload = lowerQPacket.data;
+                int headIndex = payload.IndexOf('<');
+                int headEndIndex = payload.IndexOf('>');
+                int tailIndex = payload.LastIndexOf('>');
+                int tailEndIndex = payload.LastIndexOf('<');
+
+                string hdata;
+                string tdata;
+                string data;
+                hdata = tdata = data = String.Empty;
+
+                for (int index = 0; index <= tailEndIndex; index++)
+                {
+                    if (index < headIndex)
+                        continue;
+                    else if (index <= headEndIndex)
+                        hdata += payload[index];
+                    else if (index < tailIndex)
+                        data += payload[index];
+                    else if (index <= tailEndIndex)
+                        tdata += payload[index];
+                }
+
+                Head head = new Head();
+                head.data = hdata;
+                Tail tail = new Tail();
+                tail.data = tdata;
+
+                Packet packet = new Packet();
+                packet.head = head;
+                packet.tail = tail;
+                packet.payload.data = data;
+            }
+        }
     }
     public class OSIStack
     {
         public List<Layer> OsiSevenLayers = new List<Layer>();
-
-
         public OSIStack()
         {
-            Layer applicationLayer  = new Layer(StackPosition.TOP, "application");
+            Layer applicationLayer = new Layer(StackPosition.TOP, "application");
             Layer presentationLayer = new Layer(StackPosition.MIDDLE, "presentation");
-            Layer sessionLayer      = new Layer(StackPosition.BOTTOM,  "session");
+            Layer sessionLayer = new Layer(StackPosition.BOTTOM, "session");
 
             //Connect application layer to presentation layer
             //applicationLayer.toLowerQ =
@@ -416,7 +472,7 @@ namespace OO_OSI
         public OSIStack stack = new OSIStack();
 
         //public Hardware hardware = new Hardware();
-        public Node(string Name="Undefined")
+        public Node(string Name = "Undefined")
         {
             this.id = sglobal.GetGlobalId();
             this.Name = Name;
@@ -424,21 +480,16 @@ namespace OO_OSI
 
         public void send(string s)
         {
-           
-            sglobal.data = "<hello>"; 
+
+            sglobal.data = "<hello>";
             Layer.Packet applicationPacket = new Layer.Packet();
             applicationPacket.data = sglobal.data;
             applicationPacket.head = new Layer.Head();
             applicationPacket.tail = new Layer.Tail();
 
-            Layer topLayer = stack.OsiSevenLayers[0];
-
-            if (sglobal.OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE)
-                topLayer.fromUpperQ = topLayer.fromUpperQ.Get(BufferType.PONG);
-            else
-                topLayer.fromUpperQ = topLayer.fromUpperQ.Get(BufferType.PING);
-
-            topLayer.fromUpperQ.Enqueue(applicationPacket);
+            Layer topLayer = stack.OsiSevenLayers.First();
+            topLayer.ToLowerQ.Enqueue(applicationPacket);
+            OO_OSI.Payload returnPayload = topLayer.FromLowerQ.Dequeue();
             //topLayer.TransferFromUpperToLower();
         }
 
@@ -447,11 +498,11 @@ namespace OO_OSI
             return String.Empty;
         }
     }
-    public class Hardware
+    public class PhysicalSystems
     {
         Queue<byte> hwChannel;
         public int size;
-        public Hardware(int size)
+        public PhysicalSystems(int size)
         {
             hwChannel = new Queue<byte>(size);
             this.size = size;
@@ -474,9 +525,9 @@ namespace OO_OSI
             //application-data link-physical
             Node n1 = new Node("n1");
             Node n2 = new Node("n2");
-            
+
             sglobal.InitOsiCycle(BufferCycle.PING_READ_PONG_WRITE);
-            int tick = 0;            
+            int tick = 0;
             while (tick < 10)
             {
                 if (tick % 10 == 0)
@@ -484,27 +535,31 @@ namespace OO_OSI
                     n1.send("hello");
                 }
                 //In rest of 90% time
-                
+
                 List<Layer> layers = n1.stack.OsiSevenLayers;
+                Layer topLayer = layers.First();
+                Layer bottomLayer = layers.Last();
+                Layer upperLayer = topLayer;
+                Layer lowerLayer = new Layer(0);
+                int curLayerIndex = 0;
                 foreach (Layer layer in layers)
                 {
-                    if (sglobal.OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE)
-                    {
-                        //what is this?
-                        layer.FromUpperQ = layer.FromUpperQ;
-                        layer.FromUpperQ = layer.toUpperQ.Get(BufferType.PING);
-                        layer.toLowerQ = layer.toLowerQ.Get(BufferType.PING);
-                        layer.toUpperQ = layer.toUpperQ.Get(BufferType.PING);
-                    }
-                    else
-                    {
-                        layer.fromUpperQ = layer.fromUpperQ.Get(BufferType.PONG);
-                        layer.toUpperQ = layer.toUpperQ.Get(BufferType.PONG);
-                        layer.toLowerQ = layer.toLowerQ.Get(BufferType.PONG);
-                        layer.toUpperQ = layer.toUpperQ.Get(BufferType.PONG);
-                    }
-
-                    layer.Ontick();
+                    //if (sglobal.OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE)
+                    //{
+                    //    //what is this?
+                    //    layer.FromUpperQ = layer.FromUpperQ;
+                    //    layer.FromUpperQ = layer.toUpperQ.Get(BufferType.PING);
+                    //    layer.toLowerQ = layer.toLowerQ.Get(BufferType.PING);
+                    //    layer.toUpperQ = layer.toUpperQ.Get(BufferType.PING);
+                    //}
+                    //else
+                    //{
+                    //    layer.fromUpperQ = layer.fromUpperQ.Get(BufferType.PONG);
+                    //    layer.toUpperQ = layer.toUpperQ.Get(BufferType.PONG);
+                    //    layer.toLowerQ = layer.toLowerQ.Get(BufferType.PONG);
+                    //    layer.toUpperQ = layer.toUpperQ.Get(BufferType.PONG);
+                    //}             
+                    layer.Ontick(curLayerIndex, layers);
 
                 }
 
@@ -514,26 +569,7 @@ namespace OO_OSI
             return false;
         }
     }
-    public class Simulation
-    {
-        int node_one_period = 1;
-        int node_two_period = 2;
-        public void Run()
-        {
-            //    int tick = 0;
-            //    while (true)
-            //    {
-
-            //        foreach(Layer<Payload> l in node1.layers)
-            //        {
-            //            //dequeue phase
-            //            l.TransferFromUpperToLower();
-            //            l.TransferFromLowerToUpper();
-            //        }
-
-            //    }            
-        }
-    }
+    
 }
 
 
