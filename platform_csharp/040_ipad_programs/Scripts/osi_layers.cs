@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Data.Common;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Reflection.Metadata.Ecma335;
 
 
 //TODO: Idea: Using IIT in recursive connected component algorithm (fitness of a cluster)
@@ -208,7 +209,7 @@ namespace OO_OSI
         public Queue<T> pongBuffer = new Queue<T>();
 
 
-    }    
+    }
     public class Layer
     {
         int id;
@@ -224,6 +225,11 @@ namespace OO_OSI
 
             public Packet(Head head, Payload payload, Tail tail)
             { this.head = head; this.payload = payload; this.tail = tail; }
+
+            public override string ToString()
+            {
+                return head.data + payload.data + tail.data;
+            }
         }
         public class Head
         {
@@ -345,97 +351,92 @@ namespace OO_OSI
 
         public void TransferFromUpperToLower(int layerIndex, List<Layer> layers)
         {
-            //switch buffers of upper and lower queues
-            //Buffer toggledBuffer = fromUpperQ.ToggleBuffer(fromUpperQ.readBuffer);
-            //fromUpperQ.SetReadBuffer(toggledBuffer);
-            //toggledBuffer = toLowerQ.ToggleBuffer(toLowerQ.readBuffer);
-            //toLowerQ.SetReadBuffer(toggledBuffer);
-            //fromUpperQ = fromUpperQ.Toggle();            
-            Toggle();
-
-
-            if (position == StackPosition.BOTTOM)
+            //This entire operation will happen in one tick. 
+            //If current layer reads from ping buffer of two lower and writes into
+            //pong of write buffer, 
+            //next layer-Transfer from toLowerQ of upperLayer to
+            //fromUpperQ of currentLayer
+            if (position == StackPosition.TOP)
             {
-                Payload p = FromUpperQ.Dequeue();
-                Console.WriteLine(p.data);
+                //Transfer from Upper is relevant only for non-Top rows
+                return;
             }
             else
             {
-                //This entire operation will happen in one tick. 
-                //If current layer reads from ping buffer of two lower and writes into
-                //pong of write buffer, 
-                //next layer-Transfer from toLowerQ of upperLayer to
-                //fromUpperQ of currentLayer
+                
                 while (layers[layerIndex - 1].ToLowerQ.Count > 0)
                 {
-                    Payload payload = layers[layerIndex - 1].ToLowerQ.Dequeue();
-                    FromUpperQ.Enqueue(payload);
-                }
+                    Payload upper_packet = layers[layerIndex - 1].ToLowerQ.Dequeue();                   
 
-                //Debug.Assert(position != StackPosition.TOP);
-                //Transfer from upperQ of the Layer to lowerQ
-                //of Layer
-                while (FromUpperQ.Count > 0)
-                {
-                    Payload upper_packet = FromUpperQ.Dequeue();
                     head = ComputeHead(upper_packet);
                     tail = ComputeTail(upper_packet);
                     Packet layer_packet =
                            new Packet(head, upper_packet, tail);
-                    ToLowerQ.Enqueue(layer_packet);
+
+                    if (position == StackPosition.BOTTOM)
+                    {
+                        Console.WriteLine(layer_packet);
+                    }
+                    else
+                    {
+                        ToLowerQ.Enqueue(layer_packet);
+                    }
                 }
             }
         }
+
+        //TODO: This is brute-force. Equivalent of bytecopy/memcpy. Low level manipulation
+        //TODO:Better approach would be recursive definition of Payload/Packet.  
+        //TODO:Given that Payload can be converted to Packet, if Packet can contain Payload,
+        //TODO:it can be readily converted into packet, albeit of another layer. Should explore
+        public Packet GetPacket(string strPayload)
+        {
+            //payload(data) from lower layer packet is packet for upper layer
+            
+            int headIndex    = strPayload.IndexOf('<');
+            int headEndIndex = strPayload.IndexOf('>');
+            int tailIndex    = strPayload.LastIndexOf('<');
+            int tailEndIndex = strPayload.LastIndexOf('>');
+
+            string hdata;
+            string tdata;
+            string data;
+            hdata = tdata = data = String.Empty;
+
+            for (int index = 0; index <= tailEndIndex; index++)
+            {
+                if (index < headIndex)
+                    continue;
+                else if (index <= headEndIndex)
+                    hdata += strPayload[index];
+                else if (index < tailIndex)
+                    data += strPayload[index];
+                else if (index <= tailEndIndex)
+                    tdata += strPayload[index];
+            }
+
+            Head head = new Head();
+            head.data = hdata;
+            Tail tail = new Tail();
+            tail.data = tdata;
+
+            Packet packet = new Packet();
+            packet.head = head;
+            packet.tail = tail;
+            packet.payload.data = data;
+
+            return packet;
+        }
+
+
         public void TransferFromLowerToUpper(int layerIndex, List<Layer> layers)
         {
             while (layers[layerIndex + 1].ToUpperQ.Count > 0)
             {
                 //Transferring from lower layer to current layer
-                Payload payload = (Packet)layers[layerIndex + 1].ToUpperQ.Dequeue();
-                //We are interested only in Payload, Head and Tail
-                //can be stripped off
-                FromLowerQ.Enqueue(payload);
-            }
-
-            while (FromLowerQ.Count > 0)
-            {
-                Packet lowerQPacket = (Packet)FromLowerQ.Dequeue();
-                //string layerData = ReplaceFirst(lowerQ_Payload.data, "<head>", "");
-                //layerData = ReplaceLast(lowerQ_Payload.data, "<tail>", "");                
-
-                //payload(data) from lower layer packet is packet for upper layer
-                string payload = lowerQPacket.data;
-                int headIndex = payload.IndexOf('<');
-                int headEndIndex = payload.IndexOf('>');
-                int tailIndex = payload.LastIndexOf('>');
-                int tailEndIndex = payload.LastIndexOf('<');
-
-                string hdata;
-                string tdata;
-                string data;
-                hdata = tdata = data = String.Empty;
-
-                for (int index = 0; index <= tailEndIndex; index++)
-                {
-                    if (index < headIndex)
-                        continue;
-                    else if (index <= headEndIndex)
-                        hdata += payload[index];
-                    else if (index < tailIndex)
-                        data += payload[index];
-                    else if (index <= tailEndIndex)
-                        tdata += payload[index];
-                }
-
-                Head head = new Head();
-                head.data = hdata;
-                Tail tail = new Tail();
-                tail.data = tdata;
-
-                Packet packet = new Packet();
-                packet.head = head;
-                packet.tail = tail;
-                packet.payload.data = data;
+                Packet lowerQPacket = (Packet)layers[layerIndex + 1].ToUpperQ.Dequeue();           
+                Packet upperQPacket = GetPacket(lowerQPacket.data);
+                ToUpperQ.Enqueue(upperQPacket);
             }
         }
     }
@@ -482,7 +483,6 @@ namespace OO_OSI
 
         public void send(string s)
         {
-
             sglobal.data = "<hello>";
             Layer.Packet applicationPacket = new Layer.Packet();
             applicationPacket.data = sglobal.data;
@@ -491,8 +491,6 @@ namespace OO_OSI
 
             Layer topLayer = stack.OsiSevenLayers.First();
             topLayer.ToLowerQ.Enqueue(applicationPacket);
-            OO_OSI.Payload returnPayload = topLayer.FromLowerQ.Dequeue();
-            //topLayer.TransferFromUpperToLower();
         }
 
         public string receive()
@@ -525,44 +523,29 @@ namespace OO_OSI
             //Two point to point connected computers
             //exchanging a single packet
             //application-data link-physical
-            Node n1 = new Node("n1");
-            Node n2 = new Node("n2");
 
-            sglobal.InitOsiCycle(BufferCycle.PING_READ_PONG_WRITE);
+            //node1: 3 - Layers: Top to Bottom
+            Node n1 = new Node("n1");
+
             int tick = 0;
+            List<Layer> layers = n1.stack.OsiSevenLayers;
+            Layer topLayer = layers.First();
+            Layer bottomLayer = layers.Last();
+            Layer upperLayer = topLayer;
+            Layer lowerLayer = new Layer(0);
+            int curLayerIndex = 0;
+            sglobal.InitOsiCycle(BufferCycle.PING_READ_PONG_WRITE);
+
             while (tick < 10)
             {
-                if (tick % 10 == 0)
+                if (tick % 5 == 0)
                 {
-                    n1.send("hello");
+                    n1.send("hello " + tick);
                 }
-                //In rest of 90% time
 
-                List<Layer> layers = n1.stack.OsiSevenLayers;
-                Layer topLayer = layers.First();
-                Layer bottomLayer = layers.Last();
-                Layer upperLayer = topLayer;
-                Layer lowerLayer = new Layer(0);
-                int curLayerIndex = 0;
                 foreach (Layer layer in layers)
                 {
-                    //if (sglobal.OsiStackCycle == BufferCycle.PING_READ_PONG_WRITE)
-                    //{
-                    //    //what is this?
-                    //    layer.FromUpperQ = layer.FromUpperQ;
-                    //    layer.FromUpperQ = layer.toUpperQ.Get(BufferType.PING);
-                    //    layer.toLowerQ = layer.toLowerQ.Get(BufferType.PING);
-                    //    layer.toUpperQ = layer.toUpperQ.Get(BufferType.PING);
-                    //}
-                    //else
-                    //{
-                    //    layer.fromUpperQ = layer.fromUpperQ.Get(BufferType.PONG);
-                    //    layer.toUpperQ = layer.toUpperQ.Get(BufferType.PONG);
-                    //    layer.toLowerQ = layer.toLowerQ.Get(BufferType.PONG);
-                    //    layer.toUpperQ = layer.toUpperQ.Get(BufferType.PONG);
-                    //}             
                     layer.Ontick(curLayerIndex, layers);
-
                 }
 
                 tick++;
@@ -571,7 +554,7 @@ namespace OO_OSI
             return false;
         }
     }
-    
+
 }
 
 
