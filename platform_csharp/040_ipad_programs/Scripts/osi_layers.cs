@@ -208,11 +208,12 @@ namespace OO_OSI
         public Queue<T> pingBuffer = new Queue<T>();
         public Queue<T> pongBuffer = new Queue<T>();
 
-
     }
     public class Layer
     {
         int id;
+        private string header;
+        private string trailer;
 
         public class Packet : Payload
         {
@@ -234,20 +235,21 @@ namespace OO_OSI
         public class Head
         {
             public string data;
-            public Head()
+            public Head(string header)
             {
-                data = "<head>";
+                data = "<" + header + ">";
             }
         }
         public class Tail
         {
             public string data;
-            public Tail()
+            public Tail(string trailer)
             {
-                data = "<tail>";
+                data = "<" + trailer + ">";
             }
         }
 
+        //Properties, Ports
         public Queue<Payload> FromUpperQ
         {
             get
@@ -277,15 +279,15 @@ namespace OO_OSI
             }
         }
 
-        //Members
+        //Members, Fields
         public string Name;
         public StackPosition position;
 
         private PingPongQueue<Payload> fromUpperQ = new PingPongQueue<Payload>();
         private PingPongQueue<Payload> toUpperQ = new PingPongQueue<Payload>();
 
-        public Head head = new Head();
-        public Tail tail = new Tail();
+        public Head head;
+        public Tail tail;
 
         public PingPongQueue<Payload> toLowerQ
             = new PingPongQueue<Payload>();
@@ -294,6 +296,21 @@ namespace OO_OSI
         public Packet layer_packet = new Packet();
 
         //Methods
+        //Constructors
+       public Layer( StackPosition position,
+                      string Name    = "undefined",
+                      string header  = "empty",
+                      string trailer = "empty")
+        {
+            this.id = sglobal.GetGlobalId();
+            this.Name       = Name;
+            this.position   = position;
+            this.header     = header;
+            this.trailer    = trailer;
+
+            head = new Head(header);
+            tail = new Tail(trailer);
+        }
 
         //TODO: To promote as an extension method of string library
         /// <summary>
@@ -325,13 +342,7 @@ namespace OO_OSI
             }
             return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
         }
-        public Layer(StackPosition position,
-                     string Name = "undefined")
-        {
-            this.id = sglobal.GetGlobalId();
-            this.Name = Name;
-            this.position = position;
-        }
+
         public void Toggle()
         {
             sglobal.ToggleOsiCycle();
@@ -366,12 +377,12 @@ namespace OO_OSI
                 
                 while (layers[layerIndex - 1].ToLowerQ.Count > 0)
                 {
-                    Payload upper_packet = layers[layerIndex - 1].ToLowerQ.Dequeue();                   
+                    Payload payloadFromUpperLayer = layers[layerIndex - 1].ToLowerQ.Dequeue();                   
 
-                    head = ComputeHead(upper_packet);
-                    tail = ComputeTail(upper_packet);
+                    head = ComputeHead(payloadFromUpperLayer);
+                    tail = ComputeTail(payloadFromUpperLayer);
                     Packet layer_packet =
-                           new Packet(head, upper_packet, tail);
+                           new Packet(head, payloadFromUpperLayer, tail);
 
                     if (position == StackPosition.BOTTOM)
                     {
@@ -445,9 +456,12 @@ namespace OO_OSI
         public List<Layer> OsiSevenLayers = new List<Layer>();
         public OSIStack()
         {
-            Layer applicationLayer = new Layer(StackPosition.TOP, "application");
-            Layer presentationLayer = new Layer(StackPosition.MIDDLE, "presentation");
-            Layer sessionLayer = new Layer(StackPosition.BOTTOM, "session");
+            Layer applicationLayer  = new Layer(StackPosition.TOP, 
+                                                      "application" , "ah", "at");
+            Layer presentationLayer = new Layer(StackPosition.MIDDLE, 
+                                                      "presentation","ph", "pt");
+            Layer sessionLayer      = new Layer(StackPosition.BOTTOM, 
+                                                      "session"     ,"sh","st");
 
             //Connect application layer to presentation layer
             //applicationLayer.toLowerQ =
@@ -533,7 +547,7 @@ namespace OO_OSI
             Layer bottomLayer = layers.Last();
             Layer upperLayer = topLayer;
             Layer lowerLayer = new Layer(0);
-            int curLayerIndex = 0;
+            int curLayerIndex;
             sglobal.InitOsiCycle(BufferCycle.PING_READ_PONG_WRITE);
 
             while (tick < 10)
@@ -543,9 +557,11 @@ namespace OO_OSI
                     n1.send("hello " + tick);
                 }
 
+                curLayerIndex = 0;
                 foreach (Layer layer in layers)
                 {
                     layer.Ontick(curLayerIndex, layers);
+                    curLayerIndex++;
                 }
 
                 tick++;
