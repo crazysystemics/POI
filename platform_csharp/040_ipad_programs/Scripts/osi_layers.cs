@@ -355,9 +355,9 @@ namespace OO_OSI
         }
 
         public Head ComputeHead(Payload upperPacket)
-        { return new Head(); }
+        { return new Head("uninitialized"); }
         public Tail ComputeTail(Payload upperPacket)
-        { return new Tail(); }
+        { return new Tail("unintialized"); }
 
 
         public void TransferFromUpperToLower(int layerIndex, List<Layer> layers)
@@ -426,9 +426,9 @@ namespace OO_OSI
                     tdata += strPayload[index];
             }
 
-            Head head = new Head();
+            Head head = new Head("unintialized");
             head.data = hdata;
-            Tail tail = new Tail();
+            Tail tail = new Tail("unintialized");
             tail.data = tdata;
 
             Packet packet = new Packet();
@@ -500,8 +500,8 @@ namespace OO_OSI
             sglobal.data = "<hello>";
             Layer.Packet applicationPacket = new Layer.Packet();
             applicationPacket.data = sglobal.data;
-            applicationPacket.head = new Layer.Head();
-            applicationPacket.tail = new Layer.Tail();
+            applicationPacket.head = new Layer.Head("unintialized");
+            applicationPacket.tail = new Layer.Tail("unintialized");
 
             Layer topLayer = stack.OsiSevenLayers.First();
             topLayer.ToLowerQ.Enqueue(applicationPacket);
