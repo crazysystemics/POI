@@ -358,8 +358,6 @@ namespace OO_OSI
         { return new Head("uninitialized"); }
         public Tail ComputeTail(Payload upperPacket)
         { return new Tail("unintialized"); }
-
-
         public void TransferFromUpperToLower(int layerIndex, List<Layer> layers)
         {
             //This entire operation will happen in one tick. 
