@@ -94,6 +94,8 @@ namespace oolayer_Script
         }
     }
 
+    //Another major design change queues in Q-Complex
+    //Is it good modeling practice?
     static class QComplex
     {
         public static  Queue<Packet> appm2presnQ = new Queue<Packet>();
