@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace oolayer_Scripts
+namespace oolayer_Script
 {
-    abstract class Payload { public string GetSignature(); };
-    abstract class Head { };
-    abstract class Tail { };
-    class Packet
+    abstract class Payload { public abstract string GetSignature(); };
+    abstract class Head { public string prefix, data, suffix; };
+    abstract class Tail { public string prefix, data, suffix; };
+    class Packet:Payload
     {
         public Head head;
         public Payload payload;
@@ -24,7 +24,7 @@ namespace oolayer_Scripts
             this.tail    = tail;
         }
 
-        public string GetSignature()
+        public override string GetSignature()
         {
             return signature;
         } 
@@ -35,11 +35,13 @@ namespace oolayer_Scripts
     {
         public LayerHead()
         { }
-        public LayerHead(string layer)
+        public LayerHead(string layer, string signature)
         {
             //In this place layer specific computation
             //should be placed
-            return "<layer:" + layer + ">";
+            prefix = "<head:layer=" + layer;
+            data   = signature;
+            suffix = "</head>";          
         }
     }
 
@@ -48,9 +50,13 @@ namespace oolayer_Scripts
         public LayerTail()
         {
         }
-        public LayerTail(string layer)
+        public LayerTail(string layer, string signature)
         {
-            return "<layer:" + layer + ">";
+            //In this place layer specific computation
+            //should be placed
+            prefix = "<tail:layer=" + layer;
+            data = signature;
+            suffix = "<tail/head>";
         }
     }
 
@@ -66,8 +72,8 @@ namespace oolayer_Scripts
         Queue<Packet> toLowerQ      = new Queue<Packet>();
         Queue<Packet> fromLowerQ    = new Queue<Packet>();
 
-        LayerHead layerHead = new LayerHead(layer); 
-        LayerTail layerTail      = new LayerTail(layer);
+        LayerHead layerHead; 
+        LayerTail layerTail;
         public OOLayer(string layer)
         {
             this.layer = layer;
@@ -76,11 +82,16 @@ namespace oolayer_Scripts
 
         public void downardMovement()
         {
-            Packet packetFromUpperLayer = fromUpperQ.Dequeue();
-            
-            
+            Payload packetFromUpperLayer = fromUpperQ.Dequeue();
+            string upperSignature   = packetFromUpperLayer.GetSignature();
+            string currentSignature = layer + "_" + upperSignature;
+            layerHead               = new LayerHead(layer, currentSignature);
+            layerTail               = new LayerTail(layer, currentSignature);
+            layerPacket             = new Packet(layerHead,
+                                                 packetFromUpperLayer, 
+                                                 currentSignature,
+                                                 layerTail);            
         }
-
     }
 
     static class QComplex
@@ -89,12 +100,11 @@ namespace oolayer_Scripts
         public static Queue<Packet> presn2session = new Queue<Packet>();
         public static Queue<Packet> session2presn = new Queue<Packet>();
         public static Queue<Packet> presn2appn = new Queue<Packet>();
-
     }
 
 
     class ooLayerWorld
     {
-       OOLayer applicationLayer = new OOLayer();
+       OOLayer applicationLayer = new OOLayer("application");
     }
 }
