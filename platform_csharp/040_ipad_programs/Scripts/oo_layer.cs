@@ -65,6 +65,7 @@ namespace oolayer_Script
     {
         public string layer;
         public Packet layerPacket;
+        public Packet upperLayerPacket;
 
         Queue<Packet> fromUpperQ = new Queue<Packet>();
         Queue<Packet> toUpperQ = new Queue<Packet>();
@@ -79,19 +80,48 @@ namespace oolayer_Script
             this.layer = layer;
         }
 
+        public void OnTick()
+        {
+            upwardRead();         
+        }
 
-        public void downardMovement()
+
+        public void downardRead()
         {
             Payload packetFromUpperLayer = fromUpperQ.Dequeue();
-            string upperSignature   = packetFromUpperLayer.GetSignature();
+            string upperSignature = packetFromUpperLayer.GetSignature();
             string currentSignature = layer + "_" + upperSignature;
-            layerHead               = new LayerHead(layer, currentSignature);
-            layerTail               = new LayerTail(layer, currentSignature);
-            layerPacket             = new Packet(layerHead,
-                                                 packetFromUpperLayer, 
+            layerHead = new LayerHead(layer, currentSignature);
+            layerTail = new LayerTail(layer, currentSignature);
+            layerPacket = new Packet(layerHead,
+                                                 packetFromUpperLayer,
                                                  currentSignature,
-                                                 layerTail);            
+                                                 layerTail);
         }
+
+        public void downwardWrite()
+        {
+            toLowerQ.Enqueue(layerPacket);
+        }
+        
+
+
+        public void upwardRead()
+        {
+            Payload packetFromLowerLayer  = fromLowerQ.Dequeue();
+              upperLayerPacket      = 
+                            (Packet)(((Packet)packetFromLowerLayer).payload);
+            
+        }
+
+        public void upwardWrite()
+        {
+            toUpperQ.Enqueue(upperLayerPacket);
+        }
+
+        
+
+
     }
 
     //Another major design change queues in Q-Complex
