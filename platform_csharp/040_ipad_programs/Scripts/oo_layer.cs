@@ -1,4 +1,5 @@
-﻿using System;
+﻿//using OO_OSI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,12 @@ using System.Threading.Tasks;
 
 namespace oolayer_Script
 {
+    
+    public enum QueueType       { FROM_UPPER, FROM_LOWER }
+    public enum StackPosition   { TOP, BOTTOM, MIDDLE }
+    public enum RWPhase         { READ, WRITE }
+
+
     abstract class Payload { public abstract string GetSignature(); };
     abstract class Head { public string prefix, data, suffix; };
     abstract class Tail { public string prefix, data, suffix; };
@@ -31,6 +38,15 @@ namespace oolayer_Script
 
     }
 
+    class TopPacket:Payload
+    {
+        public string data;
+        //interface functions
+        public override string GetSignature()
+        {return data;}
+        public TopPacket(string s = "undefined")
+        {data = s;}
+    }
     class LayerHead : Head
     {
         public LayerHead()
@@ -61,17 +77,18 @@ namespace oolayer_Script
     }
 
 
-    internal class OOLayer
+
+    class OOLayer
     {
         public string layer;
         public Packet layerPacket;
         public Packet upperLayerPacket;
 
-        Queue<Packet> fromUpperQ = new Queue<Packet>();
-        Queue<Packet> toUpperQ = new Queue<Packet>();
+        public Queue<Packet> fromUpperQ = new Queue<Packet>();
+        public Queue<Packet> toUpperQ = new Queue<Packet>();
 
-        Queue<Packet> toLowerQ      = new Queue<Packet>();
-        Queue<Packet> fromLowerQ    = new Queue<Packet>();
+        public Queue<Packet> toLowerQ      = new Queue<Packet>();
+        public Queue<Packet> fromLowerQ    = new Queue<Packet>();
 
         LayerHead layerHead; 
         LayerTail layerTail;
@@ -80,12 +97,44 @@ namespace oolayer_Script
             this.layer = layer;
         }
 
-        public void OnTick()
+        public void OnTick(RWPhase rwphase)
         {
-            upwardRead();         
+            if (rwphase == RWPhase.READ)
+                upwardRead(); 
+            else
+                downwardWrite();
+        }        
+
+        public Queue<Packet> GetQ(QueueType destination)
+        {
+            if (destination == QueueType.FROM_UPPER)
+                return fromUpperQ;
+            else
+                return fromLowerQ;
         }
 
+        public void setInput(string s, StackPosition position)
+        {
+           
+            Head topHead = new LayerHead(layer, "top");
+            Tail topTail = new LayerTail(layer, "top");
+            Payload topPacket = new TopPacket("top hello");
+            layerPacket = new Packet(topHead, topPacket, topPacket.GetSignature(),           
+                                     topTail);
+            toUpperQ.Enqueue(layerPacket);
 
+
+        }
+
+        public string getOutput()
+        {
+            return layerPacket.GetSignature();           
+        }
+
+        //read write calls are separated to discrete-time-modelling
+        //read of all layers are called in one phase
+        //write of all layers are called in another phase
+        //this prevents race-condition without ping-pong buffer
         public void downardRead()
         {
             Payload packetFromUpperLayer = fromUpperQ.Dequeue();
@@ -98,14 +147,10 @@ namespace oolayer_Script
                                                  currentSignature,
                                                  layerTail);
         }
-
         public void downwardWrite()
         {
             toLowerQ.Enqueue(layerPacket);
-        }
-        
-
-
+        }      
         public void upwardRead()
         {
             Payload packetFromLowerLayer  = fromLowerQ.Dequeue();
@@ -113,30 +158,11 @@ namespace oolayer_Script
                             (Packet)(((Packet)packetFromLowerLayer).payload);
             
         }
-
         public void upwardWrite()
         {
             toUpperQ.Enqueue(upperLayerPacket);
-        }
-
-        
-
-
+        }      
     }
 
-    //Another major design change queues in Q-Complex
-    //Is it good modeling practice?
-    static class QComplex
-    {
-        public static  Queue<Packet> appm2presnQ = new Queue<Packet>();
-        public static Queue<Packet> presn2session = new Queue<Packet>();
-        public static Queue<Packet> session2presn = new Queue<Packet>();
-        public static Queue<Packet> presn2appn = new Queue<Packet>();
-    }
-
-
-    class ooLayerWorld
-    {
-       OOLayer applicationLayer = new OOLayer("application");
-    }
+  
 }

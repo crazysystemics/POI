@@ -43,8 +43,8 @@ using System.Reflection.Metadata.Ecma335;
 //                  Capabilit Maturity: Continuous Improvement
 
 //TODO: Jupyter Notebook type in C#
-
-namespace OO_OSI
+//OO_OSI
+namespace OutOfScope
 {
     //public class Packet<HeadT, PayloadT, TailT>
     //    where HeadT : new()
@@ -130,6 +130,8 @@ namespace OO_OSI
     //Layer<Transport> determines Head and Tail of Transport Layer
     public enum BufferType { PING, PONG }
     public enum BufferCycle { PING_READ_PONG_WRITE, PONG_READ_PING_WRITE }
+
+    public enum QueueType { FROM_UPPER, FROM_LOWER}
     public enum StackPosition { TOP, BOTTOM, MIDDLE }
     public static class sglobal
     {
@@ -250,6 +252,8 @@ namespace OO_OSI
         }
 
         //Properties, Ports
+     
+                
         public Queue<Payload> FromUpperQ
         {
             get
