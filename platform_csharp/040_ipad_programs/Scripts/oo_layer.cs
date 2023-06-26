@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace oolayer_Script
 {
-    
-    public enum QueueType       { FROM_UPPER, FROM_LOWER }
-    public enum StackPosition   { TOP, BOTTOM, MIDDLE }
-    public enum RWPhase         { READ, WRITE }
+
+    public enum QueueType { FROM_UPPER, FROM_LOWER }
+    public enum StackPosition { TOP, BOTTOM, MIDDLE }
+    public enum RWPhase { READ, WRITE }
 
 
     abstract class Payload { public abstract string GetSignature(); };
     abstract class Head { public string prefix, data, suffix; };
     abstract class Tail { public string prefix, data, suffix; };
-    class Packet:Payload
+    class Packet : Payload
     {
         public Head head;
         public Payload payload;
@@ -25,27 +25,27 @@ namespace oolayer_Script
 
         public Packet(Head head, Payload payload, string signature, Tail tail)
         {
-            this.head    = head;
+            this.head = head;
             this.payload = payload;
             this.signature = signature;
-            this.tail    = tail;
+            this.tail = tail;
         }
 
         public override string GetSignature()
         {
             return signature;
-        } 
+        }
 
     }
 
-    class TopPacket:Payload
+    class TopPacket : Payload
     {
         public string data;
         //interface functions
         public override string GetSignature()
-        {return data;}
+        { return data; }
         public TopPacket(string s = "undefined")
-        {data = s;}
+        { data = s; }
     }
     class LayerHead : Head
     {
@@ -56,8 +56,8 @@ namespace oolayer_Script
             //In this place layer specific computation
             //should be placed
             prefix = "<head:layer=" + layer;
-            data   = signature;
-            suffix = "</head>";          
+            data = signature;
+            suffix = "</head>";
         }
     }
 
@@ -87,10 +87,10 @@ namespace oolayer_Script
         public Queue<Packet> fromUpperQ = new Queue<Packet>();
         public Queue<Packet> toUpperQ = new Queue<Packet>();
 
-        public Queue<Packet> toLowerQ      = new Queue<Packet>();
-        public Queue<Packet> fromLowerQ    = new Queue<Packet>();
+        public Queue<Packet> toLowerQ = new Queue<Packet>();
+        public Queue<Packet> fromLowerQ = new Queue<Packet>();
 
-        LayerHead layerHead; 
+        LayerHead layerHead;
         LayerTail layerTail;
         public OOLayer(string layer)
         {
@@ -100,10 +100,10 @@ namespace oolayer_Script
         public void OnTick(RWPhase rwphase)
         {
             if (rwphase == RWPhase.READ)
-                upwardRead(); 
+                downwardRead();
             else
                 downwardWrite();
-        }        
+        }
 
         public Queue<Packet> GetQ(QueueType destination)
         {
@@ -115,54 +115,65 @@ namespace oolayer_Script
 
         public void setInput(string s, StackPosition position)
         {
-           
+
             Head topHead = new LayerHead(layer, "top");
             Tail topTail = new LayerTail(layer, "top");
             Payload topPacket = new TopPacket("top hello");
-            layerPacket = new Packet(topHead, topPacket, topPacket.GetSignature(),           
+            layerPacket = new Packet(topHead, topPacket, topPacket.GetSignature(),
                                      topTail);
-            toUpperQ.Enqueue(layerPacket);
+            fromUpperQ.Enqueue(layerPacket);
 
 
         }
 
         public string getOutput()
         {
-            return layerPacket.GetSignature();           
+            if (toLowerQ.Count > 0 )
+            {
+                Packet packet = toLowerQ.Dequeue();
+                return packet.GetSignature();
+            }
+
+            return "Queue Empty";
+            
         }
 
         //read write calls are separated to discrete-time-modelling
         //read of all layers are called in one phase
         //write of all layers are called in another phase
         //this prevents race-condition without ping-pong buffer
-        public void downardRead()
+        public void downwardRead()
         {
-            Payload packetFromUpperLayer = fromUpperQ.Dequeue();
-            string upperSignature = packetFromUpperLayer.GetSignature();
-            string currentSignature = layer + "_" + upperSignature;
-            layerHead = new LayerHead(layer, currentSignature);
-            layerTail = new LayerTail(layer, currentSignature);
-            layerPacket = new Packet(layerHead,
-                                                 packetFromUpperLayer,
-                                                 currentSignature,
-                                                 layerTail);
+            while (fromUpperQ.Count > 0)
+            {
+                Payload packetFromUpperLayer = fromUpperQ.Dequeue();
+                string upperSignature = packetFromUpperLayer.GetSignature();
+                string currentSignature = layer + "_" + upperSignature;
+                layerHead = new LayerHead(layer, currentSignature);
+                layerTail = new LayerTail(layer, currentSignature);
+                layerPacket = new Packet(layerHead,
+                                                     packetFromUpperLayer,
+                                                     currentSignature,
+                                                     layerTail);
+                toLowerQ.Enqueue(layerPacket);
+            }
         }
         public void downwardWrite()
         {
             toLowerQ.Enqueue(layerPacket);
-        }      
+        }
         public void upwardRead()
         {
-            Payload packetFromLowerLayer  = fromLowerQ.Dequeue();
-              upperLayerPacket      = 
-                            (Packet)(((Packet)packetFromLowerLayer).payload);
-            
+            Payload packetFromLowerLayer = fromLowerQ.Dequeue();
+            upperLayerPacket =
+                          (Packet)(((Packet)packetFromLowerLayer).payload);
+
         }
         public void upwardWrite()
         {
             toUpperQ.Enqueue(upperLayerPacket);
-        }      
+        }
     }
 
-  
+
 }
