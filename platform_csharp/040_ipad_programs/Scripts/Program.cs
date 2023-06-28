@@ -16,9 +16,9 @@ Console.WriteLine("Script is OO_OSI... ");
 //string s = rcvr.getsQ();
 //Console.WriteLine(s);
 
-OOLayer applicationLayer = new OOLayer("application");
+OOLayer applicationLayer    = new OOLayer("application");
 OOLayer sessionLayer        = new OOLayer ("session");
-applicationLayer.toLowerQ   = applicationLayer.GetQ(QueueType.FROM_UPPER);
+applicationLayer.toLowerQ   = sessionLayer.GetQ(QueueType.FROM_UPPER);
 sessionLayer.toUpperQ       = applicationLayer.GetQ(QueueType.FROM_LOWER);
 
 string inputs = "hello";
