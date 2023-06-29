@@ -12,7 +12,12 @@ namespace oolayer_Script
     public enum StackPosition { TOP, BOTTOM, MIDDLE }
     public enum RWPhase { READ, WRITE }
 
-
+    //Receiver rcvr = new Receiver();
+    //Sender sender = new Sender();
+    //sender.Connect(rcvr.queue);
+    //sender.putQ("hello");
+    //string s = rcvr.getsQ();
+    //Console.WriteLine(s);
     abstract class Payload { public abstract string GetSignature(); };
     abstract class Head { public string prefix, data, suffix; };
     abstract class Tail { public string prefix, data, suffix; };
@@ -154,13 +159,16 @@ namespace oolayer_Script
                 layerPacket = new Packet(layerHead,
                                                      packetFromUpperLayer,
                                                      currentSignature,
-                                                     layerTail);
-                toLowerQ.Enqueue(layerPacket);
+                                                     layerTail);                
             }
         }
         public void downwardWrite()
         {
-            toLowerQ.Enqueue(layerPacket);
+            //TODO: Read difference between is null and == null
+            if (!(layerPacket is null))
+            {
+                toLowerQ.Enqueue(layerPacket);
+            }
         }
         public void upwardRead()
         {

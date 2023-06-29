@@ -8,29 +8,19 @@ Console.WriteLine("Script is OO_OSI... ");
 
 //TestHarness osiTestHarness = new TestHarness("th01");
 //osiTestHarness.test_case_01();
+TestCase curTestcase = new TestCase01();
+curTestcase.Setup();curTestcase.Run();curTestcase.Report();
 
-//Receiver rcvr = new Receiver();
-//Sender sender = new Sender();
-//sender.Connect(rcvr.queue);
-//sender.putQ("hello");
-//string s = rcvr.getsQ();
-//Console.WriteLine(s);
 
-OOLayer applicationLayer    = new OOLayer("application");
-OOLayer sessionLayer        = new OOLayer ("session");
-applicationLayer.toLowerQ   = sessionLayer.GetQ(QueueType.FROM_UPPER);
-sessionLayer.toUpperQ       = applicationLayer.GetQ(QueueType.FROM_LOWER);
 
-string inputs = "hello";
-applicationLayer.setInput(inputs,StackPosition.TOP);
 
-applicationLayer.OnTick(RWPhase.READ);
-sessionLayer.OnTick(RWPhase.READ);
-applicationLayer.OnTick(RWPhase.WRITE);
-sessionLayer.OnTick(RWPhase.WRITE);
 
-string outputs = sessionLayer.getOutput();
-Console.WriteLine(outputs);
+
+
+
+
+
+
 
 
 

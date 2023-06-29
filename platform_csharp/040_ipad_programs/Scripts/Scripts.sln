@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2558903B-23F4-4730-BBCE-7BD082D9AC82}"
 	ProjectSection(SolutionItems) = preProject
 		osi_layers.cs = osi_layers.cs
+		TestSuite.cs = TestSuite.cs
 	EndProjectSection
 EndProject
 Global
