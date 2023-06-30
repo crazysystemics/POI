@@ -12,6 +12,17 @@ namespace oolayer_Script
     public enum StackPosition { TOP, BOTTOM, MIDDLE }
     public enum RWPhase { READ, WRITE }
 
+    public static class TestOptions
+    {
+        public static bool NEVER_ASSERT = true;
+        public static bool ALWAYS_ASSERT = false;
+        public static bool VERBOSE = true;
+        public static bool SILENT = false;
+    }
+    
+        
+
+
     //Receiver rcvr = new Receiver();
     //Sender sender = new Sender();
     //sender.Connect(rcvr.queue);
@@ -43,13 +54,13 @@ namespace oolayer_Script
 
     }
 
-    class TopPacket : Payload
+    class EndPacket : Payload
     {
         public string data;
         //interface functions
         public override string GetSignature()
         { return data; }
-        public TopPacket(string s = "undefined")
+        public EndPacket(string s = "undefined")
         { data = s; }
     }
     class LayerHead : Head
@@ -121,26 +132,41 @@ namespace oolayer_Script
         public void setInput(string s, StackPosition position)
         {
 
-            Head topHead = new LayerHead(layer, "top");
-            Tail topTail = new LayerTail(layer, "top");
-            Payload topPacket = new TopPacket("top hello");
-            layerPacket = new Packet(topHead, topPacket, topPacket.GetSignature(),
-                                     topTail);
-            fromUpperQ.Enqueue(layerPacket);
+            string shead = (position == StackPosition.TOP) ? "top" : "bottom";
+            string stail = shead;
+            Head endHead = new LayerHead(layer, shead);
+            Tail endTail = new LayerTail(layer, stail);
+            Payload endPacket = new EndPacket(shead + " hello");
+          
+            layerPacket = new Packet(endHead, endPacket, endPacket.GetSignature(),
+                                     endTail);
 
-
+            if (position == StackPosition.TOP)
+                fromUpperQ.Enqueue(layerPacket);
+            else
+                fromLowerQ.Enqueue(layerPacket);
         }
 
-        public string getOutput()
+        public string getOutput(StackPosition position)
         {
-            if (toLowerQ.Count > 0 )
+            if (position == StackPosition.BOTTOM)
             {
-                Packet packet = toLowerQ.Dequeue();
-                return packet.GetSignature();
+                if (toLowerQ.Count > 0)
+                {
+                    Packet packet = toLowerQ.Dequeue();
+                    return packet.GetSignature();
+                }
+            } 
+            else 
+            {
+                if (toUpperQ.Count > 0)
+                {
+                    Packet packet = toLowerQ.Dequeue();
+                    return packet.GetSignature();
+                }
             }
 
             return "Queue Empty";
-            
         }
 
         //read write calls are separated to discrete-time-modelling
@@ -159,7 +185,7 @@ namespace oolayer_Script
                 layerPacket = new Packet(layerHead,
                                                      packetFromUpperLayer,
                                                      currentSignature,
-                                                     layerTail);                
+                                                     layerTail);
             }
         }
         public void downwardWrite()
@@ -183,5 +209,6 @@ namespace oolayer_Script
         }
     }
 
-
 }
+
+

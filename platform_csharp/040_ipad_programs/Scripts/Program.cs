@@ -2,14 +2,24 @@
 using oolayer_Script;
 
 
+
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("Hello, Script World!");
 Console.WriteLine("Script is OO_OSI... ");
 
-//TestHarness osiTestHarness = new TestHarness("th01");
-//osiTestHarness.test_case_01();
-TestCase curTestcase = new TestCase01();
-curTestcase.Setup();curTestcase.Run();curTestcase.Report();
+
+List<TestCase> testCases = new List<TestCase>();
+testCases.Add(new TestCase01());
+testCases.Add(new TestCase02());
+
+int runno = 0;
+foreach (TestCase testCase in testCases)
+{    
+    testCase.Setup(TestOptions.NEVER_ASSERT, TestOptions.VERBOSE);
+    testCase.Run(runno);
+    testCase.Report();
+    runno++;
+}
 
 
 
