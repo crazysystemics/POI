@@ -92,10 +92,12 @@ namespace oolayer_Script
         }
     }
 
-
+    //TODO: How to put constraint that every class will have
+    //TODO: a public member Name.
 
     class OOLayer
     {
+        public string Name;
         public string layer;
         public Packet layerPacket;
         public Packet upperLayerPacket;
@@ -110,15 +112,23 @@ namespace oolayer_Script
         LayerTail layerTail;
         public OOLayer(string layer)
         {
+
             this.layer = layer;
+            this.Name = layer;
         }
 
         public void OnTick(RWPhase rwphase)
         {
             if (rwphase == RWPhase.READ)
+            {
                 downwardRead();
+                upwardRead();
+            }
             else
+            {
                 downwardWrite();
+                upwardWrite();
+            }
         }
 
         public Queue<Packet> GetQ(QueueType destination)
@@ -149,7 +159,7 @@ namespace oolayer_Script
 
         public string getOutput(StackPosition position)
         {
-            if (position == StackPosition.BOTTOM)
+            if (position == StackPosition.TOP)
             {
                 if (toLowerQ.Count > 0)
                 {
@@ -173,8 +183,12 @@ namespace oolayer_Script
         //read of all layers are called in one phase
         //write of all layers are called in another phase
         //this prevents race-condition without ping-pong buffer
+
+        //TODO: two separate variables uninited and (undefined)
+        //uninited is an error whereas undefined can be design (like don't care)
         public void downwardRead()
         {
+            layerPacket = null;
             while (fromUpperQ.Count > 0)
             {
                 Payload packetFromUpperLayer = fromUpperQ.Dequeue();
@@ -191,21 +205,29 @@ namespace oolayer_Script
         public void downwardWrite()
         {
             //TODO: Read difference between is null and == null
-            if (!(layerPacket is null))
+            if (!(layerPacket == null))
             {
                 toLowerQ.Enqueue(layerPacket);
             }
         }
         public void upwardRead()
         {
-            Payload packetFromLowerLayer = fromLowerQ.Dequeue();
-            upperLayerPacket =
-                          (Packet)(((Packet)packetFromLowerLayer).payload);
+            upperLayerPacket = null;
+            if (fromLowerQ.Count > 0)
+            {
+                Payload packetFromLowerLayer = fromLowerQ.Dequeue();
+                Packet tempPacket = (Packet)packetFromLowerLayer;
+                upperLayerPacket = tempPacket;
+                              //(Packet)(((Packet)packetFromLowerLayer).payload);
+            }
 
         }
         public void upwardWrite()
         {
-            toUpperQ.Enqueue(upperLayerPacket);
+            if (!(upperLayerPacket == null))
+            {
+                fromLowerQ.Enqueue(upperLayerPacket);
+            }
         }
     }
 

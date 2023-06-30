@@ -23,6 +23,7 @@ namespace oolayer_Script
 {
 	public abstract class TestCase
 	{
+        public  string Name;
 		public abstract void Setup(bool assertFlag=true, bool verbose=false);
 		public abstract void Run(int testNum);
 		public abstract void Report();
@@ -31,13 +32,17 @@ namespace oolayer_Script
     //string title = "Two layers Top-down flow of data";
     public class TestCase01: TestCase
 	{
-        int    testCaseId = 1;
-        string title = "Two layers Top-down flow of data";
+        int    testCaseId = 1;        
         OOLayer applicationLayer;
         OOLayer sessionLayer;
         int     bugs;
         bool assertFlag;
         bool verbose;
+
+        public TestCase01()
+        {
+            Name = "Two-Layer-Top-Down";
+        }
 
         
 		public override  void Setup(bool assertFlag=true, bool verbose=false)
@@ -55,7 +60,7 @@ namespace oolayer_Script
 		{
             Console.WriteLine();
             Console.WriteLine("Test No:{0} Test Case:{1} Title:{2}",
-                               testNum, testCaseId, title);
+                               testNum, testCaseId, Name);
 
             string inputs = "hello";
            
@@ -105,13 +110,17 @@ namespace oolayer_Script
     //string title = "Two layers Bottom-Up flow of data";
     public class TestCase02 : TestCase
     {
-        int     testCaseId = 2;
-        string  title = "Two layers Bottom-Up flow of data";
+        int     testCaseId = 2;        
         OOLayer applicationLayer;
         OOLayer sessionLayer;
         int     bugs;
         bool    assertFlag;
         bool    verbose;
+
+        public TestCase02()
+        {
+            Name = "Two-Layer-Bottom-Up";
+        }
 
         public override void Setup(bool assertFlag=true, bool verbose=false)
         {
@@ -129,8 +138,7 @@ namespace oolayer_Script
         {
             Console.WriteLine();
             Console.WriteLine("Test No:{0} Test Case:{1} Test Case:{2}", 
-                               testNum, testCaseId, title);
-            
+                               testNum, testCaseId, Name);            
             string inputs = "hello";
             sessionLayer.setInput(inputs, StackPosition.BOTTOM);
             //tick 0 - packet is transferred from application to session layer
@@ -159,7 +167,7 @@ namespace oolayer_Script
             //Write Phase
             applicationLayer.OnTick(RWPhase.WRITE);
             sessionLayer.OnTick(RWPhase.WRITE);
-            outputs = applicationLayer.getOutput(StackPosition.BOTTOM);
+            outputs = applicationLayer.getOutput(StackPosition.TOP);
              
             if (outputs != "hello")
             {
