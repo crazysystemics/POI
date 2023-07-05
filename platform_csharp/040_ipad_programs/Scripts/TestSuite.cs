@@ -52,6 +52,7 @@ namespace oolayer_Script
 
             applicationLayer = new OOLayer("application");
             sessionLayer = new OOLayer("session");
+            //Physical Queue is in source. Its reference is assigned to destination
             applicationLayer.toLowerQ = sessionLayer.GetQ(QueueType.FROM_UPPER);
             sessionLayer.toUpperQ = applicationLayer.GetQ(QueueType.FROM_LOWER); 
             bugs = 0;
@@ -128,11 +129,12 @@ namespace oolayer_Script
             this.verbose = verbose;
 
             applicationLayer = new OOLayer("application");
-            sessionLayer = new OOLayer("session");
-            applicationLayer.toLowerQ = sessionLayer.GetQ(QueueType.FROM_UPPER);
-            sessionLayer.toUpperQ = applicationLayer.GetQ(QueueType.FROM_LOWER);
+            sessionLayer     = new OOLayer("session");
+            //These connections are same as in TC01
+            //Physical Queue is in source. Its reference is assigned to destination
+            applicationLayer.toLowerQ   = sessionLayer.GetQ(QueueType.FROM_UPPER);
+            sessionLayer.toUpperQ       = applicationLayer.GetQ(QueueType.FROM_LOWER);
             bugs = 0;
-
         }
         public override void Run(int testNum)
         {
@@ -169,7 +171,7 @@ namespace oolayer_Script
             sessionLayer.OnTick(RWPhase.WRITE);
             outputs = applicationLayer.getOutput(StackPosition.TOP);
              
-            if (outputs != "hello")
+            if (outputs != "bottom hello")
             {
                 Debug.Assert(assertFlag);
                 bugs++;

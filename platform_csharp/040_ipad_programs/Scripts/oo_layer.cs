@@ -1,6 +1,7 @@
 ﻿//using OO_OSI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 namespace oolayer_Script
 {
 
-    public enum QueueType { FROM_UPPER, FROM_LOWER }
+    public enum QueueType { FROM_UPPER, FROM_LOWER, TO_UPPER, TO_LOWER }
     public enum StackPosition { TOP, BOTTOM, MIDDLE }
     public enum RWPhase { READ, WRITE }
 
@@ -135,8 +136,16 @@ namespace oolayer_Script
         {
             if (destination == QueueType.FROM_UPPER)
                 return fromUpperQ;
-            else
+            else if (destination == QueueType.FROM_LOWER)
                 return fromLowerQ;
+            else if (destination == QueueType.TO_UPPER)
+                return toUpperQ;
+            else if (destination == QueueType.TO_LOWER)
+                return toLowerQ;
+            else
+                Debug.Assert(false);
+
+            return null;
         }
 
         public void setInput(string s, StackPosition position)
@@ -161,15 +170,15 @@ namespace oolayer_Script
         {
             if (position == StackPosition.TOP)
             {
-                if (toLowerQ.Count > 0)
+                if (toUpperQ.Count > 0)
                 {
-                    Packet packet = toLowerQ.Dequeue();
+                    Packet packet = toUpperQ.Dequeue();
                     return packet.GetSignature();
                 }
             } 
             else 
             {
-                if (toUpperQ.Count > 0)
+                if (toLowerQ.Count > 0)
                 {
                     Packet packet = toLowerQ.Dequeue();
                     return packet.GetSignature();
@@ -226,7 +235,7 @@ namespace oolayer_Script
         {
             if (!(upperLayerPacket == null))
             {
-                fromLowerQ.Enqueue(upperLayerPacket);
+                toUpperQ.Enqueue(upperLayerPacket);
             }
         }
     }

@@ -131,7 +131,7 @@ namespace OutOfScope
     public enum BufferType { PING, PONG }
     public enum BufferCycle { PING_READ_PONG_WRITE, PONG_READ_PING_WRITE }
 
-    public enum QueueType { FROM_UPPER, FROM_LOWER}
+    public enum QueueType {FROM_UPPER, FROM_LOWER}
     public enum StackPosition { TOP, BOTTOM, MIDDLE }
     public static class sglobal
     {
