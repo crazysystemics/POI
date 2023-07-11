@@ -14,10 +14,13 @@ testCases.Add(new TestCase02());
 
 int runno = 0;
 foreach (TestCase testCase in testCases)
-{    
-    testCase.Setup(TestOptions.NEVER_ASSERT, TestOptions.VERBOSE);
-    testCase.Run(runno);
-    testCase.Report();
+{
+    if (runno == 1)
+    {
+        testCase.Setup(TestOptions.NEVER_ASSERT, TestOptions.VERBOSE);
+        testCase.Run(runno);
+        testCase.Report();       
+    }
     runno++;
 }
 

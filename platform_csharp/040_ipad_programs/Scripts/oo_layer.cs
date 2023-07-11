@@ -20,8 +20,8 @@ namespace oolayer_Script
         public static bool VERBOSE = true;
         public static bool SILENT = false;
     }
-    
-        
+
+
 
 
     //Receiver rcvr = new Receiver();
@@ -57,6 +57,7 @@ namespace oolayer_Script
 
     class EndPacket : Payload
     {
+
         public string data;
         //interface functions
         public override string GetSignature()
@@ -72,9 +73,9 @@ namespace oolayer_Script
         {
             //In this place layer specific computation
             //should be placed
-            prefix = "<head:layer=" + layer;
+            prefix = "<" + layer + "h>";
             data = signature;
-            suffix = "</head>";
+            suffix = "</" + layer + "h>";
         }
     }
 
@@ -87,9 +88,7 @@ namespace oolayer_Script
         {
             //In this place layer specific computation
             //should be placed
-            prefix = "<tail:layer=" + layer;
-            data = signature;
-            suffix = "<tail/head>";
+            data = "</" + layer + "h>";
         }
     }
 
@@ -102,6 +101,7 @@ namespace oolayer_Script
         public string layer;
         public Packet layerPacket;
         public Packet upperLayerPacket;
+        public StackPosition stackPosition;
 
         public Queue<Packet> fromUpperQ = new Queue<Packet>();
         public Queue<Packet> toUpperQ = new Queue<Packet>();
@@ -111,19 +111,20 @@ namespace oolayer_Script
 
         LayerHead layerHead;
         LayerTail layerTail;
-        public OOLayer(string layer)
+        public OOLayer(string layer, StackPosition stackPosition = StackPosition.MIDDLE)
         {
-
-            this.layer = layer;
-            this.Name = layer;
+            this.layer         = layer;
+            this.Name          = layer;
+            this.stackPosition = stackPosition;
         }
 
         public void OnTick(RWPhase rwphase)
         {
             if (rwphase == RWPhase.READ)
             {
-                downwardRead();
+                downwardRead();                
                 upwardRead();
+                
             }
             else
             {
@@ -150,33 +151,79 @@ namespace oolayer_Script
 
         public void setInput(string s, StackPosition position)
         {
+            //string shead = layer + "_";
+            string sendhead = (position == StackPosition.TOP) ? "top" : "bottom";
+            //string stail = layer + "_";
+            string sendtail = (position == StackPosition.TOP) ? "top" : "bottom";          
 
-            string shead = (position == StackPosition.TOP) ? "top" : "bottom";
-            string stail = shead;
-            Head endHead = new LayerHead(layer, shead);
-            Tail endTail = new LayerTail(layer, stail);
-            Payload endPacket = new EndPacket(shead + " hello");
-          
-            layerPacket = new Packet(endHead, endPacket, endPacket.GetSignature(),
-                                     endTail);
+            
 
             if (position == StackPosition.TOP)
+            {
+                Head topHead      = new LayerHead(layer, "sig top");
+                Tail topTail      = new LayerTail(layer, "sig top");
+                Payload topPacket = new EndPacket("top hello");
+
+                layerPacket = new Packet(topHead,
+                                         topPacket,
+                                         topPacket.GetSignature(),
+                                         topTail);
                 fromUpperQ.Enqueue(layerPacket);
+            }
             else
+            {
+                //bottom - indicates whatever bottom layers
+                //<bottomh>
+                //  <sessionh>
+                //      <applicationh>
+                //          <bottom hello>
+                //      <applicationt>
+                //   <sessiont>
+                //<bottomt>
+
+                //Input to Session Layer is application + session layer
+                //It receives this from bottom layer
+                Head    bottomHead      = new LayerHead(layer, "sig bottom");
+                Tail    bottomTail      = new LayerTail(layer, "sig bottom");
+                Payload bottomPacket    = new EndPacket("bottom hello");
+
+                layerPacket = new Packet(bottomHead, 
+                                         bottomPacket, 
+                                         bottomPacket.GetSignature(),
+                                         bottomTail);
+    
+                Head sessionHead  = new LayerHead(layer, "sig session");
+                Tail sessionTail  = new LayerTail(layer, "sig session");
+                layerPacket       = new Packet(sessionHead,
+                                         layerPacket, 
+                                         layerPacket.GetSignature(),
+                                         sessionTail);
+
+                Head applicationHead = new LayerHead(layer, "sig application");
+                Tail applicationTail = new LayerTail(layer, "sig application");
+                layerPacket = new Packet(applicationHead,
+                                         layerPacket,
+                                         layerPacket.GetSignature(),
+                                         applicationTail);
+
                 fromLowerQ.Enqueue(layerPacket);
+
+            }
+            
+            
         }
 
-        public string getOutput(StackPosition position)
+        public string getOutput()
         {
-            if (position == StackPosition.TOP)
+            if (stackPosition == StackPosition.TOP)
             {
                 if (toUpperQ.Count > 0)
                 {
                     Packet packet = toUpperQ.Dequeue();
                     return packet.GetSignature();
                 }
-            } 
-            else 
+            }
+            else
             {
                 if (toLowerQ.Count > 0)
                 {
@@ -221,15 +268,14 @@ namespace oolayer_Script
         }
         public void upwardRead()
         {
+            
             upperLayerPacket = null;
             if (fromLowerQ.Count > 0)
-            {
+            {               
                 Payload packetFromLowerLayer = fromLowerQ.Dequeue();
-                Packet tempPacket = (Packet)packetFromLowerLayer;
-                upperLayerPacket = tempPacket;
-                              //(Packet)(((Packet)packetFromLowerLayer).payload);
+                Packet curLayerPacket = (Packet)packetFromLowerLayer;
+                upperLayerPacket = (Packet)curLayerPacket.payload;
             }
-
         }
         public void upwardWrite()
         {

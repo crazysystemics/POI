@@ -50,8 +50,8 @@ namespace oolayer_Script
             this.assertFlag = assertFlag;
             this.verbose = verbose;
 
-            applicationLayer = new OOLayer("application");
-            sessionLayer = new OOLayer("session");
+            applicationLayer = new OOLayer("application", StackPosition.TOP);
+            sessionLayer     = new OOLayer("session"    , StackPosition.BOTTOM);
             //Physical Queue is in source. Its reference is assigned to destination
             applicationLayer.toLowerQ = sessionLayer.GetQ(QueueType.FROM_UPPER);
             sessionLayer.toUpperQ = applicationLayer.GetQ(QueueType.FROM_LOWER); 
@@ -71,7 +71,7 @@ namespace oolayer_Script
             sessionLayer.OnTick(RWPhase.READ);
             applicationLayer.OnTick(RWPhase.WRITE);
             sessionLayer.OnTick(RWPhase.WRITE);
-            string outputs = sessionLayer.getOutput(StackPosition.BOTTOM);
+            string outputs = sessionLayer.getOutput();
             if (outputs != "Queue Empty")
             {
                 Debug.Assert(assertFlag);
@@ -87,7 +87,7 @@ namespace oolayer_Script
             sessionLayer.OnTick(RWPhase.READ);
             applicationLayer.OnTick(RWPhase.WRITE);
             sessionLayer.OnTick(RWPhase.WRITE);
-            outputs = sessionLayer.getOutput(StackPosition.BOTTOM);
+            outputs = sessionLayer.getOutput();
             if (outputs != "session_application_top hello")
             {
                 Debug.Assert(assertFlag);
@@ -128,8 +128,8 @@ namespace oolayer_Script
             this.assertFlag = assertFlag;
             this.verbose = verbose;
 
-            applicationLayer = new OOLayer("application");
-            sessionLayer     = new OOLayer("session");
+            applicationLayer = new OOLayer("application", StackPosition.TOP);
+            sessionLayer     = new OOLayer("session",StackPosition.TOP);
             //These connections are same as in TC01
             //Physical Queue is in source. Its reference is assigned to destination
             applicationLayer.toLowerQ   = sessionLayer.GetQ(QueueType.FROM_UPPER);
@@ -150,13 +150,14 @@ namespace oolayer_Script
             //Write Phase
             applicationLayer.OnTick(RWPhase.WRITE);
             sessionLayer.OnTick(RWPhase.WRITE);
-            string outputs = applicationLayer.getOutput(StackPosition.TOP);
+            string outputs = applicationLayer.getOutput();
             //TODO: Incrementing bug count using Debug.Assert
             if (outputs != "Queue Empty")
             {
                 Debug.Assert(assertFlag);                
                 bugs++; 
             }
+
             if (verbose)
             {
                 Console.WriteLine(outputs);
@@ -169,7 +170,7 @@ namespace oolayer_Script
             //Write Phase
             applicationLayer.OnTick(RWPhase.WRITE);
             sessionLayer.OnTick(RWPhase.WRITE);
-            outputs = applicationLayer.getOutput(StackPosition.TOP);
+            outputs = applicationLayer.getOutput();
              
             if (outputs != "bottom hello")
             {
