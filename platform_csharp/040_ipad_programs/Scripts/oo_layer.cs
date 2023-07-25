@@ -95,6 +95,11 @@ namespace oolayer_Script
     //TODO: How to put constraint that every class will have
     //TODO: a public member Name.
 
+    public class ApplicationPayload
+    {
+        public string data = "top hello";
+    }
+
     class OOLayer
     {
         public string Name;
@@ -102,6 +107,7 @@ namespace oolayer_Script
         public Packet layerPacket;
         public Packet upperLayerPacket;
         public StackPosition stackPosition;
+        
 
         public Queue<Packet> fromUpperQ = new Queue<Packet>();
         public Queue<Packet> toUpperQ = new Queue<Packet>();
@@ -149,16 +155,16 @@ namespace oolayer_Script
             return null;
         }
 
-        public void setInput(string s, StackPosition position)
+        public void setInput()
         {
             //string shead = layer + "_";
-            string sendhead = (position == StackPosition.TOP) ? "top" : "bottom";
+            string sendhead = (stackPosition == StackPosition.TOP) ? "top" : "bottom";
             //string stail = layer + "_";
-            string sendtail = (position == StackPosition.TOP) ? "top" : "bottom";          
+            string sendtail = (stackPosition == StackPosition.TOP) ? "top" : "bottom";          
 
             
 
-            if (position == StackPosition.TOP)
+            if (stackPosition == StackPosition.TOP)
             {
                 Head topHead      = new LayerHead(layer, "sig top");
                 Tail topTail      = new LayerTail(layer, "sig top");
@@ -215,15 +221,15 @@ namespace oolayer_Script
 
         public string getOutput()
         {
-            if (stackPosition == StackPosition.TOP)
-            {
-                if (toUpperQ.Count > 0)
-                {
-                    Packet packet = toUpperQ.Dequeue();
-                    return packet.GetSignature();
-                }
-            }
-            else
+            //if (stackPosition == StackPosition.TOP)
+            //{
+            //    if (toUpperQ.Count > 0)
+            //    {
+            //        Packet packet = toUpperQ.Dequeue();
+            //        return packet.GetSignature();
+            //    }
+            //}
+            //else
             {
                 if (toLowerQ.Count > 0)
                 {
@@ -274,7 +280,11 @@ namespace oolayer_Script
             {               
                 Payload packetFromLowerLayer = fromLowerQ.Dequeue();
                 Packet curLayerPacket = (Packet)packetFromLowerLayer;
-                upperLayerPacket = (Packet)curLayerPacket.payload;
+                if (stackPosition != StackPosition.TOP)
+                {
+                    upperLayerPacket = (Packet)curLayerPacket.payload;
+                }
+                
             }
         }
         public void upwardWrite()

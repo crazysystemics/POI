@@ -9,13 +9,14 @@ Console.WriteLine("Script is OO_OSI... ");
 
 
 List<TestCase> testCases = new List<TestCase>();
+testCases.Add(new TestCase00());
 testCases.Add(new TestCase01());
 testCases.Add(new TestCase02());
 
 int runno = 0;
 foreach (TestCase testCase in testCases)
 {
-    if (runno == 1)
+    if (runno == 2)
     {
         testCase.Setup(TestOptions.NEVER_ASSERT, TestOptions.VERBOSE);
         testCase.Run(runno);
