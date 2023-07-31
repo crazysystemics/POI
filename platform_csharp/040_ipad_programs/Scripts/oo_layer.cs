@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,8 +32,8 @@ namespace oolayer_Script
     //string s = rcvr.getsQ();
     //Console.WriteLine(s);
     abstract class Payload { public abstract string GetSignature(); };
-    abstract class Head { public string prefix, data, suffix; };
-    abstract class Tail { public string prefix, data, suffix; };
+    abstract class Head    { public string prefix, signature, suffix; };
+    abstract class Tail    { public string prefix, data, suffix; };
     class Packet : Payload
     {
         public Head head;
@@ -40,28 +41,28 @@ namespace oolayer_Script
         public string signature;
         public Tail tail;
 
-        public Packet(Head head, Payload payload, string signature, Tail tail)
+        public Packet(Head head, Payload payload, Tail tail)
         {
             this.head = head;
             this.payload = payload;
-            this.signature = signature;
+            this.signature = "sig_" + head.signature + "_" + payload.GetSignature(); ;            
             this.tail = tail;
         }
 
         public override string GetSignature()
         {
-            return signature;
+            string payload_sign = payload.GetSignature();
+            return head.signature + "_" + payload_sign;
         }
 
     }
 
     class EndPacket : Payload
     {
-
         public string data;
         //interface functions
         public override string GetSignature()
-        { return data; }
+        { return "_endnode_"; }
         public EndPacket(string s = "undefined")
         { data = s; }
     }
@@ -74,7 +75,7 @@ namespace oolayer_Script
             //In this place layer specific computation
             //should be placed
             prefix = "<" + layer + "h>";
-            data = signature;
+            this.signature = signature;
             suffix = "</" + layer + "h>";
         }
     }
@@ -84,7 +85,7 @@ namespace oolayer_Script
         public LayerTail()
         {
         }
-        public LayerTail(string layer, string signature)
+        public LayerTail(string layer)
         {
             //In this place layer specific computation
             //should be placed
@@ -167,12 +168,11 @@ namespace oolayer_Script
             if (stackPosition == StackPosition.TOP)
             {
                 Head topHead      = new LayerHead(layer, "sig top");
-                Tail topTail      = new LayerTail(layer, "sig top");
+                Tail topTail      = new LayerTail(layer);
                 Payload topPacket = new EndPacket("top hello");
 
                 layerPacket = new Packet(topHead,
                                          topPacket,
-                                         topPacket.GetSignature(),
                                          topTail);
                 fromUpperQ.Enqueue(layerPacket);
             }
@@ -189,27 +189,33 @@ namespace oolayer_Script
 
                 //Input to Session Layer is application + session layer
                 //It receives this from bottom layer
-                Head    bottomHead      = new LayerHead(layer, "sig bottom");
-                Tail    bottomTail      = new LayerTail(layer, "sig bottom");
-                Payload bottomPacket    = new EndPacket("bottom hello");
+                
+                string tempLayer = "Application";
+                Head    bottomHead      = new LayerHead(tempLayer, "sigapp");
+                Tail    bottomTail      = new LayerTail(tempLayer);
+                Payload bottomPacket    = new EndPacket("bottom_hello");
+                
 
                 layerPacket = new Packet(bottomHead, 
-                                         bottomPacket, 
-                                         bottomPacket.GetSignature(),
+                                         bottomPacket,
                                          bottomTail);
-    
-                Head sessionHead  = new LayerHead(layer, "sig session");
-                Tail sessionTail  = new LayerTail(layer, "sig session");
-                layerPacket       = new Packet(sessionHead,
-                                         layerPacket, 
-                                         layerPacket.GetSignature(),
+
+                
+
+                tempLayer = "Session";
+                Head sessionHead  = new LayerHead(tempLayer,"sigssn");
+                Tail sessionTail  = new LayerTail(tempLayer);
+                string layerSignature    = layerPacket.GetSignature();                
+                layerPacket = new Packet(sessionHead,
+                                         layerPacket,
                                          sessionTail);
 
-                Head applicationHead = new LayerHead(layer, "sig application");
-                Tail applicationTail = new LayerTail(layer, "sig application");
+
+                tempLayer = "Presentation";
+                Head applicationHead = new LayerHead(tempLayer, "sigpsn");
+                Tail applicationTail = new LayerTail(tempLayer);
                 layerPacket = new Packet(applicationHead,
                                          layerPacket,
-                                         layerPacket.GetSignature(),
                                          applicationTail);
 
                 fromLowerQ.Enqueue(layerPacket);
@@ -257,11 +263,10 @@ namespace oolayer_Script
                 string upperSignature = packetFromUpperLayer.GetSignature();
                 string currentSignature = layer + "_" + upperSignature;
                 layerHead = new LayerHead(layer, currentSignature);
-                layerTail = new LayerTail(layer, currentSignature);
+                layerTail = new LayerTail(layer);
                 layerPacket = new Packet(layerHead,
-                                                     packetFromUpperLayer,
-                                                     currentSignature,
-                                                     layerTail);
+                                         packetFromUpperLayer,
+                                         layerTail);
             }
         }
         public void downwardWrite()
@@ -273,8 +278,7 @@ namespace oolayer_Script
             }
         }
         public void upwardRead()
-        {
-            
+        {            
             upperLayerPacket = null;
             if (fromLowerQ.Count > 0)
             {               
@@ -283,8 +287,7 @@ namespace oolayer_Script
                 if (stackPosition != StackPosition.TOP)
                 {
                     upperLayerPacket = (Packet)curLayerPacket.payload;
-                }
-                
+                }                
             }
         }
         public void upwardWrite()

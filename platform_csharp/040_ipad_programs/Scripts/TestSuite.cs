@@ -239,18 +239,22 @@ namespace oolayer_Script
                                testNum, testCaseId, Name);
             string inputs = "hello";
             string[] expectedOutputs = new string[] 
-                          { "Queue Empty", "Queue Empty", "bottom hello" };
+                          {  "presentation_session_application_top hello",
+                             "bottom hello"
+                          };
 
             OOLayer topLayer = applicationLayer;
+            OOLayer midLayer = sessionLayer;
             OOLayer bottomLayer = presentationLayer;
+
             
             //TODO: Make these variables enumerated
             bool TOP_TO_BOTTOM = true;
             bool BOTTOM_TO_UP = false;
             bool direction = TOP_TO_BOTTOM;
             bool notDone = true;
-            int numLayers = 3;
-            int loopCount = 0;
+            int  numLayers = 3; 
+            int  loopCount = 0;
 
             while (notDone)
             {
@@ -273,6 +277,7 @@ namespace oolayer_Script
                 applicationLayer.OnTick(RWPhase.WRITE);
                 sessionLayer.OnTick(RWPhase.WRITE);
                 presentationLayer.OnTick(RWPhase.WRITE);
+                
 
                 if (loopCount == numLayers - 1)
                 {
@@ -281,14 +286,20 @@ namespace oolayer_Script
                     //time to process outputs
 
                     string outputs = String.Empty;
+                    int outputIndex;
 
                     if (direction == TOP_TO_BOTTOM)
-                        outputs = bottomLayer.getOutput();                   
+                    {
+                        outputs = bottomLayer.getOutput();
+                        outputIndex = 0;
+                    }
                     else
+                    {
                         outputs = topLayer.getOutput();
-                    
+                        outputIndex = 1;
+                    }
                     //TODO: Incrementing bug count using Debug.Assert
-                    if (outputs != expectedOutputs[loopCount])
+                    if (outputs != expectedOutputs[outputIndex])
                     {
                         Debug.Assert(assertFlag);
                         bugs++;
