@@ -307,6 +307,7 @@ namespace oolayer_Script
 
                     if (verbose)
                     {
+                        Console.WriteLine();
                         Console.WriteLine(outputs);
                     }
 
