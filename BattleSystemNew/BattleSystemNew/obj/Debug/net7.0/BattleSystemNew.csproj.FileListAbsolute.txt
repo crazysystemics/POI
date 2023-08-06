@@ -1,0 +1,15 @@
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\bin\Debug\net7.0\BattleSystemNew.exe
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\bin\Debug\net7.0\BattleSystemNew.deps.json
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\bin\Debug\net7.0\BattleSystemNew.runtimeconfig.json
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\bin\Debug\net7.0\BattleSystemNew.dll
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\bin\Debug\net7.0\BattleSystemNew.pdb
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\obj\Debug\net7.0\BattleSystemNew.csproj.AssemblyReference.cache
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\obj\Debug\net7.0\BattleSystemNew.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\obj\Debug\net7.0\BattleSystemNew.AssemblyInfoInputs.cache
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\obj\Debug\net7.0\BattleSystemNew.AssemblyInfo.cs
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\obj\Debug\net7.0\BattleSystemNew.csproj.CoreCompileInputs.cache
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\obj\Debug\net7.0\BattleSystemNew.dll
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\obj\Debug\net7.0\refint\BattleSystemNew.dll
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\obj\Debug\net7.0\BattleSystemNew.pdb
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\obj\Debug\net7.0\BattleSystemNew.genruntimeconfig.cache
+C:\Users\Rohit Chaoji\source\repos\BattleSystemNew\BattleSystemNew\obj\Debug\net7.0\ref\BattleSystemNew.dll
