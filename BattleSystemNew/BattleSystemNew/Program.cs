@@ -1,9 +1,12 @@
-﻿for(int i = 0; i<10; i++)
+﻿Aircraft Air = new Aircraft(new float[] { 1.0f, 1.5f });
+Tank T1 = new Tank(new float[] { 2.0f, 3.0f });
+
+for (int i = 0; i < 10; i++)
 {
     SimulationEngine sim = new SimulationEngine(1.0f);
     foreach (var x in BattleSOS.SystemsOnField)
     {
-        Console.WriteLine(string.Join(",", x.CurrentPosition));
+        Console.WriteLine($"{x.Type} Position: {string.Join(",", x.CurrentPosition)}");
     }
 }
 
