@@ -6,6 +6,7 @@ Tank T2 = new Tank(new float[] { 3.5f, 6.0f }, new float[] {6.5f, 10.0f });
 for (int i = 0; i < 10; i++)
 {
     SimulationEngine sim = new SimulationEngine(1.0f);
+    Console.WriteLine($"Number of ticks elapsed:{i+1}\n");
     foreach (var x in BattleSOS.SystemsOnField)
     {
         Console.WriteLine($"Vehicle{x.VehicleID} ({x.Type}) Position: {string.Join(",", x.CurrentPosition)}");
@@ -64,7 +65,7 @@ class SimulationEngine
 {
     public SimulationEngine(float TickTimer)
     {
-        Console.WriteLine($"\nTick Timer = {TickTimer} second(s)\n");
+        Console.WriteLine($"\nTick Duration = {TickTimer} second(s)");
         foreach (var system in BattleSOS.SystemsOnField)
         {
             float[] position = system.CurrentPosition;
