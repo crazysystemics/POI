@@ -1,11 +1,11 @@
-﻿Aircraft Air1 = new Aircraft(new float[] { 1.0f, 1.5f });
-Tank T1 = new Tank(new float[] { 2.0f, 3.0f });
-Aircraft Air2 = new Aircraft(new float[] { 1.5f, 3.5f });
-Tank T2 = new Tank(new float[] { 3.5f, 6.0f });
+﻿Aircraft Air1 = new Aircraft(new float[] { 1.0f, 1.5f }, new float[] { 0.0f, 0.0f });
+Tank T1 = new Tank(new float[] { 2.0f, 3.0f }, new float[] {2.5f, 4.0f });
+Aircraft Air2 = new Aircraft(new float[] { 1.5f, 3.5f }, new float[] {9.0f, 5.5f });
+Tank T2 = new Tank(new float[] { 3.5f, 6.0f }, new float[] {6.5f, 10.0f });
 
 for (int i = 0; i < 10; i++)
 {
-    SimulationEngine sim = new SimulationEngine(1.0f);
+    SimulationEngine sim = new SimulationEngine(1.5f);
     foreach (var x in BattleSOS.SystemsOnField)
     {
         Console.WriteLine($"Vehicle{x.VehicleID} ({x.Type}) Position: {string.Join(",", x.CurrentPosition)}");
@@ -27,10 +27,10 @@ class Aircraft : BattleSystem
     public override float[] CurrentPosition { get; set; }
     public override float[] Velocities { get; set; }
     public override int VehicleID { get; set; }
-    public Aircraft(float[] velocities)
+    public Aircraft(float[] velocities, float[] init_position)
     {
         this.Velocities = velocities;
-        this.CurrentPosition = new float[] { 0.0f, 0.0f };
+        this.CurrentPosition = init_position;
         Type = "Aircraft";
         BattleSOS.s_BattleSystemsCount++;
         this.VehicleID = BattleSOS.s_BattleSystemsCount;
@@ -44,10 +44,10 @@ class Tank : BattleSystem
     public override float[] CurrentPosition { get; set; }
     public override float[] Velocities { get; set; }
     public override int VehicleID { get; set; }
-    public Tank(float[] velocities)
+    public Tank(float[] velocities, float[] init_position)
     {
-        this.CurrentPosition = new float[] { 0.0f, 0.0f };
         this.Velocities = velocities;
+        this.CurrentPosition = init_position;
         Type = "Tank";
         BattleSOS.s_BattleSystemsCount++;
         this.VehicleID = BattleSOS.s_BattleSystemsCount;
