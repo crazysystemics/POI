@@ -5,7 +5,7 @@ Tank T2 = new Tank(new float[] { 3.5f, 6.0f }, new float[] {6.5f, 10.0f });
 
 for (int i = 0; i < 10; i++)
 {
-    SimulationEngine sim = new SimulationEngine(1.5f);
+    SimulationEngine sim = new SimulationEngine(1.0f);
     foreach (var x in BattleSOS.SystemsOnField)
     {
         Console.WriteLine($"Vehicle{x.VehicleID} ({x.Type}) Position: {string.Join(",", x.CurrentPosition)}");
