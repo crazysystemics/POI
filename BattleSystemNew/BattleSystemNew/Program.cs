@@ -57,6 +57,7 @@ class SimulationEngine
 {
     public SimulationEngine(float TickTimer)
     {
+        Console.WriteLine($"Tick Timer = {TickTimer} second(s)");
         foreach (var system in BattleSOS.SystemsOnField)
         {
             float[] position = system.CurrentPosition;
