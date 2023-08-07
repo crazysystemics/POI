@@ -9,7 +9,7 @@ for (int i = 0; i < 10; i++)
     Console.WriteLine($"Number of ticks elapsed:{i+1}\n");
     foreach (var x in BattleSOS.SystemsOnField)
     {
-        Console.WriteLine($"Vehicle{x.VehicleID} ({x.Type}) Position: {string.Join(",", x.CurrentPosition)}");
+        Console.WriteLine($"Vehicle {x.VehicleID} ({x.Type}) Position: {string.Join(",", x.CurrentPosition)}");
     }
 }
 
