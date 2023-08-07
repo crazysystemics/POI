@@ -58,6 +58,7 @@ class Tank : BattleSystem
 
 class BattleSOS
 {
+    //
     public static int s_BattleSystemsCount = 0;
     public static List<BattleSystem> SystemsOnField = new List<BattleSystem>();
 }
