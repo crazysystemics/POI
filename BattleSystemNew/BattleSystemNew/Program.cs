@@ -1,7 +1,4 @@
-﻿Aircraft Air1 = new Aircraft(new float[] { 1.0f, 1.5f }, new float[] { 0.0f, 0.0f });
-Tank T1 = new Tank(new float[] { 2.0f, 3.0f }, new float[] {2.5f, 4.0f });
-Aircraft Air2 = new Aircraft(new float[] { 1.5f, 3.5f }, new float[] {9.0f, 5.5f });
-Tank T2 = new Tank(new float[] { 3.5f, 6.0f }, new float[] {6.5f, 10.0f });
+﻿using System.Dynamic;
 
 for (int i = 0; i < 10; i++)
 {
@@ -66,14 +63,32 @@ class SimulationEngine
 {
     public SimulationEngine(float TickTimer)
     {
+        BattleSOS.SystemsOnField = new List<BattleSystem>();
+        BattleSOS.SystemsOnField.Add(new Aircraft(new float[] { 0.0f, 0.0f }, new float[] { 0.0f, 0.0f }));
+        BattleSOS.SystemsOnField.Add(new Aircraft(new float[] { 0.0f, 0.0f }, new float[] { 0.0f, 0.0f }));
+        BattleSOS.SystemsOnField.Add(new Tank(new float[] { 0.0f, 0.0f }, new float[] { 0.0f, 0.0f }));
+        BattleSOS.SystemsOnField.Add(new Tank(new float[] { 0.0f, 0.0f }, new float[] { 0.0f, 0.0f }));
+
+
         Console.WriteLine($"\nTick Duration = {TickTimer} second(s)");
         foreach (var system in BattleSOS.SystemsOnField)
         {
-            float[] position = system.CurrentPosition;
-            for (int i = 0; i < 2; i++)
-            {
-                system.CurrentPosition[i] += system.Velocities[i] * TickTimer;
-            }
+            string globalSituationAwareness = String.Empty;
+            globalSituationAwareness += system.Get().ToString();
         }
+
+        foreach (var system in BattleSOS.SystemsOnField)
+        {
+            string sharedSituationAwareness = String.Empty;
+            system.Set(sharedSituationAwareness);            
+        }
+        System.OnTick();
+
+        //    float[] position = system.CurrentPosition;
+        //    for (int i = 0; i < 2; i++)
+        //    {
+        //        system.CurrentPosition[i] += system.Velocities[i] * TickTimer;
+        //    }
+        //}
     }
 }
