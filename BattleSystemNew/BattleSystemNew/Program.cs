@@ -1,14 +1,14 @@
 ﻿using System.Dynamic;
 
-for (int i = 0; i < 10; i++)
+/*for (int i = 0; i < 10; i++)
 {
     SimulationEngine sim = new SimulationEngine(1.0f);
-    Console.WriteLine($"Number of ticks elapsed:{i+1}\n");
+    Console.WriteLine($"Number of ticks elapsed:{i + 1}\n");
     foreach (var x in BattleSOS.SystemsOnField)
     {
         Console.WriteLine($"Vehicle {x.VehicleID} ({x.Type}) Position: {string.Join(",", x.CurrentPosition)}");
     }
-}
+}*/
 
 
 abstract class BattleSystem
@@ -17,6 +17,9 @@ abstract class BattleSystem
     public abstract float[] CurrentPosition { get; set; }
     public abstract float[] Velocities { get; set; }
     public abstract int VehicleID { get; set; }
+    public abstract float[] Get();
+    public abstract void Set(string a);
+    public abstract void OnTick();
 }
 
 class Aircraft : BattleSystem
@@ -25,6 +28,19 @@ class Aircraft : BattleSystem
     public override float[] CurrentPosition { get; set; }
     public override float[] Velocities { get; set; }
     public override int VehicleID { get; set; }
+    public override float[] Get()
+    {
+        float[] a = new float[2];
+        return a;
+    }
+    public override void Set(string argument)
+    {
+
+    }
+    public override void OnTick()
+    {
+
+    }
     public Aircraft(float[] velocities, float[] init_position)
     {
         this.Velocities = velocities;
@@ -42,6 +58,19 @@ class Tank : BattleSystem
     public override float[] CurrentPosition { get; set; }
     public override float[] Velocities { get; set; }
     public override int VehicleID { get; set; }
+    public override float[] Get()
+    {
+        float[] a = new float[2];
+        return a;
+    }
+    public override void Set(string argument)
+    {
+
+    }
+    public override void OnTick()
+    {
+
+    }
     public Tank(float[] velocities, float[] init_position)
     {
         this.Velocities = velocities;
@@ -57,17 +86,19 @@ class BattleSOS
 {
     //
     public static int s_BattleSystemsCount = 0;
-    public static List<BattleSystem> SystemsOnField = new List<BattleSystem>();
+    public static List<BattleSystem> SystemsOnField;
 }
 class SimulationEngine
 {
     public SimulationEngine(float TickTimer)
     {
-        BattleSOS.SystemsOnField = new List<BattleSystem>();
-        BattleSOS.SystemsOnField.Add(new Aircraft(new float[] { 0.0f, 0.0f }, new float[] { 0.0f, 0.0f }));
-        BattleSOS.SystemsOnField.Add(new Aircraft(new float[] { 0.0f, 0.0f }, new float[] { 0.0f, 0.0f }));
-        BattleSOS.SystemsOnField.Add(new Tank(new float[] { 0.0f, 0.0f }, new float[] { 0.0f, 0.0f }));
-        BattleSOS.SystemsOnField.Add(new Tank(new float[] { 0.0f, 0.0f }, new float[] { 0.0f, 0.0f }));
+        BattleSOS.SystemsOnField = new List<BattleSystem>
+        {
+            new Aircraft(new float[] { 0.0f, 0.0f }, new float[] { 0.0f, 0.0f }),
+            new Aircraft(new float[] { 0.0f, 0.0f }, new float[] { 0.0f, 0.0f }),
+            new Tank(new float[] { 0.0f, 0.0f }, new float[] { 0.0f, 0.0f }),
+            new Tank(new float[] { 0.0f, 0.0f }, new float[] { 0.0f, 0.0f })
+        };
 
 
         Console.WriteLine($"\nTick Duration = {TickTimer} second(s)");
@@ -82,7 +113,6 @@ class SimulationEngine
             string sharedSituationAwareness = String.Empty;
             system.Set(sharedSituationAwareness);            
         }
-        System.OnTick();
 
         //    float[] position = system.CurrentPosition;
         //    for (int i = 0; i < 2; i++)
