@@ -98,8 +98,7 @@
         public SimulationEngine()
         {
             BattleSOS.SystemsOnField = new List<BattleSystem>
-            { new Aircraft(new float[] { 0.0f, 0.0f }, new float[] { 1.0f, 1.5f }),
-            new Aircraft(new float[] { 0.0f, 0.0f }, new float[] { 2.0f, 4.0f }),};
+            { new Aircraft(new float[] { 0.0f, 0.0f }, new float[] { 1.0f, 1.5f }), };
         }
         public void RunSimulationEngine()
         {
@@ -120,7 +119,7 @@
             foreach (var system in BattleSOS.SystemsOnField)
             {
                 system.Set();
-                Console.WriteLine($"{system.CurrentPosition[0]},{system.CurrentPosition[1]}");
+                Console.WriteLine($"({system.CurrentPosition[0]},{system.CurrentPosition[1]})");
             }
         }
     }
