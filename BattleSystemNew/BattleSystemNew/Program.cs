@@ -5,7 +5,7 @@
         static void Main(string[] args)
         {
             SimulationEngine simulationEngine = new SimulationEngine();
-            for(int i = 0; i < 20; i++)
+            for (int i = 0; i < 20; i++)
             {
                 simulationEngine.RunSimulationEngine();
             }
@@ -17,18 +17,19 @@
     {
         public abstract string Type { get; set; }
         public abstract float[] CurrentPosition { get; set; }
-        public abstract float[] Velocities { get; set; }
+        public abstract float[] LegVelocity { get; set; }
         public abstract float[] Get();
         public abstract void Set();
         public abstract float[] NewPositionTemp { get; set; }
         public abstract void OnTick(float duration);
+        public abstract List<float[]> VehiclePath { get; set; }
     }
 
     class Aircraft : BattleSystem
     {
         public override string Type { get; set; }
         public override float[] CurrentPosition { get; set; }
-        public override float[] Velocities { get; set; }
+        public override float[] LegVelocity { get; set; }
         public override float[] NewPositionTemp { get; set; }
         public override float[] Get()
         {
@@ -45,15 +46,23 @@
         {
             for (int i = 0; i < this.CurrentPosition.Length; i++)
             {
-                this.NewPositionTemp[i] = this.CurrentPosition[i] + (this.Velocities[i] * duration);
+                // Need to split velocity into x and y compoinents for each leg in order to compute new positions
+                float x_vel;
+                float y_vel;
+                float[] decomp_vel = new float[2];
+                this.NewPositionTemp[i] = this.CurrentPosition[i] + (this.LegVelocity[i] * duration);
             }
         }
-        public Aircraft(float[] init_position, float[] velocities)
+        public override List<float[]> VehiclePath { get; set; }
+        public Aircraft(List<float[]> waypoints)
         {
-            this.Velocities = velocities;
-            this.CurrentPosition = init_position;
-            this.NewPositionTemp = init_position;
+            for (int i = 0; i < waypoints.Count; i++)
+            {
+                this.LegVelocity[i] = waypoints[i][2];
+            }
+            this.CurrentPosition = this.NewPositionTemp = waypoints[0][0..1];
             Type = "Aircraft";
+            this.VehiclePath = waypoints;
         }
     }
 
@@ -98,7 +107,11 @@
         public SimulationEngine()
         {
             BattleSOS.SystemsOnField = new List<BattleSystem>
-            { new Aircraft(new float[] { 0.0f, 0.0f }, new float[] { 1.0f, 1.5f }), };
+            { new Aircraft(new List<float[]> {new float[] { 0.0f, 0.0f, 0.0f },
+                                              new float[] { 3.0f, 4.0f, 5.0f },
+                                              new float[] { 15.0f, 4.0f, 2.0f },
+                                              new float[] { 20.0f, 0.0f, 0.0f} })
+            };
         }
         public void RunSimulationEngine()
         {
