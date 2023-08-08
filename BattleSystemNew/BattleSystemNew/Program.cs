@@ -5,6 +5,10 @@
         static void Main(string[] args)
         {
             SimulationEngine simulationEngine = new SimulationEngine();
+            for(int i = 0; i < 20; i++)
+            {
+                simulationEngine.RunSimulationEngine();
+            }
         }
     }
 
@@ -94,10 +98,11 @@
         public SimulationEngine()
         {
             BattleSOS.SystemsOnField = new List<BattleSystem>
+            { new Aircraft(new float[] { 0.0f, 0.0f }, new float[] { 1.0f, 1.5f }),
+            new Aircraft(new float[] { 0.0f, 0.0f }, new float[] { 2.0f, 4.0f }),};
+        }
+        public void RunSimulationEngine()
         {
-            new Aircraft(new float[] { 0.0f, 0.0f }, new float[] { 1.0f, 1.5f }),
-            new Aircraft(new float[] { 0.0f, 0.0f }, new float[] { 2.0f, 4.0f }),
-        };
             List<float[]> globalSituationAwareness = new List<float[]>();
 
 
@@ -105,13 +110,11 @@
             foreach (var system in BattleSOS.SystemsOnField)
             {
                 globalSituationAwareness.Add(system.Get());
-                Console.WriteLine($"{system.CurrentPosition[0]},{system.CurrentPosition[1]}");
             }
 
             foreach (var system in BattleSOS.SystemsOnField)
             {
                 system.OnTick(1.0f);
-                Console.WriteLine($"{system.CurrentPosition[0]},{system.CurrentPosition[1]}");
             }
 
             foreach (var system in BattleSOS.SystemsOnField)
