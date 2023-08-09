@@ -20,9 +20,10 @@
         public abstract List<float[]> Velocities { get; set; }
         public abstract float[] LegVelocities { get; set; }
         public abstract List<float[]> FlightPath { get; set; }
+        public abstract float[] NewPositionTemp { get; set; }
+        public abstract bool FlightHasStopped { get; set; }
         public abstract float[] Get();
         public abstract void Set();
-        public abstract float[] NewPositionTemp { get; set; }
         public abstract void OnTick(float duration);
     }
 
@@ -34,7 +35,7 @@
         public override float[] LegVelocities { get; set; }
         public override float[] NewPositionTemp { get; set; }
         public override List<float[]> FlightPath { get; set; }
-        bool flight_has_stopped = false;
+        public override bool FlightHasStopped { get; set; }
         int in_leg;
         public override float[] Get()
         {
@@ -59,16 +60,13 @@
             }
             if (this.CurrentPosition[1] < 0.0f)
             {
-                this.flight_has_stopped = true;
+                this.FlightHasStopped = true;
             }
 
-            // Above works for fixed number of legs. Final position overshoots last waypoint.
-            if (!this.flight_has_stopped)
-            {
-                this.NewPositionTemp[0] = this.CurrentPosition[0] + (this.Velocities[in_leg][0] * duration);
-                this.NewPositionTemp[1] = this.CurrentPosition[1] + (this.Velocities[in_leg][1] * duration);
-            }
+            // Above works for fixed number of legs.
 
+            this.NewPositionTemp[0] = (float) Math.Round(this.CurrentPosition[0] + (this.Velocities[in_leg][0] * duration),4);
+            this.NewPositionTemp[1] = (float) Math.Round(this.CurrentPosition[1] + (this.Velocities[in_leg][1] * duration),4);
         }
 
         public Aircraft(List<float[]> waypoints, float[] leg_velocities)
@@ -130,8 +128,11 @@
 
             foreach (var system in BattleSOS.SystemsOnField)
             {
-                system.Set();
-                Console.WriteLine($"({system.CurrentPosition[0]},{system.CurrentPosition[1]})");
+                if (!system.FlightHasStopped)
+                {
+                    system.Set();
+                    Console.WriteLine($"({system.CurrentPosition[0]},{system.CurrentPosition[1]})");
+                }
             }
         }
     }
