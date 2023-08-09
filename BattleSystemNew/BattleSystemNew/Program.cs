@@ -59,6 +59,11 @@ namespace BattleSystemTest_Aug9
 
         public Aircraft(List<float[]> waypoints, float[] leg_velocities)
         {
+
+            /* The Aircraft class takes a list of waypoints in form of array of length 2 as first argument
+             * and and array of length (waypoints.Count - 1) representing velocities in each leg as second argument */
+
+
             this.FlightPath = waypoints;
             this.LegVelocities = leg_velocities;
             this.Velocities = new List<float[]>();
@@ -68,11 +73,11 @@ namespace BattleSystemTest_Aug9
                 float euclid_len;
                 float x_len;
                 float y_len;
-                x_len = this.FlightPath[i + 1][0] - this.FlightPath[i][0];
-                y_len = this.FlightPath[i + 1][1] - this.FlightPath[i][1];
-                euclid_len = (float)Math.Sqrt((x_len * x_len) + (y_len * y_len));
-                vel[0] = this.LegVelocities[i] * (x_len / euclid_len);
-                vel[1] = this.LegVelocities[i] * (y_len / euclid_len);
+                x_len = this.FlightPath[i + 1][0] - this.FlightPath[i][0]; // x2 - x1
+                y_len = this.FlightPath[i + 1][1] - this.FlightPath[i][1]; // y2 - y1
+                euclid_len = (float)Math.Sqrt((x_len * x_len) + (y_len * y_len)); // Euclidean distance formule
+                vel[0] = this.LegVelocities[i] * (x_len / euclid_len); // x_vel = vel * cos(angle)
+                vel[1] = this.LegVelocities[i] * (y_len / euclid_len); // y_vel = vel * sin(angle)
                 this.Velocities.Add(vel);
             }
             this.CurrentPosition = waypoints[0];
@@ -96,7 +101,8 @@ namespace BattleSystemTest_Aug9
             { new Aircraft(new List<float[]> {new float[] { 0.0f, 0.0f },
                                               new float[] { 4.0f, 3.0f },
                                               new float[] { 16.0f, 3.0f },
-                                              new float[] { 20.0f, 0.0f } }, new float[] { 1.0f, 2.0f, 1.5f }), };
+                                              new float[] { 20.0f, 0.0f } }, new float[] { 1.0f, 2.0f, 1.5f }),
+            }; // Argument 1 = List of floating point arrays of waypoints. Argument 2 = Floating point array of leg velocities
         }
         public void RunSimulationEngine()
         {
@@ -122,12 +128,12 @@ namespace BattleSystemTest_Aug9
                     {
                         system.InLeg = i;
                     }
-                    if (system.CurrentPosition[1] < 0)
+                    if (system.CurrentPosition[1] < 0) // Checks whether the Aircraft is on the ground
                     {
                         system.FlightHasStopped = true;
                     }
                 }
-                if (!system.FlightHasStopped)
+                if (!system.FlightHasStopped) // If Aircraft is on the ground, stop clculating new values for position
                 {
                     system.Set();
                     Console.WriteLine($"({system.CurrentPosition[0]},{system.CurrentPosition[1]})");
