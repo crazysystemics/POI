@@ -59,7 +59,7 @@
                     else { in_leg++; }
                 }
             }
-            this.NewPositionTemp[0] = this.CurrentPosition[0] + (this.Velocities[in_leg][0] * duration);
+            this.NewPositionTemp[0] = this.CurrentPosition[0] + (this.Velocities[in_leg][0] * duration); // Index out of range exception
             this.NewPositionTemp[1] = this.CurrentPosition[1] + (this.Velocities[in_leg][1] * duration);
         }
 
