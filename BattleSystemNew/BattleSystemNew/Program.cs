@@ -62,7 +62,7 @@
                 this.flight_has_stopped = true;
             }
 
-            // Above works for fixed number of legs
+            // Above works for fixed number of legs. Final position overshoots last waypoint.
             if (!this.flight_has_stopped)
             {
                 this.NewPositionTemp[0] = this.CurrentPosition[0] + (this.Velocities[in_leg][0] * duration);
