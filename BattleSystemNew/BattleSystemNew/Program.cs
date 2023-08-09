@@ -44,57 +44,37 @@
         }
         public override void OnTick(float duration)
         {
-            for (int i = 0; i < this.CurrentPosition.Length; i++)
+            float[] decomp_vel = new float[2];
+            for (int i = 0; i < this.LegVelocity.Length; i++)
             {
-                // Need to split velocity into x and y compoinents for each leg in order to compute new positions
-                float x_vel;
-                float y_vel;
-                float[] decomp_vel = new float[2];
-                this.NewPositionTemp[i] = this.CurrentPosition[i] + (this.LegVelocity[i] * duration);
+                while (true)
+                {
+                    float x_len = this.VehiclePath[i + 1][0] - this.VehiclePath[i][0];
+                    float y_len = this.VehiclePath[i + 1][1] - this.VehiclePath[i][1];
+                    float euclidean_distance = (float)Math.Sqrt(((x_len) * (x_len)) + ((y_len) * (y_len)));
+                    float x_vel = (x_len / euclidean_distance) * this.LegVelocity[i];
+                    float y_vel = (y_len / euclidean_distance) * this.LegVelocity[i];
+                    decomp_vel[0] = x_vel;
+                    decomp_vel[1] = y_vel;
+                    this.NewPositionTemp[0] = this.CurrentPosition[0] + (decomp_vel[0] * duration);
+                    this.NewPositionTemp[1] = this.CurrentPosition[1] + (decomp_vel[1] * duration);
+                    if (this.NewPositionTemp[0] >= this.VehiclePath[i + 1][0])
+                    {
+                        break;
+                    }
+                }
             }
         }
         public override List<float[]> VehiclePath { get; set; }
-        public Aircraft(List<float[]> waypoints)
+        public Aircraft(List<float[]> waypoints, float[] leg_velocity)
         {
-            for (int i = 0; i < waypoints.Count; i++)
-            {
-                this.LegVelocity[i] = waypoints[i][2];
-            }
-            this.CurrentPosition = this.NewPositionTemp = waypoints[0][0..1];
+            this.LegVelocity = leg_velocity;
+            this.CurrentPosition = waypoints[0];
+            this.NewPositionTemp = new float[] { 0.0f, 0, 0f };
             Type = "Aircraft";
             this.VehiclePath = waypoints;
         }
     }
-
-    /*    class Tank : BattleSystem
-        {
-            public override string Type { get; set; }
-            public override float[] CurrentPosition { get; set; }
-            public override float[] Velocities { get; set; }
-            public override int VehicleID { get; set; }
-            public override float[] Get()
-            {
-                float[] a = new float[2];
-                return a;
-            }
-            public override void Set(string argument)
-            {
-
-            }
-            public override void OnTick()
-            {
-
-            }
-            public Tank(float[] velocities, float[] init_position)
-            {
-                this.Velocities = velocities;
-                this.CurrentPosition = init_position;
-                Type = "Tank";
-                BattleSOS.s_BattleSystemsCount++;
-                this.VehicleID = BattleSOS.s_BattleSystemsCount;
-                BattleSOS.SystemsOnField.Add(this);
-            }
-        }*/
 
     class BattleSOS
     {
@@ -107,10 +87,10 @@
         public SimulationEngine()
         {
             BattleSOS.SystemsOnField = new List<BattleSystem>
-            { new Aircraft(new List<float[]> {new float[] { 0.0f, 0.0f, 0.0f },
-                                              new float[] { 3.0f, 4.0f, 5.0f },
-                                              new float[] { 15.0f, 4.0f, 2.0f },
-                                              new float[] { 20.0f, 0.0f, 0.0f} })
+            { new Aircraft(new List<float[]> {new float[] { 0.0f, 0.0f },
+                                              new float[] { 3.0f, 4.0f },
+                                              new float[] { 15.0f, 4.0f },
+                                              new float[] { 20.0f, 0.0f } }, new float[] {3.0f, 10.0f, 3.0f })
             };
         }
         public void RunSimulationEngine()
