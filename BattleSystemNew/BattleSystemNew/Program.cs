@@ -34,6 +34,7 @@
         public override float[] LegVelocities { get; set; }
         public override float[] NewPositionTemp { get; set; }
         public override List<float[]> FlightPath { get; set; }
+        bool flight_has_stopped = false;
         int in_leg;
         public override float[] Get()
         {
@@ -48,19 +49,26 @@
         }
         public override void OnTick(float duration)
         {
-            for (int i = 0; i < this.FlightPath.Count - 1; i++)
+            if (this.CurrentPosition[0] >= this.FlightPath[1][0])
             {
-                if (this.CurrentPosition[0] >= this.FlightPath[i + 1][0])
-                {
-                    if (in_leg >= (this.Velocities.Count))
-                    {
-                        break;
-                    }
-                    else { in_leg++; }
-                }
+                in_leg = 1;
             }
-            this.NewPositionTemp[0] = this.CurrentPosition[0] + (this.Velocities[in_leg][0] * duration); // Index out of range exception
-            this.NewPositionTemp[1] = this.CurrentPosition[1] + (this.Velocities[in_leg][1] * duration);
+            if (this.CurrentPosition[0] >= this.FlightPath[2][0])
+            {
+                in_leg = 2;
+            }
+            if (this.CurrentPosition[1] < 0.0f)
+            {
+                this.flight_has_stopped = true;
+            }
+
+            // Above works for fixed number of legs
+            if (!this.flight_has_stopped)
+            {
+                this.NewPositionTemp[0] = this.CurrentPosition[0] + (this.Velocities[in_leg][0] * duration);
+                this.NewPositionTemp[1] = this.CurrentPosition[1] + (this.Velocities[in_leg][1] * duration);
+            }
+
         }
 
         public Aircraft(List<float[]> waypoints, float[] leg_velocities)
@@ -102,7 +110,7 @@
             { new Aircraft(new List<float[]> {new float[] { 0.0f, 0.0f },
                                               new float[] { 4.0f, 3.0f },
                                               new float[] { 16.0f, 3.0f },
-                                              new float[] {20.0f, 0.0f } }, new float[] { 1.0f, 2.0f, 1.5f }), };
+                                              new float[] { 20.0f, 0.0f } }, new float[] { 1.0f, 2.0f, 1.5f }), };
         }
         public void RunSimulationEngine()
         {
