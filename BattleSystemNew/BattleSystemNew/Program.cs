@@ -1,4 +1,6 @@
-﻿namespace BattleSystemTest_Aug9
+﻿using System.IO.Enumeration;
+
+namespace BattleSystemTest_Aug9
 {
     internal class Program
     {
@@ -22,6 +24,7 @@
         public abstract List<float[]> FlightPath { get; set; }
         public abstract float[] NewPositionTemp { get; set; }
         public abstract bool FlightHasStopped { get; set; }
+        public abstract int InLeg { get; set; }
         public abstract float[] Get();
         public abstract void Set();
         public abstract void OnTick(float duration);
@@ -36,7 +39,7 @@
         public override float[] NewPositionTemp { get; set; }
         public override List<float[]> FlightPath { get; set; }
         public override bool FlightHasStopped { get; set; }
-        int in_leg;
+        public override int InLeg { get; set; }
         public override float[] Get()
         {
             return this.CurrentPosition;
@@ -50,23 +53,8 @@
         }
         public override void OnTick(float duration)
         {
-            if (this.CurrentPosition[0] >= this.FlightPath[1][0])
-            {
-                in_leg = 1;
-            }
-            if (this.CurrentPosition[0] >= this.FlightPath[2][0])
-            {
-                in_leg = 2;
-            }
-            if (this.CurrentPosition[1] < 0.0f)
-            {
-                this.FlightHasStopped = true;
-            }
-
-            // Above works for fixed number of legs.
-
-            this.NewPositionTemp[0] = (float) Math.Round(this.CurrentPosition[0] + (this.Velocities[in_leg][0] * duration),4);
-            this.NewPositionTemp[1] = (float) Math.Round(this.CurrentPosition[1] + (this.Velocities[in_leg][1] * duration),4);
+            this.NewPositionTemp[0] = (float) Math.Round(this.CurrentPosition[0] + (this.Velocities[this.InLeg][0] * duration),4);
+            this.NewPositionTemp[1] = (float) Math.Round(this.CurrentPosition[1] + (this.Velocities[this.InLeg][1] * duration),4);
         }
 
         public Aircraft(List<float[]> waypoints, float[] leg_velocities)
@@ -90,7 +78,7 @@
             this.CurrentPosition = waypoints[0];
             this.NewPositionTemp = waypoints[0];
             Type = "Aircraft";
-            in_leg = 0;
+            this.InLeg = 0;
         }
     }
 
@@ -128,6 +116,17 @@
 
             foreach (var system in BattleSOS.SystemsOnField)
             {
+                for (int i = 0; i < system.LegVelocities.Length; i++)
+                {
+                    if (system.CurrentPosition[0] >= system.FlightPath[i][0])
+                    {
+                        system.InLeg = i;
+                    }
+                    if (system.CurrentPosition[1] < 0)
+                    {
+                        system.FlightHasStopped = true;
+                    }
+                }
                 if (!system.FlightHasStopped)
                 {
                     system.Set();
