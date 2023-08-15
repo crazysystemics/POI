@@ -40,22 +40,22 @@ namespace oolayer_Script
         public string layer = String.Empty;
         public Head    head;
         public Payload payload;
-        public string  signature;
         public Tail tail;
         public string end = String.Empty;
 
         public Packet(Head head, Payload payload, Tail tail)
         {
-            
+            this.head    = head;
             this.payload = payload;
-            this.signature = "sig_" + head.signature + "_" + payload.GetSignature(); ;            
-            this.tail = tail;
+            this.tail    = tail;
+            //this.signature = "sig_" + head.signature + "_" + payload.GetSignature(); ;            
+
         }
 
         public override string GetSignature()
         {
-            string payload_string = payload.GetSignature();
-            return head.signature + "_" + payload_string;
+            //payload is not end packet, so head contains signature
+            return head.signature ;
         }
 
     }
@@ -65,7 +65,7 @@ namespace oolayer_Script
         public string data;
         //interface functions
         public override string GetSignature()
-        { return "_endnode"; }
+        { return "[" + data + "]"; }
         public EndPacket(string s = "undefined")
         { data = s; }
     }
@@ -107,6 +107,7 @@ namespace oolayer_Script
         public string Name;
         public string layer;
         public Packet curPacket;
+        public Queue<Packet> packetBuf = new Queue<Packet>();
         public Packet upPacket;
         public Packet downPacket;
         public StackPosition stackPosition;
@@ -169,14 +170,14 @@ namespace oolayer_Script
 
             if (stackPosition == StackPosition.TOP)
             {
-                Head topHead      = new LayerHead(layer, "sig top");
+                Head topHead      = new LayerHead(layer, "top_namaste");
                 Tail topTail      = new LayerTail(layer);
-                Payload topPacket = new EndPacket("top hello");
+                Payload topPacket = new EndPacket("namste");
 
-                curLayerPacket = new Packet(topHead,
+                curPacket = new Packet(topHead,
                                          topPacket,
                                          topTail);
-                fromUpperQ.Enqueue(curLayerPacket);
+                fromUpperQ.Enqueue(curPacket);
             }
             else
             {
@@ -198,7 +199,7 @@ namespace oolayer_Script
                 Payload bottomPacket    = new EndPacket("bottom_hello");
                 
 
-                curLayerPacket = new Packet(bottomHead, 
+                curPacket = new Packet(bottomHead, 
                                          bottomPacket,
                                          bottomTail);
 
@@ -207,20 +208,20 @@ namespace oolayer_Script
                 tempLayer = "Session";
                 Head sessionHead  = new LayerHead(tempLayer,"sigssn");
                 Tail sessionTail  = new LayerTail(tempLayer);
-                string layerSignature    = curLayerPacket.GetSignature();                
-                curLayerPacket = new Packet(sessionHead,
-                                         curLayerPacket,
+                string layerSignature    = curPacket.GetSignature();                
+                curPacket = new Packet(sessionHead,
+                                         curPacket,
                                          sessionTail);
 
 
                 tempLayer = "Presentation";
                 Head applicationHead = new LayerHead(tempLayer, "sigpsn");
                 Tail applicationTail = new LayerTail(tempLayer);
-                curLayerPacket = new Packet(applicationHead,
-                                         curLayerPacket,
+                curPacket = new Packet(applicationHead,
+                                         curPacket,
                                          applicationTail);
 
-                fromLowerQ.Enqueue(curLayerPacket);
+                fromLowerQ.Enqueue(curPacket);
 
             }
             
@@ -242,7 +243,7 @@ namespace oolayer_Script
                 if (toLowerQ.Count > 0)
                 {
                     Packet packet = toLowerQ.Dequeue();
-                    return packet.GetSignature();
+                    return packet.GetSignature();                    
                 }
             }
 
@@ -258,7 +259,8 @@ namespace oolayer_Script
         //uninited is an error whereas undefined can be design (like don't care)
         public void downwardRead()
         {
-            curLayerPacket = null;
+            curPacket = null;
+            packetBuf = new Queue<Packet>();
             while (fromUpperQ.Count > 0)
             {
                 Payload packetFromUpperLayer = fromUpperQ.Dequeue();
@@ -266,17 +268,25 @@ namespace oolayer_Script
                 string currentSignature = layer + "_" + upperSignature;
                 layerHead   = new LayerHead(layer, currentSignature);
                 layerTail   = new LayerTail(layer);
-                curLayerPacket = new Packet(layerHead,
+                curPacket   = new Packet(layerHead,
                                          packetFromUpperLayer,
                                          layerTail);
+                //TODO: Generic debug string
+                Console.WriteLine("method:downwardRead in layer: {0}, signature: {1} " ,
+                                           layer , currentSignature);
+                packetBuf.Enqueue(curPacket);
             }
         }
         public void downwardWrite()
         {
             //TODO: Read difference between is null and == null
-            if (!(curLayerPacket == null))
+            while (packetBuf.Count > 0)
             {
-                toLowerQ.Enqueue(curLayerPacket);
+                Packet packet = packetBuf.Dequeue();
+                toLowerQ.Enqueue(packet);
+
+                Console.WriteLine("method:downwardWrite in layer: {0}, signature: {1} ",
+                                                         layer, packet.GetSignature());
             }
         }
         public void upwardRead()
@@ -285,10 +295,10 @@ namespace oolayer_Script
             if (fromLowerQ.Count > 0)
             {               
                 Payload packetFromLowerLayer = fromLowerQ.Dequeue();
-                Packet curLayerPacket = (Packet)packetFromLowerLayer;
+                Packet curPacket = (Packet)packetFromLowerLayer;
                 if (stackPosition != StackPosition.TOP)
                 {
-                    upPacket = (Packet)curLayerPacket.payload;
+                    upPacket = (Packet)curPacket.payload;
                 }                
             }
         }

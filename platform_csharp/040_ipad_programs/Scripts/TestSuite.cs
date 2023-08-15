@@ -237,14 +237,13 @@ namespace oolayer_Script
             Console.WriteLine();
             Console.WriteLine("Test No:{0} Test Case:{1} Test Case:{2}",
                                testNum, testCaseId, Name);
-            string inputs = "hello";
             string[] expectedOutputs = new string[] 
-                          {  "presentation_session_application_top hello",
+                          {  "presentation_session_application_top_namaste",
                              "bottom hello"
                           };
 
-            OOLayer topLayer = applicationLayer;
-            OOLayer midLayer = sessionLayer;
+            OOLayer topLayer    = applicationLayer;
+            OOLayer midLayer    = sessionLayer;
             OOLayer bottomLayer = presentationLayer;
 
             
