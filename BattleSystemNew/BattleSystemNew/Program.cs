@@ -33,6 +33,7 @@ namespace BattleSystemTest_Aug9
         public abstract List<float[]> Velocities { get; set; }
         public abstract bool VehicleHasStopped { get; set; }
         public abstract int InLeg { get; set; }
+        public abstract int VehicleID { get; set; }
         public abstract float RadarRange { get; set; }
         public abstract float[] Get();
         public abstract void Set();
@@ -49,6 +50,7 @@ namespace BattleSystemTest_Aug9
         public override List<float[]> VehiclePath { get; set; }
         public override bool VehicleHasStopped { get; set; }
         public override int InLeg { get; set; }
+        public override int VehicleID { get; set; }
         public override float RadarRange { get; set; }
         public override float[] Get()
         {
@@ -95,6 +97,8 @@ namespace BattleSystemTest_Aug9
             Type = "Aircraft";
             this.InLeg = 0;
             this.RadarRange = radarRange;
+            BattleSOS.s_BattleSystemsCount++;
+            this.VehicleID = BattleSOS.s_BattleSystemsCount;
         }
     }
 
@@ -111,6 +115,7 @@ namespace BattleSystemTest_Aug9
         public override List<float[]> VehiclePath { get; set; }
         public override bool VehicleHasStopped { get; set; }
         public override int InLeg { get; set; }
+        public override int VehicleID { get; set; }
         public override float RadarRange { get; set; }
         public override float[] Get()
         {
@@ -151,6 +156,8 @@ namespace BattleSystemTest_Aug9
             Type = "Radar";
             this.InLeg = 0;
             this.RadarRange = radarRange;
+            BattleSOS.s_BattleSystemsCount++;
+            this.VehicleID = BattleSOS.s_BattleSystemsCount;
         }
     }
 
@@ -195,13 +202,24 @@ namespace BattleSystemTest_Aug9
 
             foreach (var vehicle in BattleSOS.SystemsOnField)
             {
-                foreach (var battlefield_vehicle in BattleSOS.SystemsOnField)
+                if (vehicle.Type != "Radar")
                 {
-                    if (battlefield_vehicle.CurrentPosition[0] != vehicle.CurrentPosition[0])
+                    foreach (var battlefield_vehicle in BattleSOS.SystemsOnField)
                     {
-                        if ((float)Math.Abs((battlefield_vehicle.CurrentPosition[0] - vehicle.CurrentPosition[0])) <= vehicle.RadarRange)
+                        if (battlefield_vehicle.CurrentPosition[0] != vehicle.CurrentPosition[0])
                         {
-                            Console.WriteLine($"{battlefield_vehicle.Type} Collision Warning with {vehicle.Type}");
+                            if (((float)Math.Abs((battlefield_vehicle.CurrentPosition[0] - vehicle.CurrentPosition[0])) <= vehicle.RadarRange)
+                                && ((float)Math.Abs((battlefield_vehicle.CurrentPosition[1] - vehicle.CurrentPosition[1])) <= vehicle.RadarRange))
+                            {
+                                if (battlefield_vehicle.Type == "Radar")
+                                {
+                                    Console.WriteLine($"{battlefield_vehicle.Type} {battlefield_vehicle.VehicleID} in range of {vehicle.Type} {vehicle.VehicleID}");
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"{battlefield_vehicle.Type} {battlefield_vehicle.VehicleID} Collision Warning with {vehicle.Type} {vehicle.VehicleID}");
+                                }
+                            }
                         }
                     }
                 }
