@@ -7,9 +7,15 @@ namespace BattleSystemTest_Aug9
         static void Main(string[] args)
         {
             SimulationEngine simulationEngine = new SimulationEngine();
-            for (int i = 0; i < 100; i++)
+            simulationEngine.RegisterVehicle(new Aircraft(new List<float[]>{new float[] { 50.0f, 0.0f },
+                                                                            new float[] { 35.0f, 0.0f },
+                                                                            new float[] { 20.0f, 0.0f },
+                                                                            new float[] { 5.0f, 0.0f } },
+                                                                            new float[] { 1.5f, 2.0f, 1.5f }, 10.0f));
+            while (!simulationEngine.allVehiclesStopped)
             {
-                simulationEngine.RunSimulationEngine();
+                simulationEngine.RunSimulationEngine(1.0f);
+                Console.ReadLine();
             }
         }
     }
@@ -25,6 +31,7 @@ namespace BattleSystemTest_Aug9
         public abstract List<float[]> Velocities { get; set; }
         public abstract bool VehicleHasStopped { get; set; }
         public abstract int InLeg { get; set; }
+        public abstract float RadarRange { get; set; }
         public abstract float[] Get();
         public abstract void Set();
         public abstract void OnTick(float duration);
@@ -40,6 +47,7 @@ namespace BattleSystemTest_Aug9
         public override List<float[]> VehiclePath { get; set; }
         public override bool VehicleHasStopped { get; set; }
         public override int InLeg { get; set; }
+        public override float RadarRange { get; set; }
         public override float[] Get()
         {
             return this.CurrentPosition;
@@ -57,7 +65,7 @@ namespace BattleSystemTest_Aug9
             this.NewPositionTemp[1] = (float) Math.Round(this.CurrentPosition[1] + (this.Velocities[this.InLeg][1] * duration),4);
         }
 
-        public Aircraft(List<float[]> waypoints, float[] leg_velocities)
+        public Aircraft(List<float[]> waypoints, float[] leg_velocities, float radarRange)
         {
 
             /* The Aircraft class takes a list of waypoints in form of array of length 2 as first argument
@@ -84,6 +92,7 @@ namespace BattleSystemTest_Aug9
             this.NewPositionTemp = waypoints[0];
             Type = "Aircraft";
             this.InLeg = 0;
+            this.RadarRange = radarRange;
         }
     }
 
@@ -95,14 +104,18 @@ namespace BattleSystemTest_Aug9
     }
     class SimulationEngine
     {
+        public int vehiclesStopped = 0;
+        public bool allVehiclesStopped = false;
         public SimulationEngine()
         {
             BattleSOS.SystemsOnField = new List<BattleSystem>
-            { new Aircraft(new List<float[]> {new float[] { 0.0f, 0.0f },
-                                              new float[] { 5.0f, 4.0f },
-                                              new float[] { 15.0f, 4.0f },
-                                              new float[] { 20.0f, 0.0f } }, new float[] { 1.0f, 2.0f, 1.5f }),
-            }; // Argument 1 = List of floating point arrays of waypoints. Argument 2 = Floating point array of leg velocities
+            { new Aircraft(new List<float[]> {new float[] { 0.0f, 0.0f }, // Waypoints
+                                              new float[] { 10.0f, 0.0f },
+                                              new float[] { 20.0f, 0.0f },
+                                              new float[] { 30.0f, 0.0f } },
+                                              new float[] { 1.0f, 1.0f, 1.5f }, // Velocities
+                                              10.0f) // Radar Range
+            };
         }
 
         public void RegisterVehicle(BattleSystem vehicle)
@@ -110,7 +123,7 @@ namespace BattleSystemTest_Aug9
             BattleSOS.SystemsOnField.Add(vehicle);
         }
 
-        public void RunSimulationEngine()
+        public void RunSimulationEngine(float timer)
         {
             List<float[]> globalSituationAwareness = new List<float[]>();
 
@@ -123,7 +136,17 @@ namespace BattleSystemTest_Aug9
 
             foreach (var vehicle in BattleSOS.SystemsOnField)
             {
-                vehicle.OnTick(1.0f);
+                foreach (var battlefield_vehicle in BattleSOS.SystemsOnField)
+                {
+                    if (battlefield_vehicle.CurrentPosition[0] != vehicle.CurrentPosition[0])
+                    {
+                        if ((float)Math.Abs((battlefield_vehicle.CurrentPosition[0] - vehicle.CurrentPosition[0])) <= vehicle.RadarRange)
+                        {
+                            Console.WriteLine("Collision Warning");
+                        }
+                    }
+                }
+                vehicle.OnTick(timer);
             }
 
             foreach (var vehicle in BattleSOS.SystemsOnField)
@@ -141,6 +164,7 @@ namespace BattleSystemTest_Aug9
                         {
                             // Checks whether the Vehicle is in last leg and has stopped
                             vehicle.VehicleHasStopped = true;
+                            vehiclesStopped++;
                         }
                     }
                     else
@@ -154,6 +178,7 @@ namespace BattleSystemTest_Aug9
                         {
                             // Checks whether the Vehicle is in last leg and has stopped
                             vehicle.VehicleHasStopped = true;
+                            vehiclesStopped++;
                         }
                     }
                 }
@@ -161,6 +186,14 @@ namespace BattleSystemTest_Aug9
                 {
                     vehicle.Set();
                     Console.WriteLine($"({vehicle.CurrentPosition[0]},{vehicle.CurrentPosition[1]})");
+                }
+                else if (vehicle.VehicleHasStopped)
+                {
+                    Console.WriteLine("Vehicle reached end of path");
+                }
+                if (vehiclesStopped == BattleSOS.SystemsOnField.Count)
+                {
+                    this.allVehiclesStopped = true;
                 }
             }
         }
