@@ -73,7 +73,8 @@ namespace BattleSystemTest_Aug9
         {
 
             /* The Aircraft class takes a list of waypoints in form of array of length 2 as first argument
-             * and and array of length (waypoints.Count - 1) representing velocities in each leg as second argument */
+             * and and array of length (waypoints.Count - 1) representing velocities in each leg as second argument.
+             * The third argument is the range of the internal radar system */
 
 
             this.VehiclePath = waypoints;
@@ -104,7 +105,7 @@ namespace BattleSystemTest_Aug9
 
     class Radar : BattleSystem
     {
-        // Object of Radar class has the same properties but only one array of "waypoints" and zero velocity
+        // Object of Radar class has the same properties as Aircraft but only one array of "waypoints" and zero velocity
         // (except in cases of mobile radar arrays)
 
         public override string Type { get; set; }
@@ -137,8 +138,11 @@ namespace BattleSystemTest_Aug9
         public Radar(List<float[]> coordinates, float[] leg_velocities, float radarRange)
         {
 
-            /* The Radar class takes an array of coordinates of length 2 as first argument
-             * and and array of length (waypoints.Count - 1) representing velocities in each leg as second argument */
+            /* The Radar class takes a List of array of coordinates of length 2 as first argument.
+             * Only one element would be present in the list.
+             * Second argument is leg_velocites, which would be an array of single float with value 0.0
+             * since the radars would be fixed to their position.
+             * Third argument is the Radar Range */
 
 
             this.VehiclePath = coordinates;
@@ -202,15 +206,17 @@ namespace BattleSystemTest_Aug9
 
             foreach (var vehicle in BattleSOS.SystemsOnField)
             {
-                if (vehicle.Type != "Radar")
+                if (vehicle.Type != "Radar") // Excluding all Radar type objects from computatuion of new positions.
                 {
                     foreach (var battlefield_vehicle in BattleSOS.SystemsOnField)
                     {
-                        if (battlefield_vehicle.CurrentPosition[0] != vehicle.CurrentPosition[0])
+                        if (battlefield_vehicle.CurrentPosition[0] != vehicle.CurrentPosition[0]) // Excluding itself from detecting objects in range
                         {
                             if (((float)Math.Abs((battlefield_vehicle.CurrentPosition[0] - vehicle.CurrentPosition[0])) <= vehicle.RadarRange)
                                 && ((float)Math.Abs((battlefield_vehicle.CurrentPosition[1] - vehicle.CurrentPosition[1])) <= vehicle.RadarRange))
                             {
+                                // Check for other objects in BattleSOS.SystemsOnField that are within Radar Range of given object.
+
                                 if (battlefield_vehicle.Type == "Radar")
                                 {
                                     Console.WriteLine($"{battlefield_vehicle.Type} {battlefield_vehicle.VehicleID} in range of {vehicle.Type} {vehicle.VehicleID}");
@@ -228,7 +234,7 @@ namespace BattleSystemTest_Aug9
 
             foreach (var vehicle in BattleSOS.SystemsOnField)
             {
-                if(vehicle.Type != "Radar")
+                if(vehicle.Type != "Radar") // Excluding all Radar type objects from Setting of new positions.
                 {
                     for (int i = 0; i < vehicle.LegVelocities.Length; i++)
                     {
