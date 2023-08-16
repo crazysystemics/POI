@@ -246,6 +246,9 @@ namespace oolayer_Script
             OOLayer midLayer    = sessionLayer;
             OOLayer bottomLayer = presentationLayer;
 
+            sglobal.RegisterInvocationSource("test01");
+            
+
             
             //TODO: Make these variables enumerated
             bool TOP_TO_BOTTOM = true;

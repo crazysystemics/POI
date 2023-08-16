@@ -153,6 +153,18 @@ namespace OutOfScope
                 OsiStackCycle = BufferCycle.PING_READ_PONG_WRITE;
         }
 
+        public static int invocationLineNumber = 0;
+        public static string inovcationMethodName = String.Empty;
+
+        static void RegisterInvocationSource(string message,
+        [CallerLineNumber] int lineNumber = 0,
+        [CallerMemberName] string caller = null)
+        {
+            //Console.WriteLine(message + " at line " + lineNumber + " (" + caller + ")");
+            invocationLineNumber = lineNumber;
+            inovcationMethodName = caller;
+        }
+
 
 
     }
