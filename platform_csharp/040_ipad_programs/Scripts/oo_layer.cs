@@ -212,7 +212,7 @@ namespace oolayer_Script
                 //Input to Session Layer is application + session layer
                 //It receives this from bottom layer
                 
-                string tempLayer = "Presentation";               
+                string tempLayer = "presentation";               
 
                 Head    bottomHead      = new LayerHead(tempLayer, tempLayer + "hello");
                 Tail    bottomTail      = new LayerTail(tempLayer);
@@ -224,7 +224,7 @@ namespace oolayer_Script
                                          bottomTail);
                 Console.WriteLine("method:setInput in layer: {0},"
                                       + "signature: {1} ",
-                                        layer, curPacket.GetSignature());
+                                        tempLayer, curPacket.GetSignature());
 
                 tempLayer = "session";
                 string curSignature = tempLayer + curPacket.GetSignature();
@@ -234,8 +234,14 @@ namespace oolayer_Script
                                          curPacket,
                                          sessionTail);
 
+                Console.WriteLine(   "method:setInput in layer: {0},"
+                                   + "signature: {1} ",
+                                      tempLayer, 
+                                      curPacket.GetSignature());
 
-                tempLayer = "Presentation";
+
+
+                tempLayer = "application";
                 Head applicationHead = new LayerHead(tempLayer, "");
                 Tail applicationTail = new LayerTail(tempLayer);
                 curPacket = new Packet(applicationHead,
@@ -243,6 +249,11 @@ namespace oolayer_Script
                                          applicationTail);
 
                 fromLowerQ.Enqueue(curPacket);
+
+                Console.WriteLine("method:setInput in layer: {0},"
+                                  + "signature: {1} ",
+                                     tempLayer,
+                                     curPacket.GetSignature());
 
             }
             

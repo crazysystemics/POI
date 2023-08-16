@@ -246,7 +246,7 @@ namespace oolayer_Script
             OOLayer midLayer    = sessionLayer;
             OOLayer bottomLayer = presentationLayer;
 
-            sglobal.RegisterInvocationSource("test01");
+            //sglobal.RegisterInvocationSource("test01");
             
 
             
