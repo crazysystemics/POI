@@ -11,7 +11,7 @@ namespace BattleSystemTest_Aug9
                                                                             new float[] { 35.0f, 0.0f },
                                                                             new float[] { 20.0f, 0.0f },
                                                                             new float[] { 5.0f, 0.0f } },
-                                                                            new float[] { 1.5f, 2.0f, 1.5f }, 10.0f));
+                                                                            new float[] { 1.0f, 1.0f, 1.0f }, 10.0f));
             simulationEngine.RegisterVehicle(new Radar(new List<float[]> { new float[] { 20.0f, 0.0f },},
                                                                            new float[] { 0.0f }, 10.0f));
             while (!simulationEngine.allVehiclesStopped)
@@ -181,9 +181,9 @@ namespace BattleSystemTest_Aug9
             BattleSOS.SystemsOnField = new List<BattleSystem>
             { new Aircraft(new List<float[]> {new float[] { 0.0f, 0.0f }, // Waypoints
                                               new float[] { 10.0f, 0.0f },
-                                              new float[] { 20.0f, 0.0f },
-                                              new float[] { 30.0f, 0.0f } },
-                                              new float[] { 1.0f, 1.0f, 1.5f }, // Velocities
+                                              new float[] { 25.0f, 0.0f },
+                                              new float[] { 50.0f, 0.0f } },
+                                              new float[] { 1.0f, 1.0f, 1.0f }, // Velocities
                                               10.0f) // Radar Range
             };
         }
