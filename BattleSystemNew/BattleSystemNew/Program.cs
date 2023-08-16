@@ -12,6 +12,8 @@ namespace BattleSystemTest_Aug9
                                                                             new float[] { 20.0f, 0.0f },
                                                                             new float[] { 5.0f, 0.0f } },
                                                                             new float[] { 1.5f, 2.0f, 1.5f }, 10.0f));
+            simulationEngine.RegisterVehicle(new Radar(new List<float[]> { new float[] { 20.0f, 0.0f },},
+                                                                           new float[] { 0.0f }, 10.0f));
             while (!simulationEngine.allVehiclesStopped)
             {
                 simulationEngine.RunSimulationEngine(1.0f);
@@ -96,6 +98,63 @@ namespace BattleSystemTest_Aug9
         }
     }
 
+    class Radar : BattleSystem
+    {
+        // Object of Radar class has the same properties but only one array of "waypoints" and zero velocity
+        // (except in cases of mobile radar arrays)
+
+        public override string Type { get; set; }
+        public override float[] CurrentPosition { get; set; }
+        public override float[] NewPositionTemp { get; set; }
+        public override float[] LegVelocities { get; set; }
+        public override List<float[]> Velocities { get; set; }
+        public override List<float[]> VehiclePath { get; set; }
+        public override bool VehicleHasStopped { get; set; }
+        public override int InLeg { get; set; }
+        public override float RadarRange { get; set; }
+        public override float[] Get()
+        {
+            return this.CurrentPosition;
+        }
+        public override void Set()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                this.CurrentPosition[i] = this.NewPositionTemp[i];
+            }
+        }
+        public override void OnTick(float duration)
+        {
+            this.NewPositionTemp[0] = (float)Math.Round(this.CurrentPosition[0] + (this.Velocities[this.InLeg][0] * duration), 4);
+            this.NewPositionTemp[1] = (float)Math.Round(this.CurrentPosition[1] + (this.Velocities[this.InLeg][1] * duration), 4);
+        }
+
+        public Radar(List<float[]> coordinates, float[] leg_velocities, float radarRange)
+        {
+
+            /* The Radar class takes an array of coordinates of length 2 as first argument
+             * and and array of length (waypoints.Count - 1) representing velocities in each leg as second argument */
+
+
+            this.VehiclePath = coordinates;
+            this.LegVelocities = leg_velocities;
+            this.Velocities = new List<float[]>();
+            for (int i = 0; i < leg_velocities.Length; i++) // Decomposing leg velocities during instance construction
+            {
+                float[] vel = new float[2];
+                vel[0] = 0.0f;
+                vel[1] = 0.0f;
+                this.Velocities.Add(vel);
+            }
+            this.CurrentPosition = coordinates[0];
+            this.NewPositionTemp = coordinates[0];
+            Type = "Radar";
+            this.InLeg = 0;
+            this.RadarRange = radarRange;
+        }
+    }
+
+
     class BattleSOS
     {
         //
@@ -142,7 +201,7 @@ namespace BattleSystemTest_Aug9
                     {
                         if ((float)Math.Abs((battlefield_vehicle.CurrentPosition[0] - vehicle.CurrentPosition[0])) <= vehicle.RadarRange)
                         {
-                            Console.WriteLine("Collision Warning");
+                            Console.WriteLine($"{battlefield_vehicle.Type} Collision Warning with {vehicle.Type}");
                         }
                     }
                 }
@@ -151,37 +210,41 @@ namespace BattleSystemTest_Aug9
 
             foreach (var vehicle in BattleSOS.SystemsOnField)
             {
-                for (int i = 0; i < vehicle.LegVelocities.Length; i++)
+                if(vehicle.Type != "Radar")
                 {
-                    if (vehicle.VehiclePath[i][0] > vehicle.VehiclePath[i + 1][0])
+                    for (int i = 0; i < vehicle.LegVelocities.Length; i++)
                     {
-                        if (vehicle.CurrentPosition[0] <= vehicle.VehiclePath[i][0])
+                        if (vehicle.VehiclePath[i][0] > vehicle.VehiclePath[i + 1][0])
                         {
-                            vehicle.InLeg = i;
+                            if (vehicle.CurrentPosition[0] <= vehicle.VehiclePath[i][0])
+                            {
+                                vehicle.InLeg = i;
+                            }
+                            if ((vehicle.InLeg == vehicle.Velocities.Count - 1)
+                                && vehicle.CurrentPosition[0] <= vehicle.VehiclePath[i + 1][0])
+                            {
+                                // Checks whether the Vehicle is in last leg and has stopped
+                                vehicle.VehicleHasStopped = true;
+                                vehiclesStopped++;
+                            }
                         }
-                        if ((vehicle.InLeg == vehicle.Velocities.Count - 1)
-                            && vehicle.CurrentPosition[0] <= vehicle.VehiclePath[i + 1][0])
+                        else
                         {
-                            // Checks whether the Vehicle is in last leg and has stopped
-                            vehicle.VehicleHasStopped = true;
-                            vehiclesStopped++;
-                        }
-                    }
-                    else
-                    {
-                        if (vehicle.CurrentPosition[0] >= vehicle.VehiclePath[i][0])
-                        {
-                            vehicle.InLeg = i;
-                        }
-                        if ((vehicle.InLeg == vehicle.Velocities.Count - 1)
-                            && vehicle.CurrentPosition[0] >= vehicle.VehiclePath[i + 1][0])
-                        {
-                            // Checks whether the Vehicle is in last leg and has stopped
-                            vehicle.VehicleHasStopped = true;
-                            vehiclesStopped++;
+                            if (vehicle.CurrentPosition[0] >= vehicle.VehiclePath[i][0])
+                            {
+                                vehicle.InLeg = i;
+                            }
+                            if ((vehicle.InLeg == vehicle.Velocities.Count - 1)
+                                && vehicle.CurrentPosition[0] >= vehicle.VehiclePath[i + 1][0])
+                            {
+                                // Checks whether the Vehicle is in last leg and has stopped
+                                vehicle.VehicleHasStopped = true;
+                                vehiclesStopped++;
+                            }
                         }
                     }
                 }
+                
                 if (!vehicle.VehicleHasStopped) // If Vehicle has stopped, stop calculating new values for position
                 {
                     vehicle.Set();
