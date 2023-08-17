@@ -268,6 +268,8 @@ namespace oolayer_Script
                         bottomLayer.setInput();
                 }
 
+                Console.WriteLine("^TC02:271:loopCount {0}", loopCount);
+
                 //Every Iteration is a tick and packet moves either down or up one layr
                 //based on direction. READ and WRITE phases are for managing concurrency
 

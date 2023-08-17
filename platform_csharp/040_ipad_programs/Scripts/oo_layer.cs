@@ -16,6 +16,7 @@ namespace oolayer_Script
     {
         public static int line = 0;
         public static string caller = String.Empty;
+        public static bool debug_print = false;
 
         public static void RegisterInvocationSource(string message,
         [CallerLineNumber] int lineNumber = 0,
@@ -48,24 +49,34 @@ namespace oolayer_Script
     //sender.putQ("hello");
     //string s = rcvr.getsQ();
     //Console.WriteLine(s);
-    abstract class Payload { public abstract string GetSignature(); };
-    abstract class Head    { public string prefix, signature, suffix; };
-    abstract class Tail    { public string prefix, data, suffix; };
+    abstract class Payload
+    {
+        //TODO:Should there be separate PayloadDataClass?
+        //Will it solve all problems.
+        //abstract Head, Payload, Tail classes in packet classes
+        //and derived layer classes from that. Is this the solution
+        //I am searching for?
+
+        public abstract string GetSignature();
+        public abstract string GetPayload();
+    };
+    abstract class Head { public string prefix, signature, suffix; };
+    abstract class Tail { public string prefix, data, suffix; };
     class Packet : Payload
     {
         public string start = String.Empty;
         public string layer = String.Empty;
-        public Head    head;
+        public Head head;
         public Payload payload;
         public Tail tail;
         public string end = String.Empty;
-        
+
 
         public Packet(Head head, Payload payload, Tail tail)
         {
-            this.head    = head;
+            this.head = head;
             this.payload = payload;
-            this.tail    = tail;
+            this.tail = tail;
             //this.signature = "sig_" + head.signature + "_" + payload.GetSignature(); ;            
 
         }
@@ -73,7 +84,12 @@ namespace oolayer_Script
         public override string GetSignature()
         {
             //payload is not end packet, so head contains signature
-            return head.signature ;
+            return head.signature;
+        }
+
+        public override string GetPayload()
+        {
+            return payload.GetPayload();
         }
 
     }
@@ -86,6 +102,10 @@ namespace oolayer_Script
         { return "[" + data + "]"; }
         public EndPacket(string s = "undefined")
         { data = s; }
+        public override string GetPayload()
+        {
+            return data;
+        }
     }
     class LayerHead : Head
     {
@@ -103,7 +123,7 @@ namespace oolayer_Script
 
     class LayerTail : Tail
     {
-       
+
         public LayerTail(string layer)
         {
             //In this place layer specific computation
@@ -130,7 +150,8 @@ namespace oolayer_Script
         public Packet upPacket;
         public Packet downPacket;
         public StackPosition stackPosition;
-        
+        public string outputOnTopPerTick;
+
 
         public Queue<Packet> fromUpperQ = new Queue<Packet>();
         public Queue<Packet> toUpperQ = new Queue<Packet>();
@@ -142,8 +163,8 @@ namespace oolayer_Script
         LayerTail layerTail;
         public OOLayer(string layer, StackPosition stackPosition = StackPosition.MIDDLE)
         {
-            this.layer         = layer;
-            this.Name          = layer;
+            this.layer = layer;
+            this.Name = layer;
             this.stackPosition = stackPosition;
         }
 
@@ -151,9 +172,9 @@ namespace oolayer_Script
         {
             if (rwphase == RWPhase.READ)
             {
-                downwardRead();                
+                downwardRead();
                 upwardRead();
-                
+
             }
             else
             {
@@ -180,17 +201,19 @@ namespace oolayer_Script
 
         public void setInput()
         {
+            sglobal.debug_print = false;
+
             //string shead = layer + "_";
             string sendhead = (stackPosition == StackPosition.TOP) ? "top" : "bottom";
             //string stail = layer + "_";
-            string sendtail = (stackPosition == StackPosition.TOP) ? "top" : "bottom";          
+            string sendtail = (stackPosition == StackPosition.TOP) ? "top" : "bottom";
 
-            
+
 
             if (stackPosition == StackPosition.TOP)
             {
-                Head topHead      = new LayerHead(layer, "top_hello");
-                Tail topTail      = new LayerTail(layer);
+                Head topHead = new LayerHead(layer, "top_hello");
+                Tail topTail = new LayerTail(layer);
                 Payload topPacket = new EndPacket("hello");
 
                 curPacket = new Packet(topHead,
@@ -211,38 +234,51 @@ namespace oolayer_Script
 
                 //Input to Session Layer is application + session layer
                 //It receives this from bottom layer
-                
-                string tempLayer = "presentation";               
 
-                Head    bottomHead      = new LayerHead(tempLayer, tempLayer + "hello");
-                Tail    bottomTail      = new LayerTail(tempLayer);
-                Payload bottomPacket    = new EndPacket("bottom_hello");
-                
 
-                curPacket = new Packet(bottomHead, 
+                //## bottommost - presentation layer
+                string tempLayer = "application";
+
+                Head bottomHead = new LayerHead(tempLayer,
+                                                        tempLayer + "_bottom_hello");
+                Tail bottomTail = new LayerTail(tempLayer);
+                Payload bottomPacket = new EndPacket("bottom_hello");
+
+
+                curPacket = new Packet(bottomHead,
                                          bottomPacket,
                                          bottomTail);
-                Console.WriteLine("method:setInput in layer: {0},"
+
+                if (sglobal.debug_print)
+                {
+                    Console.WriteLine("method:setInput in layer: {0},"
                                       + "signature: {1} ",
                                         tempLayer, curPacket.GetSignature());
+                }
 
+                //## intermediate - session layer
                 tempLayer = "session";
-                string curSignature = tempLayer + curPacket.GetSignature();
-                Head sessionHead  = new LayerHead(tempLayer, curSignature);
-                Tail sessionTail  = new LayerTail(tempLayer);                             
+                Head sessionHead = new LayerHead(tempLayer,
+                                                  tempLayer + "_" + curPacket.GetSignature());
+                Tail sessionTail = new LayerTail(tempLayer);
                 curPacket = new Packet(sessionHead,
                                          curPacket,
                                          sessionTail);
 
-                Console.WriteLine(   "method:setInput in layer: {0},"
-                                   + "signature: {1} ",
-                                      tempLayer, 
-                                      curPacket.GetSignature());
+                if (sglobal.debug_print)
+                {
+                    Console.WriteLine("method:setInput in layer: {0},"
+                                       + "signature: {1} ",
+                                          tempLayer,
+                                          curPacket.GetSignature());
+                }
 
 
-
-                tempLayer = "application";
-                Head applicationHead = new LayerHead(tempLayer, "");
+                //## topmost - application layer
+                tempLayer = "presentation";
+                //TODO:Compute Signature in Packet Constructor
+                Head applicationHead = new LayerHead(tempLayer,
+                                                     tempLayer + "_" + curPacket.GetSignature());
                 Tail applicationTail = new LayerTail(tempLayer);
                 curPacket = new Packet(applicationHead,
                                          curPacket,
@@ -250,14 +286,17 @@ namespace oolayer_Script
 
                 fromLowerQ.Enqueue(curPacket);
 
-                Console.WriteLine("method:setInput in layer: {0},"
-                                  + "signature: {1} ",
+                if (sglobal.debug_print)
+                {
+                    Console.WriteLine("method   :setInput in layer: {0},"
+                                    + "signature                  : {1} ",
                                      tempLayer,
                                      curPacket.GetSignature());
+                }
 
             }
-            
-            
+
+            sglobal.debug_print = false;
         }
 
         public string getOutput()
@@ -275,7 +314,7 @@ namespace oolayer_Script
                 if (toLowerQ.Count > 0)
                 {
                     Packet packet = toLowerQ.Dequeue();
-                    return packet.GetSignature();                    
+                    return packet.GetSignature();
                 }
             }
 
@@ -291,6 +330,7 @@ namespace oolayer_Script
         //uninited is an error whereas undefined can be design (like don't care)
         public void downwardRead()
         {
+            sglobal.debug_print = false;
             curPacket = null;
             downPacketBuf = new Queue<Packet>();
             while (fromUpperQ.Count > 0)
@@ -298,58 +338,103 @@ namespace oolayer_Script
                 Payload packetFromUpperLayer = fromUpperQ.Dequeue();
                 string currentSignature = layer + "_" +
                        packetFromUpperLayer.GetSignature();
-                layerHead   = new LayerHead(layer, currentSignature);
-                layerTail   = new LayerTail(layer);
-                curPacket   = new Packet(layerHead,
+                layerHead = new LayerHead(layer, currentSignature);
+                layerTail = new LayerTail(layer);
+                curPacket = new Packet(layerHead,
                                          packetFromUpperLayer,
                                          layerTail);
                 //TODO: Generic debug string
-                Console.WriteLine("method:downwardRead in layer: {0}, signature: {1} " ,
-                                           layer , currentSignature);
+                {
+                    Console.WriteLine("method:downwardRead in layer: {0}, signature: {1} ",
+                                           layer, currentSignature);
+                }
                 downPacketBuf.Enqueue(curPacket);
             }
+
+            sglobal.debug_print = false;
         }
         public void downwardWrite()
         {
+            sglobal.debug_print = false;
             //TODO: Read difference between is null and == null
             while (downPacketBuf.Count > 0)
             {
                 Packet packet = downPacketBuf.Dequeue();
                 toLowerQ.Enqueue(packet);
 
-                Console.WriteLine("method:downwardWrite in layer: {0}, signature: {1} ",
+                if (sglobal.debug_print)
+                {
+                    Console.WriteLine("method:downwardWrite in layer: {0}, signature: {1} ",
                                                          layer, packet.GetSignature());
+                }
             }
+            sglobal.debug_print = false;
         }
         public void upwardRead()
-        {            
-            
-            while (fromLowerQ.Count > 0)
-            {               
-                Payload packetFromLowerLayer = fromLowerQ.Dequeue();
-                Packet curPacket = (Packet)packetFromLowerLayer;
-                string curSignature = curPacket.GetSignature();
-                if (stackPosition != StackPosition.TOP)
+        {
+            sglobal.debug_print = true;
+            if (stackPosition == StackPosition.TOP)
+            {
+                //TODO:should handle form multiple entries in queue
+                //As of now, do nothing
+            }
+            else
+            {
+                while (fromLowerQ.Count > 0)
                 {
+                    Payload packetFromLowerLayer = fromLowerQ.Dequeue();
+                    Packet curPacket = (Packet)packetFromLowerLayer;
+                    string curSignature = curPacket.GetSignature();
+
                     upPacketBuf.Enqueue((Packet)curPacket.payload);
 
-                    Console.WriteLine("method:upwardRead in layer: {0},"
-                                      + "signature: {1} ",
-                                        layer, curSignature);
-                }                
+                    if (sglobal.debug_print)
+                    {
+                        Console.WriteLine("method:upwardRead in layer: {0},"
+                                      + "queue_count: {1} "
+                                      + "signature: {2} ",
+                                          layer, fromLowerQ.Count, curSignature);
+                    }
+                }
             }
+            sglobal.debug_print = false;
         }
         public void upwardWrite()
         {
-            while (upPacketBuf.Count > 0)
+            sglobal.debug_print = true;
+
+            if (stackPosition == StackPosition.TOP)
             {
+                //TODO:should handle form multiple entries in queue
+                //As of now, do nothing
                 Packet curPacket = upPacketBuf.Dequeue();
                 string curSignature = curPacket.GetSignature();
-                
-                toUpperQ.Enqueue(curPacket);
-                Console.WriteLine("method:upwardRead in layer: {0}, signature: {1} ",
+                outputOnTopPerTick = curPacket.GetPayload();
+
+                if (sglobal.debug_print)
+                {
+                    Console.WriteLine("method:upwardWrite in layer: {0}, signature: {1} ",
                                           layer, curSignature);
+                }
             }
+            else
+            {
+                while (upPacketBuf.Count > 0)
+                {
+                    Packet curPacket = upPacketBuf.Dequeue();
+                    string curSignature = curPacket.GetSignature();
+
+                    toUpperQ.Enqueue(curPacket);
+
+                    if (sglobal.debug_print)
+                    {
+                        Console.WriteLine("method:upwardWrite in layer: {0}, signature: {1} ",
+                                              layer, curSignature);
+                    }
+                }
+            }
+
+            sglobal.debug_print = false;
         }
     }
 
