@@ -205,7 +205,10 @@ namespace oolayer_Script
         OOLayer applicationLayer;
         OOLayer sessionLayer;
         OOLayer presentationLayer;
-
+        //TODO: Make these variables enumerated
+        bool TOP_TO_BOTTOM = true;
+        bool BOTTOM_TO_UP = false;
+        public bool direction;
         int bugs;
         bool assertFlag;
         bool verbose;
@@ -213,6 +216,7 @@ namespace oolayer_Script
         public TestCase02()
         {
             Name = "Three-Layer-Two-Ways-Half-Duplex";
+            direction = TOP_TO_BOTTOM;
         }
 
         public override void Setup(bool assertFlag = true, bool verbose = false)
@@ -238,22 +242,16 @@ namespace oolayer_Script
             Console.WriteLine("Test No:{0} Test Case:{1} Test Case:{2}",
                                testNum, testCaseId, Name);
             string[] expectedOutputs = new string[] 
-                          {  "presentation_session_application_top_namaste",
-                             "bottom hello"
+                          {  "presentation_session_application_top_hello",
+                             "bottom_hello"
                           };
 
             OOLayer topLayer    = applicationLayer;
             OOLayer midLayer    = sessionLayer;
             OOLayer bottomLayer = presentationLayer;
 
-            //sglobal.RegisterInvocationSource("test01");
-            
+            //sglobal.RegisterInvocationSource("test01");         
 
-            
-            //TODO: Make these variables enumerated
-            bool TOP_TO_BOTTOM = true;
-            bool BOTTOM_TO_UP = false;
-            bool direction = TOP_TO_BOTTOM;
             bool notDone = true;
             int  numLayers = 3; 
             int  loopCount = 0;
@@ -294,12 +292,12 @@ namespace oolayer_Script
 
                     if (direction == TOP_TO_BOTTOM)
                     {
-                        outputs = bottomLayer.getOutput();
+                        outputs = bottomLayer.getOutput(direction);
                         outputIndex = 0;
                     }
                     else
                     {
-                        outputs = topLayer.getOutput();
+                        outputs = topLayer.getOutput(direction);
                         outputIndex = 1;
                     }
                     //TODO: Incrementing bug count using Debug.Assert

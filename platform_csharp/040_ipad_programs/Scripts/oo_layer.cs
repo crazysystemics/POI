@@ -299,26 +299,25 @@ namespace oolayer_Script
             sglobal.debug_print = false;
         }
 
-        public string getOutput()
+        public string getOutput(bool direction=true)
         {
-            //if (stackPosition == StackPosition.TOP)
-            //{
-            //    if (toUpperQ.Count > 0)
-            //    {
-            //        Packet packet = toUpperQ.Dequeue();
-            //        return packet.GetSignature();
-            //    }
-            //}
-            //else
+            //TODO: Put proper enumerations
+            bool TOP_TO_BOTTOM = true;
+            bool BOTTOM_TO_TRUE = false;
+
+
+            if (direction == TOP_TO_BOTTOM)
             {
-                if (toLowerQ.Count > 0)
-                {
-                    Packet packet = toLowerQ.Dequeue();
-                    return packet.GetSignature();
-                }
+                Packet packet = toLowerQ.Dequeue();
+                return packet.GetSignature();
+            }
+            else
+            {
+                return outputOnTopPerTick;
             }
 
-            return "Queue Empty";
+
+            
         }
 
         //read write calls are separated to discrete-time-modelling
@@ -373,26 +372,46 @@ namespace oolayer_Script
         public void upwardRead()
         {
             sglobal.debug_print = true;
-            if (stackPosition == StackPosition.TOP)
+            //if (stackPosition == StackPosition.TOP)
+            //{
+            //    //TODO:should handle form multiple entries in queue
+            //    //As of now, do nothing
+            //}
+            //else
             {
-                //TODO:should handle form multiple entries in queue
-                //As of now, do nothing
-            }
-            else
-            {
+                //policy is same whether it is topmost layer or not
                 while (fromLowerQ.Count > 0)
                 {
                     Payload packetFromLowerLayer = fromLowerQ.Dequeue();
                     Packet curPacket = (Packet)packetFromLowerLayer;
                     string curSignature = curPacket.GetSignature();
 
-                    upPacketBuf.Enqueue((Packet)curPacket.payload);
+                    if (stackPosition == StackPosition.TOP)
+                    {
+                        //In topmost layer unpacking is not needed
+                        //Payload will be of Endpacket so we cannot Enqueue it
+                        //Passing Packet as it has been received
+                        //UpwardWrite will Deque and Unpack it
+
+                        //TODO: Can we generalize to other layers also?
+                        //i.e., upwardRead simply enqueues the packet as it
+                        //upwardWrite dequeues gets payload puts it in next layer queue
+                        //this seems more natural if not much processing is needed between
+                        //entering from lower layer and exiting into upper layer.
+                        //If some actions are to be done between these two points we have
+                        //to do unpacking on entering into entry of the layer only.
+                        upPacketBuf.Enqueue((Packet)curPacket);
+                    }
+                    else
+                    {
+                        upPacketBuf.Enqueue((Packet)curPacket.payload);
+                    }
 
                     if (sglobal.debug_print)
                     {
                         Console.WriteLine("method:upwardRead in layer: {0},"
-                                      + "queue_count: {1} "
-                                      + "signature: {2} ",
+                                        + "queue_count: {1} "
+                                        + "signature: {2} ",
                                           layer, fromLowerQ.Count, curSignature);
                     }
                 }
@@ -407,14 +426,22 @@ namespace oolayer_Script
             {
                 //TODO:should handle form multiple entries in queue
                 //As of now, do nothing
-                Packet curPacket = upPacketBuf.Dequeue();
-                string curSignature = curPacket.GetSignature();
-                outputOnTopPerTick = curPacket.GetPayload();
-
-                if (sglobal.debug_print)
+                while (upPacketBuf.Count > 0)
                 {
-                    Console.WriteLine("method:upwardWrite in layer: {0}, signature: {1} ",
-                                          layer, curSignature);
+                    Packet curPacket = upPacketBuf.Dequeue();
+                    string curSignature = curPacket.GetSignature();
+                    outputOnTopPerTick = curPacket.GetPayload();
+
+                    if (stackPosition == StackPosition.TOP)
+                    {
+                        Console.WriteLine("method:upwardWrite in layer: {0}, payload data: {1} ",
+                                                                      layer, outputOnTopPerTick);
+                    }
+                    else if (sglobal.debug_print)
+                    {
+                        Console.WriteLine("method:upwardWrite in layer: {0}, signature: {1} ",
+                                              layer, curSignature);
+                    }
                 }
             }
             else
