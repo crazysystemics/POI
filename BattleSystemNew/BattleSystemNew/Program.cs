@@ -34,22 +34,13 @@ namespace BattleSystem
                                                         {new float[] { 15.0f, 0.0f }},
                                                          0.0f, 7.5f));
 
-
-            float acc_zone_size = 3.0f; // Used for calculations relevant to anti-aircraft
-            float att_zone_size = 1.5f; // Used for calculations relevant to anti-aircraft
-
             while (!SimEng.allVehiclesStopped)
             {
 
-                // Run until all non-stationary vehicles come to a stop
-
-                if (SimEng.EscapeFailed)
-                {
-                    acc_zone_size += 5.0f;
-                }
+                // Run until all non-stationary battle_systems come to a stop
 
                 Console.WriteLine($"\nPosition after {i + 1} ticks:");
-                SimEng.RunSimulationEngine(1.00f, acc_zone_size, att_zone_size);
+                SimEng.RunSimulationEngine(1.00f);
                 Console.WriteLine("Press Enter/Return to display next tick");
                 Console.ReadLine();
                 i++;
@@ -79,7 +70,7 @@ abstract class BattleSystemClass
     public abstract List<BattleSystemClass> ObjectsVisible { get; set; }
     public abstract List<BattleSystemClass> ObjectsSurveyed { get; set; }
     public abstract float[] Get();
-    public abstract void Set(BattleSystemClass batt_class, string add_rem);
+    public abstract void Set();
     public abstract void OnTick(float timer);
     public abstract void DecompVelocity();
 }
@@ -117,33 +108,48 @@ class Aircraft : BattleSystemClass
             NewPositionTemp[0] = CurrentPosition[0] + (LegVelocity[0] * timer);
             NewPositionTemp[1] = CurrentPosition[1] + (LegVelocity[1] * timer);
         }
+        Console.WriteLine($"\n{this.Type} {this.VehicleID}");
+        Console.WriteLine($"(x, y) = ({this.CurrentPosition[0]},{this.CurrentPosition[1]})" +
+                          $"\n(Vx, Vy) = {this.LegVelocity[0]},{this.LegVelocity[1]}");
+
+        Console.WriteLine($"\nObjects visible to {this.Type} {this.VehicleID}:");
+        if (this.ObjectsVisible.Count == 0)
+        {
+            Console.WriteLine("None");
+        }
+        foreach (var veh in this.ObjectsVisible)
+        {
+            float obj_dist = DistanceCalculator(this.CurrentPosition, veh.CurrentPosition);
+            float obj_angle = AngleCalculator(this.CurrentPosition, veh.CurrentPosition);
+            Console.WriteLine($"{veh.Type} {veh.VehicleID} (Distance = {obj_dist}), (Angle = {Math.Abs(obj_angle) * (180 / MathF.PI)} degrees)");
+        }
+        this.DecompVelocity();
+        // RAVIJ: Move Waypoint computation to Aircraft
+        // RAVIJ: Rename battle_system battleSystem or similar
+        for (int i = 0; i < this.VehiclePath.Count - 1; i++)
+        {
+            if (MathF.Abs(DistanceCalculator(this.CurrentPosition, this.NextWaypoint)) <= (this.Velocities * timer))
+            {
+                if (!this.VehicleHasStopped || this.NextWaypoint != this.VehiclePath.Last())
+                {
+                    this.CurrWaypointID++;
+                    if (this.CurrWaypointID < this.VehiclePath.Count)
+                    {
+                        this.NextWaypoint = this.VehiclePath[this.CurrWaypointID];
+                    }
+                    else if (this.CurrWaypointID == this.VehiclePath.Count)
+                    {
+                        this.VehicleHasStopped = true;
+                    }
+                }
+            }
+        }
     }
-    public override void Set(BattleSystemClass batt_class, string add_rem)
+    public override void Set()
     {
-
         // Set current position to new position
-
         CurrentPosition[0] = NewPositionTemp[0];
         CurrentPosition[1] = NewPositionTemp[1];
-
-        if (add_rem == "add")
-        {
-            if (!this.ObjectsVisible.Contains(batt_class))
-            {
-                this.ObjectsVisible.Add(batt_class);
-                this.ObjectsSurveyed.Add(batt_class);
-                Console.WriteLine($"\n{batt_class.Type} {batt_class.VehicleID} added to {this.Type} {this.VehicleID}'s range");
-            }
-
-        }
-        if (add_rem == "remove")
-        {
-            if (this.ObjectsVisible.Contains(batt_class))
-            {
-                this.ObjectsVisible.Remove(batt_class);
-                Console.WriteLine($"\n{batt_class.Type} {batt_class.VehicleID} removed from {this.Type} {this.VehicleID}'s range");
-            }
-        }
     }
 
     public float DistanceCalculator(float[] obj1, float[] obj2)
@@ -212,34 +218,45 @@ class Radar : BattleSystemClass
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
     public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
 
+    public float DistanceCalculator(float[] obj1, float[] obj2)
+    {
+        float x = obj1[0] - obj2[0];
+        float y = obj1[1] - obj2[1];
+        return MathF.Sqrt((x * x) + (y * y));
+    }
+
+    public float AngleCalculator(float[] obj1, float[] obj2)
+    {
+        float x = obj2[0] - obj1[0];
+        float y = obj2[1] - obj1[1];
+        float v = MathF.Atan2(y, x);
+        return v;
+    }
     public override float[] Get()
     {
         return CurrentPosition;
     }
     public override void OnTick(float timer)
     {
-        // No postitional computation required for stationary objects
+        Console.WriteLine($"\n{this.Type} {this.VehicleID}");
+        Console.WriteLine($"(x, y) = ({this.CurrentPosition[0]},{this.CurrentPosition[1]})" +
+                          $"\n(Vx, Vy) = {this.LegVelocity[0]},{this.LegVelocity[1]}");
+
+        Console.WriteLine($"\nObjects visible to {this.Type} {this.VehicleID}:");
+        if (this.ObjectsVisible.Count == 0)
+        {
+            Console.WriteLine("None");
+        }
+        foreach (var veh in this.ObjectsVisible)
+        {
+            float obj_dist = DistanceCalculator(this.CurrentPosition, veh.CurrentPosition);
+            float obj_angle = AngleCalculator(this.CurrentPosition, veh.CurrentPosition);
+            Console.WriteLine($"{veh.Type} {veh.VehicleID} (Distance = {obj_dist}), (Angle = {Math.Abs(obj_angle) * (180 / MathF.PI)} degrees)");
+        }
     }
-    public override void Set(BattleSystemClass batt_class, string add_rem)
+    public override void Set()
     {
         // No postitional computation required for stationary objects
-        if (add_rem == "add" && batt_class.Type != "Radar")
-        {
-            if (!this.ObjectsVisible.Contains(batt_class))
-            {
-                this.ObjectsVisible.Add(batt_class);
-                Console.WriteLine($"\n{batt_class.Type} {batt_class.VehicleID} added to {this.Type} {this.VehicleID}'s range");
-            }
-
-        }
-        if (add_rem == "remove")
-        {
-            if (this.ObjectsVisible.Contains(batt_class))
-            {
-                this.ObjectsVisible.Remove(batt_class);
-                Console.WriteLine($"\n{batt_class.Type} {batt_class.VehicleID} removed from {this.Type} {this.VehicleID}'s range");
-            }
-        }
     }
 
     public override void DecompVelocity()
@@ -257,7 +274,7 @@ class Radar : BattleSystemClass
         CurrentPosition = waypoints[0];
         VehiclePath = waypoints;
         Velocities = velocities;
-        VehicleHasStopped = false;
+        VehicleHasStopped = true;
         RadarRange = radar_range;
         NextWaypoint = new float[] { 0.0f, 0.0f };
         LegVelocity = new float[] { 0.0f, 0.0f };
@@ -314,114 +331,68 @@ class SimulationEngine
         BattleSOS.BattleSysList.Add(newVehicle);
     }
 
-    public void RunSimulationEngine(float timer, float acc_zone, float att_zone)
+    public void RunSimulationEngine(float timer)
     {
         int stoppedVehicles = 0;
         int num_radars = 0;
         int num_aircraft = 0;
 
-        foreach (var vehicle in BattleSOS.BattleSysList)
+        foreach (var battle_system in BattleSOS.BattleSysList)
         {
 
-            if (vehicle.Type == "Radar")
+            if (battle_system.Type == "Radar")
             {
                 num_radars++;
             }
-            if (vehicle.Type == "Aircraft")
+            if (battle_system.Type == "Aircraft")
             {
                 num_aircraft++;
             }
 
         }
 
+        // EXECUTE Set() method on every battle_system on field
 
-        // Set size of globalSituationalAwareness based on number of Radars and Aircraft in BattleSOS
-
-        /*        string[,] globalSituationalAwareness = new string[num_radars, num_aircraft];
-
-                for (int i = 0; i < num_radars; i++)
-                {
-                    for (int j = 0; j < num_aircraft; j++)
-                    {
-                        globalSituationalAwareness[i, j] = "-";
-                    }
-                }*/
-
-
-        // EXECUTE Set() method on every vehicle on field
-
-        foreach (var vehicle in BattleSOS.BattleSysList)
+        foreach (var battle_system in BattleSOS.BattleSysList)
         {
-            if (vehicle.Type == "Radar" || vehicle.Type == "Aircraft")
+            if (battle_system.Type == "Radar" || battle_system.Type == "Aircraft")
             {
-                foreach (var other_vehicles in BattleSOS.BattleSysList)
+                foreach (var other_battle_systems in BattleSOS.BattleSysList)
                 {
-                    float dist = DistanceCalculator(other_vehicles.CurrentPosition, vehicle.CurrentPosition);
-                    float angle = AngleCalculator(other_vehicles.CurrentPosition, vehicle.CurrentPosition);
-                    if (vehicle != other_vehicles)
+                    float dist = DistanceCalculator(other_battle_systems.CurrentPosition, battle_system.CurrentPosition);
+                    float angle = AngleCalculator(other_battle_systems.CurrentPosition, battle_system.CurrentPosition);
+                    //RAVIJ: Rename other_battle_systems to other_battle_system
+                    if (battle_system != other_battle_systems)
                     {
-                        if (dist <= vehicle.RadarRange)
+                        if (dist <= battle_system.RadarRange && !battle_system.ObjectsVisible.Contains(other_battle_systems))
                         {
-                            vehicle.Set(other_vehicles, "add");
+                            //RAVIJ: Remove "add" and "remove" parameters
+                            battle_system.ObjectsVisible.Add(other_battle_systems);
                         }
-                        else if (dist > vehicle.RadarRange)
+                        else if (dist > battle_system.RadarRange && battle_system.ObjectsVisible.Contains(other_battle_systems))
                         {
-                            vehicle.Set(other_vehicles, "remove");
+                            battle_system.ObjectsVisible.Remove(other_battle_systems);
                         }
+                        battle_system.Set();
                     }
-
-
                 }
 
             }
 
-            if (vehicle.Type != "Radar" || vehicle.Type != "AntiAir")
+            if (!battle_system.VehicleHasStopped && battle_system.Type != "Radar")
             {
-                vehicle.DecompVelocity();
-
-                // Excludes Radar type object from Leg computation to avoid IndexOutOfRange runtime exception.
-
-                for (int i = 0; i < vehicle.VehiclePath.Count - 1; i++)
-                {
-                    if (MathF.Abs(DistanceCalculator(vehicle.CurrentPosition, vehicle.NextWaypoint)) <= (vehicle.Velocities * timer))
-                    {
-                        if (!vehicle.VehicleHasStopped || vehicle.NextWaypoint != vehicle.VehiclePath.Last())
-                        {
-                            vehicle.CurrWaypointID++;
-                            if (vehicle.CurrWaypointID < vehicle.VehiclePath.Count)
-                            {
-                                vehicle.NextWaypoint = vehicle.VehiclePath[vehicle.CurrWaypointID];
-                            }
-                            else if (vehicle.CurrWaypointID == vehicle.VehiclePath.Count)
-                            {
-                                vehicle.VehicleHasStopped = true;
-                            }
-                        }
-                    }
-
-                }
-            }
-            if (vehicle.Type == "Radar" || vehicle.Type == "AntiAir")
-            {
-                // Radar is fixed by default
-
-                vehicle.VehicleHasStopped = true;
-            }
-            if (!vehicle.VehicleHasStopped && (vehicle.Type != "Radar" || vehicle.Type != "AntiAir"))
-            {
-
                 // If Vehicle is still on path, execute Set() method set CurrentPosition to the newly computed values
-                vehicle.Set(vehicle, "");
+                battle_system.Set();
 
             }
-            if (vehicle.VehicleHasStopped)
+            if (battle_system.VehicleHasStopped)
             {
                 stoppedVehicles++;
-                if (vehicle.Type == "Aircraft")
+                if (battle_system.Type == "Aircraft")
                 {
-                    Console.WriteLine($"\n{vehicle.Type} {vehicle.VehicleID} reached the end of path");
-                    Console.WriteLine($"Objects surveyed by {vehicle.Type} {vehicle.VehicleID}:");
-                    foreach (var obj_surv in vehicle.ObjectsSurveyed)
+                    Console.WriteLine($"\n{battle_system.Type} {battle_system.VehicleID} reached the end of path");
+                    Console.WriteLine($"Objects surveyed by {battle_system.Type} {battle_system.VehicleID}:");
+                    foreach (var obj_surv in battle_system.ObjectsSurveyed)
                     {
                         Console.WriteLine($"{obj_surv.Type} {obj_surv.VehicleID} at ({obj_surv.CurrentPosition[0]}, {obj_surv.CurrentPosition[1]})");
                     }
@@ -432,45 +403,13 @@ class SimulationEngine
                 }
             }
         }
-        if (ThreatDetected)
+
+        // EXECUTE OnTick() METHOD for each battle_system on field
+
+        foreach (var battle_system in BattleSOS.BattleSysList.ToList())
         {
-            Console.WriteLine($"({UnsafePosition[0]}, {UnsafePosition[1]})");
-        }
-
-        // EXECUTE OnTick() METHOD for each vehicle on field
-
-        foreach (var vehicle in BattleSOS.BattleSysList.ToList())
-        {
-
             // Compute values for new position and objects within Radar range.
-            vehicle.OnTick(timer);
-
-            Console.WriteLine($"\n{vehicle.Type} {vehicle.VehicleID}");
-            Console.WriteLine($"(x, y) = ({vehicle.CurrentPosition[0]},{vehicle.CurrentPosition[1]})" +
-                              $"\n(Vx, Vy) = {vehicle.LegVelocity[0]},{vehicle.LegVelocity[1]}");
-
-            Console.WriteLine($"\nObjects visible to {vehicle.Type} {vehicle.VehicleID}:");
-            if (vehicle.ObjectsVisible.Count == 0)
-            {
-                Console.WriteLine("None");
-            }
-            foreach (var veh in vehicle.ObjectsVisible)
-            {
-                float obj_dist = DistanceCalculator(vehicle.CurrentPosition, veh.CurrentPosition);
-                float obj_angle = AngleCalculator(vehicle.CurrentPosition, veh.CurrentPosition);
-                Console.WriteLine($"{veh.Type} {veh.VehicleID} (Distance = {obj_dist}), (Angle = {Math.Abs(obj_angle) * (180 / MathF.PI)} degrees)");
-            }
-
+            battle_system.OnTick(timer);
         }
-
-        /*        Console.WriteLine("Global situational awareness matrix:");
-                for (int n = 0; n < num_radars; n++)
-                {
-                    for (int m = 0; m < num_aircraft; m++)
-                    {
-                        Console.Write($"{globalSituationalAwareness[n, m]} ");
-                    }
-                    Console.WriteLine("");
-                }*/
     }
 }
