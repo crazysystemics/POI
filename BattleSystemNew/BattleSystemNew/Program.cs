@@ -319,32 +319,10 @@ class BattleSOS
 class SimulationEngine
 {
     public bool allVehiclesStopped = false;
-    public bool ThreatDetected = false;
-    public bool EscapeFailed = false;
-    public float TimeCounter = 0;
-    public float FirstVelocity = 0;
-    public float[] UnsafePosition = new float[2];
-    public float[] FirstUnsafePos = new float[2];
     public SimulationEngine()
     {
         BattleSOS.BattleSysList = new List<BattleSystemClass>();
     }
-
-    public float DistanceCalculator(float[] obj1, float[] obj2)
-    {
-        float x = obj1[0] - obj2[0];
-        float y = obj1[1] - obj2[1];
-        return MathF.Sqrt((x * x) + (y * y));
-    }
-
-    public float AngleCalculator(float[] obj1, float[] obj2)
-    {
-        float x = obj2[0] - obj1[0];
-        float y = obj2[1] - obj1[1];
-        float v = MathF.Atan2(y, x);
-        return v;
-    }
-
     public void RegisterVehicle(BattleSystemClass newVehicle)
     {
         BattleSOS.BattleSysList.Add(newVehicle);
