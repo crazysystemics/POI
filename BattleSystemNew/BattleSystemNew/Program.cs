@@ -238,6 +238,23 @@ class Radar : BattleSystemClass
 
     public override void OnTick(float timer)
     {
+        foreach (var battle_system in BattleSOS.BattleSysList)
+        {
+            float dist = DistanceCalculator(battle_system.CurrentPosition, this.CurrentPosition);
+
+            if (this != battle_system && battle_system.Type != "Radar")
+            {
+                if (dist <= this.RadarRange && !this.ObjectsVisible.Contains(battle_system))
+                {
+                    this.ObjectsVisible.Add(battle_system);
+                }
+                else if (dist > this.RadarRange && this.ObjectsVisible.Contains(battle_system))
+                {
+                    this.ObjectsVisible.Remove(battle_system);
+                }
+            }
+        }
+
         Console.WriteLine($"\n{this.Type} {this.VehicleID}");
         Console.WriteLine($"(x, y) = ({this.CurrentPosition[0]},{this.CurrentPosition[1]})" +
                           $"\n(Vx, Vy) = {this.LegVelocity[0]},{this.LegVelocity[1]}");
