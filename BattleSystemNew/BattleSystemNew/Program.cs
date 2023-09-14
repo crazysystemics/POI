@@ -95,6 +95,12 @@ class Aircraft : BattleSystemClass
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
     public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
 
+    public override void DecompVelocity()
+    {
+        this.LegVelocity[0] = this.Velocities * MathF.Cos(AngleCalculator(this.CurrentPosition, this.NextWaypoint));
+        this.LegVelocity[1] = this.Velocities * MathF.Sin(AngleCalculator(this.CurrentPosition, this.NextWaypoint));
+    }
+
     public override float[] Get()
     {
         return CurrentPosition;
@@ -186,12 +192,6 @@ class Aircraft : BattleSystemClass
         float y = obj2[1] - obj1[1];
         float v = MathF.Atan2(y, x);
         return v;
-    }
-
-    public override void DecompVelocity()
-    {
-        this.LegVelocity[0] = this.Velocities * MathF.Cos(AngleCalculator(this.CurrentPosition, this.NextWaypoint));
-        this.LegVelocity[1] = this.Velocities * MathF.Sin(AngleCalculator(this.CurrentPosition, this.NextWaypoint));
     }
     public Aircraft(List<float[]> waypoints, float velocities, float radar_range)
     {
@@ -313,7 +313,6 @@ class BattleSOS
 {
     public static int s_RadarID = 0;
     public static int s_AircraftID = 0;
-    public static int s_AntiAirID = 0;
     public static List<BattleSystemClass> BattleSysList; // Maintains a list of all Vehicles on field
 }
 
@@ -337,7 +336,6 @@ class SimulationEngine
 
         foreach (var battle_system in BattleSOS.BattleSysList)
         {
-
             if (battle_system.Type == "Radar")
             {
                 num_radars++;
@@ -346,7 +344,6 @@ class SimulationEngine
             {
                 num_aircraft++;
             }
-
         }
 
         // EXECUTE Set() method on every battle_system on field
