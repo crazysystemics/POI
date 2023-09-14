@@ -77,6 +77,7 @@ abstract class BattleSystemClass
     public abstract float MissileRange { get; set; }
     public abstract float ElapsedTime { get; set; }
     public abstract List<BattleSystemClass> ObjectsVisible { get; set; }
+    public abstract List<BattleSystemClass> ObjectsSurveyed { get; set; }
     public abstract float ObjAngle { get; set; }
     public abstract float ObjDist { get; set; }
     public abstract float[] Get();
@@ -103,6 +104,7 @@ class Aircraft : BattleSystemClass
     public override float MissileRange { get; set; }
     public override float ElapsedTime { get; set; }
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
+    public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
     public override float ObjAngle { get; set; }
     public override float ObjDist { get; set; }
 
@@ -133,6 +135,7 @@ class Aircraft : BattleSystemClass
             if (!this.ObjectsVisible.Contains(batt_class))
             {
                 this.ObjectsVisible.Add(batt_class);
+                this.ObjectsSurveyed.Add(batt_class);
                 Console.WriteLine($"\n{batt_class.Type} {batt_class.VehicleID} added to {this.Type} {this.VehicleID}'s range");
             }
 
@@ -184,6 +187,7 @@ class Aircraft : BattleSystemClass
         BattleSOS.s_AircraftID++;
         VehicleID = BattleSOS.s_AircraftID;
         ObjectsVisible = new List<BattleSystemClass>();
+        ObjectsSurveyed = new List<BattleSystemClass>();
         ObjAngle = 0.0f;
         ObjDist = 0.0f;
         InLeg = 0;
@@ -212,6 +216,7 @@ class Radar : BattleSystemClass
     public override float MissileRange { get; set; }
     public override float ElapsedTime { get; set; }
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
+    public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
     public override float ObjAngle { get; set; }
     public override float ObjDist { get; set; }
 
@@ -269,90 +274,9 @@ class Radar : BattleSystemClass
         InLeg = 0;
         CurrWaypointID = 0;
         ObjectsVisible = new List<BattleSystemClass>();
+        ObjectsSurveyed = new List<BattleSystemClass>();
         BattleSOS.s_RadarID++;
         VehicleID = BattleSOS.s_RadarID;
-        ObjAngle = 0.0f;
-        ObjDist = 0.0f;
-    }
-}
-
-class AntiAir : BattleSystemClass
-{
-    public override string Type { get; set; }
-    public override int VehicleID { get; set; }
-    public override List<float[]> VehiclePath { get; set; }
-    public override float[] LegVelocity { get; set; }
-    public override float Velocities { get; set; }
-    public override float[] CurrentPosition { get; set; }
-    public override float[] NewPositionTemp { get; set; }
-    public override float[] NextWaypoint { get; set; }
-    public override int CurrWaypointID { get; set; }
-    public override int InLeg { get; set; }
-    public override bool VehicleHasStopped { get; set; }
-    public override bool VelocityChanged { get; set; }
-    public override float RadarRange { get; set; }
-    public override float MissileRange { get; set; }
-    public override float ElapsedTime { get; set; }
-    public override List<BattleSystemClass> ObjectsVisible { get; set; }
-    public override float ObjAngle { get; set; }
-    public override float ObjDist { get; set; }
-
-    public override float[] Get()
-    {
-        return CurrentPosition;
-    }
-    public override void OnTick(float timer)
-    {
-        // No postitional computation required for stationary objects
-    }
-    public override void Set(BattleSystemClass batt_class, string add_rem)
-    {
-        // No postitional computation required for stationary objects
-        if (add_rem == "add" && batt_class.Type != "Radar")
-        {
-            if (!this.ObjectsVisible.Contains(batt_class))
-            {
-                this.ObjectsVisible.Add(batt_class);
-                Console.WriteLine($"\n{batt_class.Type} {batt_class.VehicleID} added to {this.Type} {this.VehicleID}'s range");
-            }
-
-        }
-        if (add_rem == "remove")
-        {
-            if (this.ObjectsVisible.Contains(batt_class))
-            {
-                this.ObjectsVisible.Remove(batt_class);
-                Console.WriteLine($"\n{batt_class.Type} {batt_class.VehicleID} removed from {this.Type} {this.VehicleID}'s range");
-            }
-        }
-    }
-
-    public override void DecompVelocity()
-    {
-
-    }
-    public AntiAir(List<float[]> waypoints, float velocities, float radar_range)
-    {
-
-        // Object of Radar class takes the same arguments as Aircraft, but the List of waypoints only contains one item
-        // and the array of velocities has one item with the value 0.0
-        // radar_range is the only relevant value in the class.
-
-        NewPositionTemp = waypoints[0];
-        CurrentPosition = waypoints[0];
-        VehiclePath = waypoints;
-        Velocities = velocities;
-        VehicleHasStopped = false;
-        RadarRange = radar_range;
-        MissileRange = radar_range;
-        NextWaypoint = new float[] { 0.0f, 0.0f };
-        LegVelocity = new float[] { 0.0f, 0.0f };
-        Type = "AntiAir";
-        InLeg = 0;
-        CurrWaypointID = 0;
-        ObjectsVisible = new List<BattleSystemClass>();
-        BattleSOS.s_AntiAirID++;
-        VehicleID = BattleSOS.s_AntiAirID;
         ObjAngle = 0.0f;
         ObjDist = 0.0f;
     }
@@ -506,6 +430,11 @@ class SimulationEngine
                 if (vehicle.Type == "Aircraft")
                 {
                     Console.WriteLine($"\n{vehicle.Type} {vehicle.VehicleID} reached the end of path");
+                    Console.WriteLine($"Objects surveyed by {vehicle.Type} {vehicle.VehicleID}:");
+                    foreach (var obj_surv in vehicle.ObjectsSurveyed)
+                    {
+                        Console.WriteLine($"{obj_surv.Type} {obj_surv.VehicleID} at ({obj_surv.CurrentPosition[0]}, {obj_surv.CurrentPosition[1]})");
+                    }
                 }
                 if (stoppedVehicles == BattleSOS.BattleSysList.Count)
                 {
@@ -525,79 +454,7 @@ class SimulationEngine
 
             // Compute values for new position and objects within Radar range.
             vehicle.OnTick(timer);
-            if (vehicle.Type == "AntiAir")
-            {
-                foreach (var other_vehicle in BattleSOS.BattleSysList.ToList())
-                {
-                    if (other_vehicle.Type == "Aircraft")
-                    {
-                        float dist_total = DistanceCalculator(vehicle.CurrentPosition, other_vehicle.CurrentPosition);
-                        if (dist_total <= vehicle.MissileRange && !ThreatDetected)
-                        {
 
-                            // Logic for the first aircraft seen (and destroyed) by anti-aircraft.
-
-                            Console.WriteLine($"{other_vehicle.Type} {other_vehicle.VehicleID} is in attacking range of {vehicle.Type} {vehicle.VehicleID}");
-                            other_vehicle.ElapsedTime += timer;
-                            if (other_vehicle.ElapsedTime == 5.0 * timer)
-                            {
-
-                                // If aircraft is within range, wait for 5 ticks of the timer to register a hit and record unsafe position
-
-                                Console.WriteLine($"{other_vehicle.Type} {other_vehicle.VehicleID} was hit");
-                                ThreatDetected = true;
-                                FirstVelocity = other_vehicle.Velocities;
-                                UnsafePosition = FirstUnsafePos = other_vehicle.CurrentPosition;
-                                BattleSOS.BattleSysList.Remove(other_vehicle);
-                            }
-                        }
-
-                        else if (ThreatDetected)
-                        {
-
-                            // Logic for subsequent aircraft when an unsafe position is known
-
-                            float danger_zone_dist_total = DistanceCalculator(other_vehicle.CurrentPosition, UnsafePosition);
-                            Console.WriteLine($"Distance from danger zone = {danger_zone_dist_total}");
-                            if (danger_zone_dist_total <= acc_zone)
-                            {
-
-                                // When aircraft is within a certain radius of the danger zone, it must change its speed
-
-                                if (other_vehicle.NextWaypoint != other_vehicle.VehiclePath.Last() && !other_vehicle.VelocityChanged)
-                                {
-                                    float FirstLegVel_x;
-                                    float x_to_next_leg = MathF.Abs(other_vehicle.CurrentPosition[0] - other_vehicle.VehiclePath[other_vehicle.InLeg + 1][0]);
-                                    float dist_to_next_leg = DistanceCalculator(other_vehicle.CurrentPosition, other_vehicle.VehiclePath[other_vehicle.InLeg + 1]);
-                                    float cosine = x_to_next_leg / dist_to_next_leg;
-                                    FirstLegVel_x = other_vehicle.Velocities * cosine;
-                                    other_vehicle.LegVelocity[0] = (MathF.Abs(UnsafePosition[0]) + danger_zone_dist_total) * (FirstLegVel_x / FirstUnsafePos[0]);
-                                    other_vehicle.VelocityChanged = true;
-                                }
-                                if (dist_total <= vehicle.MissileRange)
-                                {
-
-                                    // Condition for Aircraft n when it enters missile range
-
-                                    Console.WriteLine($"{other_vehicle.Type}   {other_vehicle.VehicleID} is in attacking range of {vehicle.Type} {vehicle.VehicleID}");
-                                    other_vehicle.ElapsedTime += timer;
-                                    Console.WriteLine($"Time since detection: {other_vehicle.ElapsedTime}");
-                                    if (other_vehicle.ElapsedTime == 5.0 * timer && danger_zone_dist_total <= att_zone)
-                                    {
-
-                                        // Checks if Aircraft n is within "danger zone" at after duration T
-
-                                        Console.WriteLine($"{other_vehicle.Type} {other_vehicle.VehicleID} was hit");
-                                        UnsafePosition = other_vehicle.CurrentPosition;
-                                        EscapeFailed = true;
-                                        BattleSOS.BattleSysList.Remove(other_vehicle);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
             Console.WriteLine($"\n{vehicle.Type} {vehicle.VehicleID}");
             Console.WriteLine($"(x, y) = ({vehicle.CurrentPosition[0]},{vehicle.CurrentPosition[1]})" +
                               $"\n(Vx, Vy) = {vehicle.LegVelocity[0]},{vehicle.LegVelocity[1]}");
