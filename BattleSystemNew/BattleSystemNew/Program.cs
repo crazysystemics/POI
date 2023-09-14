@@ -1,3 +1,25 @@
+/* This program contains an Abstract class called BattleSystemClass, from which other classes like
+ * Aircraft and Radar inherit. It also contains a BattleSOS class, an instance of which holds information
+ * about the current battle situation.
+ * 
+ * SimulationEngine class handles initializing a BattleSOS object and registering vehicles
+ * to a static proerty of List type. It also handles calling the Set() and OnTick() functions on
+ * each object present in this list using a method called RunSimulationEngine.
+ * 
+ * The OnTick() method does relevant computations for distances, velocities, finding the next waypoint
+ * and adding/removing objects from an ObjectsVisible list. The main body of the program executes
+ * RunSimulationEngine for one tick. This method has a "timer" parameter which decides the
+ * duration of the tick.
+ * 
+ * The Set() method makes relevant changes to the current position of each object based on the
+ * computations made by the OnTick() method.
+ * 
+ * The waypoints for each Aircraft (or positions for each Radar) are provided as an input at the time
+ * of registering the vehicles. The constructor for each class takes a List of waypoints, a floating point
+ * value representing the velocity, as well as a floating point value representing radar range as arguments.
+ *  */
+
+
 namespace BattleSystem
 {
     class Program
