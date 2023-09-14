@@ -108,6 +108,25 @@ class Aircraft : BattleSystemClass
             NewPositionTemp[0] = CurrentPosition[0] + (LegVelocity[0] * timer);
             NewPositionTemp[1] = CurrentPosition[1] + (LegVelocity[1] * timer);
         }
+
+        foreach (var battle_system in BattleSOS.BattleSysList)
+        {
+            float angle = AngleCalculator(battle_system.CurrentPosition, this.CurrentPosition);
+            float dist = DistanceCalculator(battle_system.CurrentPosition, this.CurrentPosition);
+
+            if (this != battle_system)
+            {
+                if (dist <= this.RadarRange && !this.ObjectsVisible.Contains(battle_system))
+                {
+                    this.ObjectsVisible.Add(battle_system);
+                }
+                else if (dist > this.RadarRange && this.ObjectsVisible.Contains(battle_system))
+                {
+                    this.ObjectsVisible.Remove(battle_system);
+                }
+            }
+        }
+
         Console.WriteLine($"\n{this.Type} {this.VehicleID}");
         Console.WriteLine($"(x, y) = ({this.CurrentPosition[0]},{this.CurrentPosition[1]})" +
                           $"\n(Vx, Vy) = {this.LegVelocity[0]},{this.LegVelocity[1]}");
@@ -357,34 +376,9 @@ class SimulationEngine
         {
             if (battle_system.Type == "Radar" || battle_system.Type == "Aircraft")
             {
-                foreach (var other_battle_systems in BattleSOS.BattleSysList)
-                {
-                    float dist = DistanceCalculator(other_battle_systems.CurrentPosition, battle_system.CurrentPosition);
-                    float angle = AngleCalculator(other_battle_systems.CurrentPosition, battle_system.CurrentPosition);
-                    //RAVIJ: Rename other_battle_systems to other_battle_system
-                    if (battle_system != other_battle_systems)
-                    {
-                        if (dist <= battle_system.RadarRange && !battle_system.ObjectsVisible.Contains(other_battle_systems))
-                        {
-                            //RAVIJ: Remove "add" and "remove" parameters
-                            battle_system.ObjectsVisible.Add(other_battle_systems);
-                        }
-                        else if (dist > battle_system.RadarRange && battle_system.ObjectsVisible.Contains(other_battle_systems))
-                        {
-                            battle_system.ObjectsVisible.Remove(other_battle_systems);
-                        }
-                        battle_system.Set();
-                    }
-                }
-
-            }
-
-            if (!battle_system.VehicleHasStopped && battle_system.Type != "Radar")
-            {
-                // If Vehicle is still on path, execute Set() method set CurrentPosition to the newly computed values
                 battle_system.Set();
-
             }
+
             if (battle_system.VehicleHasStopped)
             {
                 stoppedVehicles++;
