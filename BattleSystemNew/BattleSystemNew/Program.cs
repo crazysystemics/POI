@@ -111,7 +111,6 @@ class Aircraft : BattleSystemClass
 
         foreach (var battle_system in BattleSOS.BattleSysList)
         {
-            float angle = AngleCalculator(battle_system.CurrentPosition, this.CurrentPosition);
             float dist = DistanceCalculator(battle_system.CurrentPosition, this.CurrentPosition);
 
             if (this != battle_system)
@@ -132,6 +131,7 @@ class Aircraft : BattleSystemClass
                           $"\n(Vx, Vy) = {this.LegVelocity[0]},{this.LegVelocity[1]}");
 
         Console.WriteLine($"\nObjects visible to {this.Type} {this.VehicleID}:");
+
         if (this.ObjectsVisible.Count == 0)
         {
             Console.WriteLine("None");
@@ -143,8 +143,10 @@ class Aircraft : BattleSystemClass
             Console.WriteLine($"{veh.Type} {veh.VehicleID} (Distance = {obj_dist}), (Angle = {Math.Abs(obj_angle) * (180 / MathF.PI)} degrees)");
         }
         this.DecompVelocity();
-        // RAVIJ: Move Waypoint computation to Aircraft
-        // RAVIJ: Rename battle_system battleSystem or similar
+
+        // RAVIJ: Move Waypoint computation to Aircraft (done)
+        // RAVIJ: Rename vehicle battleSystem or similar (done)
+
         for (int i = 0; i < this.VehiclePath.Count - 1; i++)
         {
             if (MathF.Abs(DistanceCalculator(this.CurrentPosition, this.NextWaypoint)) <= (this.Velocities * timer))
@@ -280,14 +282,13 @@ class Radar : BattleSystemClass
 
     public override void DecompVelocity()
     {
-
+        // No velocities to decompose
     }
     public Radar(List<float[]> waypoints, float velocities, float radar_range)
     {
 
         // Object of Radar class takes the same arguments as Aircraft, but the List of waypoints only contains one item
         // and the array of velocities has one item with the value 0.0
-        // radar_range is the only relevant value in the class.
 
         NewPositionTemp = waypoints[0];
         CurrentPosition = waypoints[0];
@@ -380,7 +381,6 @@ class SimulationEngine
 
         foreach (var battle_system in BattleSOS.BattleSysList.ToList())
         {
-            // Compute values for new position and objects within Radar range.
             battle_system.OnTick(timer);
         }
     }
