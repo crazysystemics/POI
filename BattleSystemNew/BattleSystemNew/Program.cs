@@ -78,8 +78,6 @@ abstract class BattleSystemClass
     public abstract float ElapsedTime { get; set; }
     public abstract List<BattleSystemClass> ObjectsVisible { get; set; }
     public abstract List<BattleSystemClass> ObjectsSurveyed { get; set; }
-    public abstract float ObjAngle { get; set; }
-    public abstract float ObjDist { get; set; }
     public abstract float[] Get();
     public abstract void Set(BattleSystemClass batt_class, string add_rem);
     public abstract void OnTick(float timer);
@@ -105,8 +103,6 @@ class Aircraft : BattleSystemClass
     public override float ElapsedTime { get; set; }
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
     public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
-    public override float ObjAngle { get; set; }
-    public override float ObjDist { get; set; }
 
     public override float[] Get()
     {
@@ -188,8 +184,6 @@ class Aircraft : BattleSystemClass
         VehicleID = BattleSOS.s_AircraftID;
         ObjectsVisible = new List<BattleSystemClass>();
         ObjectsSurveyed = new List<BattleSystemClass>();
-        ObjAngle = 0.0f;
-        ObjDist = 0.0f;
         InLeg = 0;
         CurrWaypointID = 0;
         LegVelocity = new float[2];
@@ -217,8 +211,6 @@ class Radar : BattleSystemClass
     public override float ElapsedTime { get; set; }
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
     public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
-    public override float ObjAngle { get; set; }
-    public override float ObjDist { get; set; }
 
     public override float[] Get()
     {
@@ -277,8 +269,6 @@ class Radar : BattleSystemClass
         ObjectsSurveyed = new List<BattleSystemClass>();
         BattleSOS.s_RadarID++;
         VehicleID = BattleSOS.s_RadarID;
-        ObjAngle = 0.0f;
-        ObjDist = 0.0f;
     }
 }
 
