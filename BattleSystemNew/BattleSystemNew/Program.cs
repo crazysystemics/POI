@@ -122,8 +122,8 @@ class Aircraft : BattleSystemClass
         }
 
         Console.WriteLine($"\n{this.Type} {this.VehicleID}");
-        Console.WriteLine($"(x, y) = ({this.CurrentPosition[0]},{this.CurrentPosition[1]})" +
-                          $"\n(Vx, Vy) = {this.LegVelocity[0]},{this.LegVelocity[1]}");
+        Console.WriteLine($"Position (x, y) = ({this.CurrentPosition[0]},{this.CurrentPosition[1]})" +
+                          $"\nVelocity (Vx, Vy) = {this.LegVelocity[0]},{this.LegVelocity[1]}");
 
         Console.WriteLine($"\nObjects visible to {this.Type} {this.VehicleID}:");
 
@@ -256,8 +256,7 @@ class Radar : BattleSystemClass
         }
 
         Console.WriteLine($"\n{this.Type} {this.VehicleID}");
-        Console.WriteLine($"(x, y) = ({this.CurrentPosition[0]},{this.CurrentPosition[1]})" +
-                          $"\n(Vx, Vy) = {this.LegVelocity[0]},{this.LegVelocity[1]}");
+        Console.WriteLine($"Position (x, y) = ({this.CurrentPosition[0]},{this.CurrentPosition[1]})");
 
         Console.WriteLine($"\nObjects visible to {this.Type} {this.VehicleID}:");
         if (this.ObjectsVisible.Count == 0)
