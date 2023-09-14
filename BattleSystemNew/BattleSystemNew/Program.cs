@@ -77,6 +77,7 @@ abstract class BattleSystemClass
     public abstract float MissileRange { get; set; }
     public abstract float ElapsedTime { get; set; }
     public abstract List<BattleSystemClass> ObjectsVisible { get; set; }
+    public abstract List<BattleSystemClass> ObjectsSurveyed { get; set; }
     public abstract float ObjAngle { get; set; }
     public abstract float ObjDist { get; set; }
     public abstract float[] Get();
@@ -103,6 +104,7 @@ class Aircraft : BattleSystemClass
     public override float MissileRange { get; set; }
     public override float ElapsedTime { get; set; }
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
+    public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
     public override float ObjAngle { get; set; }
     public override float ObjDist { get; set; }
 
@@ -133,6 +135,7 @@ class Aircraft : BattleSystemClass
             if (!this.ObjectsVisible.Contains(batt_class))
             {
                 this.ObjectsVisible.Add(batt_class);
+                this.ObjectsSurveyed.Add(batt_class);
                 Console.WriteLine($"\n{batt_class.Type} {batt_class.VehicleID} added to {this.Type} {this.VehicleID}'s range");
             }
 
@@ -184,6 +187,7 @@ class Aircraft : BattleSystemClass
         BattleSOS.s_AircraftID++;
         VehicleID = BattleSOS.s_AircraftID;
         ObjectsVisible = new List<BattleSystemClass>();
+        ObjectsSurveyed = new List<BattleSystemClass>();
         ObjAngle = 0.0f;
         ObjDist = 0.0f;
         InLeg = 0;
@@ -212,6 +216,7 @@ class Radar : BattleSystemClass
     public override float MissileRange { get; set; }
     public override float ElapsedTime { get; set; }
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
+    public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
     public override float ObjAngle { get; set; }
     public override float ObjDist { get; set; }
 
@@ -269,6 +274,7 @@ class Radar : BattleSystemClass
         InLeg = 0;
         CurrWaypointID = 0;
         ObjectsVisible = new List<BattleSystemClass>();
+        ObjectsSurveyed = new List<BattleSystemClass>();
         BattleSOS.s_RadarID++;
         VehicleID = BattleSOS.s_RadarID;
         ObjAngle = 0.0f;
@@ -294,6 +300,7 @@ class AntiAir : BattleSystemClass
     public override float MissileRange { get; set; }
     public override float ElapsedTime { get; set; }
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
+    public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
     public override float ObjAngle { get; set; }
     public override float ObjDist { get; set; }
 
@@ -351,6 +358,7 @@ class AntiAir : BattleSystemClass
         InLeg = 0;
         CurrWaypointID = 0;
         ObjectsVisible = new List<BattleSystemClass>();
+        ObjectsSurveyed = new List<BattleSystemClass>();
         BattleSOS.s_AntiAirID++;
         VehicleID = BattleSOS.s_AntiAirID;
         ObjAngle = 0.0f;
