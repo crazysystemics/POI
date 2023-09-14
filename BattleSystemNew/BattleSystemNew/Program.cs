@@ -54,19 +54,16 @@ abstract class BattleSystemClass
 {
     public abstract string Type { get; set; }
     public abstract int VehicleID { get; set; }
-    public abstract List<float[]> VehiclePath { get; set; }
+    public abstract int CurrWaypointID { get; set; }
     public abstract float[] LegVelocity { get; set; }
-    public abstract float Velocities { get; set; }
     public abstract float[] CurrentPosition { get; set; }
     public abstract float[] NewPositionTemp { get; set; }
     public abstract float[] NextWaypoint { get; set; }
-    public abstract int CurrWaypointID { get; set; }
-    public abstract int InLeg { get; set; }
+    public abstract float Velocities { get; set; }
+    public abstract float RadarRange { get; set; }
     public abstract bool VehicleHasStopped { get; set; }
     public abstract bool VelocityChanged { get; set; }
-    public abstract float RadarRange { get; set; }
-    public abstract float MissileRange { get; set; }
-    public abstract float ElapsedTime { get; set; }
+    public abstract List<float[]> VehiclePath { get; set; }
     public abstract List<BattleSystemClass> ObjectsVisible { get; set; }
     public abstract List<BattleSystemClass> ObjectsSurveyed { get; set; }
     public abstract float[] Get();
@@ -79,32 +76,24 @@ class Aircraft : BattleSystemClass
 {
     public override string Type { get; set; }
     public override int VehicleID { get; set; }
-    public override List<float[]> VehiclePath { get; set; }
+    public override int CurrWaypointID { get; set; }
     public override float[] LegVelocity { get; set; }
-    public override float Velocities { get; set; }
     public override float[] CurrentPosition { get; set; }
     public override float[] NewPositionTemp { get; set; }
     public override float[] NextWaypoint { get; set; }
-    public override int CurrWaypointID { get; set; }
-    public override int InLeg { get; set; }
+    public override float Velocities { get; set; }
+    public override float RadarRange { get; set; }
     public override bool VehicleHasStopped { get; set; }
     public override bool VelocityChanged { get; set; }
-    public override float RadarRange { get; set; }
-    public override float MissileRange { get; set; }
-    public override float ElapsedTime { get; set; }
+    public override List<float[]> VehiclePath { get; set; }
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
     public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
-
-    public override void DecompVelocity()
-    {
-        this.LegVelocity[0] = this.Velocities * MathF.Cos(AngleCalculator(this.CurrentPosition, this.NextWaypoint));
-        this.LegVelocity[1] = this.Velocities * MathF.Sin(AngleCalculator(this.CurrentPosition, this.NextWaypoint));
-    }
 
     public override float[] Get()
     {
         return CurrentPosition;
     }
+
     public override void OnTick(float timer)
     {
 
@@ -172,11 +161,18 @@ class Aircraft : BattleSystemClass
             }
         }
     }
+
     public override void Set()
     {
         // Set current position to new position
         CurrentPosition[0] = NewPositionTemp[0];
         CurrentPosition[1] = NewPositionTemp[1];
+    }
+
+    public override void DecompVelocity()
+    {
+        this.LegVelocity[0] = this.Velocities * MathF.Cos(AngleCalculator(this.CurrentPosition, this.NextWaypoint));
+        this.LegVelocity[1] = this.Velocities * MathF.Sin(AngleCalculator(this.CurrentPosition, this.NextWaypoint));
     }
 
     public float DistanceCalculator(float[] obj1, float[] obj2)
@@ -193,6 +189,7 @@ class Aircraft : BattleSystemClass
         float v = MathF.Atan2(y, x);
         return v;
     }
+
     public Aircraft(List<float[]> waypoints, float velocities, float radar_range)
     {
 
@@ -201,19 +198,18 @@ class Aircraft : BattleSystemClass
 
         NewPositionTemp = waypoints[0];
         CurrentPosition = waypoints[0];
+        NextWaypoint = waypoints[1];
         VehiclePath = waypoints;
         Velocities = velocities;
-        VehicleHasStopped = false;
         RadarRange = radar_range;
-        NextWaypoint = VehiclePath[1];
+        VehicleHasStopped = false;
         Type = "Aircraft";
-        BattleSOS.s_AircraftID++;
-        VehicleID = BattleSOS.s_AircraftID;
         ObjectsVisible = new List<BattleSystemClass>();
         ObjectsSurveyed = new List<BattleSystemClass>();
-        InLeg = 0;
-        CurrWaypointID = 0;
         LegVelocity = new float[2];
+        CurrWaypointID = 0;
+        BattleSOS.s_AircraftID++;
+        VehicleID = BattleSOS.s_AircraftID;
         DecompVelocity();
         // Velocities are in direction of any given waypoint leg, decomposing velocities into Vx and Vy
     }
@@ -223,40 +219,23 @@ class Radar : BattleSystemClass
 {
     public override string Type { get; set; }
     public override int VehicleID { get; set; }
-    public override List<float[]> VehiclePath { get; set; }
+    public override int CurrWaypointID { get; set; }
     public override float[] LegVelocity { get; set; }
-    public override float Velocities { get; set; }
     public override float[] CurrentPosition { get; set; }
     public override float[] NewPositionTemp { get; set; }
     public override float[] NextWaypoint { get; set; }
-    public override int CurrWaypointID { get; set; }
-    public override int InLeg { get; set; }
+    public override float Velocities { get; set; }
+    public override float RadarRange { get; set; }
     public override bool VehicleHasStopped { get; set; }
     public override bool VelocityChanged { get; set; }
-    public override float RadarRange { get; set; }
-    public override float MissileRange { get; set; }
-    public override float ElapsedTime { get; set; }
+    public override List<float[]> VehiclePath { get; set; }
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
     public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
-
-    public float DistanceCalculator(float[] obj1, float[] obj2)
-    {
-        float x = obj1[0] - obj2[0];
-        float y = obj1[1] - obj2[1];
-        return MathF.Sqrt((x * x) + (y * y));
-    }
-
-    public float AngleCalculator(float[] obj1, float[] obj2)
-    {
-        float x = obj2[0] - obj1[0];
-        float y = obj2[1] - obj1[1];
-        float v = MathF.Atan2(y, x);
-        return v;
-    }
     public override float[] Get()
     {
         return CurrentPosition;
     }
+
     public override void OnTick(float timer)
     {
         Console.WriteLine($"\n{this.Type} {this.VehicleID}");
@@ -275,6 +254,7 @@ class Radar : BattleSystemClass
             Console.WriteLine($"{veh.Type} {veh.VehicleID} (Distance = {obj_dist}), (Angle = {Math.Abs(obj_angle) * (180 / MathF.PI)} degrees)");
         }
     }
+
     public override void Set()
     {
         // No postitional computation required for stationary objects
@@ -284,6 +264,22 @@ class Radar : BattleSystemClass
     {
         // No velocities to decompose
     }
+
+    public float DistanceCalculator(float[] obj1, float[] obj2)
+    {
+        float x = obj1[0] - obj2[0];
+        float y = obj1[1] - obj2[1];
+        return MathF.Sqrt((x * x) + (y * y));
+    }
+
+    public float AngleCalculator(float[] obj1, float[] obj2)
+    {
+        float x = obj2[0] - obj1[0];
+        float y = obj2[1] - obj1[1];
+        float v = MathF.Atan2(y, x);
+        return v;
+    }
+
     public Radar(List<float[]> waypoints, float velocities, float radar_range)
     {
 
@@ -298,9 +294,7 @@ class Radar : BattleSystemClass
         RadarRange = radar_range;
         NextWaypoint = new float[] { 0.0f, 0.0f };
         LegVelocity = new float[] { 0.0f, 0.0f };
-        MissileRange = 0;
         Type = "Radar";
-        InLeg = 0;
         CurrWaypointID = 0;
         ObjectsVisible = new List<BattleSystemClass>();
         ObjectsSurveyed = new List<BattleSystemClass>();
