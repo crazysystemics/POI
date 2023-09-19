@@ -258,20 +258,6 @@ class DiscreteTimeSimulationEngine
     public void RunSimulationEngine(float timer)
     {
         int stoppedVehicles = 0;
-        int num_radars = 0;
-        int num_aircraft = 0;
-
-        foreach (var battle_system in situationalAwareness)
-        {
-            if (battle_system.Type == "Radar")
-            {
-                num_radars++;
-            }
-            if (battle_system.Type == "Aircraft")
-            {
-                num_aircraft++;
-            }
-        }
 
         PhysEngine.Get(situationalAwareness);
         PhysEngine.OnTick(timer);
