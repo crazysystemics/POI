@@ -1,22 +1,25 @@
 /* This program contains an Abstract class called BattleSystemClass, from which other classes like
- * Aircraft and Radar inherit. It also contains a BattleSOS class, an instance of which holds information
- * about the current battle situation.
+ * Aircraft and Radar inherit.
  * 
- * SimulationEngine class handles initializing a BattleSOS object and registering vehicles
- * to a static proerty of List type. It also handles calling the Set() and OnTick() functions on
- * each object present in this list using a method called RunSimulationEngine.
+ * The static class ObjectRegister starts with registering objects to a List that will be used to initialize
+ * the DiscreteTimeSimulationEngine.
  * 
- * The OnTick() method does relevant computations for distances, velocities, finding the next waypoint
- * and adding/removing objects from an ObjectsVisible list. The main body of the program executes
- * RunSimulationEngine for one tick. This method has a "timer" parameter which decides the
- * duration of the tick.
+ * The DiscreteTimeSimulationengine only calls the Get(), OnTick() and Set() methods on a PhysicalSimulationEngine.
  * 
- * The Set() method makes relevant changes to the current position of each object based on the
- * computations made by the OnTick() method.
+ * The PhysicalSimulationEngine is initialized with an empty list of BattleSystemClass objects. The Get() method
+ * of this class copies the situationalAwareness list registered to the DTSE in order to perform computations
+ * and subsequent manipulations. This is copied into a new list called physicalSituationalAwareness.
  * 
- * The waypoints for each Aircraft (or positions for each Radar) are provided as an input at the time
- * of registering the vehicles. The constructor for each class takes a List of waypoints, a floating point
- * value representing the velocity, as well as a floating point value representing radar range as arguments.
+ * The OnTick() method of this class iterates through the physicalSituationalAwareness List and performs relevant
+ * computations (currently only computes new positions for Aircraft objects). It also displays current positions
+ * and velocities of all the objects in the list and also performs a check for any objects visible
+ * to a radar or an Aircraft RWR (currently a part of the Aircraft object) and displays its distance and azimuth.
+ * 
+ * The Set() method of this class performs a distance check between objects in physicalSituationalAwareness and
+ * adds objects to the ObjectsVisible property if it is within the given range. This method also sets new values
+ * for position (and other attributes/properties) that were computed in the OnTick() method. The new values are applied
+ * to the objects in the original situationalAwareness list maintained by the DTSE. It also updates the ObjectsVisible
+ * list in the objects of situationalAwarness, rather than its copy in physicalSitautionalAwareness.
  *  */
 
 
@@ -27,8 +30,8 @@ namespace BattleSystem
         static void Main(string[] args)
         {
             int i = 0;
-            SimulationEngine SimEng = new SimulationEngine();
-            SimEng.RegisterVehicle(new Aircraft(new List<float[]>
+
+            ObjectRegister.registerObject(new Aircraft(new List<float[]>
                                                         {
                                                          // Waypoints
 
@@ -44,26 +47,24 @@ namespace BattleSystem
 
                                                          1.0f, 7.5f));
 
-            SimEng.RegisterVehicle(new Radar(new List<float[]>
+            ObjectRegister.registerObject(new Radar(new List<float[]>
                                                         {new float[] { 15.0f, 10.0f }},
                                                          0.0f, 7.5f));
 
-            SimEng.RegisterVehicle(new Radar(new List<float[]>
+            ObjectRegister.registerObject(new Radar(new List<float[]>
                                                         {new float[] { 25.0f, 5.0f }},
                                                          0.0f, 7.5f));
 
-            SimEng.RegisterVehicle(new Radar(new List<float[]>
+            ObjectRegister.registerObject(new Radar(new List<float[]>
                                                         {new float[] { 15.0f, 0.0f }},
                                                          0.0f, 7.5f));
 
-            while (!SimEng.allVehiclesStopped)
+            DiscreteTimeSimulationEngine DTSE = new DiscreteTimeSimulationEngine();
+
+            while (!DTSE.allVehiclesStopped)
             {
-
-                // Run until all non-stationary battle_systems come to a stop
-
-                Console.WriteLine($"\nPosition after {i + 1} ticks:");
-                SimEng.RunSimulationEngine(1.00f);
-                Console.WriteLine("Press Enter/Return to display next tick");
+                DTSE.RunSimulationEngine(1.00f);
+                Console.WriteLine("\nPress Enter/Return to display next tick");
                 Console.ReadLine();
                 i++;
             }
@@ -116,79 +117,14 @@ class Aircraft : BattleSystemClass
         return CurrentPosition;
     }
 
+    public override void Set()
+    {
+
+    }
+
     public override void OnTick(float timer)
     {
 
-        // Compute new positions
-        if (!VehicleHasStopped)
-        {
-            NewPositionTemp[0] = CurrentPosition[0] + (LegVelocity[0] * timer);
-            NewPositionTemp[1] = CurrentPosition[1] + (LegVelocity[1] * timer);
-        }
-
-        foreach (var battle_system in BattleSOS.BattleSysList)
-        {
-            float dist = DistanceCalculator(battle_system.CurrentPosition, this.CurrentPosition);
-
-            if (this != battle_system)
-            {
-                if (dist <= this.RadarRange && !this.ObjectsVisible.Contains(battle_system))
-                {
-                    this.ObjectsVisible.Add(battle_system);
-                }
-                else if (dist > this.RadarRange && this.ObjectsVisible.Contains(battle_system))
-                {
-                    this.ObjectsVisible.Remove(battle_system);
-                }
-            }
-        }
-
-        Console.WriteLine($"\n{this.Type} {this.VehicleID}");
-        Console.WriteLine($"Position (x, y) = ({this.CurrentPosition[0]},{this.CurrentPosition[1]})" +
-                          $"\nVelocity (Vx, Vy) = {this.LegVelocity[0]},{this.LegVelocity[1]}");
-
-        Console.WriteLine($"\nObjects visible to {this.Type} {this.VehicleID}:");
-
-        if (this.ObjectsVisible.Count == 0)
-        {
-            Console.WriteLine("None");
-        }
-        foreach (var veh in this.ObjectsVisible)
-        {
-            float obj_dist = DistanceCalculator(this.CurrentPosition, veh.CurrentPosition);
-            float obj_angle = AngleCalculator(this.CurrentPosition, veh.CurrentPosition);
-            Console.WriteLine($"{veh.Type} {veh.VehicleID} (Distance = {obj_dist}), (Angle = {Math.Abs(obj_angle) * (180 / MathF.PI)} degrees)");
-        }
-        this.DecompVelocity();
-
-        // RAVIJ: Move Waypoint computation to Aircraft (done)
-        // RAVIJ: Rename vehicle battleSystem or similar (done)
-
-        for (int i = 0; i < this.VehiclePath.Count - 1; i++)
-        {
-            if (MathF.Abs(DistanceCalculator(this.CurrentPosition, this.NextWaypoint)) <= (this.Velocities * timer))
-            {
-                if (!this.VehicleHasStopped || this.NextWaypoint != this.VehiclePath.Last())
-                {
-                    this.CurrWaypointID++;
-                    if (this.CurrWaypointID < this.VehiclePath.Count)
-                    {
-                        this.NextWaypoint = this.VehiclePath[this.CurrWaypointID];
-                    }
-                    else if (this.CurrWaypointID == this.VehiclePath.Count)
-                    {
-                        this.VehicleHasStopped = true;
-                    }
-                }
-            }
-        }
-    }
-
-    public override void Set()
-    {
-        // Set current position to new position
-        CurrentPosition[0] = NewPositionTemp[0];
-        CurrentPosition[1] = NewPositionTemp[1];
     }
 
     public override void DecompVelocity()
@@ -230,8 +166,8 @@ class Aircraft : BattleSystemClass
         ObjectsSurveyed = new List<BattleSystemClass>();
         LegVelocity = new float[2];
         CurrWaypointID = 0;
-        BattleSOS.s_AircraftID++;
-        VehicleID = BattleSOS.s_AircraftID;
+        ObjectRegister.s_AircraftID++;
+        VehicleID = ObjectRegister.s_AircraftID;
         DecompVelocity();
         // Velocities are in direction of any given waypoint leg, decomposing velocities into Vx and Vy
     }
@@ -260,62 +196,17 @@ class Radar : BattleSystemClass
 
     public override void OnTick(float timer)
     {
-        foreach (var battle_system in BattleSOS.BattleSysList)
-        {
-            float dist = DistanceCalculator(battle_system.CurrentPosition, this.CurrentPosition);
 
-            if (this != battle_system && battle_system.Type != "Radar")
-            {
-                if (dist <= this.RadarRange && !this.ObjectsVisible.Contains(battle_system))
-                {
-                    this.ObjectsVisible.Add(battle_system);
-                }
-                else if (dist > this.RadarRange && this.ObjectsVisible.Contains(battle_system))
-                {
-                    this.ObjectsVisible.Remove(battle_system);
-                }
-            }
-        }
-
-        Console.WriteLine($"\n{this.Type} {this.VehicleID}");
-        Console.WriteLine($"Position (x, y) = ({this.CurrentPosition[0]},{this.CurrentPosition[1]})");
-
-        Console.WriteLine($"\nObjects visible to {this.Type} {this.VehicleID}:");
-        if (this.ObjectsVisible.Count == 0)
-        {
-            Console.WriteLine("None");
-        }
-        foreach (var veh in this.ObjectsVisible)
-        {
-            float obj_dist = DistanceCalculator(this.CurrentPosition, veh.CurrentPosition);
-            float obj_angle = AngleCalculator(this.CurrentPosition, veh.CurrentPosition);
-            Console.WriteLine($"{veh.Type} {veh.VehicleID} (Distance = {obj_dist}), (Angle = {Math.Abs(obj_angle) * (180 / MathF.PI)} degrees)");
-        }
     }
 
     public override void Set()
     {
-        // No postitional computation required for stationary objects
+
     }
 
     public override void DecompVelocity()
     {
-        // No velocities to decompose
-    }
 
-    public float DistanceCalculator(float[] obj1, float[] obj2)
-    {
-        float x = obj1[0] - obj2[0];
-        float y = obj1[1] - obj2[1];
-        return MathF.Sqrt((x * x) + (y * y));
-    }
-
-    public float AngleCalculator(float[] obj1, float[] obj2)
-    {
-        float x = obj2[0] - obj1[0];
-        float y = obj2[1] - obj1[1];
-        float v = MathF.Atan2(y, x);
-        return v;
     }
 
     public Radar(List<float[]> waypoints, float velocities, float radar_range)
@@ -336,28 +227,32 @@ class Radar : BattleSystemClass
         CurrWaypointID = 0;
         ObjectsVisible = new List<BattleSystemClass>();
         ObjectsSurveyed = new List<BattleSystemClass>();
-        BattleSOS.s_RadarID++;
-        VehicleID = BattleSOS.s_RadarID;
+        ObjectRegister.s_RadarID++;
+        VehicleID = ObjectRegister.s_RadarID;
     }
 }
 
-class BattleSOS
+static class ObjectRegister
 {
     public static int s_RadarID = 0;
     public static int s_AircraftID = 0;
-    public static List<BattleSystemClass> BattleSysList; // Maintains a list of all Vehicles on field
+    public static List<BattleSystemClass> registered_vehicles = new List<BattleSystemClass>();
+    public static void registerObject(BattleSystemClass batt_obj)
+    {
+        registered_vehicles.Add(batt_obj);
+    }
 }
 
-class SimulationEngine
+class DiscreteTimeSimulationEngine
 {
     public bool allVehiclesStopped = false;
-    public SimulationEngine()
+    public List<BattleSystemClass> situationalAwareness;
+    PhysicalSimulationEngine PhysEngine;
+    public DiscreteTimeSimulationEngine()
     {
-        BattleSOS.BattleSysList = new List<BattleSystemClass>();
-    }
-    public void RegisterVehicle(BattleSystemClass newVehicle)
-    {
-        BattleSOS.BattleSysList.Add(newVehicle);
+        situationalAwareness = new List<BattleSystemClass>();
+        situationalAwareness = ObjectRegister.registered_vehicles.ToList();
+        PhysEngine = new PhysicalSimulationEngine();
     }
 
     public void RunSimulationEngine(float timer)
@@ -366,7 +261,7 @@ class SimulationEngine
         int num_radars = 0;
         int num_aircraft = 0;
 
-        foreach (var battle_system in BattleSOS.BattleSysList)
+        foreach (var battle_system in situationalAwareness)
         {
             if (battle_system.Type == "Radar")
             {
@@ -378,15 +273,15 @@ class SimulationEngine
             }
         }
 
+        PhysEngine.Get(situationalAwareness);
+        PhysEngine.OnTick(timer);
+        PhysEngine.Set(situationalAwareness);
+
+
         // EXECUTE Set() method on every battle_system on field
 
-        foreach (var battle_system in BattleSOS.BattleSysList)
+        foreach (var battle_system in situationalAwareness)
         {
-            if (battle_system.Type == "Radar" || battle_system.Type == "Aircraft")
-            {
-                battle_system.Set();
-            }
-
             if (battle_system.VehicleHasStopped)
             {
                 stoppedVehicles++;
@@ -399,18 +294,162 @@ class SimulationEngine
                         Console.WriteLine($"{obj_surv.Type} {obj_surv.VehicleID} at ({obj_surv.CurrentPosition[0]}, {obj_surv.CurrentPosition[1]})");
                     }
                 }
-                if (stoppedVehicles == BattleSOS.BattleSysList.Count)
+                if (stoppedVehicles == situationalAwareness.Count)
                 {
                     allVehiclesStopped = true;
                 }
             }
         }
+    }
+}
 
-        // EXECUTE OnTick() METHOD for each battle_system on field
+class PhysicalSimulationEngine
+{
+    public List<BattleSystemClass> physicalSituationalAwareness;
 
-        foreach (var battle_system in BattleSOS.BattleSysList.ToList())
+    public PhysicalSimulationEngine()
+    {
+        physicalSituationalAwareness = new List<BattleSystemClass>();
+    }
+    public float DistanceCalculator(float[] obj1, float[] obj2)
+    {
+        float x = obj1[0] - obj2[0];
+        float y = obj1[1] - obj2[1];
+        return MathF.Sqrt((x * x) + (y * y));
+    }
+
+    public float AngleCalculator(float[] obj1, float[] obj2)
+    {
+        float x = obj2[0] - obj1[0];
+        float y = obj2[1] - obj1[1];
+        float v = MathF.Atan2(y, x);
+        return v;
+    }
+
+    public void Get(List<BattleSystemClass> sit_awareness)
+    {
+        physicalSituationalAwareness = sit_awareness.ToList();
+    }
+
+    public void OnTick(float timer)
+    {
+        foreach (var battle_sys in physicalSituationalAwareness)
         {
-            battle_system.OnTick(timer);
+
+            // Outputs position of each object in physical space
+
+            Console.WriteLine($"\n{battle_sys.Type} {battle_sys.VehicleID} position (x, y): ({battle_sys.CurrentPosition[0]}, {battle_sys.CurrentPosition[1]})");
+            if (battle_sys.Type == "Aircraft")
+            {
+                Console.WriteLine($"Velocity (Vx, Vy): ({battle_sys.LegVelocity[0]}, {battle_sys.LegVelocity[1]})");
+            }
+
+            foreach (var battle_sys_2 in physicalSituationalAwareness)
+            {
+
+                // Outputs distances and angles between every object in physical space
+
+                if (battle_sys != battle_sys_2)
+                {
+                    if (battle_sys.Type == "Radar" && battle_sys_2.Type != "Radar")
+                    {
+                        float dist = DistanceCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
+                        float angle = AngleCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
+                        Console.WriteLine($"\nDistance between {battle_sys.Type} {battle_sys.VehicleID} and {battle_sys_2.Type} {battle_sys_2.VehicleID} = {dist}");
+                        Console.WriteLine($"Angle = {Math.Abs(angle)} radians");
+                        if (battle_sys.Type == "Radar")
+                        {
+                            Console.WriteLine($"Range of {battle_sys.Type} {battle_sys.VehicleID} = {battle_sys.RadarRange}");
+                        }
+                    }
+                }
+            }
+
+            if (!battle_sys.VehicleHasStopped)
+            {
+
+                // Computes new positions (and other attributes) based on physical situation
+
+                battle_sys.NewPositionTemp[0] = battle_sys.CurrentPosition[0] + (battle_sys.LegVelocity[0] * timer);
+                battle_sys.NewPositionTemp[1] = battle_sys.CurrentPosition[1] + (battle_sys.LegVelocity[1] * timer);
+            }
+
+            if (battle_sys.Type == "Aircraft")
+            {
+
+                // Finds the next waypoint(s) for all Aircraft type objects
+
+                battle_sys.DecompVelocity();
+                for (int i = 0; i < battle_sys.VehiclePath.Count - 1; i++)
+                {
+                    if (MathF.Abs(DistanceCalculator(battle_sys.CurrentPosition, battle_sys.NextWaypoint)) <= (battle_sys.Velocities * timer))
+                    {
+                        if (!battle_sys.VehicleHasStopped || battle_sys.NextWaypoint != battle_sys.VehiclePath.Last())
+                        {
+                            battle_sys.CurrWaypointID++;
+                            if (battle_sys.CurrWaypointID < battle_sys.VehiclePath.Count)
+                            {
+                                battle_sys.NextWaypoint = battle_sys.VehiclePath[battle_sys.CurrWaypointID];
+                            }
+                            else if (battle_sys.CurrWaypointID == battle_sys.VehiclePath.Count)
+                            {
+                                battle_sys.VehicleHasStopped = true;
+                            }
+                        }
+                    }
+                }
+            }
+            if (battle_sys.ObjectsVisible.Count > 0)
+            {
+
+                // Displays the objects that are registered to ObjectsVisible property
+
+                Console.WriteLine($"\nObjects visible to {battle_sys.Type} {battle_sys.VehicleID}:");
+                foreach (var vis_objs in battle_sys.ObjectsVisible)
+                {
+                    float dist = DistanceCalculator(battle_sys.CurrentPosition, vis_objs.CurrentPosition);
+                    float angle = AngleCalculator(battle_sys.CurrentPosition, vis_objs.CurrentPosition);
+                    Console.WriteLine($"{vis_objs.Type} {vis_objs.VehicleID} at distance = {dist} and angle = {Math.Abs(angle)} radians");
+                }
+            }
+        }
+    }
+
+    public void Set(List<BattleSystemClass> batt_sys)
+    {
+        foreach (var battle_system in physicalSituationalAwareness)
+        {
+
+            // Adds objects to ObjectVisible property if they are within range of radar or RWR and removes them when they are not
+
+            foreach (var battle_system_2 in physicalSituationalAwareness)
+            {
+                if (battle_system != battle_system_2)
+                {
+                    float dist = DistanceCalculator(battle_system.CurrentPosition, battle_system_2.CurrentPosition);
+                    if (dist <= battle_system.RadarRange && !battle_system.ObjectsVisible.Contains(battle_system_2))
+                    {
+                        battle_system.ObjectsVisible.Add(battle_system_2);
+                    }
+                    else if (dist > battle_system.RadarRange && battle_system.ObjectsVisible.Contains(battle_system_2))
+                    {
+                        battle_system.ObjectsVisible.Remove(battle_system_2);
+                    }
+                }
+            }
+
+            foreach (var batt_system in batt_sys)
+            {
+
+                // Sets the new values of object properties as computed by the Physics simulation to the original objects
+
+                if ((battle_system.Type.ToString() + battle_system.VehicleID.ToString()) == (batt_system.Type.ToString() + batt_system.VehicleID.ToString()))
+                {
+                    batt_system.CurrentPosition[0] = battle_system.NewPositionTemp[0];
+                    batt_system.CurrentPosition[1] = battle_system.NewPositionTemp[1];
+                    batt_system.ObjectsVisible = battle_system.ObjectsVisible;
+                }
+            }
         }
     }
 }
