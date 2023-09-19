@@ -277,11 +277,11 @@ class DiscreteTimeSimulationEngine
         PhysEngine.OnTick(timer);
         PhysEngine.Set(situationalAwareness);
 
-
-        // EXECUTE Set() method on every battle_system on field
-
         foreach (var battle_system in situationalAwareness)
         {
+
+            // Stops simulation if no dynamic actions are occurring
+
             if (battle_system.VehicleHasStopped)
             {
                 stoppedVehicles++;
