@@ -15,6 +15,7 @@ class DiscreteTimeSimulationEngine
     public bool allVehiclesStopped = false;
     public List<BattleSystemClass> situationalAwareness;
     PhysicalSimulationEngine PhysEngine;
+    public int await = 0;
     public DiscreteTimeSimulationEngine()
     {
         situationalAwareness = new List<BattleSystemClass>();
@@ -26,17 +27,13 @@ class DiscreteTimeSimulationEngine
     {
         int stoppedVehicles = 0;
 
-        foreach (var battle_system in situationalAwareness)
-        {
-            battle_system.Get(PhysEngine);
-        }
         PhysEngine.Get(situationalAwareness);
+        PhysEngine.OnTick(timer);
 
         foreach (var battle_system in situationalAwareness)
         {
             battle_system.OnTick(timer, PhysEngine);
         }
-        PhysEngine.OnTick(timer);
         foreach (var battle_system in situationalAwareness)
         {
             battle_system.Set(PhysEngine);
@@ -62,7 +59,11 @@ class DiscreteTimeSimulationEngine
                 }
                 if (stoppedVehicles == situationalAwareness.Count)
                 {
-                    allVehiclesStopped = true;
+                    this.await++;
+                    if (this.await == 2)
+                    {
+                        allVehiclesStopped = true;
+                    }
                 }
             }
         }

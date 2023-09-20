@@ -57,27 +57,6 @@ class PhysicalSimulationEngine
                 Console.WriteLine($"Velocity (Vx, Vy): ({battle_sys.LegVelocity[0]}, {battle_sys.LegVelocity[1]})");
             }
 
-            foreach (var battle_sys_2 in physicalSituationalAwareness)
-            {
-
-                // Outputs distances and angles between every object in physical space
-
-                if (battle_sys != battle_sys_2)
-                {
-                    if (battle_sys.Type == "Radar" && battle_sys_2.Type != "Radar")
-                    {
-                        float dist = DistanceCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
-                        float angle = AngleCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
-                        Console.WriteLine($"\nDistance between {battle_sys.Type} {battle_sys.VehicleID} and {battle_sys_2.Type} {battle_sys_2.VehicleID} = {dist}");
-                        Console.WriteLine($"Angle = {Math.Abs(angle)} radians");
-                        if (battle_sys.Type == "Radar")
-                        {
-                            Console.WriteLine($"Range of {battle_sys.Type} {battle_sys.VehicleID} = {battle_sys.RadarRange}");
-                        }
-                    }
-                }
-            }
-
             if (!battle_sys.VehicleHasStopped)
             {
 
@@ -87,31 +66,6 @@ class PhysicalSimulationEngine
                 battle_sys.NewPositionTemp[1] = battle_sys.CurrentPosition[1] + (battle_sys.LegVelocity[1] * timer);
             }
 
-            if (battle_sys.Type == "Aircraft")
-            {
-
-                // Finds the next waypoint(s) for all Aircraft type objects
-
-                battle_sys.DecompVelocity();
-                for (int i = 0; i < battle_sys.VehiclePath.Count - 1; i++)
-                {
-                    if (MathF.Abs(DistanceCalculator(battle_sys.CurrentPosition, battle_sys.NextWaypoint)) <= (battle_sys.Velocities * timer))
-                    {
-                        if (!battle_sys.VehicleHasStopped || battle_sys.NextWaypoint != battle_sys.VehiclePath.Last())
-                        {
-                            battle_sys.CurrWaypointID++;
-                            if (battle_sys.CurrWaypointID < battle_sys.VehiclePath.Count)
-                            {
-                                battle_sys.NextWaypoint = battle_sys.VehiclePath[battle_sys.CurrWaypointID];
-                            }
-                            else if (battle_sys.CurrWaypointID == battle_sys.VehiclePath.Count)
-                            {
-                                battle_sys.VehicleHasStopped = true;
-                            }
-                        }
-                    }
-                }
-            }
             if (battle_sys.ObjectsVisible.Count > 0)
             {
 
@@ -132,24 +86,6 @@ class PhysicalSimulationEngine
     {
         foreach (var battle_system in physicalSituationalAwareness)
         {
-
-            // Adds objects to ObjectVisible property if they are within range of radar or RWR and removes them when they are not
-
-            foreach (var battle_system_2 in physicalSituationalAwareness)
-            {
-                if (battle_system != battle_system_2)
-                {
-                    float dist = DistanceCalculator(battle_system.CurrentPosition, battle_system_2.CurrentPosition);
-                    if (dist <= battle_system.RadarRange && !battle_system.ObjectsVisible.Contains(battle_system_2))
-                    {
-                        battle_system.ObjectsVisible.Add(battle_system_2);
-                    }
-                    else if (dist > battle_system.RadarRange && battle_system.ObjectsVisible.Contains(battle_system_2))
-                    {
-                        battle_system.ObjectsVisible.Remove(battle_system_2);
-                    }
-                }
-            }
 
             foreach (var batt_system in batt_sys)
             {

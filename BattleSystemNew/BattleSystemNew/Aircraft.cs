@@ -15,22 +15,58 @@ class Aircraft : BattleSystemClass
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
     public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
 
-    public override float[] Get(PhysicalSimulationEngine simeng)
+    public override void Get()
     {
-        return CurrentPosition;
+
     }
 
     public override void Set(PhysicalSimulationEngine simeng)
     {
 
+        // Adds objects to ObjectVisible property if they are within range of radar or RWR and removes them when they are not
+
+        foreach (var battle_system in simeng.physicalSituationalAwareness)
+        {
+            if (this != battle_system)
+            {
+                float dist = DistanceCalculator(this.CurrentPosition, battle_system.CurrentPosition);
+                if (dist <= this.RadarRange && !this.ObjectsVisible.Contains(battle_system))
+                {
+                    this.ObjectsVisible.Add(battle_system);
+                }
+                else if (dist > this.RadarRange && this.ObjectsVisible.Contains(battle_system))
+                {
+                    this.ObjectsVisible.Remove(battle_system);
+                }
+            }
+        }
     }
 
     public override void OnTick(float timer, PhysicalSimulationEngine simeng)
     {
 
+        this.DecompVelocity();
+        for (int i = 0; i < this.VehiclePath.Count - 1; i++)
+        {
+            if (MathF.Abs(DistanceCalculator(this.CurrentPosition, this.NextWaypoint)) <= (this.Velocities * timer))
+            {
+                if (!this.VehicleHasStopped || this.NextWaypoint != this.VehiclePath.Last())
+                {
+                    this.CurrWaypointID++;
+                    if (this.CurrWaypointID < this.VehiclePath.Count)
+                    {
+                        this.NextWaypoint = this.VehiclePath[this.CurrWaypointID];
+                    }
+                    else if (this.CurrWaypointID == this.VehiclePath.Count)
+                    {
+                        this.VehicleHasStopped = true;
+                    }
+                }
+            }
+        }
     }
 
-    public override void DecompVelocity()
+    public void DecompVelocity()
     {
         this.LegVelocity[0] = this.Velocities * MathF.Cos(AngleCalculator(this.CurrentPosition, this.NextWaypoint));
         this.LegVelocity[1] = this.Velocities * MathF.Sin(AngleCalculator(this.CurrentPosition, this.NextWaypoint));

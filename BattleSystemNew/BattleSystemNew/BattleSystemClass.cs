@@ -14,8 +14,7 @@ abstract class BattleSystemClass
     public abstract List<float[]> VehiclePath { get; set; }
     public abstract List<BattleSystemClass> ObjectsVisible { get; set; }
     public abstract List<BattleSystemClass> ObjectsSurveyed { get; set; }
-    public abstract float[] Get(PhysicalSimulationEngine simeng);
+    public abstract void Get();
     public abstract void Set(PhysicalSimulationEngine simeng);
     public abstract void OnTick(float timer, PhysicalSimulationEngine simeng);
-    public abstract void DecompVelocity();
 }

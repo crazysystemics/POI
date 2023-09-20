@@ -14,9 +14,9 @@ class Radar : BattleSystemClass
     public override List<float[]> VehiclePath { get; set; }
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
     public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
-    public override float[] Get(PhysicalSimulationEngine simeng)
+    public override void Get()
     {
-        return CurrentPosition;
+
     }
 
     public override void OnTick(float timer, PhysicalSimulationEngine simeng)
@@ -26,12 +26,37 @@ class Radar : BattleSystemClass
 
     public override void Set(PhysicalSimulationEngine simeng)
     {
+        // Adds objects to ObjectVisible property if they are within range of radar or RWR and removes them when they are not
 
+        foreach (var battle_system in simeng.physicalSituationalAwareness)
+        {
+            if (this != battle_system)
+            {
+                float dist = DistanceCalculator(this.CurrentPosition, battle_system.CurrentPosition);
+                if (dist <= this.RadarRange && !this.ObjectsVisible.Contains(battle_system))
+                {
+                    this.ObjectsVisible.Add(battle_system);
+                }
+                else if (dist > this.RadarRange && this.ObjectsVisible.Contains(battle_system))
+                {
+                    this.ObjectsVisible.Remove(battle_system);
+                }
+            }
+        }
+    }
+    public float DistanceCalculator(float[] obj1, float[] obj2)
+    {
+        float x = obj1[0] - obj2[0];
+        float y = obj1[1] - obj2[1];
+        return MathF.Sqrt((x * x) + (y * y));
     }
 
-    public override void DecompVelocity()
+    public float AngleCalculator(float[] obj1, float[] obj2)
     {
-
+        float x = obj2[0] - obj1[0];
+        float y = obj2[1] - obj1[1];
+        float v = MathF.Atan2(y, x);
+        return v;
     }
 
     public Radar(List<float[]> waypoints, float velocities, float radar_range)
