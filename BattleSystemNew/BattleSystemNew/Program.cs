@@ -4,7 +4,7 @@
  * The static class ObjectRegister starts with registering objects to a List that will be used to initialize
  * the DiscreteTimeSimulationEngine.
  * 
- * The DiscreteTimeSimulationengine only calls the Get(), OnTick() and Set() methods on a PhysicalSimulationEngine.
+ * The DiscreteTimeSimulationengine calls the Get(), OnTick() and Set() methods on a PhysicalSimulationEngine.
  * 
  * The PhysicalSimulationEngine is initialized with an empty list of BattleSystemClass objects. The Get() method
  * of this class copies the situationalAwareness list registered to the DTSE in order to perform computations
@@ -19,7 +19,7 @@
  * adds objects to the ObjectsVisible property if it is within the given range. This method also sets new values
  * for position (and other attributes/properties) that were computed in the OnTick() method. The new values are applied
  * to the objects in the original situationalAwareness list maintained by the DTSE. It also updates the ObjectsVisible
- * list in the objects of situationalAwarness, rather than its copy in physicalSitautionalAwareness.
+ * list in the objects of situationalAwarness.
  *  */
 
 
