@@ -1,9 +1,8 @@
-﻿/* The DiscreteTimeSimulationEngine (DTSE) instantiates by adding BattleSystemClass objects registered by a the static
+﻿/* The DiscreteTimeSimulationEngine (DTSE) instantiates by adding BattleSystemClass objects registered by the static
  * ObjectRegister class to its situational awareness list. It also creates an instance of PhysicalSimulationEngine class.
  * 
  * The RunSimulationEngine method calls the Get(), OnTick() and Set() methods on the instance of PhysicalSimulationEngine
- * once. The number of ticks are set in the Main program, or can be set up to stop the simulation if there are no dynamic
- * or moving objects in the scene, such as aircraft.
+ * once. The number of ticks are set in the Main program.
  * 
  * <Yet to be implemented: RunSimulationEngine should also call Get(), OnTick() and Set() methods in BattleSystemClass objects
  *  but the operations to be performed by those objects is yet to be confirmed. Some operations might require moving from
