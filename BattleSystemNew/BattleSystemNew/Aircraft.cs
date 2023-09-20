@@ -1,3 +1,17 @@
+/* The Aircraft class inherits from BattleSystemClass. It contains data pertaining to flight path, velocities
+ * RWR range, and its current state. It also inherits Get(), OnTick() and Set() methods.
+ * 
+ * The Get() method is currently empty, since any data from the object is obtained by the PhysicalSimulationEngine.
+ * 
+ * The OnTick() method determines the next waypoint based on velocity and path information.
+ * 
+ * The Set() method updates its internal list of ObjectVisible based on Radars detected by RWR (pending proper implementation)
+ * 
+ * It also has its own methods called DistanceCalculator, AngleCalculator and DecompVelocity, which are used for calculating
+ * distances to other points in space, as well as decompose its velocity vector into cartesian components.
+ */
+
+
 class Aircraft : BattleSystemClass
 {
     public override string Type { get; set; }
@@ -33,6 +47,7 @@ class Aircraft : BattleSystemClass
                 if (dist <= this.RadarRange && !this.ObjectsVisible.Contains(battle_system))
                 {
                     this.ObjectsVisible.Add(battle_system);
+                    this.ObjectsSurveyed.Add(battle_system);
                 }
                 else if (dist > this.RadarRange && this.ObjectsVisible.Contains(battle_system))
                 {

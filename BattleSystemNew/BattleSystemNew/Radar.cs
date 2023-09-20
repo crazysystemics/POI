@@ -1,3 +1,18 @@
+/* The Radar class inherits from BattleSystemClass. It contains data pertaining to its state, such as current position
+ * and its range. This radar is assumed to have an isometric scan, so beam direction is irrelevant in this case.
+ * 
+ * The Get() method is currently empty, since any data from the object is obtained by the PhysicalSimulationEngine.
+ * 
+ * The OnTick() method is currently not computing anything. Potential to add direction/angle based computations
+ * when the Radar gets more complex.
+ * 
+ * The Set() method updates its internal list of ObjectVisible based aircraft that are within its range.
+ * 
+ * It also has its own methods called DistanceCalculator and AngleCalculator to determine its distance from other
+ * points in 2D space.
+ */
+
+
 class Radar : BattleSystemClass
 {
     public override string Type { get; set; }

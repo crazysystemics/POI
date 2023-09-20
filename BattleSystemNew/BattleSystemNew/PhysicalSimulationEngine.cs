@@ -5,10 +5,9 @@
  * 2. The Get() method copies the list of BattleSystemClass objects from the DTSE into its own situational awareness list.
  * 
  * 3. The OnTick() method:
- *    a. Displays positions of objects in physical space, and also displays distance and azimuth
- *       relation between the objects. If there are any objects in Radar range or Radars being seen by RWR, display that.
- *    b. Computes new positions for aircraft objects based on velocity and path information. Also determines the next waypoint(s)
- *       for each aircraft object.
+ *    a. Displays positions of objects in physical space. If there are any objects in Radar range or Radars being seen
+ *       by RWR, it also displays that.
+ *    b. Computes new positions for aircraft objects based on velocity and path information.
  *       
  * 4. The Set() method updates the internal states of all BattleSystemClass objects that are in the situational awareness list.
  *    It also updates the ObjectsVisible property of the objects with any other object within radar/rwr range.
@@ -96,7 +95,6 @@ class PhysicalSimulationEngine
                 {
                     batt_system.CurrentPosition[0] = battle_system.NewPositionTemp[0];
                     batt_system.CurrentPosition[1] = battle_system.NewPositionTemp[1];
-                    batt_system.ObjectsVisible = battle_system.ObjectsVisible;
                 }
             }
         }
