@@ -78,6 +78,16 @@ class Aircraft : BattleSystemClass
                 }
             }
         }
+
+        if (VehicleHasStopped)
+        {
+            Console.WriteLine($"\n{this.Type} {this.VehicleID} reached the end of path");
+            Console.WriteLine($"Objects surveyed by {this.Type} {this.VehicleID}:");
+            foreach (var obj_surv in this.ObjectsSurveyed)
+            {
+                Console.WriteLine($"{obj_surv.Type} {obj_surv.VehicleID} at ({obj_surv.CurrentPosition[0]}, {obj_surv.CurrentPosition[1]})");
+            }
+        }
     }
 
     public void DecompVelocity()

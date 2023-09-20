@@ -48,15 +48,6 @@ class DiscreteTimeSimulationEngine
             if (battle_system.VehicleHasStopped)
             {
                 stoppedVehicles++;
-                if (battle_system.Type == "Aircraft")
-                {
-                    Console.WriteLine($"\n{battle_system.Type} {battle_system.VehicleID} reached the end of path");
-                    Console.WriteLine($"Objects surveyed by {battle_system.Type} {battle_system.VehicleID}:");
-                    foreach (var obj_surv in battle_system.ObjectsSurveyed)
-                    {
-                        Console.WriteLine($"{obj_surv.Type} {obj_surv.VehicleID} at ({obj_surv.CurrentPosition[0]}, {obj_surv.CurrentPosition[1]})");
-                    }
-                }
                 if (stoppedVehicles == situationalAwareness.Count)
                 {
                     this.await++;
