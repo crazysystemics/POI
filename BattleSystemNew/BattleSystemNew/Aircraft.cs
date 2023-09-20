@@ -1,4 +1,4 @@
-﻿class Aircraft : BattleSystemClass
+class Aircraft : BattleSystemClass
 {
     public override string Type { get; set; }
     public override int VehicleID { get; set; }

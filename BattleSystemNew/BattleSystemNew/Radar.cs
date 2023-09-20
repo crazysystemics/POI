@@ -1,4 +1,4 @@
-﻿class Radar : BattleSystemClass
+class Radar : BattleSystemClass
 {
     public override string Type { get; set; }
     public override int VehicleID { get; set; }

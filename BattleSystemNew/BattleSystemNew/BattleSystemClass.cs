@@ -1,4 +1,4 @@
-﻿abstract class BattleSystemClass
+abstract class BattleSystemClass
 {
     public abstract string Type { get; set; }
     public abstract int VehicleID { get; set; }
