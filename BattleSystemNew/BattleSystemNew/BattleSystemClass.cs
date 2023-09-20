@@ -10,7 +10,6 @@ abstract class BattleSystemClass
     public abstract float Velocities { get; set; }
     public abstract float RadarRange { get; set; }
     public abstract bool VehicleHasStopped { get; set; }
-    public abstract bool VelocityChanged { get; set; }
     public abstract List<float[]> VehiclePath { get; set; }
     public abstract List<BattleSystemClass> ObjectsVisible { get; set; }
     public abstract List<BattleSystemClass> ObjectsSurveyed { get; set; }

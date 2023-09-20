@@ -25,7 +25,6 @@ class Radar : BattleSystemClass
     public override float Velocities { get; set; }
     public override float RadarRange { get; set; }
     public override bool VehicleHasStopped { get; set; }
-    public override bool VelocityChanged { get; set; }
     public override List<float[]> VehiclePath { get; set; }
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
     public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
