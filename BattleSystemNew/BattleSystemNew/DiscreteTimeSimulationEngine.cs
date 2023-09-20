@@ -1,25 +1,13 @@
-﻿/* This program contains an Abstract class called BattleSystemClass, from which other classes like
- * Aircraft and Radar inherit.
+﻿/* The DiscreteTimeSimulationEngine (DTSE) instantiates by adding BattleSystemClass objects registered by a the static
+ * ObjectRegister class to its situational awareness list. It also creates an instance of PhysicalSimulationEngine class.
  * 
- * The static class ObjectRegister starts with registering objects to a List that will be used to initialize
- * the DiscreteTimeSimulationEngine.
+ * The RunSimulationEngine method calls the Get(), OnTick() and Set() methods on the instance of PhysicalSimulationEngine
+ * once. The number of ticks are set in the Main program, or can be set up to stop the simulation if there are no dynamic
+ * or moving objects in the scene, such as aircraft.
  * 
- * The DiscreteTimeSimulationengine only calls the Get(), OnTick() and Set() methods on a PhysicalSimulationEngine.
- * 
- * The PhysicalSimulationEngine is initialized with an empty list of BattleSystemClass objects. The Get() method
- * of this class copies the situationalAwareness list registered to the DTSE in order to perform computations
- * and subsequent manipulations. This is copied into a new list called physicalSituationalAwareness.
- * 
- * The OnTick() method of this class iterates through the physicalSituationalAwareness List and performs relevant
- * computations (currently only computes new positions for Aircraft objects). It also displays current positions
- * and velocities of all the objects in the list and also performs a check for any objects visible
- * to a radar or an Aircraft RWR (currently a part of the Aircraft object) and displays its distance and azimuth.
- * 
- * The Set() method of this class performs a distance check between objects in physicalSituationalAwareness and
- * adds objects to the ObjectsVisible property if it is within the given range. This method also sets new values
- * for position (and other attributes/properties) that were computed in the OnTick() method. The new values are applied
- * to the objects in the original situationalAwareness list maintained by the DTSE. It also updates the ObjectsVisible
- * list in the objects of situationalAwarness, rather than its copy in physicalSitautionalAwareness.
+ * <Yet to be implemented: RunSimulationEngine should also call Get(), OnTick() and Set() methods in BattleSystemClass objects
+ *  but the operations to be performed by those objects is yet to be confirmed. Some operations might require moving from
+ *  PhysicalSimulationEngine to Aircraft or Radar class, depending on the actions>
  *  */
 
 
@@ -39,8 +27,21 @@ class DiscreteTimeSimulationEngine
     {
         int stoppedVehicles = 0;
 
+        foreach (var battle_system in situationalAwareness)
+        {
+            battle_system.Get(PhysEngine);
+        }
         PhysEngine.Get(situationalAwareness);
+
+        foreach (var battle_system in situationalAwareness)
+        {
+            battle_system.OnTick(timer, PhysEngine);
+        }
         PhysEngine.OnTick(timer);
+        foreach (var battle_system in situationalAwareness)
+        {
+            battle_system.Set(PhysEngine);
+        }
         PhysEngine.Set(situationalAwareness);
 
         foreach (var battle_system in situationalAwareness)

@@ -40,17 +40,17 @@ class Aircraft : BattleSystemClass
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
     public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
 
-    public override float[] Get()
+    public override float[] Get(PhysicalSimulationEngine simeng)
     {
         return CurrentPosition;
     }
 
-    public override void Set()
+    public override void Set(PhysicalSimulationEngine simeng)
     {
 
     }
 
-    public override void OnTick(float timer)
+    public override void OnTick(float timer, PhysicalSimulationEngine simeng)
     {
 
     }

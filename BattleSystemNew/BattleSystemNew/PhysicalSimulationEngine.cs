@@ -1,25 +1,18 @@
-﻿/* This program contains an Abstract class called BattleSystemClass, from which other classes like
- * Aircraft and Radar inherit.
+﻿/* The PhysicalSimulationEngine does the following:
  * 
- * The static class ObjectRegister starts with registering objects to a List that will be used to initialize
- * the DiscreteTimeSimulationEngine.
+ * 1. On instantiation, it creates a new list of BattleSystemClass objects for situational awareness.
  * 
- * The DiscreteTimeSimulationengine only calls the Get(), OnTick() and Set() methods on a PhysicalSimulationEngine.
+ * 2. The Get() method copies the list of BattleSystemClass objects from the DTSE into its own situational awareness list.
  * 
- * The PhysicalSimulationEngine is initialized with an empty list of BattleSystemClass objects. The Get() method
- * of this class copies the situationalAwareness list registered to the DTSE in order to perform computations
- * and subsequent manipulations. This is copied into a new list called physicalSituationalAwareness.
- * 
- * The OnTick() method of this class iterates through the physicalSituationalAwareness List and performs relevant
- * computations (currently only computes new positions for Aircraft objects). It also displays current positions
- * and velocities of all the objects in the list and also performs a check for any objects visible
- * to a radar or an Aircraft RWR (currently a part of the Aircraft object) and displays its distance and azimuth.
- * 
- * The Set() method of this class performs a distance check between objects in physicalSituationalAwareness and
- * adds objects to the ObjectsVisible property if it is within the given range. This method also sets new values
- * for position (and other attributes/properties) that were computed in the OnTick() method. The new values are applied
- * to the objects in the original situationalAwareness list maintained by the DTSE. It also updates the ObjectsVisible
- * list in the objects of situationalAwarness, rather than its copy in physicalSitautionalAwareness.
+ * 3. The OnTick() method:
+ *    a. Displays positions of objects in physical space, and also displays distance and azimuth
+ *       relation between the objects. If there are any objects in Radar range or Radars being seen by RWR, display that.
+ *    b. Computes new positions for aircraft objects based on velocity and path information. Also determines the next waypoint(s)
+ *       for each aircraft object.
+ *       
+ * 4. The Set() method updates the internal states of all BattleSystemClass objects that are in the situational awareness list.
+ *    It also updates the ObjectsVisible property of the objects with any other object within radar/rwr range.
+ *    
  *  */
 
 
