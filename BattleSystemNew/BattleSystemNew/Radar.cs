@@ -33,7 +33,7 @@ class Radar : BattleSystemClass
 
     }
 
-    public override void OnTick(float timer, PhysicalSimulationEngine simeng)
+    public override void OnTick(float timer)
     {
 
     }

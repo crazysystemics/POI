@@ -15,5 +15,5 @@ abstract class BattleSystemClass
     public abstract List<BattleSystemClass> ObjectsSurveyed { get; set; }
     public abstract void Get();
     public abstract void Set(PhysicalSimulationEngine simeng);
-    public abstract void OnTick(float timer, PhysicalSimulationEngine simeng);
+    public abstract void OnTick(float timer);
 }

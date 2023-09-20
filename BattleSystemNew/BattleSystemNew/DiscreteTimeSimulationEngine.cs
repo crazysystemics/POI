@@ -32,7 +32,7 @@ class DiscreteTimeSimulationEngine
 
         foreach (var battle_system in situationalAwareness)
         {
-            battle_system.OnTick(timer, PhysEngine);
+            battle_system.OnTick(timer);
         }
         foreach (var battle_system in situationalAwareness)
         {
