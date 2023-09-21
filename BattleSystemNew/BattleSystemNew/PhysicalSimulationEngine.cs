@@ -56,12 +56,14 @@ class PhysicalSimulationEngine : SimulatedModel
             // Return a list of emitters to the RWR
 
             // Outputs position of each object in physical space
-
-            Console.WriteLine($"\n\n{battle_sys.Type} {battle_sys.VehicleID} position (x, y): ({battle_sys.CurrentPosition[0]}, {battle_sys.CurrentPosition[1]})");
+            
+            Console.WriteLine($"\n----------------\n\n{battle_sys.Type} {battle_sys.VehicleID} position (x, y): ({battle_sys.CurrentPosition[0]}, {battle_sys.CurrentPosition[1]})");
             if (battle_sys.Type == "Aircraft")
             {
                 Console.WriteLine($"Velocity (Vx, Vy): ({battle_sys.LegVelocity[0]}, {battle_sys.LegVelocity[1]})");
             }
+
+            Console.WriteLine("\n\nSpatial relations:");
 
             foreach (BattleSystemClass battle_sys_2 in physicalSituationalAwareness)
             {
@@ -69,11 +71,16 @@ class PhysicalSimulationEngine : SimulatedModel
                 {
                     float dist = DistanceCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
                     float angle = AngleCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
-                    Console.WriteLine($"\nSpatial relation between {battle_sys.Type} {battle_sys.VehicleID} and {battle_sys_2.Type} {battle_sys_2.VehicleID}:");
+                    Console.WriteLine($"\n{battle_sys.Type} {battle_sys.VehicleID} and {battle_sys_2.Type} {battle_sys_2.VehicleID}:");
                     Console.WriteLine($"Distance = {dist}");
                     Console.WriteLine($"Azimuth = {Math.Abs(angle)} radians");
+
+                    // The above is being printed twice after the first tick. Reason currently not known.
+
                 }
             }
+
+            Console.WriteLine("\n----------------");
 
             if (battle_sys.ObjectsVisible.Count > 0)
             {
@@ -103,17 +110,9 @@ class PhysicalSimulationEngine : SimulatedModel
         foreach (BattleSystemClass battle_system in physicalSituationalAwareness)
         {
 
-            foreach (BattleSystemClass batt_system in sit_awareness)
-            {
+            battle_system.CurrentPosition[0] = battle_system.NewPositionTemp[0];
+            battle_system.CurrentPosition[1] = battle_system.NewPositionTemp[1];
 
-                // Sets the new values of object properties as computed by the Physics simulation to the original objects
-
-                if ((battle_system.Type.ToString() + battle_system.VehicleID.ToString()) == (batt_system.Type.ToString() + batt_system.VehicleID.ToString()))
-                {
-                    batt_system.CurrentPosition[0] = battle_system.NewPositionTemp[0];
-                    batt_system.CurrentPosition[1] = battle_system.NewPositionTemp[1];
-                }
-            }
         }
     }
 }

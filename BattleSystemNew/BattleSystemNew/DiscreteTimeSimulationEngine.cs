@@ -20,6 +20,7 @@ class DiscreteTimeSimulationEngine
     PhysicalSimulationEngine PhysEngine;
     List<SimulatedModel> sim_mod = new List<SimulatedModel>();
     public int await = 0;
+    public bool FirstRun = true;
     public DiscreteTimeSimulationEngine()
     {
         situationalAwareness = new List<BattleSystemClass>();
@@ -35,6 +36,25 @@ class DiscreteTimeSimulationEngine
     public void RunSimulationEngine(float timer)
     {
         int stoppedVehicles = 0;
+
+        if (this.FirstRun)
+        {
+            if (sim_mod.Contains(PhysEngine))
+            {
+                sim_mod.Remove(PhysEngine);
+            }
+            Console.WriteLine("Initial values:");
+            foreach (BattleSystemClass battle_system in sim_mod)
+            {
+                Console.WriteLine($"\n{battle_system.Type} {battle_system.VehicleID} position (x, y): ({battle_system.CurrentPosition[0]}, {battle_system.CurrentPosition[1]})");
+                if (battle_system.Type == "Aircraft")
+                {
+                    Console.WriteLine($"Velocity (Vx, Vy): ({battle_system.LegVelocity[0]}, {battle_system.LegVelocity[1]})");
+                }
+            }
+            FirstRun = false;
+            sim_mod.Add(PhysEngine);
+        }
 
         foreach (var battle_system in sim_mod)
         {
