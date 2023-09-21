@@ -39,6 +39,10 @@ class DiscreteTimeSimulationEngine
 
         if (this.FirstRun)
         {
+
+            // This conditional check is only to output the initial states of all objects before
+            // any values are updated by the method calls that follow this
+
             if (sim_mod.Contains(PhysEngine))
             {
                 sim_mod.Remove(PhysEngine);
