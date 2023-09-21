@@ -28,17 +28,23 @@ class Aircraft : BattleSystemClass
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
     public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
 
-    public override void Get()
-    {
+    // Maintain separate list of radars visible by RWR
 
+    public override BattleSystemClass Get()
+    {
+        return this;
     }
 
-    public override void Set(PhysicalSimulationEngine simeng)
+    public override void Set(List<BattleSystemClass> batt_sys, List<SimulatedModel> sim_mod)
     {
 
         // Adds objects to ObjectVisible property if they are within range of radar or RWR and removes them when they are not
 
-        foreach (var battle_system in simeng.physicalSituationalAwareness)
+        // Parameters = list of battle systems
+
+        // Computation to be done in PSE
+
+        foreach (var battle_system in batt_sys)
         {
             if (this != battle_system)
             {
@@ -54,10 +60,14 @@ class Aircraft : BattleSystemClass
                 }
             }
         }
+
+
     }
 
     public override void OnTick(float timer)
     {
+
+        // Compute next position here
 
         this.DecompVelocity();
         for (int i = 0; i < this.VehiclePath.Count - 1; i++)
@@ -77,6 +87,15 @@ class Aircraft : BattleSystemClass
                     }
                 }
             }
+        }
+
+        if (!this.VehicleHasStopped)
+        {
+
+            // Computes new positions (and other attributes) based on physical situation
+
+            this.NewPositionTemp[0] = this.CurrentPosition[0] + (this.LegVelocity[0] * timer);
+            this.NewPositionTemp[1] = this.CurrentPosition[1] + (this.LegVelocity[1] * timer);
         }
 
         if (VehicleHasStopped)

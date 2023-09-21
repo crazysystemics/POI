@@ -15,13 +15,13 @@
  *  */
 
 
-class PhysicalSimulationEngine
+class PhysicalSimulationEngine : SimulatedModel
 {
-    public List<BattleSystemClass> physicalSituationalAwareness;
+    public List<SimulatedModel> physicalSituationalAwareness;
 
     public PhysicalSimulationEngine()
     {
-        physicalSituationalAwareness = new List<BattleSystemClass>();
+        physicalSituationalAwareness = new List<SimulatedModel>();
     }
     public float DistanceCalculator(float[] obj1, float[] obj2)
     {
@@ -38,31 +38,41 @@ class PhysicalSimulationEngine
         return v;
     }
 
-    public void Get(List<BattleSystemClass> sit_awareness)
+    public override PhysicalSimulationEngine Get()
     {
-        physicalSituationalAwareness = sit_awareness.ToList();
+        return this;
     }
 
-    public void OnTick(float timer)
+    public override void OnTick(float timer)
     {
-        foreach (var battle_sys in physicalSituationalAwareness)
+        if (physicalSituationalAwareness.Contains(this))
         {
+            physicalSituationalAwareness.Remove(this);
+        }
+
+        foreach (BattleSystemClass battle_sys in physicalSituationalAwareness)
+        {
+
+            // Return a list of emitters to the RWR
 
             // Outputs position of each object in physical space
 
-            Console.WriteLine($"\n{battle_sys.Type} {battle_sys.VehicleID} position (x, y): ({battle_sys.CurrentPosition[0]}, {battle_sys.CurrentPosition[1]})");
+            Console.WriteLine($"\n\n{battle_sys.Type} {battle_sys.VehicleID} position (x, y): ({battle_sys.CurrentPosition[0]}, {battle_sys.CurrentPosition[1]})");
             if (battle_sys.Type == "Aircraft")
             {
                 Console.WriteLine($"Velocity (Vx, Vy): ({battle_sys.LegVelocity[0]}, {battle_sys.LegVelocity[1]})");
             }
 
-            if (!battle_sys.VehicleHasStopped)
+            foreach (BattleSystemClass battle_sys_2 in physicalSituationalAwareness)
             {
-
-                // Computes new positions (and other attributes) based on physical situation
-
-                battle_sys.NewPositionTemp[0] = battle_sys.CurrentPosition[0] + (battle_sys.LegVelocity[0] * timer);
-                battle_sys.NewPositionTemp[1] = battle_sys.CurrentPosition[1] + (battle_sys.LegVelocity[1] * timer);
+                if (battle_sys != battle_sys_2 && battle_sys.Type != battle_sys_2.Type)
+                {
+                    float dist = DistanceCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
+                    float angle = AngleCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
+                    Console.WriteLine($"\nSpatial relation between {battle_sys.Type} {battle_sys.VehicleID} and {battle_sys_2.Type} {battle_sys_2.VehicleID}:");
+                    Console.WriteLine($"Distance = {dist}");
+                    Console.WriteLine($"Azimuth = {Math.Abs(angle)} radians");
+                }
             }
 
             if (battle_sys.ObjectsVisible.Count > 0)
@@ -81,12 +91,19 @@ class PhysicalSimulationEngine
         }
     }
 
-    public void Set(List<BattleSystemClass> batt_sys)
+    public override void Set(List<BattleSystemClass> sit_awareness, List<SimulatedModel> sim_mod)
     {
-        foreach (var battle_system in physicalSituationalAwareness)
+
+        physicalSituationalAwareness = sim_mod.ToList();
+        if (physicalSituationalAwareness.Contains(this))
+        {
+            physicalSituationalAwareness.Remove(this);
+        }
+
+        foreach (BattleSystemClass battle_system in physicalSituationalAwareness)
         {
 
-            foreach (var batt_system in batt_sys)
+            foreach (BattleSystemClass batt_system in sit_awareness)
             {
 
                 // Sets the new values of object properties as computed by the Physics simulation to the original objects

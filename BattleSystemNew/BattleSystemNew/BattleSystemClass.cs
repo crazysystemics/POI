@@ -1,4 +1,4 @@
-abstract class BattleSystemClass
+abstract class BattleSystemClass : SimulatedModel
 {
     public abstract string Type { get; set; }
     public abstract int VehicleID { get; set; }
@@ -13,7 +13,8 @@ abstract class BattleSystemClass
     public abstract List<float[]> VehiclePath { get; set; }
     public abstract List<BattleSystemClass> ObjectsVisible { get; set; }
     public abstract List<BattleSystemClass> ObjectsSurveyed { get; set; }
-    public abstract void Get();
-    public abstract void Set(PhysicalSimulationEngine simeng);
-    public abstract void OnTick(float timer);
 }
+
+
+// Add another cklass emitter with proteries - pluse width, PRI, time of arrival, emitter id, angle of arrival, symbol
+// Rename this class to BattleSystem

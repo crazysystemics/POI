@@ -10,35 +10,44 @@
  *  */
 
 
+// Create class simulated model and add battle systm class and simulated engine
+
+
 class DiscreteTimeSimulationEngine
 {
     public bool allVehiclesStopped = false;
     public List<BattleSystemClass> situationalAwareness;
     PhysicalSimulationEngine PhysEngine;
+    List<SimulatedModel> sim_mod = new List<SimulatedModel>();
     public int await = 0;
     public DiscreteTimeSimulationEngine()
     {
         situationalAwareness = new List<BattleSystemClass>();
         situationalAwareness = ObjectRegister.registered_vehicles.ToList();
         PhysEngine = new PhysicalSimulationEngine();
+        foreach (var objs in situationalAwareness)
+        {
+            sim_mod.Add(objs);
+        }
+        sim_mod.Add(PhysEngine);
     }
 
     public void RunSimulationEngine(float timer)
     {
         int stoppedVehicles = 0;
 
-        PhysEngine.Get(situationalAwareness);
-        PhysEngine.OnTick(timer);
-
-        foreach (var battle_system in situationalAwareness)
+        foreach (var battle_system in sim_mod)
+        {
+            PhysEngine.physicalSituationalAwareness.Add(battle_system.Get());
+        }
+        foreach (var battle_system in sim_mod)
         {
             battle_system.OnTick(timer);
         }
-        foreach (var battle_system in situationalAwareness)
+        foreach (var battle_system in sim_mod)
         {
-            battle_system.Set(PhysEngine);
+            battle_system.Set(situationalAwareness, sim_mod);
         }
-        PhysEngine.Set(situationalAwareness);
 
         foreach (var battle_system in situationalAwareness)
         {

@@ -28,9 +28,9 @@ class Radar : BattleSystemClass
     public override List<float[]> VehiclePath { get; set; }
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
     public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
-    public override void Get()
+    public override BattleSystemClass Get()
     {
-
+        return this;
     }
 
     public override void OnTick(float timer)
@@ -38,11 +38,11 @@ class Radar : BattleSystemClass
 
     }
 
-    public override void Set(PhysicalSimulationEngine simeng)
+    public override void Set(List<BattleSystemClass> batt_sys, List<SimulatedModel> sim_mod)
     {
         // Adds objects to ObjectVisible property if they are within range of radar or RWR and removes them when they are not
 
-        foreach (var battle_system in simeng.physicalSituationalAwareness)
+        foreach (var battle_system in batt_sys)
         {
             if (this != battle_system)
             {
