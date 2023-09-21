@@ -43,6 +43,14 @@ class PhysicalSimulationEngine : SimulatedModel
         return this;
     }
 
+
+    // The following operations are supposed to happen in objects contained in a List
+    // of SimulatedModels type. The operations, however must only happen on objects of
+    // BattleSystemClass type. So we must remove the PhysicalSimulationEngine instance
+    // from this in order to avoid type mismatch error/exceptions. This removal occurs in
+    // the first line of the following OnTick() method body. It is re-added to the overall
+    // situational awareness during the Get() call.
+
     public override void OnTick(float timer)
     {
         if (physicalSituationalAwareness.Contains(this))
@@ -53,7 +61,7 @@ class PhysicalSimulationEngine : SimulatedModel
         foreach (BattleSystemClass battle_sys in physicalSituationalAwareness)
         {
 
-            // Return a list of emitters to the RWR
+            // Return a list of emitters to the RWR (to do)
 
             // Outputs position of each object in physical space
             
@@ -104,6 +112,7 @@ class PhysicalSimulationEngine : SimulatedModel
         physicalSituationalAwareness = sim_mod.ToList();
         if (physicalSituationalAwareness.Contains(this))
         {
+            // Avoids a similar error as explain before the OnTick() method
             physicalSituationalAwareness.Remove(this);
         }
 
