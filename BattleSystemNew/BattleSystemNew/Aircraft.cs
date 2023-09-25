@@ -1,14 +1,14 @@
-/* The Aircraft class inherits from BattleSystemClass. It contains data pertaining to flight path, velocities
- * RWR range, and its current state. It also inherits Get(), OnTick() and Set() methods.
+/* The Aircraft class inherits from BattleSystemClass. It contains data pertaining to flight path
+ * RWR range, and its current state. It also inherits Get(), OnTick() and Set() methods from SimulationModel
  * 
- * The Get() method is currently empty, since any data from the object is obtained by the PhysicalSimulationEngine.
+ * The Get() method returns a SituationalAwareness object containing its CurrentPosition, VehicleID and Type.
  * 
- * The OnTick() method determines the next waypoint based on velocity and path information.
+ * The OnTick() method determines the next waypoint based on velocity and path information and moves to the
+ * new position computed by the PSE.
  * 
  * The Set() method updates its internal list of ObjectVisible based on Radars detected by RWR (pending proper implementation)
+ * and also display them to the Console.
  * 
- * It also has its own methods called DistanceCalculator, AngleCalculator and DecompVelocity, which are used for calculating
- * distances to other points in space, as well as decompose its velocity vector into cartesian components.
  */
 
 

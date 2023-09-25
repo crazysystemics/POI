@@ -1,26 +1,27 @@
-/* This program contains an Abstract class called BattleSystemClass, from which other classes like
- * Aircraft and Radar inherit.
+/* Classes contained in this project:
+ * 1. Simulation Model (abstract)
+ *  - Derived classes:
+ *    a. Physical Simulation Engine (PSE)
+ *    b. Battle System (abstract)
+ *    - Derived classes:
+ *      i. Aircraft
+ *      ii. Radar
  * 
- * The static class ObjectRegister starts with registering objects to a List that will be used to initialize
- * the DiscreteTimeSimulationEngine.
+ * 2. Situational Awareness
+ * 3. Discrete Time Simulation Engine (DTSE)
+ * 4. Object Register
+ * 5. Globals
+ * 6. Emitter (currently not implemented)
  * 
- * The DiscreteTimeSimulationengine calls the Get(), OnTick() and Set() methods on a PhysicalSimulationEngine.
+ * It also contains a Program class (in this file) that runs the main program.
+ * The main program first registers Battle System objects using the Object Register class.
+ * Object Register also assigns an identifier to each object registered with it.
  * 
- * The PhysicalSimulationEngine is initialized with an empty list of BattleSystemClass objects. The Get() method
- * of this class copies the situationalAwareness list registered to the DTSE in order to perform computations
- * and subsequent manipulations. This is copied into a new list called physicalSituationalAwareness.
- * 
- * The OnTick() method of this class iterates through the physicalSituationalAwareness List and performs relevant
- * computations (currently only computes new positions for Aircraft objects). It also displays current positions
- * and velocities of all the objects in the list and also performs a check for any objects visible
- * to a radar or an Aircraft RWR (currently a part of the Aircraft object) and displays its distance and azimuth.
- * 
- * The Set() method of this class performs a distance check between objects in physicalSituationalAwareness and
- * adds objects to the ObjectsVisible property if it is within the given range. This method also sets new values
- * for position (and other attributes/properties) that were computed in the OnTick() method. The new values are applied
- * to the objects in the original situationalAwareness list maintained by the DTSE. It also updates the ObjectsVisible
- * list in the objects of situationalAwarness.
- *  */
+ * The DTSE initializes a Simulation Model list and adds all objects registered with
+ * Object Register to it. It also instantiates a PSE object, which in turn creates
+ * a Sitautional Awareness class list. The DTSE then calls Get(), OnTick() and Set()
+ * methods on every object in the Simulation Model list.
+ */
 
 
 namespace BattleSystem

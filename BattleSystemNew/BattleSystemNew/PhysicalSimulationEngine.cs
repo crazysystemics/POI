@@ -1,20 +1,18 @@
 ﻿/* The PhysicalSimulationEngine does the following:
  * 
- * 1. On instantiation, it creates a new list of BattleSystemClass objects for situational awareness.
+ * 1. On instantiation, it creates a new list of SituationalAwareness objects.
  * 
- * 2. The Get() method copies the list of BattleSystemClass objects from the DTSE into its own situational awareness list.
+ * 2. The Get() returns a SituationalAwareness object with some default attribute values, but this object
+ *    is never used.
  * 
  * 3. The OnTick() method:
- *    a. Displays positions of objects in physical space. If there are any objects in Radar range or Radars being seen
- *       by RWR, it also displays that.
- *    b. Computes new positions for aircraft objects based on velocity and path information.
+ *    a. Displays positions of objects in physical space. Also displays the spatial relation between
+ *       every object in physicalSituationalAwareness.
  *       
  * 4. The Set() method updates the internal states of all BattleSystemClass objects that are in the situational awareness list.
- *    It also updates the ObjectsVisible property of the objects with any other object within radar/rwr range.
  *    
  *  */
 
-// Separation of concerns - only pass properties required for computations
 class PhysicalSimulationEngine : SimulationModel
 {
     public List<SituationalAwareness> physicalSituationalAwareness;
