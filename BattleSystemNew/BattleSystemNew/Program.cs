@@ -35,13 +35,13 @@ namespace BattleSystem
                                                         {
                                                          // Waypoints
 
-                                                         new float[] { 5.0f, 5.0f },
-                                                         new float[] { 10.0f, 10.0f },
-                                                         new float[] { 15.0f, 10.0f },
-                                                         new float[] { 20.0f, 5.0f },
-                                                         new float[] { 15.0f, 0.0f },
-                                                         new float[] { 10.0f, 0.0f },
-                                                         new float[] { 5.0f, 5.0f }, },
+                                                         new float[] { 5.0f, 5.0f, 0.0f },
+                                                         new float[] { 10.0f, 10.0f, 1.0f },
+                                                         new float[] { 15.0f, 10.0f, 2.0f },
+                                                         new float[] { 20.0f, 5.0f, 3.0f },
+                                                         new float[] { 15.0f, 0.0f, 4.0f },
+                                                         new float[] { 10.0f, 0.0f, 5.0f },
+                                                         new float[] { 5.0f, 5.0f, 6.0f }, },
 
                                                          // Velocities
 
@@ -63,7 +63,7 @@ namespace BattleSystem
 
             while (!DTSE.allVehiclesStopped)
             {
-                DTSE.RunSimulationEngine(1.00f);
+                DTSE.RunSimulationEngine();
                 Console.WriteLine("\nPress Enter/Return to display next tick");
                 Console.ReadLine();
                 i++;

@@ -14,72 +14,54 @@
  *    
  *  */
 
-
-class PhysicalSimulationEngine : SimulatedModel
+// Separation of concerns - only pass properties required for computations
+class PhysicalSimulationEngine : SimulationModel
 {
-    public List<SimulatedModel> physicalSituationalAwareness;
+    public List<SituationalAwareness> physicalSituationalAwareness;
 
     public PhysicalSimulationEngine()
     {
-        physicalSituationalAwareness = new List<SimulatedModel>();
-    }
-    public float DistanceCalculator(float[] obj1, float[] obj2)
-    {
-        float x = obj1[0] - obj2[0];
-        float y = obj1[1] - obj2[1];
-        return MathF.Sqrt((x * x) + (y * y));
+        physicalSituationalAwareness = new List<SituationalAwareness>();
     }
 
-    public float AngleCalculator(float[] obj1, float[] obj2)
+    public override SituationalAwareness Get()
     {
-        float x = obj2[0] - obj1[0];
-        float y = obj2[1] - obj1[1];
-        float v = MathF.Atan2(y, x);
-        return v;
+        float[] temp_values = new float[2];
+        temp_values[0] = 0.0f;
+        temp_values[1] = 0.0f;
+        SituationalAwareness temp = new SituationalAwareness(temp_values, 0, "PhysEngine");
+        return temp;
     }
 
-    public override PhysicalSimulationEngine Get()
+    public override void OnTick()
     {
-        return this;
-    }
 
-
-    // The following operations are supposed to happen in objects contained in a List
-    // of SimulatedModels type. The operations, however must only happen on objects of
-    // BattleSystemClass type. So we must remove the PhysicalSimulationEngine instance
-    // from this in order to avoid type mismatch error/exceptions. This removal occurs in
-    // the first line of the following OnTick() method body. It is re-added to the overall
-    // situational awareness during the Get() call.
-
-    public override void OnTick(float timer)
-    {
-        if (physicalSituationalAwareness.Contains(this))
+        foreach (var sit_aw in physicalSituationalAwareness)
         {
-            physicalSituationalAwareness.Remove(this);
+            if (sit_aw.Type == "PhysEngine")
+            {
+                physicalSituationalAwareness.Remove(sit_aw);
+            }
         }
 
-        foreach (BattleSystemClass battle_sys in physicalSituationalAwareness)
+        foreach (var battle_sys in physicalSituationalAwareness)
         {
 
             // Return a list of emitters to the RWR (to do)
 
             // Outputs position of each object in physical space
             
-            Console.WriteLine($"\n----------------\n\n{battle_sys.Type} {battle_sys.VehicleID} position (x, y): ({battle_sys.CurrentPosition[0]}, {battle_sys.CurrentPosition[1]})");
-            if (battle_sys.Type == "Aircraft")
-            {
-                Console.WriteLine($"Velocity (Vx, Vy): ({battle_sys.LegVelocity[0]}, {battle_sys.LegVelocity[1]})");
-            }
+            Console.WriteLine($"\n----------------\n\n{battle_sys.Type} {battle_sys.ID} position (x, y): ({battle_sys.CurrentPosition[0]}, {battle_sys.CurrentPosition[1]})");
 
             Console.WriteLine("\n\nSpatial relations:");
 
-            foreach (BattleSystemClass battle_sys_2 in physicalSituationalAwareness)
+            foreach (var battle_sys_2 in physicalSituationalAwareness)
             {
                 if (battle_sys != battle_sys_2 && battle_sys.Type != battle_sys_2.Type)
                 {
-                    float dist = DistanceCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
-                    float angle = AngleCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
-                    Console.WriteLine($"\n{battle_sys.Type} {battle_sys.VehicleID} and {battle_sys_2.Type} {battle_sys_2.VehicleID}:");
+                    float dist = Globals.DistanceCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
+                    float angle = Globals.AngleCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
+                    Console.WriteLine($"\n{battle_sys.Type} {battle_sys.ID} and {battle_sys_2.Type} {battle_sys_2.ID}:");
                     Console.WriteLine($"Distance = {dist}");
                     Console.WriteLine($"Azimuth = {Math.Abs(angle)} radians");
 
@@ -95,32 +77,37 @@ class PhysicalSimulationEngine : SimulatedModel
 
                 // Displays the objects that are registered to ObjectsVisible property
 
-                Console.WriteLine($"\nObjects visible to {battle_sys.Type} {battle_sys.VehicleID}:");
+                Console.WriteLine($"\nObjects visible to {battle_sys.Type} {battle_sys.ID}:");
                 foreach (var vis_objs in battle_sys.ObjectsVisible)
                 {
-                    float dist = DistanceCalculator(battle_sys.CurrentPosition, vis_objs.CurrentPosition);
-                    float angle = AngleCalculator(battle_sys.CurrentPosition, vis_objs.CurrentPosition);
+                    float dist = Globals.DistanceCalculator(battle_sys.CurrentPosition, vis_objs.CurrentPosition);
+                    float angle = Globals.AngleCalculator(battle_sys.CurrentPosition, vis_objs.CurrentPosition);
                     Console.WriteLine($"{vis_objs.Type} {vis_objs.VehicleID} at distance = {dist} and angle = {Math.Abs(angle)} radians");
                 }
             }
         }
     }
 
-    public override void Set(List<BattleSystemClass> sit_awareness, List<SimulatedModel> sim_mod)
+    public override void Set(List<SimulationModel> sim_mod)
     {
 
-        physicalSituationalAwareness = sim_mod.ToList();
+/*        physicalSituationalAwareness = sim_mod.ToList();
         if (physicalSituationalAwareness.Contains(this))
         {
             // Avoids a similar error as explain before the OnTick() method
             physicalSituationalAwareness.Remove(this);
-        }
+        }*/
 
-        foreach (BattleSystemClass battle_system in physicalSituationalAwareness)
+        foreach (var battle_system in physicalSituationalAwareness)
         {
-
-            battle_system.CurrentPosition[0] = battle_system.NewPositionTemp[0];
-            battle_system.CurrentPosition[1] = battle_system.NewPositionTemp[1];
+            foreach (BattleSystemClass sys_model in sim_mod)
+            {
+                if (sys_model.Type == battle_system.Type && sys_model.VehicleID == battle_system.ID)
+                {
+                    sys_model.CurrentPosition[0] = battle_system.NewPositionTemp[0];
+                    sys_model.CurrentPosition[1] = battle_system.NewPositionTemp[1];
+                }
+            }
 
         }
     }

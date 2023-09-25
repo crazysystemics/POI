@@ -21,7 +21,6 @@ class Aircraft : BattleSystemClass
     public override float[] CurrentPosition { get; set; }
     public override float[] NewPositionTemp { get; set; }
     public override float[] NextWaypoint { get; set; }
-    public override float Velocities { get; set; }
     public override float RadarRange { get; set; }
     public override bool VehicleHasStopped { get; set; }
     public override List<float[]> VehiclePath { get; set; }
@@ -30,12 +29,13 @@ class Aircraft : BattleSystemClass
 
     // Maintain separate list of radars visible by RWR
 
-    public override BattleSystemClass Get()
+    public override SituationalAwareness Get()
     {
-        return this;
+        SituationalAwareness sit_aw_obj = new SituationalAwareness(this.CurrentPosition, this.VehicleID, this.Type);
+        return sit_aw_obj;
     }
 
-    public override void Set(List<BattleSystemClass> batt_sys, List<SimulatedModel> sim_mod)
+    public override void Set(List<SimulationModel> sim_mod)
     {
 
         // Adds objects to ObjectVisible property if they are within range of radar or RWR and removes them when they are not
@@ -44,11 +44,17 @@ class Aircraft : BattleSystemClass
 
         // Computation to be done in PSE
 
-        foreach (var battle_system in batt_sys)
+        foreach (BattleSystemClass battle_system in sim_mod)
         {
+
+            if (battle_system is PhysicalSimulationEngine)
+            {
+                sim_mod.Remove(battle_system);
+            }
+
             if (this != battle_system)
             {
-                float dist = DistanceCalculator(this.CurrentPosition, battle_system.CurrentPosition);
+                float dist = Globals.DistanceCalculator(this.CurrentPosition, battle_system.CurrentPosition);
                 if (dist <= this.RadarRange && !this.ObjectsVisible.Contains(battle_system))
                 {
                     this.ObjectsVisible.Add(battle_system);
@@ -64,15 +70,17 @@ class Aircraft : BattleSystemClass
 
     }
 
-    public override void OnTick(float timer)
+    public override void OnTick()
     {
+
+        float time_resolution = Globals.TimeResolution;
 
         // Compute next position here
 
-        this.DecompVelocity();
+        this.ComputeVelocity();
         for (int i = 0; i < this.VehiclePath.Count - 1; i++)
         {
-            if (MathF.Abs(DistanceCalculator(this.CurrentPosition, this.NextWaypoint)) <= (this.Velocities * timer))
+            if (MathF.Abs(Globals.DistanceCalculator(this.CurrentPosition, this.NextWaypoint)) <= (this.LegVelocity[2] * time_resolution))
             {
                 if (!this.VehicleHasStopped || this.NextWaypoint != this.VehiclePath.Last())
                 {
@@ -94,8 +102,8 @@ class Aircraft : BattleSystemClass
 
             // Computes new positions (and other attributes) based on physical situation
 
-            this.NewPositionTemp[0] = this.CurrentPosition[0] + (this.LegVelocity[0] * timer);
-            this.NewPositionTemp[1] = this.CurrentPosition[1] + (this.LegVelocity[1] * timer);
+            this.NewPositionTemp[0] = this.CurrentPosition[0] + (this.LegVelocity[0] * time_resolution);
+            this.NewPositionTemp[1] = this.CurrentPosition[1] + (this.LegVelocity[1] * time_resolution);
         }
 
         if (VehicleHasStopped)
@@ -109,30 +117,16 @@ class Aircraft : BattleSystemClass
         }
     }
 
-    public void DecompVelocity()
+    public void ComputeVelocity()
     {
-        this.LegVelocity[0] = this.Velocities * MathF.Cos(AngleCalculator(this.CurrentPosition, this.NextWaypoint));
-        this.LegVelocity[1] = this.Velocities * MathF.Sin(AngleCalculator(this.CurrentPosition, this.NextWaypoint));
+        this.LegVelocity[0] = (this.NextWaypoint[0] - this.CurrentPosition[0]) / (this.CurrentPosition[2] - Globals.CurrentTime);
+        this.LegVelocity[1] = (this.NextWaypoint[1] - this.CurrentPosition[1]) / (this.CurrentPosition[2] - Globals.CurrentTime);
+        this.LegVelocity[2] = MathF.Sqrt((this.LegVelocity[0] * this.LegVelocity[0]) + (this.LegVelocity[1] * this.LegVelocity[1]));
     }
 
-    public float DistanceCalculator(float[] obj1, float[] obj2)
+    public Aircraft(List<float[]> waypoints, float radar_range)
     {
-        float x = obj1[0] - obj2[0];
-        float y = obj1[1] - obj2[1];
-        return MathF.Sqrt((x * x) + (y * y));
-    }
-
-    public float AngleCalculator(float[] obj1, float[] obj2)
-    {
-        float x = obj2[0] - obj1[0];
-        float y = obj2[1] - obj1[1];
-        float v = MathF.Atan2(y, x);
-        return v;
-    }
-
-    public Aircraft(List<float[]> waypoints, float velocities, float radar_range)
-    {
-
+        // Waypoint should should have waypoints and time of arrival and compute velocity from that
         // Object of Aircraft class takes a List of waypoints (float array of size 2), an array of velocities (size = waypoint list size - 1)
         // and a float indicating Radar range.
 
@@ -140,17 +134,16 @@ class Aircraft : BattleSystemClass
         CurrentPosition = waypoints[0];
         NextWaypoint = waypoints[1];
         VehiclePath = waypoints;
-        Velocities = velocities;
         RadarRange = radar_range;
         VehicleHasStopped = false;
         Type = "Aircraft";
         ObjectsVisible = new List<BattleSystemClass>();
         ObjectsSurveyed = new List<BattleSystemClass>();
-        LegVelocity = new float[2];
+        LegVelocity = new float[3];
         CurrWaypointID = 0;
         ObjectRegister.s_AircraftID++;
         VehicleID = ObjectRegister.s_AircraftID;
-        DecompVelocity();
+        ComputeVelocity();
         // Velocities are in direction of any given waypoint leg, decomposing velocities into Vx and Vy
     }
 }

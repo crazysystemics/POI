@@ -1,5 +1,8 @@
-﻿class Emitter
+﻿class Emitter : BattleSystemClass
 {
+
+    // Derived from BattleSystem
+
     public float PulseWidth;
     public float PulseRepetitionInterval;
     public float TimeOfArrival;
@@ -15,5 +18,20 @@
         AngleOfArrival = angleOfArrival;
         EmitterID = emitterID;
         Symbol = symbol;
+    }
+
+    public void Get()
+    {
+
+    }
+
+    public void OnTick()
+    {
+
+    }
+
+    public void Set()
+    {
+
     }
 }

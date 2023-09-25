@@ -12,17 +12,22 @@
 
 // Create class simulated model and add battle systm class and simulated engine
 
+// Define a time of milliseconds per tick (or some other high resolution)
+// Globals.Tick = <value> ms
+
+// Define a public static global class to be accessed by all other classess
 
 class DiscreteTimeSimulationEngine
 {
     public bool allVehiclesStopped = false;
     public List<BattleSystemClass> situationalAwareness;
     PhysicalSimulationEngine PhysEngine;
-    List<SimulatedModel> sim_mod = new List<SimulatedModel>();
+    List<SimulationModel> sim_mod = new List<SimulationModel>();
     public int await = 0;
     public bool FirstRun = true;
     public DiscreteTimeSimulationEngine()
     {
+        Globals.CurrentTime = 0.0f;
         situationalAwareness = new List<BattleSystemClass>();
         situationalAwareness = ObjectRegister.registered_vehicles.ToList();
         PhysEngine = new PhysicalSimulationEngine();
@@ -33,8 +38,10 @@ class DiscreteTimeSimulationEngine
         sim_mod.Add(PhysEngine);
     }
 
-    public void RunSimulationEngine(float timer)
+    public void RunSimulationEngine()
     {
+
+        float time_resolution = Globals.TimeResolution;
         int stoppedVehicles = 0;
 
         if (this.FirstRun)
@@ -66,11 +73,11 @@ class DiscreteTimeSimulationEngine
         }
         foreach (var battle_system in sim_mod)
         {
-            battle_system.OnTick(timer);
+            battle_system.OnTick();
         }
         foreach (var battle_system in sim_mod)
         {
-            battle_system.Set(situationalAwareness, sim_mod);
+            battle_system.Set(sim_mod);
         }
 
         foreach (var battle_system in situationalAwareness)
@@ -91,5 +98,12 @@ class DiscreteTimeSimulationEngine
                 }
             }
         }
+
+        Globals.CurrentTime += Globals.TimeResolution;
+    }
+
+    public void ResetTime()
+    {
+        Globals.CurrentTime = 0.0f;
     }
 }
