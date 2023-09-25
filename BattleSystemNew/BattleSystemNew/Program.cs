@@ -29,7 +29,6 @@ namespace BattleSystem
     {
         static void Main(string[] args)
         {
-            int i = 0;
 
             ObjectRegister.registerObject(new Aircraft(new List<float[]>
                                                         {
@@ -42,22 +41,21 @@ namespace BattleSystem
                                                          new float[] { 15.0f, 0.0f, 4.0f },
                                                          new float[] { 10.0f, 0.0f, 5.0f },
                                                          new float[] { 5.0f, 5.0f, 6.0f }, },
-
-                                                         // Velocities
-
-                                                         1.0f, 7.5f));
-
-            ObjectRegister.registerObject(new Radar(new List<float[]>
-                                                        {new float[] { 15.0f, 10.0f }},
-                                                         0.0f, 7.5f));
+                                                         
+                                                         // Range
+                                                         7.5f));
 
             ObjectRegister.registerObject(new Radar(new List<float[]>
-                                                        {new float[] { 25.0f, 5.0f }},
-                                                         0.0f, 7.5f));
+                                                        {new float[] { 15.0f, 10.0f, 0.0f }},
+                                                          7.5f));
 
             ObjectRegister.registerObject(new Radar(new List<float[]>
-                                                        {new float[] { 15.0f, 0.0f }},
-                                                         0.0f, 7.5f));
+                                                        {new float[] { 25.0f, 5.0f, 0.0f }},
+                                                         7.5f));
+
+            ObjectRegister.registerObject(new Radar(new List<float[]>
+                                                        {new float[] { 15.0f, 0.0f, 0.0f }},
+                                                         7.5f));
 
             DiscreteTimeSimulationEngine DTSE = new DiscreteTimeSimulationEngine();
 
@@ -66,7 +64,6 @@ namespace BattleSystem
                 DTSE.RunSimulationEngine();
                 Console.WriteLine("\nPress Enter/Return to display next tick");
                 Console.ReadLine();
-                i++;
             }
         }
     }

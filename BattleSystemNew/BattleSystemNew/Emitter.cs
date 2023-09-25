@@ -1,4 +1,4 @@
-﻿class Emitter : BattleSystemClass
+﻿class Emitter
 {
 
     // Derived from BattleSystem

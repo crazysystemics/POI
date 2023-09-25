@@ -35,7 +35,6 @@ class DiscreteTimeSimulationEngine
         {
             sim_mod.Add(objs);
         }
-        sim_mod.Add(PhysEngine);
     }
 
     public void RunSimulationEngine()
@@ -50,10 +49,6 @@ class DiscreteTimeSimulationEngine
             // This conditional check is only to output the initial states of all objects before
             // any values are updated by the method calls that follow this
 
-            if (sim_mod.Contains(PhysEngine))
-            {
-                sim_mod.Remove(PhysEngine);
-            }
             Console.WriteLine("Initial values:");
             foreach (BattleSystemClass battle_system in sim_mod)
             {
@@ -64,7 +59,6 @@ class DiscreteTimeSimulationEngine
                 }
             }
             FirstRun = false;
-            sim_mod.Add(PhysEngine);
         }
 
         foreach (var battle_system in sim_mod)
@@ -75,10 +69,12 @@ class DiscreteTimeSimulationEngine
         {
             battle_system.OnTick();
         }
+        PhysEngine.OnTick();
         foreach (var battle_system in sim_mod)
         {
             battle_system.Set(sim_mod);
         }
+        PhysEngine.Set(sim_mod);
 
         foreach (var battle_system in situationalAwareness)
         {

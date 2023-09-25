@@ -36,7 +36,14 @@ class Radar : BattleSystemClass
 
     public override void OnTick()
     {
-
+/*        Console.WriteLine("\n----------------");
+        Console.WriteLine($"Objects visible to {this.Type} {this.VehicleID}:");
+        foreach (var vis_obj in this.ObjectsVisible)
+        {
+            float dist = Globals.DistanceCalculator(this.CurrentPosition, vis_obj.CurrentPosition);
+            float angle = Globals.AngleCalculator(this.CurrentPosition, vis_obj.CurrentPosition);
+            Console.WriteLine($"{vis_obj.Type} {vis_obj.VehicleID} at distance = {dist} and angle = {Math.Abs(angle)} radians");
+        }*/
     }
 
     public override void Set(List<SimulationModel> sim_mod)

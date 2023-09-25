@@ -36,53 +36,27 @@ class PhysicalSimulationEngine : SimulationModel
     public override void OnTick()
     {
 
-        foreach (var sit_aw in physicalSituationalAwareness)
-        {
-            if (sit_aw.Type == "PhysEngine")
-            {
-                physicalSituationalAwareness.Remove(sit_aw);
-            }
-        }
-
         foreach (var battle_sys in physicalSituationalAwareness)
         {
 
-            // Return a list of emitters to the RWR (to do)
+            Console.WriteLine($"\n{battle_sys.Type} {battle_sys.ID} attributes:");
+            Console.WriteLine($"Position (x, y): ({battle_sys.CurrentPosition[0]}, {battle_sys.CurrentPosition[1]})");
 
-            // Outputs position of each object in physical space
-            
-            Console.WriteLine($"\n----------------\n\n{battle_sys.Type} {battle_sys.ID} position (x, y): ({battle_sys.CurrentPosition[0]}, {battle_sys.CurrentPosition[1]})");
+        }
 
-            Console.WriteLine("\n\nSpatial relations:");
+        Console.WriteLine("\nSpatial relations:");
 
+        foreach (var battle_sys in physicalSituationalAwareness)
+        {
             foreach (var battle_sys_2 in physicalSituationalAwareness)
             {
-                if (battle_sys != battle_sys_2 && battle_sys.Type != battle_sys_2.Type)
+                if (battle_sys != battle_sys_2 && battle_sys.Type != battle_sys_2.Type && battle_sys.Type != "Radar")
                 {
                     float dist = Globals.DistanceCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
                     float angle = Globals.AngleCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
                     Console.WriteLine($"\n{battle_sys.Type} {battle_sys.ID} and {battle_sys_2.Type} {battle_sys_2.ID}:");
                     Console.WriteLine($"Distance = {dist}");
                     Console.WriteLine($"Azimuth = {Math.Abs(angle)} radians");
-
-                    // The above is being printed twice after the first tick. Reason currently not known.
-
-                }
-            }
-
-            Console.WriteLine("\n----------------");
-
-            if (battle_sys.ObjectsVisible.Count > 0)
-            {
-
-                // Displays the objects that are registered to ObjectsVisible property
-
-                Console.WriteLine($"\nObjects visible to {battle_sys.Type} {battle_sys.ID}:");
-                foreach (var vis_objs in battle_sys.ObjectsVisible)
-                {
-                    float dist = Globals.DistanceCalculator(battle_sys.CurrentPosition, vis_objs.CurrentPosition);
-                    float angle = Globals.AngleCalculator(battle_sys.CurrentPosition, vis_objs.CurrentPosition);
-                    Console.WriteLine($"{vis_objs.Type} {vis_objs.VehicleID} at distance = {dist} and angle = {Math.Abs(angle)} radians");
                 }
             }
         }
@@ -90,13 +64,6 @@ class PhysicalSimulationEngine : SimulationModel
 
     public override void Set(List<SimulationModel> sim_mod)
     {
-
-/*        physicalSituationalAwareness = sim_mod.ToList();
-        if (physicalSituationalAwareness.Contains(this))
-        {
-            // Avoids a similar error as explain before the OnTick() method
-            physicalSituationalAwareness.Remove(this);
-        }*/
 
         foreach (var battle_system in physicalSituationalAwareness)
         {

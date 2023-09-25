@@ -44,13 +44,16 @@ class Aircraft : BattleSystemClass
 
         // Computation to be done in PSE
 
+        foreach (var batt_cls in sim_mod)
+        {
+            if (batt_cls is PhysicalSimulationEngine)
+            {
+                sim_mod.Remove(batt_cls);
+            }
+        }
+
         foreach (BattleSystemClass battle_system in sim_mod)
         {
-
-            if (battle_system is PhysicalSimulationEngine)
-            {
-                sim_mod.Remove(battle_system);
-            }
 
             if (this != battle_system)
             {
@@ -97,6 +100,18 @@ class Aircraft : BattleSystemClass
             }
         }
 
+        Console.WriteLine($"(Vx, Vy) = ({this.LegVelocity[0]}, {this.LegVelocity[1]})");
+        Console.WriteLine($"(x, y) = ({this.CurrentPosition[0]}, {this.CurrentPosition[1]})");
+
+        Console.WriteLine("\n----------------");
+        Console.WriteLine($"Objects visible to {this.Type} {this.VehicleID}:");
+        foreach(var vis_obj in this.ObjectsVisible)
+        {
+            float dist = Globals.DistanceCalculator(this.CurrentPosition, vis_obj.CurrentPosition);
+            float angle = Globals.AngleCalculator(this.CurrentPosition, vis_obj.CurrentPosition);
+            Console.WriteLine($"{vis_obj.Type} {vis_obj.VehicleID} at distance = {dist} and angle = {Math.Abs(angle)} radians");
+        }
+
         if (!this.VehicleHasStopped)
         {
 
@@ -119,8 +134,8 @@ class Aircraft : BattleSystemClass
 
     public void ComputeVelocity()
     {
-        this.LegVelocity[0] = (this.NextWaypoint[0] - this.CurrentPosition[0]) / (this.CurrentPosition[2] - Globals.CurrentTime);
-        this.LegVelocity[1] = (this.NextWaypoint[1] - this.CurrentPosition[1]) / (this.CurrentPosition[2] - Globals.CurrentTime);
+        this.LegVelocity[0] = (this.NextWaypoint[0] - this.CurrentPosition[0]) / MathF.Abs(Globals.CurrentTime - this.NextWaypoint[2]);
+        this.LegVelocity[1] = (this.NextWaypoint[1] - this.CurrentPosition[1]) / MathF.Abs(Globals.CurrentTime - this.NextWaypoint[2]);
         this.LegVelocity[2] = MathF.Sqrt((this.LegVelocity[0] * this.LegVelocity[0]) + (this.LegVelocity[1] * this.LegVelocity[1]));
     }
 
