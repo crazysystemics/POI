@@ -43,6 +43,7 @@ class PhysicalSimulationEngine : SimulationModel
 
         }
 
+        Console.WriteLine("\n----------------");
         Console.WriteLine("\nSpatial relations:");
 
         foreach (var battle_sys in physicalSituationalAwareness)

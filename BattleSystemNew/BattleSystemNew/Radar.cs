@@ -62,6 +62,18 @@ class Radar : BattleSystemClass
                 }
             }
         }
+
+        if (this.ObjectsVisible.Count > 0)
+        {
+            Console.WriteLine("\n----------------");
+            Console.WriteLine($"\nObjects visible to {this.Type} {this.VehicleID}:\n");
+            foreach (var vis_obj in this.ObjectsVisible)
+            {
+                float dist = Globals.DistanceCalculator(this.CurrentPosition, vis_obj.CurrentPosition);
+                float angle = Globals.AngleCalculator(this.CurrentPosition, vis_obj.CurrentPosition);
+                Console.WriteLine($"{vis_obj.Type} {vis_obj.VehicleID} at distance = {dist} and angle = {Math.Abs(angle)} radians");
+            }
+        }
     }
     public Radar(List<float[]> waypoints, float radar_range)
     {

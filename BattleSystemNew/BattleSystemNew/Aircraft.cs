@@ -42,18 +42,6 @@ class Aircraft : BattleSystemClass
 
         // Adds objects to ObjectVisible property if they are within range of radar or RWR and removes them when they are not
 
-        // Parameters = list of battle systems
-
-        // Computation to be done in PSE
-
-        foreach (var batt_cls in sim_mod)
-        {
-            if (batt_cls is PhysicalSimulationEngine)
-            {
-                sim_mod.Remove(batt_cls);
-            }
-        }
-
         foreach (BattleSystemClass battle_system in sim_mod)
         {
 
@@ -69,6 +57,18 @@ class Aircraft : BattleSystemClass
                 {
                     this.ObjectsVisible.Remove(battle_system);
                 }
+            }
+        }
+
+        if (this.ObjectsVisible.Count > 0)
+        {
+            Console.WriteLine("\n----------------");
+            Console.WriteLine($"\nObjects visible to {this.Type} {this.VehicleID}:\n");
+            foreach (var vis_obj in this.ObjectsVisible)
+            {
+                float dist = Globals.DistanceCalculator(this.CurrentPosition, vis_obj.CurrentPosition);
+                float angle = Globals.AngleCalculator(this.CurrentPosition, vis_obj.CurrentPosition);
+                Console.WriteLine($"{vis_obj.Type} {vis_obj.VehicleID} at distance = {dist} and angle = {Math.Abs(angle)} radians");
             }
         }
 
@@ -103,13 +103,7 @@ class Aircraft : BattleSystemClass
         }
 
         Console.WriteLine("\n----------------");
-        Console.WriteLine($"Objects visible to {this.Type} {this.VehicleID}:");
-        foreach(var vis_obj in this.ObjectsVisible)
-        {
-            float dist = Globals.DistanceCalculator(this.CurrentPosition, vis_obj.CurrentPosition);
-            float angle = Globals.AngleCalculator(this.CurrentPosition, vis_obj.CurrentPosition);
-            Console.WriteLine($"{vis_obj.Type} {vis_obj.VehicleID} at distance = {dist} and angle = {Math.Abs(angle)} radians");
-        }
+
 
         if (!this.VehicleHasStopped)
         {

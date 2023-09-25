@@ -62,7 +62,7 @@ namespace BattleSystem
             while (!DTSE.allVehiclesStopped)
             {
                 DTSE.RunSimulationEngine();
-                Console.WriteLine("\nPress Enter/Return to display next tick");
+                Console.WriteLine("\n----------------\n\nPress Enter/Return to display next tick");
                 Console.ReadLine();
             }
         }
