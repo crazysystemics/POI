@@ -17,11 +17,8 @@ class Radar : BattleSystemClass
 {
     public override string Type { get; set; }
     public override int VehicleID { get; set; }
-    public override int CurrWaypointID { get; set; }
-    public override float[] LegVelocity { get; set; }
     public override float[] CurrentPosition { get; set; }
     public override float[] NewPositionTemp { get; set; }
-    public override float[] NextWaypoint { get; set; }
     public override float RadarRange { get; set; }
     public override bool VehicleHasStopped { get; set; }
     public override List<float[]> VehiclePath { get; set; }
@@ -77,10 +74,7 @@ class Radar : BattleSystemClass
         VehiclePath = waypoints;
         VehicleHasStopped = true;
         RadarRange = radar_range;
-        NextWaypoint = new float[] { 0.0f, 0.0f };
-        LegVelocity = new float[] { 0.0f, 0.0f };
         Type = "Radar";
-        CurrWaypointID = 0;
         ObjectsVisible = new List<BattleSystemClass>();
         ObjectsSurveyed = new List<BattleSystemClass>();
         ObjectRegister.s_RadarID++;

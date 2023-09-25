@@ -55,10 +55,6 @@ class DiscreteTimeSimulationEngine
             foreach (BattleSystemClass battle_system in sim_mod)
             {
                 Console.WriteLine($"\n{battle_system.Type} {battle_system.VehicleID} position (x, y): ({battle_system.CurrentPosition[0]}, {battle_system.CurrentPosition[1]})");
-                if (battle_system.Type == "Aircraft")
-                {
-                    Console.WriteLine($"Velocity (Vx, Vy): ({battle_system.LegVelocity[0]}, {battle_system.LegVelocity[1]})");
-                }
             }
             FirstRun = false;
         }

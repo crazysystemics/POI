@@ -16,16 +16,18 @@ class Aircraft : BattleSystemClass
 {
     public override string Type { get; set; }
     public override int VehicleID { get; set; }
-    public override int CurrWaypointID { get; set; }
-    public override float[] LegVelocity { get; set; }
     public override float[] CurrentPosition { get; set; }
     public override float[] NewPositionTemp { get; set; }
-    public override float[] NextWaypoint { get; set; }
     public override float RadarRange { get; set; }
     public override bool VehicleHasStopped { get; set; }
     public override List<float[]> VehiclePath { get; set; }
     public override List<BattleSystemClass> ObjectsVisible { get; set; }
     public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
+
+
+    public int CurrWaypointID;
+    public float[] LegVelocity;
+    public float[] NextWaypoint;
 
     // Maintain separate list of radars visible by RWR
 
