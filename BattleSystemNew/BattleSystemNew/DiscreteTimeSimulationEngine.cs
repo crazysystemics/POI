@@ -17,6 +17,8 @@
 
 // Define a public static global class to be accessed by all other classess
 
+using System.Net.NetworkInformation;
+
 class DiscreteTimeSimulationEngine
 {
     public bool allVehiclesStopped = false;
@@ -75,6 +77,7 @@ class DiscreteTimeSimulationEngine
             battle_system.Set(sim_mod);
         }
         PhysEngine.Set(sim_mod);
+        PhysEngine.physicalSituationalAwareness.Clear();
 
         foreach (var battle_system in situationalAwareness)
         {
@@ -90,6 +93,10 @@ class DiscreteTimeSimulationEngine
                     if (this.await == 2)
                     {
                         allVehiclesStopped = true;
+                        if (allVehiclesStopped)
+                        {
+                            Globals.CurrentTime = 0.0f;
+                        }
                     }
                 }
             }

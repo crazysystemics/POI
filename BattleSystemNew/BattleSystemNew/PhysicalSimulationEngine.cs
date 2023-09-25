@@ -35,7 +35,6 @@ class PhysicalSimulationEngine : SimulationModel
 
     public override void OnTick()
     {
-
         foreach (var battle_sys in physicalSituationalAwareness)
         {
 
@@ -54,9 +53,8 @@ class PhysicalSimulationEngine : SimulationModel
                 {
                     float dist = Globals.DistanceCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
                     float angle = Globals.AngleCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
-                    Console.WriteLine($"\n{battle_sys.Type} {battle_sys.ID} and {battle_sys_2.Type} {battle_sys_2.ID}:");
-                    Console.WriteLine($"Distance = {dist}");
-                    Console.WriteLine($"Azimuth = {Math.Abs(angle)} radians");
+                    Console.WriteLine($"\nBetween {battle_sys.Type} {battle_sys.ID} and {battle_sys_2.Type} {battle_sys_2.ID}:");
+                    Console.WriteLine($"Distance = {dist}, Angle = {angle}");
                 }
             }
         }

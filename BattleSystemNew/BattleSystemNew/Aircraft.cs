@@ -100,9 +100,6 @@ class Aircraft : BattleSystemClass
             }
         }
 
-        Console.WriteLine($"(Vx, Vy) = ({this.LegVelocity[0]}, {this.LegVelocity[1]})");
-        Console.WriteLine($"(x, y) = ({this.CurrentPosition[0]}, {this.CurrentPosition[1]})");
-
         Console.WriteLine("\n----------------");
         Console.WriteLine($"Objects visible to {this.Type} {this.VehicleID}:");
         foreach(var vis_obj in this.ObjectsVisible)
