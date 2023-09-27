@@ -2,7 +2,7 @@
  * It is an abstraction layer to avoid passing entire object instances to the simulation engine
  * and it instead allows creating objects with only some properties to be passed to the engine */
 
-class OutParameter
+public class OutParameter
 {
     public int ID;
     public OutParameter(int id)

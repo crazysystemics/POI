@@ -24,7 +24,7 @@
  */
 
 
-namespace RWR_POC
+namespace RWRPOC
 {
     class Program
     {

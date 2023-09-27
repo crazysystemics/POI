@@ -1,16 +1,18 @@
-﻿class Emitter
+﻿class Emitter : BattleSystem
 {
+
+    public override bool Stopped { get; set; }
 
     // Derived from BattleSystem
 
-    public float PulseWidth;
-    public float PulseRepetitionInterval;
-    public float TimeOfArrival;
-    public float AngleOfArrival;
+    public int PulseWidth;
+    public int PulseRepetitionInterval;
+    public int TimeOfArrival;
+    public int AngleOfArrival;
     public int EmitterID;
     public string Symbol;
 
-    public Emitter(float pulseWidth, float pulseRepetitionInterval, float timeOfArrival, float angleOfArrival, int emitterID, string symbol)
+    public Emitter(int pulseWidth, int pulseRepetitionInterval, int timeOfArrival, int angleOfArrival, int emitterID, string symbol)
     {
         PulseWidth = pulseWidth;
         PulseRepetitionInterval = pulseRepetitionInterval;
@@ -20,17 +22,35 @@
         Symbol = symbol;
     }
 
-    public void Get()
+    public class EmitterOut : OutParameter
+    {
+        public int pulseWidth;
+        public int pulseRepetitionInterval;
+        public int timeOfArrival;
+        public int AngleOfArrival;
+        public int EmitterID;
+        public EmitterOut(int pulseWidth, int pulseRepetitionInterval, int timeOfArrival, int angleOfArrival, int id) : base(id)
+        {
+            this.pulseWidth = pulseWidth;
+            this.pulseRepetitionInterval = pulseRepetitionInterval;
+            this.timeOfArrival = timeOfArrival;
+            AngleOfArrival = angleOfArrival;
+            EmitterID = id;
+        }
+    }
+
+    public override EmitterOut Get()
+    {
+        EmitterOut emitterout = new EmitterOut(0, 1, 1, 0, 5);
+        return emitterout;
+    }
+
+    public override void OnTick()
     {
 
     }
 
-    public void OnTick()
-    {
-
-    }
-
-    public void Set()
+    public override void Set(List<InParameter> inparameter)
     {
 
     }

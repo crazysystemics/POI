@@ -25,81 +25,98 @@ using System.Net.NetworkInformation;
 class DiscreteTimeSimulationEngine
 {
     public bool allVehiclesStopped = false;
-    public List<BattleSystem> situationalAwareness;
-    PhysicalSimulationEngine PhysEngine;
-    List<SimulationModel> sim_mod = new List<SimulationModel>();
-    public int await = 0;
-    public bool FirstRun = true;
+    public List<SimulationModel> sim_mod;
+    PhysicalSimulationEngine PhysEngine = new PhysicalSimulationEngine();
+    public List<InParameter> dtseinplist;
+    //public int await = 0;
+    //public bool FirstRun = true;
+
     public DiscreteTimeSimulationEngine()
     {
+        sim_mod = new List<SimulationModel>();
+        dtseinplist = new List<InParameter>();
         Globals.CurrentTime = 0.0f;
-        situationalAwareness = new List<BattleSystem>();
-        situationalAwareness = ObjectRegister.registered_vehicles.ToList();
-        PhysEngine = new PhysicalSimulationEngine();
-        foreach (var objs in situationalAwareness)
-        {
-            sim_mod.Add(objs);
-        }
+        sim_mod = ObjectRegister.objects_registered.ToList();
+
     }
 
+    public class DTSEIn : InParameter
+    {
+        public DTSEIn(int id) : base(id)
+        {
+            
+        }
+    }
     public void RunSimulationEngine()
     {
 
-        float time_resolution = Globals.TimeResolution;
-        int stoppedVehicles = 0;
-
-        if (this.FirstRun)
+        foreach (SimulationModel sim_model in sim_mod)
         {
-
-            // This conditional check is only to output the initial states of all objects before
-            // any values are updated by the method calls that follow this
-
-            Console.WriteLine("Initial values:");
-            foreach (BattleSystem battle_system in sim_mod)
-            {
-                Console.WriteLine($"\n{battle_system.Type} {battle_system.VehicleID} position (x, y): ({battle_system.CurrentPosition[0]}, {battle_system.CurrentPosition[1]})");
-            }
-            FirstRun = false;
+            PhysEngine.physicalSituationalAwareness.Add(sim_model.Get());
         }
 
-        foreach (var battle_system in sim_mod)
+        foreach (SimulationModel sim_model in sim_mod)
         {
-            PhysEngine.physicalSituationalAwareness.Add(battle_system.Get());
+            sim_model.OnTick();
         }
-        foreach (var battle_system in sim_mod)
-        {
-            battle_system.OnTick();
-        }
-        PhysEngine.OnTick();
-        foreach (var battle_system in sim_mod)
-        {
-            battle_system.Set(sim_mod);
-        }
-        PhysEngine.Set(sim_mod);
-        PhysEngine.physicalSituationalAwareness.Clear();
 
-        foreach (var battle_system in situationalAwareness)
+        foreach (SimulationModel sim_model in sim_mod)
         {
-
-            // Stops simulation if no dynamic actions are occurring
-
-            if (battle_system.VehicleHasStopped)
-            {
-                stoppedVehicles++;
-                if (stoppedVehicles == situationalAwareness.Count)
-                {
-                    this.await++;
-                    if (this.await == 1)
-                    {
-                        allVehiclesStopped = true;
-                        if (allVehiclesStopped)
-                        {
-                            Globals.CurrentTime = 0.0f;
-                        }
-                    }
-                }
-            }
+            sim_model.Set(dtseinplist);
         }
+
+        //if (this.FirstRun)
+        //{
+
+        //    // This conditional check is only to output the initial states of all objects before
+        //    // any values are updated by the method calls that follow this
+
+        //    Console.WriteLine("Initial values:");
+        //    foreach (BattleSystem battle_system in sim_mod)
+        //    {
+        //        Console.WriteLine($"\n{battle_system.Type} {battle_system.VehicleID} position (x, y): ({battle_system.CurrentPosition[0]}, {battle_system.CurrentPosition[1]})");
+        //    }
+        //    FirstRun = false;
+        //}
+
+        //foreach (var battle_system in sim_mod)
+        //{
+        //    PhysEngine.physicalSituationalAwareness.Add(battle_system.Get());
+        //}
+        //foreach (var battle_system in sim_mod)
+        //{
+        //    battle_system.OnTick();
+        //}
+        //PhysEngine.OnTick();
+        //foreach (var battle_system in sim_mod)
+        //{
+        //    battle_system.Set(sim_mod);
+        //}
+        //PhysEngine.Set(sim_mod);
+        //PhysEngine.physicalSituationalAwareness.Clear();
+
+        //foreach (var battle_system in situationalAwareness)
+        //{
+
+        //    // Stops simulation if no dynamic actions are occurring
+
+        //    if (battle_system.VehicleHasStopped)
+        //    {
+        //        stoppedVehicles++;
+        //        if (stoppedVehicles == situationalAwareness.Count)
+        //        {
+        //            this.await++;
+        //            if (this.await == 1)
+        //            {
+        //                allVehiclesStopped = true;
+        //                if (allVehiclesStopped)
+        //                {
+        //                    Globals.CurrentTime = 0.0f;
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
         Globals.CurrentTime += Globals.TimeResolution;
     }
