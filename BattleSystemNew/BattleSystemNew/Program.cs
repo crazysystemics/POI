@@ -1,29 +1,3 @@
-/* Classes contained in this project:
- * 1. Simulation Model (abstract)
- *  - Derived classes:
- *    a. Physical Simulation Engine (PSE)
- *    b. Battle System (abstract)
- *    - Derived classes:
- *      i. Aircraft
- *      ii. Radar
- * 
- * 2. Situational Awareness
- * 3. Discrete Time Simulation Engine (DTSE)
- * 4. Object Register
- * 5. Globals
- * 6. Emitter (currently not implemented)
- * 
- * It also contains a Program class (in this file) that runs the main program.
- * The main program first registers Battle System objects using the Object Register class.
- * Object Register also assigns an identifier to each object registered with it.
- * 
- * The DTSE initializes a Simulation Model list and adds all objects registered with
- * Object Register to it. It also instantiates a PSE object, which in turn creates
- * a Sitautional Awareness class list. The DTSE then calls Get(), OnTick() and Set()
- * methods on every object in the Simulation Model list.
- */
-
-
 namespace RWRPOC
 {
     class Program

@@ -1,19 +1,4 @@
-﻿/* The PhysicalSimulationEngine does the following:
- * 
- * 1. On instantiation, it creates a new list of SituationalAwareness objects.
- * 
- * 2. The Get() returns a SituationalAwareness object with some default attribute values, but this object
- *    is never used.
- * 
- * 3. The OnTick() method:
- *    a. Displays positions of objects in physical space. Also displays the spatial relation between
- *       every object in physicalSituationalAwareness.
- *       
- * 4. The Set() method updates the internal states of all BattleSystemClass objects that are in the situational awareness list.
- *    
- *  */
-
-class PhysicalSimulationEngine : SimulationModel
+﻿class PhysicalSimulationEngine : SimulationModel
 {
     public List<OutParameter> physicalSituationalAwareness;
 

@@ -1,16 +1,3 @@
-/* The Aircraft class inherits from BattleSystemClass. It contains data pertaining to flight path
- * RWR range, and its current state. It also inherits Get(), OnTick() and Set() methods from SimulationModel
- * 
- * The Get() method returns a SituationalAwareness object containing its CurrentPosition, VehicleID and Type.
- * 
- * The OnTick() method determines the next waypoint based on velocity and path information and moves to the
- * new position computed by the PSE.
- * 
- * The Set() method updates its internal list of ObjectVisible based on Radars detected by RWR (pending proper implementation)
- * and also display them to the Console.
- * 
- */
-
 // Naming conventions:
 // avoid names with underscores
 

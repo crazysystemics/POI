@@ -1,16 +1,3 @@
-/* The Radar class inherits from BattleSystemClass. It contains data pertaining to its state, such as current position
- * and its range. This radar is assumed to have an isometric scan, so beam direction is irrelevant in this case.
- * 
- * The Get() method returns a SituationalAwareness object containing its CurrentPosition, VehicleID and Type.
- * 
- * The OnTick() method is currently not computing anything. Potential to add direction/angle based computations
- * when the Radar gets more complex.
- * 
- * The Set() method updates its internal list of ObjectVisible based aircraft that are within its range and outputs them
- * to the console.
- * 
- */
-
 class Radar : BattleSystem
 {
 
