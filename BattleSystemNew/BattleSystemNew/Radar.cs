@@ -56,43 +56,12 @@ class Radar : BattleSystem
 
     public override void Set(List<InParameter> inparameter)
     {
-        // Adds objects to ObjectVisible property if they are within range of radar or RWR and removes them when they are not
 
-    //    foreach (BattleSystem battle_system in sim_mod)
-    //    {
-    //        if (this != battle_system)
-    //        {
-    //            float dist = Globals.DistanceCalculator(this.CurrentPosition, battle_system.CurrentPosition);
-    //            if (dist <= this.RadarRange && !this.ObjectsVisible.Contains(battle_system))
-    //            {
-    //                this.ObjectsVisible.Add(battle_system);
-    //            }
-    //            else if (dist > this.RadarRange && this.ObjectsVisible.Contains(battle_system))
-    //            {
-    //                this.ObjectsVisible.Remove(battle_system);
-    //            }
-    //        }
-    //    }
-
-    //    if (this.ObjectsVisible.Count > 0)
-    //    {
-    //        Console.WriteLine("\n----------------");
-    //        Console.WriteLine($"\nObjects visible to {this.Type} {this.VehicleID}:\n");
-    //        foreach (var vis_obj in this.ObjectsVisible)
-    //        {
-    //            float dist = Globals.DistanceCalculator(this.CurrentPosition, vis_obj.CurrentPosition);
-    //            float angle = Globals.AngleCalculator(this.CurrentPosition, vis_obj.CurrentPosition);
-    //            Console.WriteLine($"{vis_obj.Type} {vis_obj.VehicleID} at distance = {dist} and angle = {Math.Abs(angle)} radians");
-    //        }
-    //    }
     }
 
 
     public Radar(List<float[]> waypoints, float radar_range)
     {
-
-        // Object of Radar class takes the same arguments as Aircraft, but the List of waypoints only contains one item
-        // and the array of velocities has one item with the value 0.0
 
     }
 }

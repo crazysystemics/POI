@@ -44,30 +44,6 @@ class PhysicalSimulationEngine : SimulationModel
         // Compute the transmitted power detected in neighbouring cells
         // Update the RWR cells with their coordinates and power
 
-        //foreach (var battle_sys in physicalSituationalAwareness)
-        //{
-
-        //    Console.WriteLine($"\n{battle_sys.Type} {battle_sys.ID} attributes:");
-        //    Console.WriteLine($"Position (x, y): ({battle_sys.CurrentPosition[0]}, {battle_sys.CurrentPosition[1]})");
-
-        //}
-
-        //Console.WriteLine("\n----------------");
-        //Console.WriteLine("\nSpatial relations:");
-
-        //foreach (var battle_sys in physicalSituationalAwareness)
-        //{
-        //    foreach (var battle_sys_2 in physicalSituationalAwareness)
-        //    {
-        //        if (battle_sys != battle_sys_2 && battle_sys.Type != battle_sys_2.Type && battle_sys.Type != "Radar")
-        //        {
-        //            float dist = Globals.DistanceCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
-        //            float angle = Globals.AngleCalculator(battle_sys.CurrentPosition, battle_sys_2.CurrentPosition);
-        //            Console.WriteLine($"\nBetween {battle_sys.Type} {battle_sys.ID} and {battle_sys_2.Type} {battle_sys_2.ID}:");
-        //            Console.WriteLine($"Distance = {dist}, Angle = {angle}");
-        //        }
-        //    }
-        //}
     }
 
     public override void Set(List<InParameter> inparameter)
