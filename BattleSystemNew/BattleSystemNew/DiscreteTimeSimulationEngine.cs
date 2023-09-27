@@ -3,18 +3,18 @@
 class DiscreteTimeSimulationEngine
 {
     public bool allVehiclesStopped = false;
-    public List<SimulationModel> sim_mod;
-    PhysicalSimulationEngine PhysEngine = new PhysicalSimulationEngine();
-    public List<InParameter> dtseinplist;
+    public List<SimulationModel> simMod;
+    PhysicalSimulationEngine physEngine = new PhysicalSimulationEngine();
+    public List<InParameter> dtseInpList;
     //public int await = 0;
     //public bool FirstRun = true;
 
     public DiscreteTimeSimulationEngine()
     {
-        sim_mod = new List<SimulationModel>();
-        dtseinplist = new List<InParameter>();
+        simMod = new List<SimulationModel>();
+        dtseInpList = new List<InParameter>();
         Globals.CurrentTime = 0.0f;
-        sim_mod = ObjectRegister.objects_registered.ToList();
+        simMod = ObjectRegister.objects_registered.ToList();
 
     }
 
@@ -28,19 +28,19 @@ class DiscreteTimeSimulationEngine
     public void RunSimulationEngine()
     {
 
-        foreach (SimulationModel sim_model in sim_mod)
+        foreach (SimulationModel sim_model in simMod)
         {
-            PhysEngine.physicalSituationalAwareness.Add(sim_model.Get());
+            physEngine.physicalSituationalAwareness.Add(sim_model.Get());
         }
 
-        foreach (SimulationModel sim_model in sim_mod)
+        foreach (SimulationModel sim_model in simMod)
         {
             sim_model.OnTick();
         }
 
-        foreach (SimulationModel sim_model in sim_mod)
+        foreach (SimulationModel sim_model in simMod)
         {
-            sim_model.Set(dtseinplist);
+            sim_model.Set(dtseInpList);
         }
 
         Globals.CurrentTime += Globals.TimeResolution;

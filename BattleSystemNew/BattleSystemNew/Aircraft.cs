@@ -13,14 +13,7 @@ using System.Dynamic;
 class Aircraft : BattleSystem
 {
     public override bool Stopped { get; set; }
-    public AircraftPosition CurrentPosition = new AircraftPosition(0, 0);
-
-
-    public int CurrWaypointID;
-    public float[] LegVelocity;
-    public float[] NextWaypoint;
-
-    // Maintain separate list of radars visible by RWR
+    public AircraftPosition currentPosition = new AircraftPosition(0, 0);
 
     public class AircraftOut:OutParameter
     {
@@ -32,15 +25,13 @@ class Aircraft : BattleSystem
             this.Oy = y;
         }
     }
-
-    // In Parameter class is null
     public override AircraftOut Get()
     {
-        AircraftOut aircraft_position = new AircraftOut(CurrentPosition.x, CurrentPosition.y, 0);
-        return aircraft_position;
+        AircraftOut aircraftPosition = new AircraftOut(currentPosition.x, currentPosition.y, 0);
+        return aircraftPosition;
     }
 
-    public override void Set(List<InParameter> inparameter)
+    public override void Set(List<InParameter> inParameter)
     {
 
     }
@@ -50,7 +41,7 @@ class Aircraft : BattleSystem
 
     }
 
-    public Aircraft(List<float[]> waypoints, float radar_range)
+    public Aircraft()
     {
 
     }

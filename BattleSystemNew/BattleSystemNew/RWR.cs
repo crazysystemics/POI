@@ -7,7 +7,7 @@
         public int[] Amplitudes = new int[4];
         public int Frequency;
         public int PRI;
-        public int PulseWidth;
+        public int pulseWidth;
         public int AOA;
 
         public Emitter(int[] amplitudes = null, int frequency = 0, int pRI = 0, int pulseWidth = 1, int aOA = 0)
@@ -15,7 +15,7 @@
             Amplitudes = amplitudes;
             Frequency = frequency;
             PRI = pRI;
-            PulseWidth = pulseWidth;
+            this.pulseWidth = pulseWidth;
             AOA = aOA;
         }
     }
@@ -44,8 +44,8 @@
 
     public override OutParameter Get()
     {
-        RWROut rwrparams = new RWROut(0, 0, 2);
-        return rwrparams;
+        RWROut rwrParams = new RWROut(0, 0, 2);
+        return rwrParams;
     }
 
     public override void OnTick()
@@ -53,7 +53,7 @@
 
     }
 
-    public override void Set(List<InParameter> inparameter)
+    public override void Set(List<InParameter> inParameter)
     {
 
     }

@@ -3,11 +3,11 @@ class Radar : BattleSystem
 
     public override bool Stopped { get; set; }
 
-    public float PulseWidth;
-    public float PulseRepetitionInterval;
-    public float TimeElapsed = 0.0f;
+    public float pulseWidth;
+    public float pulseRepetitionInterval;
+    public float timeElapsed = 0.0f;
 
-    public RadarPosition CurrentPosition = new RadarPosition(0, 0);
+    public RadarPosition currentPosition = new RadarPosition(0, 0);
 
     public float[] EmitPulse()
     {
@@ -27,27 +27,27 @@ class Radar : BattleSystem
 
     public override OutParameter Get()
     {
-        Out radar_output = new Out(CurrentPosition.r, CurrentPosition.theta, 1);
-        return radar_output;
+        Out radarOutput = new Out(currentPosition.r, currentPosition.theta, 1);
+        return radarOutput;
     }
 
     public override void OnTick()
     {
-        if (TimeElapsed == PulseRepetitionInterval)
+        if (timeElapsed == pulseRepetitionInterval)
         {
             EmitPulse();
-            TimeElapsed = 0;
+            timeElapsed = 0;
         }
-        TimeElapsed += Globals.TimeResolution;
+        timeElapsed += Globals.TimeResolution;
     }
 
-    public override void Set(List<InParameter> inparameter)
+    public override void Set(List<InParameter> inParameter)
     {
 
     }
 
 
-    public Radar(List<float[]> waypoints, float radar_range)
+    public Radar()
     {
 
     }
