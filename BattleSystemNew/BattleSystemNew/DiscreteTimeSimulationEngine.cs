@@ -25,7 +25,7 @@ using System.Net.NetworkInformation;
 class DiscreteTimeSimulationEngine
 {
     public bool allVehiclesStopped = false;
-    public List<BattleSystemClass> situationalAwareness;
+    public List<BattleSystem> situationalAwareness;
     PhysicalSimulationEngine PhysEngine;
     List<SimulationModel> sim_mod = new List<SimulationModel>();
     public int await = 0;
@@ -33,7 +33,7 @@ class DiscreteTimeSimulationEngine
     public DiscreteTimeSimulationEngine()
     {
         Globals.CurrentTime = 0.0f;
-        situationalAwareness = new List<BattleSystemClass>();
+        situationalAwareness = new List<BattleSystem>();
         situationalAwareness = ObjectRegister.registered_vehicles.ToList();
         PhysEngine = new PhysicalSimulationEngine();
         foreach (var objs in situationalAwareness)
@@ -55,7 +55,7 @@ class DiscreteTimeSimulationEngine
             // any values are updated by the method calls that follow this
 
             Console.WriteLine("Initial values:");
-            foreach (BattleSystemClass battle_system in sim_mod)
+            foreach (BattleSystem battle_system in sim_mod)
             {
                 Console.WriteLine($"\n{battle_system.Type} {battle_system.VehicleID} position (x, y): ({battle_system.CurrentPosition[0]}, {battle_system.CurrentPosition[1]})");
             }
@@ -89,7 +89,7 @@ class DiscreteTimeSimulationEngine
                 if (stoppedVehicles == situationalAwareness.Count)
                 {
                     this.await++;
-                    if (this.await == 2)
+                    if (this.await == 1)
                     {
                         allVehiclesStopped = true;
                         if (allVehiclesStopped)

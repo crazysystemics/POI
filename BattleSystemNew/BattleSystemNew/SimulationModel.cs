@@ -1,6 +1,8 @@
 ﻿abstract class SimulationModel
 {
-    public abstract SituationalAwareness Get();
-    public abstract void Set(List<SimulationModel> sim_mod);
+    public abstract OutParameter Get();
+    public abstract void Set(List<InParameter> sim_mod);
+
+    // Separation of concerns - list of configs or settings should be applied in Set() - gives in-parameters
     public abstract void OnTick();
 }

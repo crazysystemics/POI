@@ -24,7 +24,7 @@
  */
 
 
-namespace BattleSystem
+namespace RWR_POC
 {
     class Program
     {

@@ -2,18 +2,12 @@
  * It is an abstraction layer to avoid passing entire object instances to the simulation engine
  * and it instead allows creating objects with only some properties to be passed to the engine */
 
-class SituationalAwareness
+class InParameter
 {
-    public float[] CurrentPosition;
-    public float[] NewPositionTemp;
     public int ID;
-    public string Type;
 
-    public SituationalAwareness(float[] currentPosition, int ID, string veh_type)
+    public InParameter(int ID)
     {
-        this.CurrentPosition = currentPosition;
-        this.NewPositionTemp = currentPosition;
         this.ID = ID;
-        this.Type = veh_type;
     }
 }

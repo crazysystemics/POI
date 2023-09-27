@@ -15,24 +15,26 @@
 
 class PhysicalSimulationEngine : SimulationModel
 {
-    public List<SituationalAwareness> physicalSituationalAwareness;
+    public List<OutParameter> physicalSituationalAwareness;
 
     public PhysicalSimulationEngine()
     {
-        physicalSituationalAwareness = new List<SituationalAwareness>();
+        physicalSituationalAwareness = new List<OutParameter>();
     }
 
-    public override SituationalAwareness Get()
+    public override OutParameter Get()
     {
-        float[] temp_values = new float[2];
-        temp_values[0] = 0.0f;
-        temp_values[1] = 0.0f;
-        SituationalAwareness temp = new SituationalAwareness(temp_values, 0, "PhysEngine");
-        return temp;
+        return ("Energy at RWR");
     }
 
     public override void OnTick()
     {
+
+        // the following is to be implemented:
+        // Obtain neighbours of RWR
+        // Compute the transmitted power detected in neighbouring cells
+        // Update the RWR cells with their coordinates and power
+
         foreach (var battle_sys in physicalSituationalAwareness)
         {
 
@@ -64,7 +66,7 @@ class PhysicalSimulationEngine : SimulationModel
 
         foreach (var battle_system in physicalSituationalAwareness)
         {
-            foreach (BattleSystemClass sys_model in sim_mod)
+            foreach (BattleSystem sys_model in sim_mod)
             {
                 if (sys_model.Type == battle_system.Type && sys_model.VehicleID == battle_system.ID)
                 {

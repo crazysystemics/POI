@@ -12,7 +12,7 @@
  */
 
 
-class Aircraft : BattleSystemClass
+class Aircraft : BattleSystem
 {
     public override string Type { get; set; }
     public override int VehicleID { get; set; }
@@ -21,8 +21,8 @@ class Aircraft : BattleSystemClass
     public override float RadarRange { get; set; }
     public override bool VehicleHasStopped { get; set; }
     public override List<float[]> VehiclePath { get; set; }
-    public override List<BattleSystemClass> ObjectsVisible { get; set; }
-    public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
+    public override List<BattleSystem> ObjectsVisible { get; set; }
+    public override List<BattleSystem> ObjectsSurveyed { get; set; }
 
 
     public int CurrWaypointID;
@@ -31,18 +31,29 @@ class Aircraft : BattleSystemClass
 
     // Maintain separate list of radars visible by RWR
 
-    public override SituationalAwareness Get()
+    public class Out:OutParameter
     {
-        SituationalAwareness sit_aw_obj = new SituationalAwareness(this.CurrentPosition, this.VehicleID, this.Type);
-        return sit_aw_obj;
+        public float Ox;
+        public float Oy;
+        public Out(float x, float y, int id):base(id)
+        {
+            this.Ox = x;
+            this.Oy = y;
+        }
     }
 
-    public override void Set(List<SimulationModel> sim_mod)
+    // In Parameter class is null
+    public override Out Get()
     {
+        Out aircraft_position = new Out(CurrentPosition[0], CurrentPosition[1], 0);
+        return aircraft_position;
+    }
 
+    public override void Set(List<InParameter> sim_mod)
+    {
         // Adds objects to ObjectVisible property if they are within range of radar or RWR and removes them when they are not
 
-        foreach (BattleSystemClass battle_system in sim_mod)
+/*        foreach (BattleSystemClass battle_system in sim_mod)
         {
 
             if (this != battle_system)
@@ -70,7 +81,7 @@ class Aircraft : BattleSystemClass
                 float angle = Globals.AngleCalculator(this.CurrentPosition, vis_obj.CurrentPosition);
                 Console.WriteLine($"{vis_obj.Type} {vis_obj.VehicleID} at distance = {dist} and angle = {Math.Abs(angle)} radians");
             }
-        }
+        }*/
 
 
     }
@@ -145,13 +156,29 @@ class Aircraft : BattleSystemClass
         RadarRange = radar_range;
         VehicleHasStopped = false;
         Type = "Aircraft";
-        ObjectsVisible = new List<BattleSystemClass>();
-        ObjectsSurveyed = new List<BattleSystemClass>();
+        ObjectsVisible = new List<BattleSystem>();
+        ObjectsSurveyed = new List<BattleSystem>();
         LegVelocity = new float[3];
         CurrWaypointID = 0;
         ObjectRegister.s_AircraftID++;
         VehicleID = ObjectRegister.s_AircraftID;
         ComputeVelocity();
         // Velocities are in direction of any given waypoint leg, decomposing velocities into Vx and Vy
+    }
+
+    public class RWR
+    {
+        public List<float[]> Neighbours = new List<float[]>();
+    }
+
+    public class Situation
+    {
+        float x_position;
+        float y_position;
+        public Situation(float[] position)
+        {
+            this.x_position = position[0];
+            this.y_position = position[1];
+        }
     }
 }

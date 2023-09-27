@@ -12,7 +12,7 @@
  */
 
 
-class Radar : BattleSystemClass
+class Radar : BattleSystem
 {
     public override string Type { get; set; }
     public override int VehicleID { get; set; }
@@ -21,25 +21,50 @@ class Radar : BattleSystemClass
     public override float RadarRange { get; set; }
     public override bool VehicleHasStopped { get; set; }
     public override List<float[]> VehiclePath { get; set; }
-    public override List<BattleSystemClass> ObjectsVisible { get; set; }
-    public override List<BattleSystemClass> ObjectsSurveyed { get; set; }
+    public override List<BattleSystem> ObjectsVisible { get; set; }
+    public override List<BattleSystem> ObjectsSurveyed { get; set; }
 
-    public override SituationalAwareness Get()
+    public float PulseWidth;
+    public float PulseRepetitionInterval;
+    public float TimeElapsed = 0.0f;
+
+    public float[] EmitPulse()
     {
-        SituationalAwareness sit_aw_obj = new SituationalAwareness(this.CurrentPosition, this.VehicleID, this.Type);
-        return sit_aw_obj;
+        return null;
+    }
+
+    public class Out : OutParameter
+    {
+        public float Ox;
+        public float Oy;
+        public Out(float x, float y, int id) : base(id)
+        {
+            this.Ox = x;
+            this.Oy = y;
+        }
+    }
+
+    public override OutParameter Get()
+    {
+        OutParameter radar_output = new Out(CurrentPosition[0], CurrentPosition[1], 1);
+        return radar_output;
     }
 
     public override void OnTick()
     {
-
+        if (TimeElapsed == PulseRepetitionInterval)
+        {
+            EmitPulse();
+            TimeElapsed = 0;
+        }
+        TimeElapsed += Globals.TimeResolution;
     }
 
     public override void Set(List<SimulationModel> sim_mod)
     {
         // Adds objects to ObjectVisible property if they are within range of radar or RWR and removes them when they are not
 
-        foreach (BattleSystemClass battle_system in sim_mod)
+        foreach (BattleSystem battle_system in sim_mod)
         {
             if (this != battle_system)
             {
@@ -79,8 +104,8 @@ class Radar : BattleSystemClass
         VehicleHasStopped = true;
         RadarRange = radar_range;
         Type = "Radar";
-        ObjectsVisible = new List<BattleSystemClass>();
-        ObjectsSurveyed = new List<BattleSystemClass>();
+        ObjectsVisible = new List<BattleSystem>();
+        ObjectsSurveyed = new List<BattleSystem>();
         ObjectRegister.s_RadarID++;
         VehicleID = ObjectRegister.s_RadarID;
     }
