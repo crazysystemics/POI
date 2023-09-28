@@ -13,21 +13,29 @@ using System.Dynamic;
 class Aircraft : BattleSystem
 {
     public override bool Stopped { get; set; }
-    public AircraftPosition currentPosition = new AircraftPosition(0, 0);
+    public Position currentPosition = new Position(0, 0);
 
-    public class AircraftOut:OutParameter
+    public class Out:OutParameter
     {
         public int Ox;
         public int Oy;
-        public AircraftOut(int x, int y, int id):base(id)
+        public Out(int x, int y, int id):base(id)
         {
             this.Ox = x;
             this.Oy = y;
         }
     }
-    public override AircraftOut Get()
+
+    public class In : InParameter
     {
-        AircraftOut aircraftPosition = new AircraftOut(currentPosition.x, currentPosition.y, 0);
+        public In(int id) : base(id)
+        {
+            this.ID = id;
+        }
+    }
+    public override Out Get()
+    {
+        Out aircraftPosition = new Out(currentPosition.x, currentPosition.y, 0);
         return aircraftPosition;
     }
 
@@ -47,12 +55,12 @@ class Aircraft : BattleSystem
     }
 }
 
-class AircraftPosition
+class Position
 {
     public int x;
     public int y;
 
-    public AircraftPosition(int x = 0, int y = 0)
+    public Position(int x = 0, int y = 0)
     {
         this.x = x;
         this.y = y;

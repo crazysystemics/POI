@@ -1,3 +1,5 @@
+using System.Security.Cryptography.X509Certificates;
+
 class Radar : BattleSystem
 {
 
@@ -5,51 +7,60 @@ class Radar : BattleSystem
 
     public float pulseWidth;
     public float pulseRepetitionInterval;
-    public float timeElapsed = 0.0f;
+    public Pulse txPulse;
+    public Pulse activePulse;
+    public Pulse zeroPulse = new Pulse(0, 0, 0, 0, "zero");
+    public Pulse echoPulse;
 
     public RadarPosition currentPosition = new RadarPosition(0, 0);
 
-    public float[] EmitPulse()
-    {
-        return null;
-    }
 
     public class Out : OutParameter
     {
-        public int r;
-        public int theta;
-        public Out(int r, int theta, int id) : base(id)
+        public Pulse p;
+        public Out(Pulse p, int id) : base(id)
         {
-            this.r = r;
-            this.theta = theta;
+            this.p = p;
+        }
+    }
+
+    public class In : InParameter
+    {
+        public Pulse echoPulse;
+        public In(Pulse echoPulse, int id):base(id)
+        {
+            this.echoPulse = echoPulse;
         }
     }
 
     public override OutParameter Get()
     {
-        Out radarOutput = new Out(currentPosition.r, currentPosition.theta, 1);
+        Out radarOutput = new Out(txPulse, 1);
         return radarOutput;
     }
 
     public override void OnTick()
     {
-        if (timeElapsed == pulseRepetitionInterval)
+        if (Globals.Tick % pulseRepetitionInterval == 0)
         {
-            EmitPulse();
-            timeElapsed = 0;
+            txPulse = activePulse;
         }
-        timeElapsed += Globals.TimeResolution;
+        else
+        {
+            txPulse = zeroPulse;
+        }
     }
 
-    public override void Set(List<InParameter> inParameter)
+    public override void Set(List<InParameter> inParameters)
     {
-
+        echoPulse = ((In)(inParameters[0])).echoPulse;
     }
 
 
-    public Radar()
+    public Radar(Pulse inPulse)
     {
-
+        this.txPulse = zeroPulse;
+        this.activePulse = inPulse;
     }
 }
 
@@ -62,5 +73,23 @@ class RadarPosition
     {
         this.r = r;
         this.theta = theta;
+    }
+}
+
+class Pulse
+{
+    public int pulseWidth;
+    public int pulseRepetitionInterval;
+    public int timeOfArrival;
+    public int angleOfArrival;
+    public string symbol;
+
+    public Pulse(int pulseWidth, int pulseRepetitionInterval, int timeOfArrival, int angleOfArrival, string symbol)
+    {
+        this.pulseWidth = pulseWidth;
+        this.pulseRepetitionInterval = pulseRepetitionInterval;
+        this.timeOfArrival = timeOfArrival;
+        this.angleOfArrival = angleOfArrival;
+        this.symbol = symbol;
     }
 }

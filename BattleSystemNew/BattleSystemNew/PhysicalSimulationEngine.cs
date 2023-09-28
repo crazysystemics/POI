@@ -1,10 +1,10 @@
 ﻿class PhysicalSimulationEngine : SimulationModel
 {
-    public List<OutParameter> physicalSituationalAwareness;
+    public List<OutParameter> physInParameters;
 
     public PhysicalSimulationEngine()
     {
-        physicalSituationalAwareness = new List<OutParameter>();
+        physInParameters = new List<OutParameter>();
     }
 
     public class PhysicalSimulationOut : OutParameter
@@ -15,10 +15,18 @@
         }
     }
 
+    public class In : InParameter
+    {
+        public In(int id) : base(id)
+        {
+            this.ID = id;
+        }
+    }
+
     public override OutParameter Get()
     {
-        PhysicalSimulationOut physoutparamaters = new PhysicalSimulationOut(3);
-        return physoutparamaters;
+        PhysicalSimulationOut physOutParamaters = new PhysicalSimulationOut(0);
+        return physOutParamaters;
     }
 
     public override void OnTick()
@@ -31,7 +39,7 @@
 
     }
 
-    public override void Set(List<InParameter> inparameter)
+    public override void Set(List<InParameter> inParameters)
     {
 
         //foreach (var battle_system in physicalSituationalAwareness)

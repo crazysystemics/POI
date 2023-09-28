@@ -5,15 +5,13 @@ class DiscreteTimeSimulationEngine
     public bool allVehiclesStopped = false;
     public List<SimulationModel> simMod;
     PhysicalSimulationEngine physEngine = new PhysicalSimulationEngine();
-    public List<InParameter> dtseInpList;
-    //public int await = 0;
-    //public bool FirstRun = true;
+    public List<InParameter> dtseInParameters;
 
     public DiscreteTimeSimulationEngine()
     {
         simMod = new List<SimulationModel>();
-        dtseInpList = new List<InParameter>();
-        Globals.CurrentTime = 0.0f;
+        dtseInParameters = new List<InParameter>();
+        Globals.Tick = 0;
         simMod = ObjectRegister.objects_registered.ToList();
 
     }
@@ -30,7 +28,7 @@ class DiscreteTimeSimulationEngine
 
         foreach (SimulationModel sim_model in simMod)
         {
-            physEngine.physicalSituationalAwareness.Add(sim_model.Get());
+            physEngine.physInParameters.Add(sim_model.Get());
         }
 
         foreach (SimulationModel sim_model in simMod)
@@ -40,14 +38,14 @@ class DiscreteTimeSimulationEngine
 
         foreach (SimulationModel sim_model in simMod)
         {
-            sim_model.Set(dtseInpList);
+            sim_model.Set(dtseInParameters);
         }
 
-        Globals.CurrentTime += Globals.TimeResolution;
+        Globals.Tick++;
     }
 
     public void ResetTime()
     {
-        Globals.CurrentTime = 0.0f;
+        Globals.Tick = 0;
     }
 }

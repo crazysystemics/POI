@@ -1,6 +1,6 @@
 ﻿static class Globals
 {
-    public static float CurrentTime = 0.0f;
+    public static int Tick = 0;
     public static float TimeResolution = 0.10f;
     public static float DistanceCalculator(float[] obj1, float[] obj2)
     {
