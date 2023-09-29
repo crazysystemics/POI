@@ -4,15 +4,13 @@ class Radar : BattleSystem
 {
 
     public override bool Stopped { get; set; }
-
-    public float pulseWidth;
-    public float pulseRepetitionInterval;
     public Pulse txPulse;
     public Pulse activePulse;
     public Pulse zeroPulse = new Pulse(0, 0, 0, 0, "zero");
     public Pulse echoPulse;
     public int targetX;
     public int targetY;
+    public int radius;
 
  //   public RadarPosition currentPosition = new RadarPosition(0, 0);
 
@@ -45,7 +43,7 @@ class Radar : BattleSystem
 
     public override void OnTick()
     {
-        if (Globals.Tick % pulseRepetitionInterval == 0)
+        if (Globals.Tick % activePulse.pulseRepetitionInterval == 0)
         {
             txPulse = activePulse;
         }
@@ -53,7 +51,10 @@ class Radar : BattleSystem
         {
             txPulse = zeroPulse;
         }
-        Console.WriteLine("Tick : " +Globals.Tick + "Radar :\t\t tx Pulse :" + txPulse + ",echo Pulse :" + echoPulse);
+
+        Console.WriteLine($"Tick : {Globals.Tick} Radar :\t\t txPulse : {txPulse.pulseWidth}, {txPulse.pulseRepetitionInterval}, " +
+            $"{txPulse.timeOfArrival}, {txPulse.angleOfArrival}, {txPulse.symbol}, echoPulse : {echoPulse.pulseWidth}," +
+            $" {echoPulse.pulseRepetitionInterval}, {echoPulse.timeOfArrival}, {echoPulse.angleOfArrival}, {echoPulse.symbol}");
     }
 
     public override void Set(List<InParameter> inParameters)
@@ -62,10 +63,13 @@ class Radar : BattleSystem
     }
 
 
-    public Radar(Pulse inPulse)
+    public Radar(Pulse initPulse, Position position, int radius, int id)
     {
         this.txPulse = zeroPulse;
-        this.activePulse = inPulse;
+        this.activePulse = initPulse;
+        this.position = position;
+        this.id = id;
+        this.radius = radius;
     }
 }
 

@@ -2,6 +2,12 @@
 {
 
     public override bool Stopped { get; set; }
+
+    public RWR(ref Position positon, int id)
+    {
+        this.position = positon;
+        this.id = id;
+    }
     public class Emitter
     {
         public int[] Amplitudes = new int[4];
@@ -53,7 +59,9 @@
 
     public override void OnTick()
     {
-        Console.WriteLine("Tick : " + Globals.Tick + "RWR :\t\t amplitude :" + RxBuf.Amplitudes + RxBuf.Amplitudes + ",freq :" + RxBuf.Frequency);
+         Console.WriteLine($"Tick : {Globals.Tick} RWR :\t\t\t amplitude : {RxBuf.Amplitudes[0]}, {RxBuf.Amplitudes[1]}, " +
+            $"{RxBuf.Amplitudes[2]}, {RxBuf.Amplitudes[3]}, freq : {RxBuf.Frequency}, PRI : {RxBuf.PRI}, pulseWidth : {RxBuf.pulseWidth}, " +
+            $"AOA : {RxBuf.AOA}");
     }
 
     public override void Set(List<InParameter> inParameters)

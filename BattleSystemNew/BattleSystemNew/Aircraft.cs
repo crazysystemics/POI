@@ -13,7 +13,7 @@ using System.Dynamic;
 class Aircraft : BattleSystem
 {
     public override bool Stopped { get; set; }
-    public RWR rwr = new RWR();
+    public RWR rwr;
  //   public Position currentPosition = new Position(0, 0);
 
     public class Out:OutParameter
@@ -47,12 +47,13 @@ class Aircraft : BattleSystem
 
     public override void OnTick()
     {
-        Console.WriteLine("Tick:" + Globals.Tick +" Aircraft :\t\t Current Position x:" + position.x +", y:" + position.y);
+        Console.WriteLine("Tick : " + Globals.Tick +" Aircraft :\t\t Current Position x:" + position.x +", y:" + position.y);
     }
 
-    public Aircraft(Position position)
+    public Aircraft(Position position, int id)
     {
         this.position = position;
+        this.id = id;
     }
 }
 

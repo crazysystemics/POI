@@ -6,6 +6,7 @@
     public PhysicalSimulationEngine()
     {
         physInParameters = new List<In>();
+        id = 99;
 
 
     }
@@ -52,15 +53,20 @@
     public override void Set(List<InParameter> inParameters)
     {
         // Set the new parameters on BattleSystem objects following the OnTick() computation
-        int id = inParameters[0].ID;
-        Position pos = ((In)inParameters[0]).position;
-        if (!physicalObjects.ContainsKey(inParameters[0].ID))
+        foreach (InParameter inParameter in inParameters)
         {
-            physicalObjects.Add(id, pos);
+            int id = inParameter.ID;
+            Position pos = ((In)inParameter).position;
+            if (!physicalObjects.ContainsKey(inParameter.ID))
+            {
+                physicalObjects.Add(id, pos);
+            }
+            else
+            {
+                physicalObjects[id] = pos;
+            }
         }
-        else
-        {
-            physicalObjects[id] = pos;
-        }
+        //int id = inParameters[0].ID;
+
     }
 }

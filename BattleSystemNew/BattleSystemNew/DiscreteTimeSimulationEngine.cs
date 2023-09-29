@@ -2,11 +2,11 @@
 
 class DiscreteTimeSimulationEngine
 {
-    public bool allVehiclesStopped = false;
     public List<SimulationModel> simMod;
-    PhysicalSimulationEngine physEngine = new PhysicalSimulationEngine();
+    //PhysicalSimulationEngine physEngine = new PhysicalSimulationEngine();
     public List<InParameter> dtseInParameters;
     public List<OutParameter> dtseOutParameter = new List<OutParameter>();
+    public PhysicalSimulationEngine pse = new PhysicalSimulationEngine();
 
     public DiscreteTimeSimulationEngine()
     {
@@ -19,11 +19,11 @@ class DiscreteTimeSimulationEngine
 
     public void Init()
     {
-        Aircraft a = new Aircraft(new Position(20,30));
-        Radar r = new Radar(new Pulse(5, 5, 5, 5, "E1"));
-        PhysicalSimulationEngine pse = new PhysicalSimulationEngine();
+        Aircraft a = new Aircraft(new Position(20,30), 0);
+        Radar r = new Radar(new Pulse(5, 5, 5, 5, "E1"), new Position(10, 10), 25, 1);
 
-        a.rwr.position = a.position;
+
+        a.rwr = new RWR(ref a.position, 2);
 
         simMod.Add(a);
         simMod.Add(r);
@@ -31,39 +31,26 @@ class DiscreteTimeSimulationEngine
         simMod.Add(pse);
     }
 
-    //public class In : InParameter
-    //{
-    //    public In(int id) : base(id)
-    //    {
-            
-    //    }
-    //}
-    //public class Out : OutParameter
-    //{
-    //    public Radar.In radarIn;
-    //    public RWR.In rwrIn;
-    //    public Out(Radar.In radarIn, RWR.In rwrIN, int id) : base(id)
-    //    {
-    //        this.radarIn = radarIn;
-    //        this.rwrIn = rwrIN;
-    //    }
-    //}
-
     public void RunSimulationEngine()
     {
+        List<InParameter> inParameters = new List<InParameter>();
 
         foreach (SimulationModel sim_model in simMod)
         {
             // physEngine.physInParameters.Add(sim_model.Get());
             dtseOutParameter.Add(sim_model.Get());
         }
-        PhysicalSimulationEngine pse2 = new PhysicalSimulationEngine();
         foreach (SimulationModel sim_model in simMod)
         {
             if (sim_model is PhysicalSimulationEngine)
             {
-                pse2 = (PhysicalSimulationEngine)sim_model;
+                pse = (PhysicalSimulationEngine)sim_model;
                 break;
+            }
+            else
+            {
+                inParameters.Add(new PhysicalSimulationEngine.In(sim_model.position, sim_model.id));
+                // *1 of notes
             }
         }
 
@@ -72,31 +59,27 @@ class DiscreteTimeSimulationEngine
 
         foreach (SimulationModel sim_model in simMod)
         {
-            //sim_model.Set(dtseInParameters);
-            //if (sim_model is PhysicalSimulationEngine)
-            //{
-
-
-            //}
-            List<InParameter> inParameters = new List<InParameter>();
-            inParameters.Add(new PhysicalSimulationEngine.In(sim_model.position, sim_model.id));
-            pse2.Set(inParameters);
+            pse.Set(inParameters);
+            int radius = 0;
 
             if (sim_model is Radar)
             {
-                int dist = physEngine.Distance(0, 1);
-                if ( dist < 25)
+                radius = ((Radar)sim_model).radius;
+                int dist = pse.Distance(0, 1);
+                Console.WriteLine($"Distance between Aricraft and Radar = {dist}");
+                if ( dist < radius)
                 {
                     List<InParameter> inParameters2 = new List<InParameter>();
-                    inParameters2.Add(new Radar.In(new Pulse(10,50,10,20,"E1"),3));
+                    inParameters2.Add(new Radar.In(new Pulse(10,50,10,20,"E2"),2));
                     ((Radar)sim_model).Set(inParameters2);
                 }
             }
 
             if (sim_model is RWR)
             {
-                int dist = physEngine.Distance(2, 1);
-                if (dist < 25)
+                int dist = pse.Distance(2, 1);
+                Console.WriteLine($"Distance between Radar and RWR = {dist}");
+                if (dist < radius)
                 {
                     List<InParameter> inParameters2 = new List<InParameter>();
                     int[] amps = new int[] { 10, 10, 10, 10 };
