@@ -54,7 +54,8 @@ class Radar : BattleSystem
 
         Console.WriteLine($"Tick : {Globals.Tick} Radar :\t\t txPulse : {txPulse.pulseWidth}, {txPulse.pulseRepetitionInterval}, " +
             $"{txPulse.timeOfArrival}, {txPulse.angleOfArrival}, {txPulse.symbol}, echoPulse : {echoPulse.pulseWidth}," +
-            $" {echoPulse.pulseRepetitionInterval}, {echoPulse.timeOfArrival}, {echoPulse.angleOfArrival}, {echoPulse.symbol}");
+            $" {echoPulse.pulseRepetitionInterval}, {echoPulse.timeOfArrival}, {echoPulse.angleOfArrival}, {echoPulse.symbol}, " +
+            $"Position: x:{position.x}, y:{position.y}");
     }
 
     public override void Set(List<InParameter> inParameters)

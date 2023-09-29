@@ -18,6 +18,10 @@
 
         public Emitter(int[] amplitudes = null, int frequency = 0, int pRI = 0, int pulseWidth = 1, int aOA = 0)
         {
+            if (amplitudes == null)
+            {
+                amplitudes = new int[] { 0, 0, 0, 0 };
+            }
             Amplitudes = amplitudes;
             Frequency = frequency;
             PRI = pRI;
@@ -25,7 +29,6 @@
             AOA = aOA;
         }
     }
-
     public Emitter RxBuf = new Emitter();
     public class Out : OutParameter
     {
