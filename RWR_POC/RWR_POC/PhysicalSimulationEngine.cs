@@ -1,14 +1,13 @@
-﻿class PhysicalSimulationEngine : SimulationModel
+﻿using System.Transactions;
+
+class PhysicalSimulationEngine : SimulationModel
 {
-    public List<In> physInParameters;
     public Dictionary<int, Position> physicalObjects = new Dictionary<int, Position>();
+    public Pulse previousActivePulse;
 
     public PhysicalSimulationEngine()
     {
-        physInParameters = new List<In>();
         id = 99;
-
-
     }
 
     public int Distance(int objID1, int objID2)
@@ -68,5 +67,11 @@
         }
         //int id = inParameters[0].ID;
 
+    }
+
+    public TravellingPulse GetPulse(Pulse txPulse, Position txPos, Position currentPos, int txTick, int currentTick)
+    {
+        TravellingPulse pulse = new TravellingPulse(txTick, currentTick, txPos, currentPos, txPulse.pulseWidth, txPulse.pulseRepetitionInterval, txPulse.timeOfArrival, txPulse.angleOfArrival, txPulse.symbol);
+        return pulse;
     }
 }

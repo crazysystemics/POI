@@ -1,13 +1,3 @@
-// Naming conventions:
-// avoid names with underscores
-
-// Class names: Begin with Upper case. CamelCase
-// Member objects: Begin with lowercase. camelCase
-// Parameters: Begin with lowercase. camelCase
-// Local variables: Begin with lowercase. camelCase
-// Method names: Begin with Upper case. CamelCase
-// Use Microsoft standard naming conventions for C#
-
 using System.Dynamic;
 
 class Aircraft : BattleSystem
@@ -47,7 +37,7 @@ class Aircraft : BattleSystem
 
     public override void OnTick()
     {
-        Console.WriteLine("Tick : " + Globals.Tick +" Aircraft :\t\t Current Position x:" + position.x +", y:" + position.y);
+        Console.WriteLine("\nTick : " + Globals.Tick +" Aircraft :\t\t Current Position x: " + position.x +", y: " + position.y);
     }
 
     public Aircraft(Position position, int id)

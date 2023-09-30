@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 
 class Radar : BattleSystem
@@ -55,7 +56,7 @@ class Radar : BattleSystem
         Console.WriteLine($"Tick : {Globals.Tick} Radar :\t\t txPulse : {txPulse.pulseWidth}, {txPulse.pulseRepetitionInterval}, " +
             $"{txPulse.timeOfArrival}, {txPulse.angleOfArrival}, {txPulse.symbol}, echoPulse : {echoPulse.pulseWidth}," +
             $" {echoPulse.pulseRepetitionInterval}, {echoPulse.timeOfArrival}, {echoPulse.angleOfArrival}, {echoPulse.symbol}, " +
-            $"Position: x:{position.x}, y:{position.y}");
+            $"Position: x: {position.x}, y: {position.y}");
     }
 
     public override void Set(List<InParameter> inParameters)
@@ -74,18 +75,6 @@ class Radar : BattleSystem
     }
 }
 
-//class RadarPosition
-//{
-//    public int r;
-//    public int theta;
-
-//    public RadarPosition(int r = 0, int theta = 0)
-//    {
-//        this.r = r;
-//        this.theta = theta;
-//    }
-//}
-
 class Pulse
 {
     public int pulseWidth;
@@ -101,5 +90,20 @@ class Pulse
         this.timeOfArrival = timeOfArrival;
         this.angleOfArrival = angleOfArrival;
         this.symbol = symbol;
+    }
+}
+
+class TravellingPulse : Pulse
+{
+    public int currentTick;
+    public int txTick;
+    public Position txPos;
+    public Position currentPos;
+    public TravellingPulse(int txTick, int currentTick, Position txPos, Position currentPos, int pulseWidth, int pulseRepetitionInterval, int timeOfArrival, int angleOfArrival, string symbol) : base(pulseWidth, pulseRepetitionInterval, timeOfArrival, angleOfArrival, symbol)
+    {
+        this.txTick = txTick;
+        this.currentPos = currentPos;
+        this.txPos = txPos;
+        this.currentTick = currentTick;
     }
 }

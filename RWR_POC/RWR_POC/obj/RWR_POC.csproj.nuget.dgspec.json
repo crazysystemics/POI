@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\RohitChaoji\\Source\\Repos\\crazysystemics\\POI\\RWR_POC\\RWR_POC\\RWR_POC.csproj": {}
+    "C:\\Users\\RohitChaoji\\source\\repos\\crazysystemics\\POI\\RWR_POC\\RWR_POC\\RWR_POC.csproj": {}
   },
   "projects": {
-    "C:\\Users\\RohitChaoji\\Source\\Repos\\crazysystemics\\POI\\RWR_POC\\RWR_POC\\RWR_POC.csproj": {
+    "C:\\Users\\RohitChaoji\\source\\repos\\crazysystemics\\POI\\RWR_POC\\RWR_POC\\RWR_POC.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\RohitChaoji\\Source\\Repos\\crazysystemics\\POI\\RWR_POC\\RWR_POC\\RWR_POC.csproj",
+        "projectUniqueName": "C:\\Users\\RohitChaoji\\source\\repos\\crazysystemics\\POI\\RWR_POC\\RWR_POC\\RWR_POC.csproj",
         "projectName": "RWR_POC",
-        "projectPath": "C:\\Users\\RohitChaoji\\Source\\Repos\\crazysystemics\\POI\\RWR_POC\\RWR_POC\\RWR_POC.csproj",
+        "projectPath": "C:\\Users\\RohitChaoji\\source\\repos\\crazysystemics\\POI\\RWR_POC\\RWR_POC\\RWR_POC.csproj",
         "packagesPath": "C:\\Users\\RohitChaoji\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\RohitChaoji\\Source\\Repos\\crazysystemics\\POI\\RWR_POC\\RWR_POC\\obj\\",
+        "outputPath": "C:\\Users\\RohitChaoji\\source\\repos\\crazysystemics\\POI\\RWR_POC\\RWR_POC\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

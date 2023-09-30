@@ -7,6 +7,7 @@ class DiscreteTimeSimulationEngine
     public List<InParameter> dtseInParameters;
     public List<OutParameter> dtseOutParameter = new List<OutParameter>();
     public PhysicalSimulationEngine pse = new PhysicalSimulationEngine();
+    public int pulseTxTick = 0;
 
     public DiscreteTimeSimulationEngine()
     {
@@ -20,7 +21,7 @@ class DiscreteTimeSimulationEngine
     public void Init()
     {
         Aircraft a = new Aircraft(new Position(20,30), 0);
-        Radar r = new Radar(new Pulse(5, 5, 5, 5, "E1"), new Position(10, 10), 25, 1);
+        Radar r = new Radar(new Pulse(5, 5, 5, 5, "E1"), new Position(20, 10), 25, 1);
 
 
         a.rwr = new RWR(ref a.position, 2);
@@ -92,6 +93,50 @@ class DiscreteTimeSimulationEngine
         foreach (SimulationModel sim_model in simMod)
         {
             sim_model.OnTick();
+        }
+
+        OutParameter pulseOut;
+        Pulse txPulse;
+
+        foreach (SimulationModel sim_model in simMod)
+        {
+            if (sim_model is Radar)
+            {
+
+                pulseOut = sim_model.Get();
+                txPulse = ((Radar.Out)pulseOut).p;
+
+                TravellingPulse rxPulse = pse.GetPulse(txPulse, sim_model.position, sim_model.position, pulseTxTick, Globals.Tick);
+
+                //Console.WriteLine("\nTravelling pulse attributes:");
+                //Console.WriteLine($"\ntxTick: {rxPulse.txTick}" +
+                //    $"\ntxPos: ({rxPulse.txPos.x}, {rxPulse.txPos.y})" +
+                //    $"\ncurrentPos: ({rxPulse.currentPos.x}, {rxPulse.currentPos.y})" +
+                //    $"\nCurrentTick: {rxPulse.currentTick}" +
+                //    $"\npulseWidth at receiving cell: {rxPulse.pulseWidth}" +
+                //    $"\nPRI at receiving cell: {rxPulse.pulseRepetitionInterval}" +
+                //    $"\ntimeOfArrival at receiving cell: {rxPulse.timeOfArrival}" +
+                //    $"\nangleOfArrival at receiving cell: {rxPulse.angleOfArrival}\n\n");
+
+                if (((Radar)sim_model).activePulse != ((Radar)sim_model).zeroPulse)
+                {
+                    foreach (SimulationModel receiver in simMod)
+                    {
+                        int pulseTravelSpeed = 1; // must be speed of light "c" in actual computation
+                        int dist = pse.Distance(receiver.id, sim_model.id);
+                        int pulseTravelTime = dist / pulseTravelSpeed;
+                        if (Math.Abs(rxPulse.txTick - Globals.Tick) == pulseTravelTime && Globals.Tick != 0)
+                        {
+                            Console.WriteLine($"Pulse arrived at cell of {receiver}");
+                            pulseTxTick = rxPulse.currentTick;
+                            if (rxPulse.pulseWidth != 0)
+                            {
+
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         Globals.Tick++;
