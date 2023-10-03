@@ -14,7 +14,7 @@ class DiscreteTimeSimulationEngine
     public Pulse echoedPulse = new Pulse(0, 0, 0, 0, "zero");
     public bool echoPulseSet = false;
     public bool activePulseRecorded = false;
-    public int activePulsePRI;
+    public int[] activePulseChars = new int[4];
     public int echoReceivedTime = 0;
 
     public DiscreteTimeSimulationEngine()
@@ -122,14 +122,18 @@ class DiscreteTimeSimulationEngine
                 txPulse = ((Radar.Out)pulseOut).p;
                 if (!activePulseRecorded)
                 {
-                    activePulsePRI = txPulse.pulseRepetitionInterval;
+                    activePulseChars = new int[] { txPulse.pulseWidth, txPulse.pulseRepetitionInterval, txPulse.timeOfArrival, txPulse.angleOfArrival};
                     activePulseRecorded = true;
                 }
                 TravellingPulse rxPulse = pse.GetPulse(pulseTxTick, Globals.Tick, sim_model.position, txPulse);
 
                 if (rxPulse.pulseRepetitionInterval == 0)
                 {
-                    rxPulse.pulseRepetitionInterval = activePulsePRI;
+                    rxPulse.pulseWidth = activePulseChars[0];
+                    rxPulse.pulseRepetitionInterval = activePulseChars[1];
+                    rxPulse.timeOfArrival = activePulseChars[2];
+                    rxPulse.angleOfArrival = activePulseChars[3];
+                    rxPulse.symbol = txPulse.symbol;
                 }
 
                 Console.WriteLine($"txTick of rxPulse: {rxPulse.txTick}");
