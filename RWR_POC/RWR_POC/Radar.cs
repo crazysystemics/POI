@@ -6,15 +6,15 @@ class Radar : BattleSystem
     public Pulse activePulse;
     public Pulse zeroPulse = new Pulse(0, 0, 0, 0, "zero");
     public Pulse echoPulse;
-    public int targetX;
-    public int targetY;
+    //public int targetX;
+    //public int targetY;
     public int radius;
-
 
     public class Out : OutParameter
     {
         public Pulse p;
         public Position pos;
+        public int txTick;
         public Out(Pulse p, Position pos, int id) : base(id)
         {
             this.pos = pos;

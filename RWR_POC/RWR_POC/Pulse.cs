@@ -18,14 +18,12 @@
 
 class TravellingPulse : Pulse
 {
-    public int currentTick;
     public int txTick;
+    public int currentTick;
     public Position txPos;
-    public Position currentPos;
-    public TravellingPulse(int txTick, int currentTick, Position txPos, Position currentPos, int pulseWidth, int pulseRepetitionInterval, int timeOfArrival, int angleOfArrival, string symbol) : base(pulseWidth, pulseRepetitionInterval, timeOfArrival, angleOfArrival, symbol)
+    public TravellingPulse(int txTick, int currentTick, Position txPos, int pulseWidth, int pulseRepetitionInterval, int timeOfArrival, int angleOfArrival, string symbol) : base(pulseWidth, pulseRepetitionInterval, timeOfArrival, angleOfArrival, symbol)
     {
         this.txTick = txTick;
-        this.currentPos = currentPos;
         this.txPos = txPos;
         this.currentTick = currentTick;
     }

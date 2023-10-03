@@ -1,7 +1,7 @@
 ﻿class PhysicalSimulationEngine : SimulationModel
 {
     public Dictionary<int, Position> physicalObjects = new Dictionary<int, Position>();
-    public Pulse previousActivePulse;
+    //public Pulse previousActivePulse;
 
     public PhysicalSimulationEngine()
     {
@@ -67,9 +67,9 @@
 
     }
 
-    public TravellingPulse GetPulse(Pulse txPulse, Position txPos, Position currentPos, int txTick, int currentTick)
+    public TravellingPulse GetPulse(int txTick, int currentTick, Position txPos, Pulse txPulse)
     {
-        TravellingPulse pulse = new TravellingPulse(txTick, currentTick, txPos, currentPos, txPulse.pulseWidth, txPulse.pulseRepetitionInterval, txPulse.timeOfArrival, txPulse.angleOfArrival, txPulse.symbol);
+        TravellingPulse pulse = new(txTick, currentTick, txPos, txPulse.pulseWidth, txPulse.pulseRepetitionInterval, txPulse.timeOfArrival, txPulse.angleOfArrival, txPulse.symbol);
         return pulse;
     }
 }

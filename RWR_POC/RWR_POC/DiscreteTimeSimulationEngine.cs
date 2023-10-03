@@ -13,6 +13,8 @@ class DiscreteTimeSimulationEngine
     public int firstPulseTick = 0;
     public Pulse echoedPulse = new Pulse(0, 0, 0, 0, "zero");
     public bool echoPulseSet = false;
+    public bool activePulseRecorded = false;
+    public int activePulsePRI;
 
     public DiscreteTimeSimulationEngine()
     {
@@ -24,8 +26,8 @@ class DiscreteTimeSimulationEngine
 
     public void Init()
     {
-        Aircraft a = new Aircraft(new Position(20, 30), 0);
-        Radar r = new Radar(new Pulse(5, 5, 5, 5, "E1"), new Position(20, 10), 25, 1);
+        Aircraft a = new Aircraft(new Position(30, 30), 0);
+        Radar r = new Radar(new Pulse(5, 5, 5, 5, "E1"), new Position(20, 10), 50, 1);
 
 
         a.rwr = new RWR(ref a.position, 2);
@@ -39,6 +41,8 @@ class DiscreteTimeSimulationEngine
     public void RunSimulationEngine()
     {
         List<InParameter> inParameters = new List<InParameter>();
+
+        // Get() on every Simulation Model
 
         foreach (SimulationModel sim_model in simMod)
         {
@@ -60,7 +64,7 @@ class DiscreteTimeSimulationEngine
         }
 
         
-
+        // Set() on every Simulation Model
 
         foreach (SimulationModel sim_model in simMod)
         {
@@ -71,7 +75,7 @@ class DiscreteTimeSimulationEngine
             {
                 radius = ((Radar)sim_model).radius;
                 int dist = pse.Distance(0, 1);
-                Console.WriteLine($"Distance between Aricraft and Radar = {dist}");
+                Console.WriteLine($"Distance between Aircraft and Radar = {dist}");
                 if (echoPulseSet)
                 {
                     List<InParameter> inParameters2 = new List<InParameter>
@@ -96,6 +100,8 @@ class DiscreteTimeSimulationEngine
             }
         }
 
+        // OnTick() on each Simulation Model
+
         foreach (SimulationModel sim_model in simMod)
         {
             sim_model.OnTick();
@@ -104,6 +110,8 @@ class DiscreteTimeSimulationEngine
         OutParameter pulseOut;
         Pulse txPulse;
 
+        // GetPulse() on PSE
+
         foreach (SimulationModel sim_model in simMod)
         {
             if (sim_model is Radar)
@@ -111,8 +119,20 @@ class DiscreteTimeSimulationEngine
 
                 pulseOut = sim_model.Get();
                 txPulse = ((Radar.Out)pulseOut).p;
+                if (!activePulseRecorded)
+                {
+                    activePulsePRI = txPulse.pulseRepetitionInterval;
+                    activePulseRecorded = true;
+                }
+                TravellingPulse rxPulse = pse.GetPulse(pulseTxTick, Globals.Tick, sim_model.position, txPulse);
 
-                TravellingPulse rxPulse = pse.GetPulse(txPulse, sim_model.position, sim_model.position, pulseTxTick, Globals.Tick);
+                if (rxPulse.pulseRepetitionInterval == 0)
+                {
+                    rxPulse.pulseRepetitionInterval = activePulsePRI;
+                }
+
+                Console.WriteLine($"txTick of rxPulse: {rxPulse.txTick}");
+
 
                 if (((Radar)sim_model).activePulse != ((Radar)sim_model).zeroPulse)
                 {
@@ -126,13 +146,12 @@ class DiscreteTimeSimulationEngine
                             if (receiver is RWR)
                             {
                                 Console.WriteLine($"Pulse arrived at cell of {receiver}");
+                                firstPulseReceived = true;
                             }
-                            firstPulseReceived = true;
                             pulseTxTick = rxPulse.currentTick;
                         }
                         if (rxPulse.pulseRepetitionInterval != 0 && firstPulseReceived && (Math.Abs(rxPulse.txTick - Globals.Tick) % rxPulse.pulseRepetitionInterval == 0))
                         {
-
                             if (receiver is RWR)
                             {
                                 Console.WriteLine($"Pulse arrived at cell of {receiver}");
@@ -145,12 +164,13 @@ class DiscreteTimeSimulationEngine
                             {
                                 Console.WriteLine("Echo received by Radar");
                                 echoReceived = true;
+                                // Extract Pulse object from rxPulse to be used as Radar's InParameter during Set()
+                                echoedPulse = new Pulse(rxPulse.pulseWidth, rxPulse.pulseRepetitionInterval, rxPulse.timeOfArrival, rxPulse.angleOfArrival, rxPulse.symbol);
+                                echoPulseSet = true;
                             }
                             else if (echoReceived && rxPulse.pulseRepetitionInterval != 0 && (Math.Abs(rxPulse.txTick - Globals.Tick) % rxPulse.pulseRepetitionInterval == 0) && receiver is RWR)
                             {
                                 Console.WriteLine("Repeat echo received by radar");
-                                echoedPulse = new Pulse(rxPulse.pulseWidth, rxPulse.pulseRepetitionInterval, rxPulse.timeOfArrival, rxPulse.angleOfArrival, rxPulse.symbol);
-                                echoPulseSet = true;
                             }
                         }
                     }
