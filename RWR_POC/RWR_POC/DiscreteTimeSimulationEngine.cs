@@ -16,18 +16,18 @@ class DiscreteTimeSimulationEngine
     public bool activePulseRecorded = false;
     public int[] activePulseChars = new int[4];
     public int echoReceivedTime = 0;
+    public string activePulseSymbol = "";
 
     public DiscreteTimeSimulationEngine()
     {
         simMod = new List<SimulationModel>();
         dtseInParameters = new List<InParameter>();
         Globals.Tick = 0;
-        simMod = ObjectRegister.objects_registered.ToList();
     }
 
     public void Init()
     {
-        Aircraft a = new Aircraft(new Position(30, 30), 0);
+        Aircraft a = new Aircraft(new Position(40, 35), 0);
         Radar r = new Radar(new Pulse(5, 5, 5, 5, "E1"), new Position(20, 10), 50, 1);
 
 
@@ -76,7 +76,7 @@ class DiscreteTimeSimulationEngine
             {
                 radius = ((Radar)sim_model).radius;
                 int dist = pse.Distance(0, 1);
-                Console.WriteLine($"Distance between Aircraft and Radar = {dist}");
+                Console.WriteLine($"Distance between Aircraft and Radar = {dist}\n");
                 if (echoPulseSet)
                 {
                     List<InParameter> inParameters2 = new List<InParameter>
@@ -90,7 +90,7 @@ class DiscreteTimeSimulationEngine
             if (sim_model is RWR)
             {
                 int dist = pse.Distance(2, 1);
-                Console.WriteLine($"Distance between Radar and RWR = {dist}");
+                Console.WriteLine($"Distance between Radar and RWR = {dist}\n");
                 if (dist < radius)
                 {
                     List<InParameter> inParameters2 = new List<InParameter>();
@@ -123,6 +123,7 @@ class DiscreteTimeSimulationEngine
                 if (!activePulseRecorded)
                 {
                     activePulseChars = new int[] { txPulse.pulseWidth, txPulse.pulseRepetitionInterval, txPulse.timeOfArrival, txPulse.angleOfArrival};
+                    activePulseSymbol = txPulse.symbol;
                     activePulseRecorded = true;
                 }
                 TravellingPulse rxPulse = pse.GetPulse(pulseTxTick, Globals.Tick, sim_model.position, txPulse);
@@ -133,7 +134,7 @@ class DiscreteTimeSimulationEngine
                     rxPulse.pulseRepetitionInterval = activePulseChars[1];
                     rxPulse.timeOfArrival = activePulseChars[2];
                     rxPulse.angleOfArrival = activePulseChars[3];
-                    rxPulse.symbol = txPulse.symbol;
+                    rxPulse.symbol = activePulseSymbol;
                 }
 
                 Console.WriteLine($"txTick of rxPulse: {rxPulse.txTick}");
