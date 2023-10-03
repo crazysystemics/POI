@@ -1,6 +1,4 @@
-﻿using System.Transactions;
-
-class PhysicalSimulationEngine : SimulationModel
+﻿class PhysicalSimulationEngine : SimulationModel
 {
     public Dictionary<int, Position> physicalObjects = new Dictionary<int, Position>();
     public Pulse previousActivePulse;
@@ -12,7 +10,7 @@ class PhysicalSimulationEngine : SimulationModel
 
     public int Distance(int objID1, int objID2)
     {
-        if(!physicalObjects.ContainsKey(objID1) || !physicalObjects.ContainsKey(objID2)) return 0;
+        if (!physicalObjects.ContainsKey(objID1) || !physicalObjects.ContainsKey(objID2)) return 0;
         Position p1 = physicalObjects[objID1];
         Position p2 = physicalObjects[objID2];
         int distance_x = p1.x - p2.x;
@@ -23,7 +21,7 @@ class PhysicalSimulationEngine : SimulationModel
 
     public class PhysicalSimulationOut : OutParameter
     {
-        public PhysicalSimulationOut(int id):base(id)
+        public PhysicalSimulationOut(int id) : base(id)
         {
 
         }

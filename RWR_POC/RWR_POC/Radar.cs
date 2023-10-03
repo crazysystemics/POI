@@ -1,6 +1,3 @@
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
-
 class Radar : BattleSystem
 {
 
@@ -12,8 +9,6 @@ class Radar : BattleSystem
     public int targetX;
     public int targetY;
     public int radius;
-
- //   public RadarPosition currentPosition = new RadarPosition(0, 0);
 
 
     public class Out : OutParameter
@@ -30,7 +25,7 @@ class Radar : BattleSystem
     public class In : InParameter
     {
         public Pulse echoPulse;
-        public In(Pulse echoPulse, int id):base(id)
+        public In(Pulse echoPulse, int id) : base(id)
         {
             this.echoPulse = echoPulse;
         }
@@ -54,9 +49,13 @@ class Radar : BattleSystem
         }
 
         Console.WriteLine($"Tick : {Globals.Tick} Radar :\t\t txPulse : {txPulse.pulseWidth}, {txPulse.pulseRepetitionInterval}, " +
-            $"{txPulse.timeOfArrival}, {txPulse.angleOfArrival}, {txPulse.symbol}, echoPulse : {echoPulse.pulseWidth}," +
-            $" {echoPulse.pulseRepetitionInterval}, {echoPulse.timeOfArrival}, {echoPulse.angleOfArrival}, {echoPulse.symbol}, " +
-            $"Position: x: {position.x}, y: {position.y}");
+            $"{txPulse.timeOfArrival}, {txPulse.angleOfArrival}, {txPulse.symbol}");
+
+        if (echoPulse != null)
+        {
+            Console.WriteLine($"Tick : {Globals.Tick} Radar :\t\t echoPulse : {echoPulse.pulseWidth}, {echoPulse.pulseRepetitionInterval}, " +
+            $"{echoPulse.timeOfArrival}, {echoPulse.angleOfArrival}, {echoPulse.symbol}");
+        }
     }
 
     public override void Set(List<InParameter> inParameters)
@@ -72,38 +71,5 @@ class Radar : BattleSystem
         this.position = position;
         this.id = id;
         this.radius = radius;
-    }
-}
-
-class Pulse
-{
-    public int pulseWidth;
-    public int pulseRepetitionInterval;
-    public int timeOfArrival;
-    public int angleOfArrival;
-    public string symbol;
-
-    public Pulse(int pulseWidth, int pulseRepetitionInterval, int timeOfArrival, int angleOfArrival, string symbol)
-    {
-        this.pulseWidth = pulseWidth;
-        this.pulseRepetitionInterval = pulseRepetitionInterval;
-        this.timeOfArrival = timeOfArrival;
-        this.angleOfArrival = angleOfArrival;
-        this.symbol = symbol;
-    }
-}
-
-class TravellingPulse : Pulse
-{
-    public int currentTick;
-    public int txTick;
-    public Position txPos;
-    public Position currentPos;
-    public TravellingPulse(int txTick, int currentTick, Position txPos, Position currentPos, int pulseWidth, int pulseRepetitionInterval, int timeOfArrival, int angleOfArrival, string symbol) : base(pulseWidth, pulseRepetitionInterval, timeOfArrival, angleOfArrival, symbol)
-    {
-        this.txTick = txTick;
-        this.currentPos = currentPos;
-        this.txPos = txPos;
-        this.currentTick = currentTick;
     }
 }

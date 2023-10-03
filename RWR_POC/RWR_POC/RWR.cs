@@ -62,9 +62,9 @@
 
     public override void OnTick()
     {
-         Console.WriteLine($"Tick : {Globals.Tick} RWR :\t\t\t amplitude : {RxBuf.Amplitudes[0]}, {RxBuf.Amplitudes[1]}, " +
-            $"{RxBuf.Amplitudes[2]}, {RxBuf.Amplitudes[3]}, freq : {RxBuf.Frequency}, PRI : {RxBuf.PRI}, pulseWidth : {RxBuf.pulseWidth}, " +
-            $"AOA : {RxBuf.AOA}");
+        Console.WriteLine($"Tick : {Globals.Tick} RWR :\t\t\t amplitude : {RxBuf.Amplitudes[0]}, {RxBuf.Amplitudes[1]}, " +
+           $"{RxBuf.Amplitudes[2]}, {RxBuf.Amplitudes[3]}, freq : {RxBuf.Frequency}, PRI : {RxBuf.PRI}, pulseWidth : {RxBuf.pulseWidth}, " +
+           $"AOA : {RxBuf.AOA}\n");
     }
 
     public override void Set(List<InParameter> inParameters)
