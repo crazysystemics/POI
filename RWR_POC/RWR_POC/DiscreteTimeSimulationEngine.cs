@@ -15,6 +15,7 @@ class DiscreteTimeSimulationEngine
     public bool echoPulseSet = false;
     public bool activePulseRecorded = false;
     public int activePulsePRI;
+    public int echoReceivedTime = 0;
 
     public DiscreteTimeSimulationEngine()
     {
@@ -164,11 +165,12 @@ class DiscreteTimeSimulationEngine
                             {
                                 Console.WriteLine("Echo received by Radar");
                                 echoReceived = true;
+                                echoReceivedTime = Globals.Tick;
                                 // Extract Pulse object from rxPulse to be used as Radar's InParameter during Set()
                                 echoedPulse = new Pulse(rxPulse.pulseWidth, rxPulse.pulseRepetitionInterval, rxPulse.timeOfArrival, rxPulse.angleOfArrival, rxPulse.symbol);
                                 echoPulseSet = true;
                             }
-                            else if (echoReceived && rxPulse.pulseRepetitionInterval != 0 && (Math.Abs(rxPulse.txTick - Globals.Tick) % rxPulse.pulseRepetitionInterval == 0) && receiver is RWR)
+                            else if (echoReceived && rxPulse.pulseRepetitionInterval != 0 && (Math.Abs(echoReceivedTime - Globals.Tick) % rxPulse.pulseRepetitionInterval == 0) && receiver is RWR)
                             {
                                 Console.WriteLine("Repeat echo received by radar");
                             }

@@ -14,7 +14,6 @@ class Radar : BattleSystem
     {
         public Pulse p;
         public Position pos;
-        public int txTick;
         public Out(Pulse p, Position pos, int id) : base(id)
         {
             this.pos = pos;
