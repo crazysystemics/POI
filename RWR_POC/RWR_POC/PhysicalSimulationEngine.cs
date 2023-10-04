@@ -67,9 +67,8 @@
 
     }
 
-    public TransmittedPulse GetPulse(int txTick, int rxTick, Position txPos, Pulse txPulse)
+    public Pulse GetPulse(Pulse txPulse)
     {
-        TransmittedPulse pulse = new(txTick, rxTick, txPos, txPulse.pulseWidth, txPulse.pulseRepetitionInterval, txPulse.timeOfArrival, txPulse.angleOfArrival, txPulse.symbol);
-        return pulse;
+        return txPulse;
     }
 }

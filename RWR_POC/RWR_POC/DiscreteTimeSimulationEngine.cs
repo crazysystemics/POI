@@ -8,7 +8,7 @@
     public Pulse echoedPulse = new Pulse(0, 0, 0, 0, "zero");
     public bool echoPulseSet = false;
     public int rxTick = Globals.Tick;
-    TransmittedPulse rxPulse = new TransmittedPulse(0, 0, new Position(0, 0), 0, 0, 0, 0, "zero");
+    Pulse rxPulse = new Pulse(0, 0, 0, 0, "zero");
 
     public DiscreteTimeSimulationEngine()
     {
@@ -21,7 +21,7 @@
     {
         Aircraft a = new Aircraft(new Position(10, 25), 0);
         Aircraft a2 = new Aircraft(new Position(20, 25), 5);
-        Radar r = new Radar(new Pulse(5, 5, 5, 5, "E1"), new Position(20, 10), Globals.Tick, 50, 1);
+        Radar r = new Radar(new Pulse(5, 20, 5, 5, "E1"), new Position(20, 10), Globals.Tick, 50, 1);
 
 
         a.rwr = new RWR(ref a.position, 2);
@@ -137,11 +137,8 @@
 
                 if (txPulse.pulseRepetitionInterval != 0)
                 {
-                    rxPulse = pse.GetPulse(pulseTxTick, rxTick, sim_model.position, txPulse);
+                    rxPulse = pse.GetPulse(txPulse);
                 }
-
-                Console.WriteLine($"txTick of rxPulse: {rxPulse.txTick}");
-                Console.WriteLine($"rxTick of rxPulse: {rxPulse.rxTick}");
 
 
                 if (((Radar)sim_model).activePulse != ((Radar)sim_model).zeroPulse)
