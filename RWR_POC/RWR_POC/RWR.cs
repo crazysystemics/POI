@@ -3,6 +3,7 @@
 
     public override bool Stopped { get; set; }
     public bool receivedPulse;
+    public int rxTick;
 
     public RWR(ref Position positon, int id)
     {
@@ -63,9 +64,9 @@
 
     public override void OnTick()
     {
-        Console.WriteLine($"Tick : {Globals.Tick} RWR :\t\t\t amplitude : {RxBuf.Amplitudes[0]}, {RxBuf.Amplitudes[1]}, " +
+        Console.WriteLine($"Tick : {Globals.Tick} RWR {id}:\t\t\t amplitude : {RxBuf.Amplitudes[0]}, {RxBuf.Amplitudes[1]}, " +
            $"{RxBuf.Amplitudes[2]}, {RxBuf.Amplitudes[3]}, freq : {RxBuf.Frequency}, PRI : {RxBuf.PRI}, pulseWidth : {RxBuf.pulseWidth}, " +
-           $"AOA : {RxBuf.AOA}, RWRPos: {position.x}, {position.y}\n");
+           $"AOA : {RxBuf.AOA}, RWRPos: {position.x}, {position.y}");
     }
 
     public override void Set(List<InParameter> inParameters)

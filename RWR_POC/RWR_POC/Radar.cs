@@ -10,6 +10,7 @@ class Radar : BattleSystem
     //public int targetY;
     public int radius;
     public int txTick;
+    public int rxTick;
     public int firstTxTick;
     public bool receivedEcho;
     public int echoReceivedTime;
