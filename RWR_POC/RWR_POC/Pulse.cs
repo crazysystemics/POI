@@ -16,15 +16,15 @@
     }
 }
 
-class TravellingPulse : Pulse
+class TransmittedPulse : Pulse
 {
     public int txTick;
-    public int currentTick;
+    public int rxTick;
     public Position txPos;
-    public TravellingPulse(int txTick, int currentTick, Position txPos, int pulseWidth, int pulseRepetitionInterval, int timeOfArrival, int angleOfArrival, string symbol) : base(pulseWidth, pulseRepetitionInterval, timeOfArrival, angleOfArrival, symbol)
+    public TransmittedPulse(int txTick, int rxTick, Position txPos, int pulseWidth, int pulseRepetitionInterval, int timeOfArrival, int angleOfArrival, string symbol) : base(pulseWidth, pulseRepetitionInterval, timeOfArrival, angleOfArrival, symbol)
     {
         this.txTick = txTick;
         this.txPos = txPos;
-        this.currentTick = currentTick;
+        this.rxTick = rxTick;
     }
 }

@@ -9,15 +9,23 @@ class Radar : BattleSystem
     //public int targetX;
     //public int targetY;
     public int radius;
+    public int txTick;
+    public int firstTxTick;
+    public bool receivedEcho;
+    public int echoReceivedTime;
 
     public class Out : OutParameter
     {
         public Pulse p;
         public Position pos;
-        public Out(Pulse p, Position pos, int id) : base(id)
+        public int firstTxTick;
+        public int txTick;
+        public Out(Pulse p, Position pos, int firstTxTick, int tcTick, int id) : base(id)
         {
             this.pos = pos;
             this.p = p;
+            this.firstTxTick = firstTxTick;
+            this.txTick = tcTick;
         }
     }
 
@@ -32,7 +40,7 @@ class Radar : BattleSystem
 
     public override OutParameter Get()
     {
-        Out radarOutput = new Out(txPulse, position, 1);
+        Out radarOutput = new Out(txPulse, position, firstTxTick, txTick, 1);
         return radarOutput;
     }
 
@@ -41,6 +49,7 @@ class Radar : BattleSystem
         if (Globals.Tick % activePulse.pulseRepetitionInterval == 0)
         {
             txPulse = activePulse;
+            txTick = Globals.Tick;
         }
         else
         {
@@ -63,12 +72,14 @@ class Radar : BattleSystem
     }
 
 
-    public Radar(Pulse initPulse, Position position, int radius, int id)
+    public Radar(Pulse initPulse, Position position, int txTick, int radius, int id)
     {
         this.txPulse = zeroPulse;
         this.activePulse = initPulse;
         this.position = position;
         this.id = id;
         this.radius = radius;
+        this.txTick = txTick;
+        this.firstTxTick = Globals.Tick;
     }
 }

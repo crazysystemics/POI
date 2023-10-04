@@ -2,6 +2,7 @@
 {
 
     public override bool Stopped { get; set; }
+    public bool receivedPulse;
 
     public RWR(ref Position positon, int id)
     {
