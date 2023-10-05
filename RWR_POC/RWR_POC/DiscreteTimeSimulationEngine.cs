@@ -78,17 +78,16 @@
             {
                 foreach (SimulationModel sim_model_2 in simMod)
                 {
-                    if (sim_model_2 is Aircraft)
+                    if (sim_model_2 is RWR)
                     {
                         radius = ((Radar)sim_model).radius;
                         int dist = pse.Distance(sim_model.id, sim_model_2.id);
-                        Console.WriteLine($"Distance between Aircraft {sim_model_2.id} and Radar {sim_model.id} = {dist}");
+                        Console.WriteLine($"Distance between {sim_model_2} {sim_model_2.id} and Radar {sim_model.id} = {dist}");
+                        List<InParameter> inParameters2 = new List<InParameter>();
+                        inParameters2.Clear();
                         if (echoPulseSet)
                         {
-                            List<InParameter> inParameters2 = new List<InParameter>
-                            {
-                                new Radar.In(echoedPulse, 2)
-                            };
+                            inParameters2.Add(new Radar.In(echoedPulse, 2));
                             ((Radar)sim_model).Set(inParameters2);
                         }
                     }
@@ -102,7 +101,7 @@
                     if (sim_model_2 is Radar)
                     {
                         int dist = pse.Distance(sim_model.id, sim_model_2.id);
-                        Console.WriteLine($"Distance between Radar {sim_model_2.id} and RWR {sim_model.id} = {dist}");
+                        Console.WriteLine($"Distance between {sim_model_2} {sim_model_2.id} and {sim_model} {sim_model.id} = {dist}");
                         if (dist < radius)
                         {
                             List<InParameter> inParameters2 = new List<InParameter>();
@@ -139,7 +138,6 @@
 
                 pulseOut = sim_model.Get();
                 txPulse = ((Radar.Out)pulseOut).p;
-                int pulseTxTick = ((Radar.Out)pulseOut).txTick;
 
                 if (txPulse.pulseRepetitionInterval != 0)
                 {
@@ -156,8 +154,6 @@
                         if ((!((Radar)sim_model).hasPulseReachedTarget) && Math.Abs(Globals.Tick - ((Radar)sim_model).txTick) == pulseTravelTime && Globals.Tick != 0)
                         {
                             Console.WriteLine($"Pulse from {sim_model} {sim_model.id} arrived at cell of {receiver} {receiver.id}");
-                            rxTick = Globals.Tick;
-                            ((RWR)receiver).rxTick = Globals.Tick;
                             ((Radar)sim_model).hasPulseReachedTarget = true;
 
                             // all booleans should be in the form of predicates

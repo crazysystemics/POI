@@ -69,7 +69,7 @@ class Radar : BattleSystem
 
     public override void Set(List<InParameter> inParameters)
     {
-        echoPulse = ((In)(inParameters[0])).echoPulse;
+        this.echoPulse = ((In)(inParameters[0])).echoPulse;
     }
 
 
