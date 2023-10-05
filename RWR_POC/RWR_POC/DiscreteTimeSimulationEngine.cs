@@ -21,7 +21,7 @@
     {
         Aircraft a = new Aircraft(new Position(0, 0), 0);
         Aircraft a2 = new Aircraft(new Position(20, 25), 5);
-        Radar r = new Radar(new Pulse(5, 25, 5, 5, "E1"), new Position(0, 12), Globals.Tick, 50, 1);
+        Radar r = new Radar(new Pulse(5, 40, 5, 5, "E1"), new Position(0, 12), Globals.Tick, 50, 1);
         Radar r2 = new Radar(new Pulse(5, 25, 5, 5, "E1"), new Position(0, 5), Globals.Tick, 50, 6);
 
 
@@ -107,6 +107,7 @@
                         {
                             List<InParameter> inParameters2 = new List<InParameter>();
                             int[] amps = new int[] { 10, 10, 10, 10 };
+                            inParameters2.Clear();
                             inParameters2.Add(new RWR.In(new RWR.Emitter(amps, 10, 10, 10, 10), 1));
                             ((RWR)sim_model).Set(inParameters2);
                         }
@@ -145,8 +146,6 @@
                     rxPulse = pse.GetPulse(txPulse);
                 }
 
-                // below if condition is not required
-
                 foreach (SimulationModel receiver in simMod)
                 {
                     int pulseTravelSpeed = 1; // must be speed of light "c" in actual computation
@@ -172,19 +171,12 @@
                         }
                         if (((Radar)sim_model).hasPulseReachedTarget)
                         {
-                            if (!((Radar)sim_model).receivedEcho && Math.Abs(Globals.Tick - ((Radar)sim_model).txTick) == 2 * pulseTravelTime)
+                            if (Math.Abs(Globals.Tick - ((Radar)sim_model).txTick) == 2 * pulseTravelTime)
                             {
                                 Console.WriteLine($"Echo received by Radar {sim_model.id}");
-                                ((Radar)sim_model).receivedEcho = true;
                                 ((Radar)sim_model).echoReceivedTime = Globals.Tick;
-                                // Extract Pulse object from rxPulse to be used as Radar's InParameter during Set()
                                 echoedPulse = new Pulse(rxPulse.pulseWidth, rxPulse.pulseRepetitionInterval, rxPulse.timeOfArrival, rxPulse.angleOfArrival, rxPulse.symbol);
                                 echoPulseSet = true;
-                                ((Radar)sim_model).hasPulseReachedTarget = false;
-                            }
-                            else if (((Radar)sim_model).receivedEcho && rxPulse.pulseRepetitionInterval != 0 && (Math.Abs(((Radar)sim_model).echoReceivedTime - Globals.Tick) % rxPulse.pulseRepetitionInterval == 0))
-                            {
-                                Console.WriteLine($"Repeat echo received by Radar {sim_model.id}");
                                 ((Radar)sim_model).hasPulseReachedTarget = false;
                             }
                         }

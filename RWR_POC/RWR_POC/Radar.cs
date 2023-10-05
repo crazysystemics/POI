@@ -11,7 +11,7 @@ class Radar : BattleSystem
     public int radius;
     public int txTick;
     public int rxTick;
-    public bool receivedEcho = false;
+    public bool hasReceivedEcho = false;
     public int echoReceivedTime;
     public bool hasPulseReachedTarget = false;
 
