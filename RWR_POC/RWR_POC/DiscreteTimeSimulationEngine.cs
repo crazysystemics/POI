@@ -19,20 +19,26 @@
 
     public void Init()
     {
-        Aircraft a = new Aircraft(new Position(10, 25), 0);
+        Aircraft a = new Aircraft(new Position(0, 0), 0);
         Aircraft a2 = new Aircraft(new Position(20, 25), 5);
-        Radar r = new Radar(new Pulse(5, 20, 5, 5, "E1"), new Position(20, 10), Globals.Tick, 50, 1);
+        Radar r = new Radar(new Pulse(5, 25, 5, 5, "E1"), new Position(0, 12), Globals.Tick, 50, 1);
+        Radar r2 = new Radar(new Pulse(5, 25, 5, 5, "E1"), new Position(0, 5), Globals.Tick, 50, 6);
 
 
         a.rwr = new RWR(ref a.position, 2);
-        a2.rwr = new RWR(ref a2.position, 6);
+        //a2.rwr = new RWR(ref a2.position, 6);
+        // be careful with ref operator
 
         simMod.Add(a);
-        simMod.Add(a2);
+        //simMod.Add(a2);
         simMod.Add(r);
+        simMod.Add(r2);
         simMod.Add(a.rwr);
-        simMod.Add(a2.rwr);
+        //simMod.Add(a2.rwr);
         simMod.Add(pse);
+
+        // Take single aircraft and multiple radars
+
     }
 
     public void RunSimulationEngine()
@@ -133,54 +139,58 @@
                 pulseOut = sim_model.Get();
                 txPulse = ((Radar.Out)pulseOut).p;
                 int pulseTxTick = ((Radar.Out)pulseOut).txTick;
-                int firstTxTick = ((Radar.Out)pulseOut).firstTxTick;
 
                 if (txPulse.pulseRepetitionInterval != 0)
                 {
                     rxPulse = pse.GetPulse(txPulse);
                 }
 
+                // below if condition is not required
 
-                if (((Radar)sim_model).activePulse != ((Radar)sim_model).zeroPulse)
+                foreach (SimulationModel receiver in simMod)
                 {
-                    foreach (SimulationModel receiver in simMod)
+                    int pulseTravelSpeed = 1; // must be speed of light "c" in actual computation
+                    int dist = pse.Distance(receiver.id, sim_model.id);
+                    int pulseTravelTime = dist / pulseTravelSpeed;
+                    if (receiver is RWR)
                     {
-                        int pulseTravelSpeed = 1; // must be speed of light "c" in actual computation
-                        int dist = pse.Distance(receiver.id, sim_model.id);
-                        int pulseTravelTime = dist / pulseTravelSpeed;
-                        if (receiver is RWR)
+                        if ((!((Radar)sim_model).hasPulseReachedTarget) && Math.Abs(Globals.Tick - ((Radar)sim_model).txTick) == pulseTravelTime && Globals.Tick != 0)
                         {
-                            if ((!((RWR)receiver).receivedPulse) && Math.Abs(firstTxTick - Globals.Tick) == pulseTravelTime && Globals.Tick != 0)
+                            Console.WriteLine($"Pulse from {sim_model} {sim_model.id} arrived at cell of {receiver} {receiver.id}");
+                            rxTick = Globals.Tick;
+                            ((RWR)receiver).rxTick = Globals.Tick;
+                            ((Radar)sim_model).hasPulseReachedTarget = true;
+
+                            // all booleans should be in the form of predicates
+                            // do not change variables to make your model/code work
+                            // make sure changes in foreach are reflected in list
+                        }
+                        if (((Radar)sim_model).hasPulseReachedTarget && (Math.Abs(Globals.Tick - ((Radar)sim_model).txTick) % rxPulse.pulseRepetitionInterval == 0))
+                        {
+                            Console.WriteLine($"Pulse from {sim_model} {sim_model.id} arrived at cell of {receiver} {receiver.id}");
+                            Console.WriteLine($"Pulse reflected by {receiver} {receiver.id}");
+                        }
+                        if (((Radar)sim_model).hasPulseReachedTarget)
+                        {
+                            if (!((Radar)sim_model).receivedEcho && Math.Abs(Globals.Tick - ((Radar)sim_model).txTick) == 2 * pulseTravelTime)
                             {
-                                Console.WriteLine($"Pulse arrived at cell of {receiver} {receiver.id}");
-                                rxTick = Globals.Tick;
-                                ((RWR)receiver).rxTick = Globals.Tick;
-                                ((RWR)receiver).receivedPulse = true;
+                                Console.WriteLine($"Echo received by Radar {sim_model.id}");
+                                ((Radar)sim_model).receivedEcho = true;
+                                ((Radar)sim_model).echoReceivedTime = Globals.Tick;
+                                // Extract Pulse object from rxPulse to be used as Radar's InParameter during Set()
+                                echoedPulse = new Pulse(rxPulse.pulseWidth, rxPulse.pulseRepetitionInterval, rxPulse.timeOfArrival, rxPulse.angleOfArrival, rxPulse.symbol);
+                                echoPulseSet = true;
+                                ((Radar)sim_model).hasPulseReachedTarget = false;
                             }
-                            if (((RWR)receiver).receivedPulse && (Math.Abs(((RWR)receiver).rxTick - Globals.Tick) % rxPulse.pulseRepetitionInterval == 0))
+                            else if (((Radar)sim_model).receivedEcho && rxPulse.pulseRepetitionInterval != 0 && (Math.Abs(((Radar)sim_model).echoReceivedTime - Globals.Tick) % rxPulse.pulseRepetitionInterval == 0))
                             {
-                                Console.WriteLine($"Pulse arrived at cell of {receiver} {receiver.id}");
-                                Console.WriteLine($"Pulse reflected by {receiver} {receiver.id}");
-                            }
-                            if (((RWR)receiver).receivedPulse)
-                            {
-                                if (!((Radar)sim_model).receivedEcho && Math.Abs(firstTxTick - Globals.Tick) == 2 * pulseTravelTime)
-                                {
-                                    Console.WriteLine("Echo received by Radar");
-                                    ((Radar)sim_model).receivedEcho = true;
-                                    ((Radar)sim_model).echoReceivedTime = Globals.Tick;
-                                    // Extract Pulse object from rxPulse to be used as Radar's InParameter during Set()
-                                    echoedPulse = new Pulse(rxPulse.pulseWidth, rxPulse.pulseRepetitionInterval, rxPulse.timeOfArrival, rxPulse.angleOfArrival, rxPulse.symbol);
-                                    echoPulseSet = true;
-                                }
-                                else if (((Radar)sim_model).receivedEcho && rxPulse.pulseRepetitionInterval != 0 && (Math.Abs(((Radar)sim_model).echoReceivedTime - Globals.Tick) % rxPulse.pulseRepetitionInterval == 0))
-                                {
-                                    Console.WriteLine("Repeat echo received by Radar");
-                                }
+                                Console.WriteLine($"Repeat echo received by Radar {sim_model.id}");
+                                ((Radar)sim_model).hasPulseReachedTarget = false;
                             }
                         }
                     }
                 }
+
             }
         }
         Globals.Tick++;
