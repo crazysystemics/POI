@@ -21,9 +21,11 @@
     {
         Aircraft a = new Aircraft(new Position(0, 0), 0);
         Aircraft a2 = new Aircraft(new Position(20, 25), 5);
-        Radar r = new Radar(new Pulse(5, 40, 5, 5, "E1"), new Position(0, 12), Globals.Tick, 50, 1);
-        Radar r2 = new Radar(new Pulse(5, 25, 5, 5, "E1"), new Position(0, 5), Globals.Tick, 50, 6);
+        Radar r = new Radar(new Pulse(7, 10, 5, 45, "E1"), new Position(0, 6), 40, Globals.Tick, 50, 1);
+        Radar r2 = new Radar(new Pulse(5, 15, 5, 45, "E2"), new Position(6, 0), 20, Globals.Tick, 50, 6);
 
+        // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
+        // Minimum unambiguous range for a radar is c * PRI / 2 where c is the speed of light
 
         a.rwr = new RWR(ref a.position, 2);
         //a2.rwr = new RWR(ref a2.position, 6);
@@ -45,7 +47,11 @@
     {
         List<InParameter> inParameters = new List<InParameter>();
 
+        Console.WriteLine($"Tick = {Globals.Tick}");
+
         // Get() on every Simulation Model
+
+        Globals.debugPrint = true;
 
         foreach (SimulationModel sim_model in simMod)
         {
@@ -81,8 +87,12 @@
                     if (sim_model_2 is RWR)
                     {
                         radius = ((Radar)sim_model).radius;
-                        int dist = pse.Distance(sim_model.id, sim_model_2.id);
-                        Console.WriteLine($"Distance between {sim_model_2} {sim_model_2.id} and Radar {sim_model.id} = {dist}");
+                        int dist = pse.GetDistance(sim_model.id, sim_model_2.id);
+                        if (Globals.debugPrint)
+                        {
+                            Console.WriteLine($"Distance between {sim_model_2} {sim_model_2.id} and Radar {sim_model.id} = {dist}");
+                        }
+
                         List<InParameter> inParameters2 = new List<InParameter>();
                         inParameters2.Clear();
                         if (echoPulseSet)
@@ -100,8 +110,12 @@
                 {
                     if (sim_model_2 is Radar)
                     {
-                        int dist = pse.Distance(sim_model.id, sim_model_2.id);
-                        Console.WriteLine($"Distance between {sim_model_2} {sim_model_2.id} and {sim_model} {sim_model.id} = {dist}");
+                        int dist = pse.GetDistance(sim_model.id, sim_model_2.id);
+                        if (Globals.debugPrint)
+                        {
+                            Console.WriteLine($"Distance between {sim_model_2} {sim_model_2.id} and {sim_model} {sim_model.id} = {dist}");
+                        }
+
                         if (dist < radius)
                         {
                             List<InParameter> inParameters2 = new List<InParameter>();
@@ -138,42 +152,49 @@
 
                 pulseOut = sim_model.Get();
                 txPulse = ((Radar.Out)pulseOut).p;
+                Radar r = (Radar)sim_model;
 
-                if (txPulse.pulseRepetitionInterval != 0)
-                {
-                    rxPulse = pse.GetPulse(txPulse);
-                }
+
 
                 foreach (SimulationModel receiver in simMod)
                 {
-                    int pulseTravelSpeed = 1; // must be speed of light "c" in actual computation
-                    int dist = pse.Distance(receiver.id, sim_model.id);
-                    int pulseTravelTime = dist / pulseTravelSpeed;
+
+                    //if (txPulse.pulseRepetitionInterval != 0)
+                    //{
+                    //rxPulse = pse.GetPulse(txPulse, r.txTick, r.position, Globals.Tick, receiver.position);
+                    //}
+
+
+                    int dist = pse.GetDistance(receiver.id, sim_model.id);
+                    int pulseTravelTime = dist / Globals.pulseTravelSpeed;
                     if (receiver is RWR)
                     {
-                        if ((!((Radar)sim_model).hasPulseReachedTarget) && Math.Abs(Globals.Tick - ((Radar)sim_model).txTick) == pulseTravelTime && Globals.Tick != 0)
+                        if ((!((RWR)receiver).hasReceivedPulse) && Math.Abs(Globals.Tick - ((Radar)sim_model).txTick) == pulseTravelTime && Globals.Tick != 0)
                         {
-                            Console.WriteLine($"Pulse from {sim_model} {sim_model.id} arrived at cell of {receiver} {receiver.id}");
-                            ((Radar)sim_model).hasPulseReachedTarget = true;
+                            Console.WriteLine($"Pulse from {sim_model} {sim_model.id} arrived at cell of {receiver} {receiver.id}\n");
+                            ((RWR)receiver).hasReceivedPulse = true;
 
-                            // all booleans should be in the form of predicates
-                            // do not change variables to make your model/code work
-                            // make sure changes in foreach are reflected in list
+                            // at current tick at current location, what will be the amplitude of the pulse
+                            // no attenuation in amplitude
+                            // only pse should the energy at a location and time
+                            // only when we introduce sensor model of RWR
                         }
-                        if (((Radar)sim_model).hasPulseReachedTarget && (Math.Abs(Globals.Tick - ((Radar)sim_model).txTick) % rxPulse.pulseRepetitionInterval == 0))
+                        if (((RWR)receiver).hasReceivedPulse && (Math.Abs(Globals.Tick - ((Radar)sim_model).txTick) % ((Radar)sim_model).pulseRepetitionInterval == 0))
                         {
-                            Console.WriteLine($"Pulse from {sim_model} {sim_model.id} arrived at cell of {receiver} {receiver.id}");
+                            Console.WriteLine($"Pulse from {sim_model} {sim_model.id} arrived at cell of {receiver} {receiver.id}\n");
                             Console.WriteLine($"Pulse reflected by {receiver} {receiver.id}");
                         }
-                        if (((Radar)sim_model).hasPulseReachedTarget)
+                        if (((RWR)receiver).hasReceivedPulse)
                         {
                             if (Math.Abs(Globals.Tick - ((Radar)sim_model).txTick) == 2 * pulseTravelTime)
                             {
-                                Console.WriteLine($"Echo received by Radar {sim_model.id}");
-                                ((Radar)sim_model).echoReceivedTime = Globals.Tick;
-                                echoedPulse = new Pulse(rxPulse.pulseWidth, rxPulse.pulseRepetitionInterval, rxPulse.timeOfArrival, rxPulse.angleOfArrival, rxPulse.symbol);
+                                Console.WriteLine($"Echo received by Radar {sim_model.id}\n");
+                                ((Radar)sim_model).echoTimeOfArrival = Globals.Tick;
+                                echoedPulse = new Pulse(txPulse.pulseWidth, ((Radar)sim_model).pulseRepetitionInterval, txPulse.timeOfTraversal, txPulse.angleOfTraversal, txPulse.symbol);
                                 echoPulseSet = true;
-                                ((Radar)sim_model).hasPulseReachedTarget = false;
+                                // discard echo packets not matching characteristics
+                                // ideally do frequency-based filtering
+                                ((RWR)receiver).hasReceivedPulse = false;
                             }
                         }
                     }

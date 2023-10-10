@@ -2,6 +2,13 @@
 {
     public static int Tick = 0;
     public static float TimeResolution = 0.10f;
+    public static int pulseTravelSpeed = 1;
+    public static bool debugPrint = true;
+
+    public static void debugWriteLine(string s)
+    {
+        Console.WriteLine(s);
+    }
     public static float DistanceCalculator(float[] obj1, float[] obj2)
     {
         float x = obj1[0] - obj2[0];

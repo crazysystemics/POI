@@ -1,6 +1,7 @@
 ﻿class PhysicalSimulationEngine : SimulationModel
 {
     public Dictionary<int, Position> physicalObjects = new Dictionary<int, Position>();
+    public Pulse pulseInspace;
     //public Pulse previousActivePulse;
 
     public PhysicalSimulationEngine()
@@ -8,7 +9,7 @@
         id = 99;
     }
 
-    public int Distance(int objID1, int objID2)
+    public int GetDistance(int objID1, int objID2)
     {
         if (!physicalObjects.ContainsKey(objID1) || !physicalObjects.ContainsKey(objID2)) return 0;
         Position p1 = physicalObjects[objID1];
@@ -18,6 +19,11 @@
         int distance = (int)Math.Sqrt((distance_x * distance_x) + (distance_y * distance_y));
         return distance;
     }
+
+    //public Pulse Get()
+    //{
+
+    //}
 
     public class PhysicalSimulationOut : OutParameter
     {
@@ -67,8 +73,10 @@
 
     }
 
-    public Pulse GetPulse(Pulse txPulse)
+    public Pulse GetPulse(Pulse txPulse, int txTick, Position txPosition,
+                          int rxTick, Position rxPosition)
     {
-        return txPulse;
+        pulseInspace = txPulse;
+        return pulseInspace;
     }
 }

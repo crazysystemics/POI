@@ -4,12 +4,15 @@
     public override bool Stopped { get; set; }
     public bool hasReceivedPulse = false;
     public int rxTick;
+    public Pulse EmitterPulse;
 
     public RWR(ref Position positon, int id)
     {
         this.position = positon;
         this.id = id;
     }
+
+
     public class Emitter
     {
         public int[] Amplitudes = new int[4];
@@ -47,6 +50,8 @@
 
     public class In : InParameter
     {
+
+        // Pulse as InParameter
         public Emitter e = new Emitter();
         public In(Emitter e, int id) : base(id)
         {
@@ -64,9 +69,11 @@
 
     public override void OnTick()
     {
-        Console.WriteLine($"Tick : {Globals.Tick} RWR {id}:\t\t\t amplitude : {RxBuf.Amplitudes[0]}, {RxBuf.Amplitudes[1]}, " +
-           $"{RxBuf.Amplitudes[2]}, {RxBuf.Amplitudes[3]}, freq : {RxBuf.Frequency}, PRI : {RxBuf.PRI}, pulseWidth : {RxBuf.pulseWidth}, " +
-           $"AOA : {RxBuf.AOA}, RWRPos: {position.x}, {position.y}");
+        if (Globals.debugPrint)
+        {
+            Console.WriteLine($"RWR {id}:\t\t\t Position (x, y): ({position.x}, {position.y})");
+        }
+
     }
 
     public override void Set(List<InParameter> inParameters)

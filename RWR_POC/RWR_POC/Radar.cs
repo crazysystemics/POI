@@ -6,14 +6,15 @@ class Radar : BattleSystem
     public Pulse activePulse;
     public Pulse zeroPulse = new Pulse(0, 0, 0, 0, "zero");
     public Pulse echoPulse;
+    public int pulseRepetitionInterval;
     //public int targetX;
     //public int targetY;
     public int radius;
     public int txTick;
     public int rxTick;
-    public bool hasReceivedEcho = false;
-    public int echoReceivedTime;
-    public bool hasPulseReachedTarget = false;
+    //public bool hasReceivedEcho = false;
+    public int echoTimeOfArrival;
+    //public bool hasPulseReachedTarget = false;
 
     public class Out : OutParameter
     {
@@ -40,16 +41,28 @@ class Radar : BattleSystem
 
     public override OutParameter Get()
     {
+        if (txPulse.amplitude > 0)
+        {
+            Globals.debugPrint = true;
+        }
+        else
+        {
+            Globals.debugPrint = false;
+        }
         Out radarOutput = new Out(txPulse, position, txTick, 1);
         return radarOutput;
     }
 
     public override void OnTick()
     {
-        if (Globals.Tick % activePulse.pulseRepetitionInterval == 0)
+        if (Globals.Tick % this.pulseRepetitionInterval == 0)
         {
             txPulse = activePulse;
             txTick = Globals.Tick;
+            //if (Globals.debugPrint)
+            //{
+            //    Console.WriteLine($"Pulse emitted by {this} {id}");
+            //}
             Console.WriteLine($"Pulse emitted by {this} {id}");
         }
         else
@@ -57,14 +70,22 @@ class Radar : BattleSystem
             txPulse = zeroPulse;
         }
 
-        Console.WriteLine($"Tick : {Globals.Tick} Radar {id}:\t\t txPulse : {txPulse.pulseWidth}, {txPulse.pulseRepetitionInterval}, " +
-            $"{txPulse.timeOfArrival}, {txPulse.angleOfArrival}, {txPulse.symbol}");
-
-        if (echoPulse != null)
+        if (Globals.debugPrint)
         {
-            Console.WriteLine($"Tick : {Globals.Tick} Radar :\t\t echoPulse : {echoPulse.pulseWidth}, {echoPulse.pulseRepetitionInterval}, " +
-            $"{echoPulse.timeOfArrival}, {echoPulse.angleOfArrival}, {echoPulse.symbol}");
+            Console.WriteLine($"Radar {id}:\t\t txPulse : {txPulse.pulseWidth}, {pulseRepetitionInterval}, " +
+    $"{txPulse.timeOfTraversal}, {txPulse.angleOfTraversal}, {txPulse.symbol}, {txPulse.amplitude}, txTick = {txTick}");
         }
+
+        if (Globals.debugPrint)
+        {
+            if (echoPulse != null)
+            {
+                Console.WriteLine($"Radar {id} :\t\t echoPulse : {echoPulse.pulseWidth}, {pulseRepetitionInterval}, " +
+                $"{echoPulse.timeOfTraversal}, {echoPulse.angleOfTraversal}, {echoPulse.symbol}, {echoPulse.amplitude}, txTick = {txTick}");
+            }
+        }
+
+
     }
 
     public override void Set(List<InParameter> inParameters)
@@ -73,7 +94,7 @@ class Radar : BattleSystem
     }
 
 
-    public Radar(Pulse initPulse, Position position, int txTick, int radius, int id)
+    public Radar(Pulse initPulse, Position position, int pulseRepetitionInterval, int txTick, int radius, int id)
     {
         this.txPulse = zeroPulse;
         this.activePulse = initPulse;
@@ -81,5 +102,6 @@ class Radar : BattleSystem
         this.id = id;
         this.radius = radius;
         this.txTick = txTick;
+        this.pulseRepetitionInterval = pulseRepetitionInterval;
     }
 }
