@@ -72,16 +72,18 @@ class Radar : BattleSystem
 
         if (Globals.debugPrint)
         {
-            Console.WriteLine($"Radar {id}:\t\t txPulse : {txPulse.pulseWidth}, {pulseRepetitionInterval}, " +
-    $"{txPulse.timeOfTraversal}, {txPulse.angleOfTraversal}, {txPulse.symbol}, {txPulse.amplitude}, txTick = {txTick}");
+            Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
+    $"\n\t\tTime of transmission: {txPulse.timeOfTraversal}\n\t\tAngle of transmission: {txPulse.angleOfTraversal}\n\t\tSymbol: {txPulse.symbol}" +
+    $"\n\t\tAmplitude: {txPulse.amplitude}\n\t\ttxTick = {txTick}\n");
         }
 
         if (Globals.debugPrint)
         {
-            if (echoPulse != null)
+            if (echoPulse != zeroPulse)
             {
-                Console.WriteLine($"Radar {id} :\t\t echoPulse : {echoPulse.pulseWidth}, {pulseRepetitionInterval}, " +
-                $"{echoPulse.timeOfTraversal}, {echoPulse.angleOfTraversal}, {echoPulse.symbol}, {echoPulse.amplitude}, txTick = {txTick}");
+                Console.WriteLine($"Radar {id}:\n\techoPulse:\n\t\tPulse width: {echoPulse.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
+                $"\n\t\tTime of arrival: {echoPulse.timeOfTraversal}\n\t\tAngle of arrival: {echoPulse.angleOfTraversal}\n\t\tSymbol: {echoPulse.symbol}" +
+                $"\n\t\tAmplitude: {echoPulse.amplitude}\n\t\ttxTick = {txTick}\n");
             }
         }
 
@@ -90,12 +92,16 @@ class Radar : BattleSystem
 
     public override void Set(List<InParameter> inParameters)
     {
-        this.echoPulse = ((In)(inParameters[0])).echoPulse;
+        if (echoPulse.symbol == this.activePulse.symbol)
+        {
+            this.echoPulse = ((In)(inParameters[0])).echoPulse;
+        }
     }
 
 
     public Radar(Pulse initPulse, Position position, int pulseRepetitionInterval, int txTick, int radius, int id)
     {
+        this.echoPulse = zeroPulse;
         this.txPulse = zeroPulse;
         this.activePulse = initPulse;
         this.position = position;

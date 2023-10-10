@@ -71,9 +71,8 @@
     {
         if (Globals.debugPrint)
         {
-            Console.WriteLine($"RWR {id}:\t\t\t Position (x, y): ({position.x}, {position.y})");
+            Console.WriteLine($"RWR {id}:\t\t\t Position (x, y): ({position.x}, {position.y})\n");
         }
-
     }
 
     public override void Set(List<InParameter> inParameters)

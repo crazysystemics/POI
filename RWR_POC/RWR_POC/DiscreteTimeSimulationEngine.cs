@@ -32,10 +32,10 @@
         // be careful with ref operator
 
         simMod.Add(a);
+        simMod.Add(a.rwr);
         //simMod.Add(a2);
         simMod.Add(r);
         simMod.Add(r2);
-        simMod.Add(a.rwr);
         //simMod.Add(a2.rwr);
         simMod.Add(pse);
 
@@ -88,10 +88,10 @@
                     {
                         radius = ((Radar)sim_model).radius;
                         int dist = pse.GetDistance(sim_model.id, sim_model_2.id);
-                        if (Globals.debugPrint)
-                        {
-                            Console.WriteLine($"Distance between {sim_model_2} {sim_model_2.id} and Radar {sim_model.id} = {dist}");
-                        }
+                        //if (Globals.debugPrint)
+                        //{
+                        //    Console.WriteLine($"Distance between {sim_model_2} {sim_model_2.id} and Radar {sim_model.id} = {dist}");
+                        //}
 
                         List<InParameter> inParameters2 = new List<InParameter>();
                         inParameters2.Clear();
@@ -141,8 +141,6 @@
         OutParameter pulseOut;
         Pulse txPulse;
 
-        // GetPulse() on PSE
-
         Console.WriteLine();
 
         foreach (SimulationModel sim_model in simMod)
@@ -151,10 +149,11 @@
             {
 
                 pulseOut = sim_model.Get();
-                txPulse = ((Radar.Out)pulseOut).p;
-                Radar r = (Radar)sim_model;
-
-
+                txPulse = new Pulse(0, 0, 0, 0, "E0");
+                if (((Radar.Out)pulseOut).p == ((Radar)sim_model).activePulse)
+                {
+                    txPulse = ((Radar.Out)pulseOut).p;
+                }
 
                 foreach (SimulationModel receiver in simMod)
                 {
@@ -190,10 +189,9 @@
                             {
                                 Console.WriteLine($"Echo received by Radar {sim_model.id}\n");
                                 ((Radar)sim_model).echoTimeOfArrival = Globals.Tick;
-                                echoedPulse = new Pulse(txPulse.pulseWidth, ((Radar)sim_model).pulseRepetitionInterval, txPulse.timeOfTraversal, txPulse.angleOfTraversal, txPulse.symbol);
+                                echoedPulse = new Pulse(txPulse.pulseWidth, txPulse.amplitude, txPulse.timeOfTraversal, txPulse.angleOfTraversal, txPulse.symbol);
                                 echoPulseSet = true;
-                                // discard echo packets not matching characteristics
-                                // ideally do frequency-based filtering
+
                                 ((RWR)receiver).hasReceivedPulse = false;
                             }
                         }
