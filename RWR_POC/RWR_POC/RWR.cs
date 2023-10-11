@@ -5,6 +5,7 @@
     public bool hasReceivedPulse = false;
     public int rxTick;
     public Pulse EmitterPulse;
+    public int receivedPulseCount = 0;
 
     public RWR(ref Position positon, int id)
     {
@@ -20,8 +21,9 @@
         public int PRI;
         public int pulseWidth;
         public int AOA;
+        public int id;
 
-        public Emitter(int[] amplitudes = null, int frequency = 0, int pRI = 0, int pulseWidth = 1, int aOA = 0)
+        public Emitter(int[] amplitudes = null, int frequency = 0, int pRI = 0, int pulseWidth = 1, int aOA = 0, int id = 0)
         {
             if (amplitudes == null)
             {
@@ -32,6 +34,7 @@
             PRI = pRI;
             this.pulseWidth = pulseWidth;
             AOA = aOA;
+            this.id = id;
         }
     }
     public Emitter RxBuf = new Emitter();
@@ -53,6 +56,7 @@
 
         // Pulse as InParameter
         public Emitter e = new Emitter();
+
         public In(Emitter e, int id) : base(id)
         {
             this.ID = id;
@@ -71,7 +75,16 @@
     {
         if (Globals.debugPrint)
         {
-            Console.WriteLine($"RWR {id}:\t\t\t Position (x, y): ({position.x}, {position.y})\n");
+            Console.WriteLine($"RWR {id}:\t\tPosition (x, y): ({position.x}, {position.y})");
+            if (RxBuf.id == 0)
+            {
+                Console.WriteLine("\t\tNo emitter\n");
+            }
+            else
+            {
+                Console.WriteLine($"\t\tPRI: {RxBuf.PRI}\n\t\tFrequency: {RxBuf.Frequency}\n");
+                // print all characteristics
+            }
         }
     }
 

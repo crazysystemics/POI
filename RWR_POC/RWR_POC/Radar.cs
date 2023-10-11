@@ -12,8 +12,9 @@ class Radar : BattleSystem
     public int radius;
     public int txTick;
     public int rxTick;
-    //public bool hasReceivedEcho = false;
+    public bool hasReceivedEcho = false;
     public int echoTimeOfArrival;
+    public string pulseSymbol;
     //public bool hasPulseReachedTarget = false;
 
     public class Out : OutParameter
@@ -45,10 +46,6 @@ class Radar : BattleSystem
         {
             Globals.debugPrint = true;
         }
-        else
-        {
-            Globals.debugPrint = false;
-        }
         Out radarOutput = new Out(txPulse, position, txTick, 1);
         return radarOutput;
     }
@@ -63,7 +60,8 @@ class Radar : BattleSystem
             //{
             //    Console.WriteLine($"Pulse emitted by {this} {id}");
             //}
-            Console.WriteLine($"Pulse emitted by {this} {id}");
+            Console.WriteLine($"Pulse emitted by {this} {id}\n");
+            Globals.debugPrint = true;
         }
         else
         {
@@ -79,10 +77,10 @@ class Radar : BattleSystem
 
         if (Globals.debugPrint)
         {
-            if (echoPulse != zeroPulse)
+            if (hasReceivedEcho)
             {
                 Console.WriteLine($"Radar {id}:\n\techoPulse:\n\t\tPulse width: {echoPulse.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
-                $"\n\t\tTime of arrival: {echoPulse.timeOfTraversal}\n\t\tAngle of arrival: {echoPulse.angleOfTraversal}\n\t\tSymbol: {echoPulse.symbol}" +
+                $"\n\t\tTime of arrival: {echoTimeOfArrival}\n\t\tAngle of arrival: {echoPulse.angleOfTraversal}\n\t\tSymbol: {echoPulse.symbol}" +
                 $"\n\t\tAmplitude: {echoPulse.amplitude}\n\t\ttxTick = {txTick}\n");
             }
         }
@@ -92,18 +90,19 @@ class Radar : BattleSystem
 
     public override void Set(List<InParameter> inParameters)
     {
-        if (echoPulse.symbol == this.activePulse.symbol)
+        if (this.echoPulse.symbol == this.pulseSymbol)
         {
             this.echoPulse = ((In)(inParameters[0])).echoPulse;
         }
     }
 
 
-    public Radar(Pulse initPulse, Position position, int pulseRepetitionInterval, int txTick, int radius, int id)
+    public Radar(Pulse initPulse, Position position, int pulseRepetitionInterval, string pulseSymbol, int txTick, int radius, int id)
     {
-        this.echoPulse = zeroPulse;
         this.txPulse = zeroPulse;
         this.activePulse = initPulse;
+        this.echoPulse = activePulse;
+        this.pulseSymbol = pulseSymbol;
         this.position = position;
         this.id = id;
         this.radius = radius;
