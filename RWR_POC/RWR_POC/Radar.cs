@@ -66,6 +66,7 @@ class Radar : BattleSystem
         else
         {
             txPulse = zeroPulse;
+            Globals.debugPrint = false;
         }
 
         if (Globals.debugPrint)
