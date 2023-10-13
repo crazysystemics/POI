@@ -10,7 +10,6 @@ class DiscreteTimeSimulationEngine
     public bool echoPulseSet = false;
     public int rxTick = Globals.Tick;
     public RWR.Emitter detectedRadar = new RWR.Emitter();
-    public bool emitterDetected = false;
     OutParameter pulseOut;
     Pulse txPulse = new Pulse(0, 0, 0, 0, "E0");
 
@@ -79,39 +78,38 @@ class DiscreteTimeSimulationEngine
         
         // Set() on every Simulation Model
 
-        foreach (SimulationModel transmitter in simMod)
+        foreach (SimulationModel receiver in simMod)
         {
             pse.Set(inParameters);
             int radius = 0;
 
-            if (transmitter is Radar)
+            if (receiver is Radar)
             {
-                foreach (SimulationModel receiver in simMod)
+                foreach (SimulationModel transmitter in simMod)
                 {
-                    if (receiver is RWR)
+                    if (transmitter is RWR)
                     {
                         List<InParameter> inParameters2 = new List<InParameter>();
                         inParameters2.Clear();
                         if (echoPulseSet)
                         {
                             inParameters2.Add(new Radar.In(echoedPulse, 2));
-                            ((Radar)transmitter).Set(inParameters2);
+                            ((Radar)receiver).Set(inParameters2);
                         }
                     }
                 }
             }
 
-            if (transmitter is RWR)
+            if (receiver is RWR)
             {
-                foreach (SimulationModel receiver in simMod)
+                foreach (SimulationModel transmitter in simMod)
                 {
-                    if (receiver is Radar && emitterDetected)
+                    if (transmitter is Radar)
                     {
                         List<InParameter> inParameters2 = new List<InParameter>();
-                        int[] amps = new int[] { 0, 0, 0, 0 };
                         inParameters2.Clear();
-                        inParameters2.Add(new RWR.In(detectedRadar, ((Radar)receiver).id));
-                        ((RWR)transmitter).Set(inParameters2);
+                        inParameters2.Add(new RWR.In(detectedRadar, ((Radar)transmitter).id));
+                        ((RWR)receiver).Set(inParameters2);
                     }
                 }
 
@@ -149,7 +147,7 @@ class DiscreteTimeSimulationEngine
             {
 
                 pulseOut = transmitter.Get();
-                if (((Radar.Out)pulseOut).p == ((Radar)transmitter).activePulse)
+                //if (((Radar.Out)pulseOut).p == ((Radar)transmitter).activePulse)
                 {
                     txPulse = ((Radar.Out)pulseOut).p;
                 }
@@ -164,9 +162,10 @@ class DiscreteTimeSimulationEngine
                     if (receiver is RWR)
                     {
                         int radius = ((Radar)transmitter).radius;
-                        if (Globals.debugPrint)
+                        if (Globals.distDebugPrint)
                         {
                             Console.WriteLine($"Distance between {receiver} {receiver.id} and Radar {transmitter.id} = {dist}");
+                            Globals.distDebugPrint = false;
                         }
 
                         if (Math.Abs(Globals.Tick - ((Radar)transmitter).txTick) == pulseTravelTime && Globals.Tick != 0)
@@ -195,18 +194,10 @@ class DiscreteTimeSimulationEngine
 
                         // below If condition is unnecessary
 
-                        //if (((RWR)receiver).hasReceivedPulse && (Math.Abs(Globals.Tick - ((Radar)transmitter).txTick) % ((Radar)transmitter).pulseRepetitionInterval == 0))
-                        //{
-                        //    Console.WriteLine($"Pulse from {transmitter} {transmitter.id} arrived at cell of {receiver} {receiver.id}\n");
-                        //    Console.WriteLine($"Pulse reflected by {receiver} {receiver.id}");
-                        //    ((RWR)receiver).hasReceivedPulse = false;
-                        //}
 
-                        if (((RWR)receiver).hasReceivedPulse && Math.Abs(Globals.Tick - ((Radar)transmitter).txTick) == pulseTravelTime)
+                        if (((RWR)receiver).hasReceivedPulse)
                         {
-                            int[] receivedAmps = { 0, 0, 0, 0 };
-                            detectedRadar = new RWR.Emitter(receivedAmps, 0, ((Radar)transmitter).pulseRepetitionInterval, txPulse.pulseWidth, txPulse.angleOfTraversal, ((Radar)transmitter).id);
-                            emitterDetected = true;
+                            detectedRadar = new RWR.Emitter(txPulse.amplitude, 0, ((Radar)transmitter).pulseRepetitionInterval, txPulse.pulseWidth, txPulse.angleOfTraversal, ((Radar)transmitter).id);
                         }
                     }
                 }

@@ -35,9 +35,10 @@ class Aircraft : BattleSystem
 
     public override void OnTick()
     {
-        if (Globals.debugPrint)
+        if (Globals.aircraftDebugPrint)
         {
             Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
+            Globals.aircraftDebugPrint = false;
         }
     }
 

@@ -61,20 +61,23 @@ class Radar : BattleSystem
             //    Console.WriteLine($"Pulse emitted by {this} {id}");
             //}
             Console.WriteLine($"Pulse emitted by {this} {id}\n");
-            Globals.debugPrint = true;
+
+            if (Globals.debugPrint)
+            {
+                Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
+        $"\n\t\tTime of transmission: {txPulse.timeOfTraversal}\n\t\tAngle of transmission: {txPulse.angleOfTraversal}\n\t\tSymbol: {txPulse.symbol}" +
+        $"\n\t\tAmplitude: {txPulse.amplitude}\n\t\ttxTick = {txTick}\n");
+            }
+
+            //Globals.debugPrint = true;
         }
         else
         {
             txPulse = zeroPulse;
-            Globals.debugPrint = false;
+            //Globals.debugPrint = false;
         }
 
-        if (Globals.debugPrint)
-        {
-            Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
-    $"\n\t\tTime of transmission: {txPulse.timeOfTraversal}\n\t\tAngle of transmission: {txPulse.angleOfTraversal}\n\t\tSymbol: {txPulse.symbol}" +
-    $"\n\t\tAmplitude: {txPulse.amplitude}\n\t\ttxTick = {txTick}\n");
-        }
+
 
         if (Globals.debugPrint)
         {
