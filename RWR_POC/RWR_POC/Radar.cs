@@ -61,12 +61,13 @@ class Radar : BattleSystem
             //    Console.WriteLine($"Pulse emitted by {this} {id}");
             //}
             Console.WriteLine($"Pulse emitted by {this} {id}\n");
+            Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
+$"\n\t\tTime of transmission: {txPulse.timeOfTraversal}\n\t\tAngle of transmission: {txPulse.angleOfTraversal}\n\t\tSymbol: {txPulse.symbol}" +
+$"\n\t\tAmplitude: {txPulse.amplitude}\n\t\ttxTick = {txTick}\n");
 
             if (Globals.debugPrint)
             {
-                Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
-        $"\n\t\tTime of transmission: {txPulse.timeOfTraversal}\n\t\tAngle of transmission: {txPulse.angleOfTraversal}\n\t\tSymbol: {txPulse.symbol}" +
-        $"\n\t\tAmplitude: {txPulse.amplitude}\n\t\ttxTick = {txTick}\n");
+
             }
 
             //Globals.debugPrint = true;
@@ -83,9 +84,7 @@ class Radar : BattleSystem
         {
             if (hasReceivedEcho)
             {
-                Console.WriteLine($"Radar {id}:\n\techoPulse:\n\t\tPulse width: {echoPulse.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
-                $"\n\t\tTime of arrival: {echoTimeOfArrival}\n\t\tAngle of arrival: {echoPulse.angleOfTraversal}\n\t\tSymbol: {echoPulse.symbol}" +
-                $"\n\t\tAmplitude: {echoPulse.amplitude}\n\t\ttxTick = {txTick}\n");
+
             }
         }
 
