@@ -187,7 +187,8 @@ class DiscreteTimeSimulationEngine
                         {
                             if (Math.Abs(Globals.Tick - ((Radar)transmitter).txTick) == 2 * pulseTravelTime)
                             {
-                                Console.WriteLine($"\nEcho received by Radar {transmitter.id}");
+                                Console.WriteLine($"\nEcho received by Radar {transmitter.id}\n");
+
                                 Console.WriteLine($"Radar {((Radar)transmitter).id}:\n\techoPulse:\n\t\tPulse width: {((Radar)transmitter).echoPulse.pulseWidth}\n\t\tPRI: {((Radar)transmitter).pulseRepetitionInterval}" +
                                                   $"\n\t\tTime of arrival: {((Radar)transmitter).echoTimeOfArrival}\n\t\tAngle of arrival: {((Radar)transmitter).echoPulse.angleOfTraversal}\n\t\tSymbol: {((Radar)transmitter).echoPulse.symbol}" +
                                                   $"\n\t\tAmplitude: {((Radar)transmitter).echoPulse.amplitude}\n\t\ttxTick = {((Radar)transmitter).txTick}\n");
@@ -199,11 +200,11 @@ class DiscreteTimeSimulationEngine
                             }
                         }
 
-                        if (((RWR)receiver).hasReceivedPulse && Math.Abs(Globals.Tick - ((Radar)transmitter).txTick) == pulseTravelTime)
+                        if (((RWR)receiver).hasReceivedPulse && Math.Abs(Globals.Tick - ((Radar)transmitter).txTick) == dist)
                         {
                             detectedRadar = new RWR.Emitter(txPulse.amplitude, 0, ((Radar)transmitter).pulseRepetitionInterval, txPulse.pulseWidth, txPulse.angleOfTraversal, ((Radar)transmitter).id);
                         }
-                        else if (((RWR)receiver).hasReceivedPulse && Math.Abs(Globals.Tick - ((Radar)transmitter).txTick) != pulseTravelTime)
+                        else if (((RWR)receiver).hasReceivedPulse && Math.Abs(Globals.Tick - ((Radar)transmitter).txTick) != dist)
                         {
                             detectedRadar = new RWR.Emitter();
                         }
