@@ -57,7 +57,11 @@ class Radar : BattleSystem
         if (Globals.Tick % this.pulseRepetitionInterval == 0)
         {
             txPulse = activePulse;
-            this.txTicks.Add(Globals.Tick);
+            if (Globals.Tick != 0)
+            {
+                this.txTicks.Add(Globals.Tick);
+            }
+
             //pulsesSent++;
 
             Console.WriteLine($"Pulse emitted by {this} {id}\n");

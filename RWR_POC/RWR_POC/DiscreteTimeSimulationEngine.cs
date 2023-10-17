@@ -10,6 +10,7 @@
     public int rxTick = Globals.Tick;
     public RWR.Emitter detectedRadar = new RWR.Emitter();
     public Pulse[,] globalSituationalMatrix;
+    public int transmitterCount;
     OutParameter pulseOut;
     Pulse txPulse = new Pulse(0, 0, 0, 0, "E0");
     //List<Pulse> txPulses = new List<Pulse>();
@@ -23,10 +24,44 @@
 
     public void Init()
     {
-        Aircraft a = new Aircraft(new Position(16, 10), 0);
+        string aircraftPosX;
+        string aircraftPosY;
+        string radarPosX;
+        string radarPosY;
+        string radarSymbol;
+        string radarPRI;
+        string pulsePW;
+        string pulseAmp;
+        string pulseTimeOfTraversal;
+        string pulseAngleOfTravelsal;
 
-        Radar r = new Radar(new Pulse(7, 10, 5, 45, "E1"), new Position(10, 0), 30, "E1", Globals.Tick, 50, 1);
-        Radar r2 = new Radar(new Pulse(5, 15, 5, 45, "E2"), new Position(0, 10), 20, "E2", Globals.Tick, 50, 3);
+        //Console.WriteLine("Enter the position for aircraft:\nX: ");
+        //aircraftPosX = Console.ReadLine();
+        //Console.WriteLine("Y: ");
+        //aircraftPosY = Console.ReadLine();
+        //Console.WriteLine("Enter the position for radar:\nX: ");
+        //radarPosX = Console.ReadLine();
+        //Console.WriteLine("Y: ");
+        //radarPosY = Console.ReadLine();
+        //Console.WriteLine("Enter the PRI for radar: ");
+        //radarPRI = Console.ReadLine();
+        //Console.WriteLine("Enter the symbol for radar/pulse: ");
+        //radarSymbol = Console.ReadLine();
+        //Console.WriteLine("Enter the pulse width: ");
+        //pulsePW = Console.ReadLine();
+        //Console.WriteLine("Enter the pulse amplitude: ");
+        //pulseAmp = Console.ReadLine();
+        //Console.WriteLine("Enter the pulse time of traversal: ");
+        //pulseTimeOfTraversal = Console.ReadLine();
+        //Console.WriteLine("Enter the pulse angle of traversal: ");
+        //pulseAngleOfTravelsal = Console.ReadLine();
+
+
+        //Aircraft a = new Aircraft(new Position(Int32.Parse(aircraftPosX), Int32.Parse(aircraftPosY)), 0);
+        Aircraft a = new Aircraft(new Position(10, 10), 0);
+        //Radar r = new Radar(new Pulse(Int32.Parse(pulsePW), Int32.Parse(pulseAmp), Int32.Parse(pulseTimeOfTraversal), Int32.Parse(pulseAngleOfTravelsal), radarSymbol), new Position(Int32.Parse(radarPosX), Int32.Parse(radarPosY)), Int32.Parse(radarPRI), radarSymbol, Globals.Tick, 50, 1);
+        Radar r2 = new Radar(new Pulse(5, 15, 5, 45, "E2"), new Position(5, 5), 20, "E2", Globals.Tick, 50, 1);
+        Radar r3 = new Radar(new Pulse(8, 10, 5, 45, "E3"), new Position(8, 6), 30, "E3", Globals.Tick, 50, 3);
 
         // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
         // Minimum unambiguous range for a radar is c * PRI / 2 where c is the speed of light
@@ -37,9 +72,18 @@
 
         simMod.Add(a);
         simMod.Add(a.rwr);
-        simMod.Add(r);
         simMod.Add(r2);
+        simMod.Add(r3);
+        //simMod.Add(r2);
         simMod.Add(pse);
+
+        foreach (SimulationModel sim_mod in simMod)
+        {
+            if (sim_mod is Radar)
+            {
+                transmitterCount++;
+            }
+        }
 
         globalSituationalMatrix = new Pulse[simMod.Count, simMod.Count];
 
@@ -162,23 +206,27 @@
                             Globals.distDebugPrint = false;
                         }
 
-                        if (Math.Abs(Globals.Tick - ((Radar)transmitter).txTicks.Max()) == pulseTravelTime && Globals.Tick != 0)
+                        if (((Radar)transmitter).txTicks.Count != 0)
                         {
-                            Globals.debugPrint = true;
-                            Console.WriteLine($"\nPulse from {transmitter} {transmitter.id} arrived at cell of {receiver} {receiver.id}\n");
-                            ((RWR)receiver).hasReceivedPulse = true;
-                            globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).activePulse;
+                            if (Math.Abs(Globals.Tick - ((Radar)transmitter).txTicks.Max()) == pulseTravelTime && Globals.Tick != 0)
+                            {
+                                Globals.debugPrint = true;
+                                Console.WriteLine($"\nPulse from {transmitter} {transmitter.id} arrived at cell of {receiver} {receiver.id}\n");
+                                ((RWR)receiver).hasReceivedPulse = true;
+                                globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).activePulse;
 
-                            // at current tick at current location, what will be the amplitude of the pulse
-                            // no attenuation in amplitude
-                            // only pse should the energy at a location and time
-                            // only when we introduce sensor model of RWR
-                        }
+                                // at current tick at current location, what will be the amplitude of the pulse
+                                // no attenuation in amplitude
+                                // only pse should the energy at a location and time
+                                // only when we introduce sensor model of RWR
+                            }
 
-                        else
-                        {
-                            globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).zeroPulse;
+                            else
+                            {
+                                globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).zeroPulse;
+                            }
                         }
+                        
                     }
                 }
 
@@ -188,21 +236,29 @@
                     {
                         int dist = pse.GetDistance(receiver.id, transmitter.id);
                         int pulseTravelTime = dist / Globals.pulseTravelSpeed;
-                        if (Math.Abs(Globals.Tick - ((Radar)receiver).txTicks.Min()) == 2 * pulseTravelTime && Globals.Tick != 0)
+                        if (((Radar)receiver).txTicks.Count != 0)
                         {
-                            ((Radar)receiver).txTicks.Remove(((Radar)receiver).txTicks.Min());
-                            //((Radar)receiver).pulsesSent--;
+                            if (Math.Abs(Globals.Tick - ((Radar)receiver).txTicks.Min()) == 2 * pulseTravelTime && Globals.Tick != 0)
+                            {
+                                int txTickMin = ((Radar)receiver).txTicks.Min();
+                                //if (transmitterCount > 1)
+                                {
+                                    ((Radar)receiver).txTicks.RemoveAll(item => item == txTickMin);
+                                }
 
-                            Console.WriteLine($"\nEcho received by Radar {receiver.id}\n");
+                                //((Radar)receiver).pulsesSent--;
 
-                            Console.WriteLine($"Radar {((Radar)receiver).id}:\n\techoPulse:\n\t\tPulse width: {((Radar)receiver).echoPulse.pulseWidth}\n\t\tPRI: {((Radar)receiver).pulseRepetitionInterval}" +
-                                              $"\n\t\tTime of arrival: {((Radar)receiver).echoTimeOfArrival}\n\t\tAngle of arrival: {((Radar)receiver).echoPulse.angleOfTraversal}\n\t\tSymbol: {((Radar)receiver).echoPulse.symbol}" +
-                                              $"\n\t\tAmplitude: {((Radar)receiver).echoPulse.amplitude}\n\t\ttxTick = {((Radar)receiver).txTick}\n");
+                                Console.WriteLine($"\nEcho received by Radar {receiver.id}\n");
 
-                            ((Radar)receiver).hasReceivedEcho = true;
-                            ((Radar)receiver).echoTimeOfArrival = Globals.Tick;
-                            globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)receiver).activePulse;
-                            echoPulseSet = true;
+                                Console.WriteLine($"Radar {((Radar)receiver).id}:\n\techoPulse:\n\t\tPulse width: {((Radar)receiver).echoPulse.pulseWidth}\n\t\tPRI: {((Radar)receiver).pulseRepetitionInterval}" +
+                                                  $"\n\t\tTime of arrival: {((Radar)receiver).echoTimeOfArrival}\n\t\tAngle of arrival: {((Radar)receiver).echoPulse.angleOfTraversal}\n\t\tSymbol: {((Radar)receiver).echoPulse.symbol}" +
+                                                  $"\n\t\tAmplitude: {((Radar)receiver).echoPulse.amplitude}\n\t\ttxTick = {((Radar)receiver).txTick}\n");
+
+                                ((Radar)receiver).hasReceivedEcho = true;
+                                ((Radar)receiver).echoTimeOfArrival = Globals.Tick;
+                                globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)receiver).activePulse;
+                                echoPulseSet = true;
+                            }
                         }
                     }
                 }
