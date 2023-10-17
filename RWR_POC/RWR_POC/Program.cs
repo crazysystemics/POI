@@ -26,11 +26,8 @@ namespace RWRPOC
 /* Notes:
  * 1. InParameters of PSE, Radar/RWR should be taken from Out parameters list of DTSE.
  * 2. Modeling physical grid and detection by RWR.
- * 3. How to get radius of the radar irrespective of order of BattleSystems in the sim_model list.
- * 4. How to handle detection of echo pulse. Should 2D world be built first or through PSE.
- * 5. Condition for setting visible radars for RWR should not check radius, but detection of pulse (how to write the code)?
- 
- */
+ * 3. How to obtain Emitter characteristics from RxBuf if Rxbuf is of Pulse type.
+ * */
 
 //Method:
 /*
@@ -51,4 +48,17 @@ Assume velocity (cells/tick)
 After 22 ticks, pulse will be at cell of RWR
 
 if Tick - txTick == time taken to travel for pulse to travel from emitter to receiver, it will detect the pulse
+ */
+
+/* October 17:
+ * 
+ * 1. Maintained a list to keep track of txTick for each radar.
+ * 2. txTick being removed from list on receiving echoPulse (DTSE).
+ * 3. Used globalSitautionMatrix to detect RWR received pulses and echoPulse.
+ * 4. Console output shows correct distances (only showed zero distance at Tick 0 earlier).
+ * 5. Handled case for different distance values (different positions for radars and aircraft).
+ *
+ * Observations:
+ * 1. Console output for distances has a one tick delay.
+
  */

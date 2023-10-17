@@ -15,6 +15,8 @@ class Radar : BattleSystem
     public bool hasReceivedEcho = false;
     public int echoTimeOfArrival;
     public string pulseSymbol;
+    public List<int> txTicks = new List<int>();
+    public int pulsesSent = 0;
     //public bool hasPulseReachedTarget = false;
 
     public class Out : OutParameter
@@ -44,7 +46,7 @@ class Radar : BattleSystem
     {
         if (txPulse.amplitude > 0)
         {
-            Globals.debugPrint = true;
+            //Globals.debugPrint = true;
         }
         Out radarOutput = new Out(txPulse, position, txTick, 1);
         return radarOutput;
@@ -55,11 +57,9 @@ class Radar : BattleSystem
         if (Globals.Tick % this.pulseRepetitionInterval == 0)
         {
             txPulse = activePulse;
-            txTick = Globals.Tick;
-            //if (Globals.debugPrint)
-            //{
-            //    Console.WriteLine($"Pulse emitted by {this} {id}");
-            //}
+            this.txTicks.Add(Globals.Tick);
+            //pulsesSent++;
+
             Console.WriteLine($"Pulse emitted by {this} {id}\n");
             Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
 $"\n\t\tTime of transmission: {txPulse.timeOfTraversal}\n\t\tAngle of transmission: {txPulse.angleOfTraversal}\n\t\tSymbol: {txPulse.symbol}" +
@@ -93,9 +93,15 @@ $"\n\t\tAmplitude: {txPulse.amplitude}\n\t\ttxTick = {txTick}\n");
 
     public override void Set(List<InParameter> inParameters)
     {
-        if (this.echoPulse.symbol == this.pulseSymbol)
+        foreach (InParameter inParam in inParameters)
         {
-            this.echoPulse = ((In)(inParameters[0])).echoPulse;
+            if (((In)inParam).echoPulse != null)
+            {
+                if (((In)inParam).echoPulse.symbol == this.pulseSymbol)
+                {
+                    this.echoPulse = ((In)(inParam)).echoPulse;
+                }
+            }
         }
     }
 
@@ -111,5 +117,6 @@ $"\n\t\tAmplitude: {txPulse.amplitude}\n\t\ttxTick = {txTick}\n");
         this.radius = radius;
         this.txTick = txTick;
         this.pulseRepetitionInterval = pulseRepetitionInterval;
+        this.txTicks.Add(Globals.Tick);
     }
 }

@@ -4,9 +4,9 @@
     public Pulse pulseInspace;
     //public Pulse previousActivePulse;
 
-    public PhysicalSimulationEngine()
+    public PhysicalSimulationEngine(int id)
     {
-        id = 99;
+        this.id = id;
     }
 
     public int GetDistance(int objID1, int objID2)

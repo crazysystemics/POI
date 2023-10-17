@@ -33,7 +33,7 @@
             this.id = id;
         }
     }
-    public Emitter RxBuf = new Emitter();
+    public List<Pulse> RxBuf = new List<Pulse>();
     public class Out : OutParameter
     {
         public int r;
@@ -51,12 +51,11 @@
     {
 
         // Pulse as InParameter
-        public Emitter e = new Emitter();
+        public Pulse p = new Pulse(0, 0, 0, 0, "zero");
 
-        public In(Emitter e, int id) : base(id)
+        public In(Pulse p, int id) : base(id)
         {
-            this.ID = id;
-            this.e = e;
+            this.p = p;
         }
 
     }
@@ -69,16 +68,11 @@
 
     public override void OnTick()
     {
-        //if (Globals.debugPrint)
+        foreach(Pulse e in RxBuf)
         {
-            //Console.WriteLine($"RWR {id}:\t\tPosition (x, y): ({position.x}, {position.y})");
-            //if (RxBuf.id == 0)
-            //{
-            //    Console.WriteLine("\t\tNo emitter\n");
-            //}
-            if (RxBuf.Amplitude > 0)
+            if (e.amplitude > 0)
             {
-                Console.WriteLine($"RWR {id}\t\tPRI: {RxBuf.PRI}\n\t\tFrequency: {RxBuf.Frequency}\n\t\tAmplitude: {RxBuf.Amplitude}");
+                Console.WriteLine($"RWR {id}\t\tPRI: 0\n\t\tFrequency: 0\n\t\tAmplitude: {e.amplitude}\n\t\tID: {e.symbol}");
                 // print all characteristics
             }
         }
@@ -86,6 +80,13 @@
 
     public override void Set(List<InParameter> inParameters)
     {
-        RxBuf = ((In)inParameters[0]).e;
+        RxBuf.Clear();
+        foreach(InParameter inParameter in inParameters)
+        {
+            if (((In)inParameter).p.amplitude > 0)
+            {
+                RxBuf.Add(((In)inParameter).p);
+            }
+        }
     }
 }
