@@ -1,8 +1,10 @@
+using System.Runtime.CompilerServices;
+
 class Aircraft : BattleSystem
 {
     public override bool Stopped { get; set; }
     public RWR rwr;
-    public List<Position> waypoint = new List<Position>();
+    public Dictionary<int, Position> waypoints = new Dictionary<int, Position>();
     //   public Position currentPosition = new Position(0, 0);
 
     public class Out : OutParameter
@@ -43,9 +45,10 @@ class Aircraft : BattleSystem
         }
     }
 
-    public Aircraft(Position position, int id)
+    public Aircraft(Dictionary<int, Position> waypoints, int id)
     {
-        this.position = position;
+        this.position = waypoints[0];
+        this.waypoints = waypoints;
         this.id = id;
     }
 }
