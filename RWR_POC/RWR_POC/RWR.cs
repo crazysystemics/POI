@@ -51,7 +51,7 @@
     {
 
         // Pulse as InParameter
-        public Pulse p = new Pulse(0, 0, 0, 0, "zero");
+        public Pulse p = new Pulse(0, 0, 0, 0, 0, "zero");
 
         public In(Pulse p, int id) : base(id)
         {
@@ -68,14 +68,20 @@
 
     public override void OnTick()
     {
-        foreach(Pulse e in RxBuf)
+        Console.WriteLine("\n-----------------------------------\nPulses received by RWR:\n");
+        if (RxBuf.Count == 0)
+        {
+            Console.WriteLine("None");
+        }
+        foreach (Pulse e in RxBuf)
         {
             if (e.amplitude > 0)
             {
-                Console.WriteLine($"RWR {id}\t\tPRI: 0\n\t\tFrequency: 0\n\t\tAmplitude: {e.amplitude}\n\t\tID: {e.symbol}");
+                Console.WriteLine($"RWR {id}\t\tPulse Symbol: {e.symbol}\n\t\tAmplitude: {e.amplitude}\n\t\tPulse Width: {e.pulseWidth}\n\t\tFrequency: {e.frequency}\n");
                 // print all characteristics
             }
         }
+        Console.WriteLine("-----------------------------------\n");
     }
 
     public override void Set(List<InParameter> inParameters)

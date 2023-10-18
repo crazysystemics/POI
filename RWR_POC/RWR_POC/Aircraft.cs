@@ -39,7 +39,6 @@ class Aircraft : BattleSystem
         if (Globals.aircraftDebugPrint)
         {
             Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
-            Globals.aircraftDebugPrint = false;
         }
     }
 

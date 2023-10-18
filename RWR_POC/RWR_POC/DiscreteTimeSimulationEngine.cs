@@ -7,14 +7,14 @@ class DiscreteTimeSimulationEngine
     public List<OutParameter> dtseOutParameter = new List<OutParameter>();
     public List<InParameter> receiverInParams = new List<InParameter>();
     public PhysicalSimulationEngine pse = new PhysicalSimulationEngine(99);
-    public Pulse echoedPulse = new Pulse(0, 0, 0, 0, "zero");
+    public Pulse echoedPulse = new Pulse(0, 0, 0, 0, 0, "zero");
     public bool echoPulseSet = false;
     public int rxTick = Globals.Tick;
     public RWR.Emitter detectedRadar = new RWR.Emitter();
     public Pulse[,] globalSituationalMatrix;
     public int transmitterCount;
     OutParameter pulseOut;
-    Pulse txPulse = new Pulse(0, 0, 0, 0, "E0");
+    Pulse txPulse = new Pulse(0, 0, 0, 0, 0, "E0");
     //List<Pulse> txPulses = new List<Pulse>();
 
     public DiscreteTimeSimulationEngine()
@@ -111,8 +111,8 @@ class DiscreteTimeSimulationEngine
         //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
         //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
 
-        Radar r = new Radar(new Pulse(5, 15, 5, 45, "E1"), new Position(5, 5), 20, "E1", Globals.Tick, 50, 1);
-        Radar r2 = new Radar(new Pulse(8, 10, 5, 45, "E2"), new Position(5, 5), 20, "E2", Globals.Tick, 50, 2);
+        Radar r = new Radar(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(15, 15), 20, "E1", Globals.Tick, 20, 1);
+        Radar r2 = new Radar(new Pulse(8, 10, 1000, 5, 45, "E2"), new Position(8, 8), 20, "E2", Globals.Tick, 20, 2);
 
         // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
         // Minimum unambiguous range for a radar is c * PRI / 2 where c is the speed of light
@@ -241,15 +241,37 @@ class DiscreteTimeSimulationEngine
             foreach (SimulationModel receiver in simMod)
             {
 
+                //if (transmitter is RWR)
+                //{
+                //    if (receiver is Radar)
+                //    {
+                //        int dist = pse.GetDistance(receiver.id, transmitter.id);
+                //        int radius = ((Radar)receiver).radius;
+                //        //if (((Radar)receiver).txTicks.Count != 0)
+                //        {
+                //            if (dist <= radius && Globals.Tick != 0)
+                //            {
+
+                //                Console.WriteLine($"\nEcho received by Radar {receiver.id}\n");
+
+                //                Console.WriteLine($"Radar {((Radar)receiver).id}:\n\techoPulse:\n\t\tPulse width: {((Radar)receiver).echoPulse.pulseWidth}\n\t\tPRI: {((Radar)receiver).pulseRepetitionInterval}" +
+                //                                  $"\n\t\tTime of arrival: {((Radar)receiver).echoTimeOfArrival}\n\t\tAngle of arrival: {((Radar)receiver).echoPulse.angleOfTraversal}\n\t\tSymbol: {((Radar)receiver).echoPulse.symbol}" +
+                //                                  $"\n\t\tAmplitude: {((Radar)receiver).echoPulse.amplitude}\n\t\ttxTick = {((Radar)receiver).txTick}\n");
+
+                //                ((Radar)receiver).hasReceivedEcho = true;
+                //                globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)receiver).activePulse;
+                //                echoPulseSet = true;
+                //            }
+                //        }
+                //    }
+                //}
 
                 if (transmitter is Radar)
                 {
 
-                    // Note: This will work at the Pulse's scale but not at physical scale of movement of aircraft
                     if (receiver is RWR)
                     {
                         int dist = pse.GetDistance(receiver.id, transmitter.id);
-                        int pulseTravelTime = dist / Globals.pulseTravelSpeed;
                         int radius = ((Radar)transmitter).radius;
                         //if (Globals.distDebugPrint)
                         {
@@ -257,58 +279,18 @@ class DiscreteTimeSimulationEngine
                             Globals.distDebugPrint = false;
                         }
 
-                        if (((Radar)transmitter).txTicks.Count != 0)
+                        //if (((Radar)transmitter).txTicks.Count != 0)
                         {
-                            if (Math.Abs(Globals.Tick - ((Radar)transmitter).txTicks.Max()) == pulseTravelTime && Globals.Tick != 0)
+                            if (dist <= radius && Globals.Tick != 0)
                             {
                                 Globals.debugPrint = true;
-                                Console.WriteLine($"\nPulse from {transmitter} {transmitter.id} arrived at cell of {receiver} {receiver.id}\n");
+                                Console.WriteLine($"{transmitter} {transmitter.id} is visible to {receiver}{receiver.id}\n");
                                 ((RWR)receiver).hasReceivedPulse = true;
                                 globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).activePulse;
-
-                                // at current tick at current location, what will be the amplitude of the pulse
-                                // no attenuation in amplitude
-                                // only pse should the energy at a location and time
-                                // only when we introduce sensor model of RWR
                             }
-
                             else
                             {
                                 globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).zeroPulse;
-                            }
-                        }
-                        
-                    }
-                }
-
-                if (transmitter is RWR)
-                {
-                    if (receiver is Radar)
-                    {
-                        int dist = pse.GetDistance(receiver.id, transmitter.id);
-                        int pulseTravelTime = dist / Globals.pulseTravelSpeed;
-                        if (((Radar)receiver).txTicks.Count != 0)
-                        {
-                            if (Math.Abs(Globals.Tick - ((Radar)receiver).txTicks.Min()) == 2 * pulseTravelTime && Globals.Tick != 0)
-                            {
-                                int txTickMin = ((Radar)receiver).txTicks.Min();
-                                //if (transmitterCount > 1)
-                                {
-                                    ((Radar)receiver).txTicks.RemoveAll(item => item == txTickMin);
-                                }
-
-                                //((Radar)receiver).pulsesSent--;
-
-                                Console.WriteLine($"\nEcho received by Radar {receiver.id}\n");
-
-                                Console.WriteLine($"Radar {((Radar)receiver).id}:\n\techoPulse:\n\t\tPulse width: {((Radar)receiver).echoPulse.pulseWidth}\n\t\tPRI: {((Radar)receiver).pulseRepetitionInterval}" +
-                                                  $"\n\t\tTime of arrival: {((Radar)receiver).echoTimeOfArrival}\n\t\tAngle of arrival: {((Radar)receiver).echoPulse.angleOfTraversal}\n\t\tSymbol: {((Radar)receiver).echoPulse.symbol}" +
-                                                  $"\n\t\tAmplitude: {((Radar)receiver).echoPulse.amplitude}\n\t\ttxTick = {((Radar)receiver).txTick}\n");
-
-                                ((Radar)receiver).hasReceivedEcho = true;
-                                ((Radar)receiver).echoTimeOfArrival = Globals.Tick;
-                                globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)receiver).activePulse;
-                                echoPulseSet = true;
                             }
                         }
                     }
