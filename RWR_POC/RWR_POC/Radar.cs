@@ -60,6 +60,7 @@ class Radar : BattleSystem
             if (Globals.Tick != 0)
             {
                 this.txTicks.Add(Globals.Tick);
+                this.txTick = Globals.Tick;
             }
 
             //pulsesSent++;
