@@ -9,7 +9,7 @@ class Aircraft : BattleSystem
     public int nextWaypointID = 1;
     public int[] legVelocity = new int[2];
     public Position nextWaypoint;
-    //   public Position currentPosition = new Position(0, 0);
+    //public Position currentPosition = new Position(0, 0);
 
     public class Out : OutParameter
     {
@@ -57,7 +57,11 @@ class Aircraft : BattleSystem
         if (computeDistance(position, nextWaypoint) <= 1)
         {
             // Change waypoint
-            // this.currentWaypointID = this.nextWaypointID
+            // if (this.nextWaypointID != waypoints.Count)
+            // {
+            //     this.currentWaypointID = this.nextWaypointID
+            //     this.nextWaypointID++
+            // }
         }
         else
         {
