@@ -58,7 +58,15 @@ class DiscreteTimeSimulationEngine
                 userInput = Console.ReadLine();
                 if (prompt == "Enter the symbol for radar/pulse:")
                 {
-                    break;
+                    if (string.IsNullOrEmpty(userInput))
+                    {
+                        Console.WriteLine("Please enter a valid non-empty and non-null value.");
+                        continue;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
                 if (string.IsNullOrEmpty(userInput) || !int.TryParse(userInput, out parseOut))
                 {
