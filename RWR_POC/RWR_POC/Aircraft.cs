@@ -20,8 +20,13 @@ class Aircraft : BattleSystem
 
     public class In : InParameter
     {
-        public In(int id) : base(id)
+
+        public int posX;
+        public int posY;
+        public In(int posX, int posY, int id) : base(id)
         {
+            this.posX = posX;
+            this.posY = posY;
             this.ID = id;
         }
     }
@@ -33,7 +38,8 @@ class Aircraft : BattleSystem
 
     public override void Set(List<InParameter> inParameter)
     {
-
+        this.position.x = ((In)inParameter[0]).posX;
+        this.position.y = ((In)inParameter[0]).posY;
     }
 
     public override void OnTick()
