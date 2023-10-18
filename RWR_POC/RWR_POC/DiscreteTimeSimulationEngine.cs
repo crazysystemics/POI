@@ -26,93 +26,93 @@ class DiscreteTimeSimulationEngine
 
     public void Init()
     {
-        string aircraftPosX;
-        string aircraftPosY;
+        //string aircraftPosX;
+        //string aircraftPosY;
 
-        string radar1PosX;
-        string radar1PosY;
-        string radar1Symbol;
-        string radar1PRI;
-        string pulse1PW;
-        string pulse1Amp;
-        string pulse1TimeOfTraversal;
-        string pulse1AngleOfTraversal;
+        //string radar1PosX;
+        //string radar1PosY;
+        //string radar1Symbol;
+        //string radar1PRI;
+        //string pulse1PW;
+        //string pulse1Amp;
+        //string pulse1TimeOfTraversal;
+        //string pulse1AngleOfTraversal;
 
-        string radar2PosX;
-        string radar2PosY;
-        string radar2Symbol;
-        string radar2PRI;
-        string pulse2PW;
-        string pulse2Amp;
-        string pulse2TimeOfTraversal;
-        string pulse2AngleOfTraversal;
+        //string radar2PosX;
+        //string radar2PosY;
+        //string radar2Symbol;
+        //string radar2PRI;
+        //string pulse2PW;
+        //string pulse2Amp;
+        //string pulse2TimeOfTraversal;
+        //string pulse2AngleOfTraversal;
 
-        static string GetValidInput(string prompt, string errorMessage)
-        {
-            string userInput;
-            int parseOut;
+        //static string GetValidInput(string prompt, string errorMessage)
+        //{
+        //    string userInput;
+        //    int parseOut;
 
-            do
-            {
-                Console.WriteLine(prompt);
-                userInput = Console.ReadLine();
-                if (prompt == "Enter the symbol for radar/pulse:")
-                {
-                    if (string.IsNullOrEmpty(userInput))
-                    {
-                        Console.WriteLine("Please enter a valid non-empty and non-null value.");
-                        continue;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                if (string.IsNullOrEmpty(userInput) || !int.TryParse(userInput, out parseOut))
-                {
-                    Console.WriteLine(errorMessage);
-                }
-            }
-            while (string.IsNullOrEmpty(userInput) || !int.TryParse(userInput, out parseOut));
+        //    do
+        //    {
+        //        Console.WriteLine(prompt);
+        //        userInput = Console.ReadLine();
+        //        if (prompt == "Enter the symbol for radar/pulse:")
+        //        {
+        //            if (string.IsNullOrEmpty(userInput))
+        //            {
+        //                Console.WriteLine("Please enter a valid non-empty and non-null value.");
+        //                continue;
+        //            }
+        //            else
+        //            {
+        //                break;
+        //            }
+        //        }
+        //        if (string.IsNullOrEmpty(userInput) || !int.TryParse(userInput, out parseOut))
+        //        {
+        //            Console.WriteLine(errorMessage);
+        //        }
+        //    }
+        //    while (string.IsNullOrEmpty(userInput) || !int.TryParse(userInput, out parseOut));
 
-            return userInput;
-        }
+        //    return userInput;
+        //}
 
-        aircraftPosX = GetValidInput("Enter the position for aircraft (X):", "Please enter a valid integer value.");
-        aircraftPosY = GetValidInput("Enter the position for aircraft (Y):", "Please enter a valid integer value.");
+        //aircraftPosX = GetValidInput("Enter the position for aircraft (X):", "Please enter a valid integer value.");
+        //aircraftPosY = GetValidInput("Enter the position for aircraft (Y):", "Please enter a valid integer value.");
 
-        radar1PosX = GetValidInput("Enter the position for radar 1 (X):", "Please enter a valid integer value.");
-        radar1PosY = GetValidInput("Enter the position for radar 1 (Y):", "Please enter a valid integer value.");
-        radar1PRI = GetValidInput("Enter the PRI for radar 1:", "Please enter a valid integer value.");
-        radar1Symbol = GetValidInput("Enter the symbol for radar/pulse:", "Please enter a valid non-empty and non-null value.");
-        pulse1PW = GetValidInput("Enter the pulse 1 width:", "Please enter a valid integer value.");
-        pulse1Amp = GetValidInput("Enter the pulse 1 amplitude:", "Please enter a valid integer value.");
-        pulse1TimeOfTraversal = GetValidInput("Enter the pulse 1 time of traversal:", "Please enter a valid integer value.");
-        pulse1AngleOfTraversal = GetValidInput("Enter the pulse 1 angle of traversal:", "Please enter a valid integer value.");
+        //radar1PosX = GetValidInput("Enter the position for radar 1 (X):", "Please enter a valid integer value.");
+        //radar1PosY = GetValidInput("Enter the position for radar 1 (Y):", "Please enter a valid integer value.");
+        //radar1PRI = GetValidInput("Enter the PRI for radar 1:", "Please enter a valid integer value.");
+        //radar1Symbol = GetValidInput("Enter the symbol for radar/pulse:", "Please enter a valid non-empty and non-null value.");
+        //pulse1PW = GetValidInput("Enter the pulse 1 width:", "Please enter a valid integer value.");
+        //pulse1Amp = GetValidInput("Enter the pulse 1 amplitude:", "Please enter a valid integer value.");
+        //pulse1TimeOfTraversal = GetValidInput("Enter the pulse 1 time of traversal:", "Please enter a valid integer value.");
+        //pulse1AngleOfTraversal = GetValidInput("Enter the pulse 1 angle of traversal:", "Please enter a valid integer value.");
 
-        radar2PosX = GetValidInput("Enter the position for radar 2 (X):", "Please enter a valid integer value.");
-        radar2PosY = GetValidInput("Enter the position for radar 2 (Y):", "Please enter a valid integer value.");
-        radar2PRI = GetValidInput("Enter the PRI for radar 2:", "Please enter a valid integer value.");
-        radar2Symbol = GetValidInput("Enter the symbol for radar/pulse:", "Please enter a valid non-empty and non-null value.");
-        while (radar2Symbol == radar1Symbol)
-        {
-            Console.WriteLine("Radar 2 symbol cannot be same as Radar 1 symbol. Please try again.");
-            radar1Symbol = GetValidInput("Enter the symbol for radar/pulse:", "Please enter a valid non-empty and non-null value.");
-        }
-        pulse2PW = GetValidInput("Enter the pulse 2 width:", "Please enter a valid integer value.");
-        pulse2Amp = GetValidInput("Enter the pulse 2 amplitude:", "Please enter a valid integer value.");
-        pulse2TimeOfTraversal = GetValidInput("Enter the pulse 2 time of traversal:", "Please enter a valid integer value.");
-        pulse2AngleOfTraversal = GetValidInput("Enter the pulse 2 angle of traversal:", "Please enter a valid integer value.");
+        //radar2PosX = GetValidInput("Enter the position for radar 2 (X):", "Please enter a valid integer value.");
+        //radar2PosY = GetValidInput("Enter the position for radar 2 (Y):", "Please enter a valid integer value.");
+        //radar2PRI = GetValidInput("Enter the PRI for radar 2:", "Please enter a valid integer value.");
+        //radar2Symbol = GetValidInput("Enter the symbol for radar/pulse:", "Please enter a valid non-empty and non-null value.");
+        //while (radar2Symbol == radar1Symbol)
+        //{
+        //    Console.WriteLine("Radar 2 symbol cannot be same as Radar 1 symbol. Please try again.");
+        //    radar1Symbol = GetValidInput("Enter the symbol for radar/pulse:", "Please enter a valid non-empty and non-null value.");
+        //}
+        //pulse2PW = GetValidInput("Enter the pulse 2 width:", "Please enter a valid integer value.");
+        //pulse2Amp = GetValidInput("Enter the pulse 2 amplitude:", "Please enter a valid integer value.");
+        //pulse2TimeOfTraversal = GetValidInput("Enter the pulse 2 time of traversal:", "Please enter a valid integer value.");
+        //pulse2AngleOfTraversal = GetValidInput("Enter the pulse 2 angle of traversal:", "Please enter a valid integer value.");
 
 
-        Aircraft a = new Aircraft(new Position(Int32.Parse(aircraftPosX), Int32.Parse(aircraftPosY)), 0);
-        //Aircraft a = new Aircraft(new Position(10, 10), 0);
+        //Aircraft a = new Aircraft(new Position(Int32.Parse(aircraftPosX), Int32.Parse(aircraftPosY)), 0);
+        Aircraft a = new Aircraft(new Position(10, 10), 0);
 
-        Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
-        Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
+        //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
+        //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
 
-        //Radar r = new Radar(new Pulse(5, 15, 5, 45, "E1"), new Position(5, 5), 20, "E2", Globals.Tick, 50, 2);
-        //Radar r2 = new Radar(new Pulse(8, 10, 5, 45, "E2"), new Position(5, 5), 20, "E2", Globals.Tick, 50, 2);
+        Radar r = new Radar(new Pulse(5, 15, 5, 45, "E1"), new Position(5, 5), 20, "E1", Globals.Tick, 50, 1);
+        Radar r2 = new Radar(new Pulse(8, 10, 5, 45, "E2"), new Position(5, 5), 20, "E2", Globals.Tick, 50, 2);
 
         // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
         // Minimum unambiguous range for a radar is c * PRI / 2 where c is the speed of light
