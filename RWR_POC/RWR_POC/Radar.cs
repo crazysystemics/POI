@@ -47,23 +47,18 @@ class Radar : BattleSystem
 
     public override void OnTick()
     {
-        //if (Globals.Tick % this.pulseRepetitionInterval == 0)
-        {
-            txPulse = activePulse;
+        txPulse = activePulse;
 
-            Console.WriteLine($"Radar {id}:\n\tPosition (x, y): ({position.x}, {position.y})\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth}\n\t\tFrequency: {txPulse.frequency}\n\t\tPRI: {pulseRepetitionInterval}" +
-$"\n\t\tTime of transmission: {txPulse.timeOfTraversal}\n\t\tAngle of transmission: {txPulse.angleOfTraversal}\n\t\tSymbol: {txPulse.symbol}" +
-$"\n\t\tAmplitude: {txPulse.amplitude}\n\t\ttxTick = {txTick}\n");
-
-            if (Globals.debugPrint)
-            {
-
-            }
-
-            //Globals.debugPrint = true;
-        }
-
-
+        Console.WriteLine($"Radar {id}:" +
+                          $"\n\tPosition (x, y): ({position.x}, {position.y})" +
+                          $"\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth}" +
+                          $"\n\t\tFrequency: {txPulse.frequency}" +
+                          $"\n\t\tPRI: {pulseRepetitionInterval}" +
+                          $"\n\t\tTime of transmission: {txPulse.timeOfTraversal}" +
+                          $"\n\t\tAngle of transmission: {txPulse.angleOfTraversal}" +
+                          $"\n\t\tSymbol: {txPulse.symbol}" +
+                          $"\n\t\tAmplitude: {txPulse.amplitude}" +
+                          $"\n\t\ttxTick = {txTick}\n");
     }
 
     public override void Set(List<InParameter> inParameters)

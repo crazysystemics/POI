@@ -67,7 +67,7 @@
 
     public override void OnTick()
     {
-        Console.WriteLine("\n-----------------------------------\nPulses received by RWR:\n");
+        Console.WriteLine("\n-----------------------------------\nSignals received by RWR:\n");
         if (RxBuf.Count == 0)
         {
             Console.WriteLine("None");
