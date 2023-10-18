@@ -4,7 +4,6 @@
     public override bool Stopped { get; set; }
     public bool hasReceivedPulse = false;
     public int rxTick;
-    public Pulse EmitterPulse;
     public int receivedPulseCount = 0;
 
     public RWR(ref Position positon, int id)
@@ -87,7 +86,7 @@
     public override void Set(List<InParameter> inParameters)
     {
         RxBuf.Clear();
-        foreach(InParameter inParameter in inParameters)
+        foreach (InParameter inParameter in inParameters)
         {
             if (((In)inParameter).p.amplitude > 0)
             {

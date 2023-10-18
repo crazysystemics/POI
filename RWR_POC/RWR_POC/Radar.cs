@@ -7,23 +7,16 @@ class Radar : BattleSystem
     public Pulse zeroPulse = new Pulse(0, 0, 0, 0, 0, "zero");
     public Pulse echoPulse;
     public int pulseRepetitionInterval;
-    //public int targetX;
-    //public int targetY;
     public int radius;
     public int txTick;
-    public int rxTick;
-    public bool hasReceivedEcho = false;
-    public int echoTimeOfArrival;
     public string pulseSymbol;
     public List<int> txTicks = new List<int>();
     public int pulsesSent = 0;
-    //public bool hasPulseReachedTarget = false;
 
     public class Out : OutParameter
     {
         public Pulse p;
         public Position pos;
-        public int firstTxTick;
         public int txTick;
         public Out(Pulse p, Position pos, int tcTick, int id) : base(id)
         {

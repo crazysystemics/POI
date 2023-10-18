@@ -3,7 +3,6 @@ class Aircraft : BattleSystem
     public override bool Stopped { get; set; }
     public RWR rwr;
     public List<Position> waypoint = new List<Position>();
-    //   public Position currentPosition = new Position(0, 0);
 
     public class Out : OutParameter
     {

@@ -1,7 +1,6 @@
 ﻿class PhysicalSimulationEngine : SimulationModel
 {
     public Dictionary<int, Position> physicalObjects = new Dictionary<int, Position>();
-    public Pulse pulseInspace;
     //public Pulse previousActivePulse;
 
     public PhysicalSimulationEngine(int id)
@@ -73,10 +72,10 @@
 
     }
 
-    public Pulse GetPulse(Pulse txPulse, int txTick, Position txPosition,
-                          int rxTick, Position rxPosition)
-    {
-        pulseInspace = txPulse;
-        return pulseInspace;
-    }
+    //public Pulse GetPulse(Pulse txPulse, int txTick, Position txPosition,
+    //                      int rxTick, Position rxPosition)
+    //{
+    //    pulseInspace = txPulse;
+    //    return pulseInspace;
+    //}
 }

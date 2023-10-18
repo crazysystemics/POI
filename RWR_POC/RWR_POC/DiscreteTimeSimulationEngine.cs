@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-class DiscreteTimeSimulationEngine
+﻿class DiscreteTimeSimulationEngine
 {
     public List<SimulationModel> simMod;
     public List<InParameter> dtseInParameters;
@@ -13,8 +11,6 @@ class DiscreteTimeSimulationEngine
     public RWR.Emitter detectedRadar = new RWR.Emitter();
     public Pulse[,] globalSituationalMatrix;
     public int transmitterCount;
-    OutParameter pulseOut;
-    Pulse txPulse = new Pulse(0, 0, 0, 0, 0, "E0");
     //List<Pulse> txPulses = new List<Pulse>();
 
     public DiscreteTimeSimulationEngine()
@@ -35,6 +31,7 @@ class DiscreteTimeSimulationEngine
         //string radar1PRI;
         //string pulse1PW;
         //string pulse1Amp;
+        //string pulse1Freq;
         //string pulse1TimeOfTraversal;
         //string pulse1AngleOfTraversal;
 
@@ -44,6 +41,7 @@ class DiscreteTimeSimulationEngine
         //string radar2PRI;
         //string pulse2PW;
         //string pulse2Amp;
+        //string pulse2Freq;
         //string pulse2TimeOfTraversal;
         //string pulse2AngleOfTraversal;
 
@@ -87,6 +85,7 @@ class DiscreteTimeSimulationEngine
         //radar1Symbol = GetValidInput("Enter the symbol for radar/pulse:", "Please enter a valid non-empty and non-null value.");
         //pulse1PW = GetValidInput("Enter the pulse 1 width:", "Please enter a valid integer value.");
         //pulse1Amp = GetValidInput("Enter the pulse 1 amplitude:", "Please enter a valid integer value.");
+        //pulse1Freq = GetValidInput("Enter the pulse 1 frequency:", "Please enter a valid integer value.");
         //pulse1TimeOfTraversal = GetValidInput("Enter the pulse 1 time of traversal:", "Please enter a valid integer value.");
         //pulse1AngleOfTraversal = GetValidInput("Enter the pulse 1 angle of traversal:", "Please enter a valid integer value.");
 
@@ -101,6 +100,7 @@ class DiscreteTimeSimulationEngine
         //}
         //pulse2PW = GetValidInput("Enter the pulse 2 width:", "Please enter a valid integer value.");
         //pulse2Amp = GetValidInput("Enter the pulse 2 amplitude:", "Please enter a valid integer value.");
+        //pulse2Freq = GetValidInput("Enter the pulse 2 frequency:", "Please enter a valid integer value.");
         //pulse2TimeOfTraversal = GetValidInput("Enter the pulse 2 time of traversal:", "Please enter a valid integer value.");
         //pulse2AngleOfTraversal = GetValidInput("Enter the pulse 2 angle of traversal:", "Please enter a valid integer value.");
 
@@ -108,8 +108,8 @@ class DiscreteTimeSimulationEngine
         //Aircraft a = new Aircraft(new Position(Int32.Parse(aircraftPosX), Int32.Parse(aircraftPosY)), 0);
         Aircraft a = new Aircraft(new Position(10, 10), 0);
 
-        //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
-        //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
+        //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1Freq), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
+        //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2Freq), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
 
         Radar r = new Radar(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(15, 15), 20, "E1", Globals.Tick, 20, 1);
         Radar r2 = new Radar(new Pulse(8, 10, 1000, 5, 45, "E2"), new Position(8, 8), 20, "E2", Globals.Tick, 20, 2);
@@ -182,7 +182,6 @@ class DiscreteTimeSimulationEngine
         foreach (SimulationModel receiver in simMod)
         {
             pse.Set(inParameters);
-            int radius = 0;
 
             if (receiver is Radar)
             {
