@@ -4,14 +4,16 @@
     public int timeOfTraversal;
     public int angleOfTraversal;
     public int amplitude;
+    public int frequency;
     public string symbol;
 
-    public Pulse(int pulseWidth, int amplitude, int timeOfTraversal, int angleOfTraversal, string symbol)
+    public Pulse(int pulseWidth, int amplitude, int frequency, int timeOfTraversal, int angleOfTraversal, string symbol)
     {
         this.pulseWidth = pulseWidth;
         this.amplitude = amplitude;
         this.timeOfTraversal = timeOfTraversal;
         this.angleOfTraversal = angleOfTraversal;
+        this.frequency = frequency;
         this.symbol = symbol;
     }
 }

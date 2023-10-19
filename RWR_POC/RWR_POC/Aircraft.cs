@@ -5,8 +5,9 @@ class Aircraft : BattleSystem
     public override bool Stopped { get; set; }
     public RWR rwr;
     public Dictionary<int, Position> waypoints = new Dictionary<int, Position>();
+    public List<int> waypointKeys = new List<int>();
     public int currentWaypointID = 0;
-    public int nextWaypointID = 1;
+    public int nextWaypointID;
     public int[] legVelocity = new int[2];
     public Position nextWaypoint;
     //public Position currentPosition = new Position(0, 0);
@@ -47,12 +48,8 @@ class Aircraft : BattleSystem
 
     public override void OnTick()
     {
-        if (Globals.aircraftDebugPrint)
-        {
-            Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
-            Globals.aircraftDebugPrint = false;
-        }
-        computeVelocity();
+        Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
+        int[] vel = computeVelocity();
         if (computeDistance(position, nextWaypoint) <= 1)
         {
             // Change waypoint
@@ -60,13 +57,14 @@ class Aircraft : BattleSystem
             {
                 this.currentWaypointID = this.nextWaypointID;
                 this.nextWaypointID++;
+                this.nextWaypoint = this.waypoints[nextWaypointID];
             }
         }
         else
         {
             // Move aircraft
-            this.position.x += (legVelocity[0] * 1);
-            this.position.y += (legVelocity[0] * 1);
+            this.position.x += (vel[0] * 1);
+            this.position.y += (vel[0] * 1);
             // How and where to set this?
         }
     }
@@ -90,7 +88,9 @@ class Aircraft : BattleSystem
     {
         this.position = waypoints[0];
         this.waypoints = waypoints;
-        this.nextWaypoint = waypoints[1];
+        this.waypointKeys = waypoints.Keys.ToList();
+        this.nextWaypointID = waypointKeys[1];
+        this.nextWaypoint = waypoints[waypointKeys[1]];
         this.id = id;
     }
 }

@@ -4,7 +4,7 @@ class Radar : BattleSystem
     public override bool Stopped { get; set; }
     public Pulse txPulse;
     public Pulse activePulse;
-    public Pulse zeroPulse = new Pulse(0, 0, 0, 0, "zero");
+    public Pulse zeroPulse = new Pulse(0, 0, 0, 0, 0, "zero");
     public Pulse echoPulse;
     public int pulseRepetitionInterval;
     //public int targetX;
