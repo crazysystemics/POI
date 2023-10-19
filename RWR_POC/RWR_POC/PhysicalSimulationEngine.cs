@@ -8,11 +8,11 @@
         this.id = id;
     }
 
-    public int GetDistance(int objID1, int objID2)
+    public int GetDistance(Position p1, Position p2)
     {
-        if (!physicalObjects.ContainsKey(objID1) || !physicalObjects.ContainsKey(objID2)) return 0;
-        Position p1 = physicalObjects[objID1];
-        Position p2 = physicalObjects[objID2];
+        //if (!physicalObjects.ContainsKey(objID1) || !physicalObjects.ContainsKey(objID2)) return 0;
+        //Position p1 = physicalObjects[objID1];
+        //Position p2 = physicalObjects[objID2];
         int distance_x = p1.x - p2.x;
         int distance_y = p1.y - p2.y;
         int distance = (int)Math.Sqrt((distance_x * distance_x) + (distance_y * distance_y));
