@@ -106,13 +106,13 @@
 
 
         //Aircraft a = new Aircraft(new Position(Int32.Parse(aircraftPosX), Int32.Parse(aircraftPosY)), 0);
-        Aircraft a = new Aircraft(new Position(100, 100), 0);
+        Aircraft a = new Aircraft(new Position(10, 5), 0);
         //Aircraft a2 = new Aircraft(new Position(0, 0), 4);
 
         //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1Freq), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
         //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2Freq), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
 
-        Radar r = new Radar(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(100, 110), 20, "E1", Globals.Tick, 20, 1);
+        Radar r = new Radar(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(10, 10), 20, "E1", Globals.Tick, 20, 1);
         Radar r2 = new Radar(new Pulse(8, 10, 1000, 5, 45, "E2"), new Position(8, 8), 20, "E2", Globals.Tick, 20, 2);
 
         // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
@@ -208,16 +208,16 @@
                 receiverInParams.Clear();
                 for (int j = 0; j < simMod.Count; j++)
                 {
-                    //if (globalSituationalMatrix[receiver.id, j] is Radar)
+                    if (simMod[j] is Radar)
                     {
                         // Condition not needed but some validation is required
                         // TODO: It should be possible to selective pick up the sources
 
-                        //int dist = pse.GetDistance(receiver.position, ((Radar)simMod[j]).position);
+                        //int dist = pse.GetDistance(receiver.position, simMod[j].position);
                         //int radius = ((Radar)simMod[j]).radius;
-                        if (globalSituationalMatrix[receiver.id, j] != null)
+                        if (globalSituationalMatrix[receiver.id, simMod[j].id] != null)
                         {
-                            RWR.In globalSituation = new RWR.In(globalSituationalMatrix[receiver.id, j], receiver.id);
+                            RWR.In globalSituation = new RWR.In(globalSituationalMatrix[receiver.id, simMod[j].id], receiver.id);
                             receiverInParams.Add(globalSituation);
                         }
                     }
