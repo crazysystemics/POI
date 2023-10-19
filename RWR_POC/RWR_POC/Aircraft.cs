@@ -39,6 +39,13 @@ class Aircraft : BattleSystem
         {
             Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
         }
+        else
+        {
+            // Move aircraft
+            // this.position.x += (legVelocity[0] * 1)
+            // this.position.y += (legVelocity[0] * 1)
+            // How and where to set this?
+        }
     }
 
     public Aircraft(Position position, int id)
