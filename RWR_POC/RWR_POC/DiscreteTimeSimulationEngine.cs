@@ -107,22 +107,25 @@
 
         //Aircraft a = new Aircraft(new Position(Int32.Parse(aircraftPosX), Int32.Parse(aircraftPosY)), 0);
         Aircraft a = new Aircraft(new Position(10, 10), 0);
+        Aircraft a2 = new Aircraft(new Position(0, 0), 4);
 
         //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1Freq), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
         //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2Freq), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
 
-        Radar r = new Radar(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(15, 15), 20, "E1", Globals.Tick, 20, 1);
+        Radar r = new Radar(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(13, 13), 20, "E1", Globals.Tick, 20, 1);
         Radar r2 = new Radar(new Pulse(8, 10, 1000, 5, 45, "E2"), new Position(8, 8), 20, "E2", Globals.Tick, 20, 2);
 
         // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
         // Minimum unambiguous range for a radar is c * PRI / 2 where c is the speed of light
 
         a.rwr = new RWR(ref a.position, 3);
-        //a2.rwr = new RWR(ref a2.position, 6);
+        a2.rwr = new RWR(ref a2.position, 5);
         // be careful with ref operator
 
         simMod.Add(a);
         simMod.Add(a.rwr);
+        simMod.Add(a2);
+        simMod.Add(a2.rwr);
         simMod.Add(r);
         simMod.Add(r2);
         //simMod.Add(r3);

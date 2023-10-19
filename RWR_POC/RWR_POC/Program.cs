@@ -11,12 +11,10 @@ namespace RWRPOC
             while (true)
             {
                 DTSE.RunSimulationEngine();
-                //if (Globals.debugPrint)
                 {
                     Console.WriteLine("\n----------------\n\nPress Enter/Return to display next tick");
                     Console.ReadLine();
                 }
-
             }
         }
     }
