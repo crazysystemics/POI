@@ -42,8 +42,7 @@ class Aircraft : BattleSystem
 
     public override void Set(List<InParameter> inParameter)
     {
-        this.position.x = ((In)inParameter[0]).posX;
-        this.position.y = ((In)inParameter[0]).posY;
+
     }
 
     public override void OnTick()
@@ -57,17 +56,17 @@ class Aircraft : BattleSystem
         if (computeDistance(position, nextWaypoint) <= 1)
         {
             // Change waypoint
-            // if (this.nextWaypointID != waypoints.Count)
-            // {
-            //     this.currentWaypointID = this.nextWaypointID
-            //     this.nextWaypointID++
-            // }
+            if (this.nextWaypointID != waypoints.Count)
+            {
+                this.currentWaypointID = this.nextWaypointID;
+                this.nextWaypointID++;
+            }
         }
         else
         {
             // Move aircraft
-            // this.position.x += (legVelocity[0] * 1)
-            // this.position.y += (legVelocity[0] * 1)
+            this.position.x += (legVelocity[0] * 1);
+            this.position.y += (legVelocity[0] * 1);
             // How and where to set this?
         }
     }
