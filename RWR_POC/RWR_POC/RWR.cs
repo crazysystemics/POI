@@ -5,6 +5,7 @@
     public bool hasReceivedPulse = false;
     public int rxTick;
     public int receivedPulseCount = 0;
+    public List<Pulse> receivedPulses = new List<Pulse>();
 
     public RWR(ref Position positon, int id)
     {
@@ -80,6 +81,12 @@
                 // print all characteristics
             }
         }
+        Console.WriteLine($"\nEmitters scanned during mission:\n");
+        foreach (Pulse emitter in this.receivedPulses)
+        {
+            Console.WriteLine($"Pulse Symbol: {emitter.symbol}\n\t\tAmplitude: {emitter.amplitude}\n\t\tPulse Width: {emitter.pulseWidth}\n\t\tFrequency: {emitter.frequency}\n");
+        }
+
         Console.WriteLine("-----------------------------------\n");
     }
 

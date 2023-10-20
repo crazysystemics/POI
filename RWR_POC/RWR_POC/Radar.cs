@@ -54,46 +54,10 @@ class Radar : BattleSystem
 
     public override void OnTick()
     {
-        if (Globals.Tick % this.pulseRepetitionInterval == 0)
-        {
-            txPulse = activePulse;
-            if (Globals.Tick != 0)
-            {
-                this.txTicks.Add(Globals.Tick);
-                this.txTick = Globals.Tick;
-            }
-
-            //pulsesSent++;
-
-            Console.WriteLine($"Pulse emitted by {this} {id}\n");
-            Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
+        Console.WriteLine($"Pulse emitted by {this} {id}\n");
+        Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
 $"\n\t\tTime of transmission: {txPulse.timeOfTraversal}\n\t\tAngle of transmission: {txPulse.angleOfTraversal}\n\t\tSymbol: {txPulse.symbol}" +
 $"\n\t\tAmplitude: {txPulse.amplitude}\n\t\ttxTick = {txTick}\n");
-
-            if (Globals.debugPrint)
-            {
-
-            }
-
-            //Globals.debugPrint = true;
-        }
-        else
-        {
-            txPulse = zeroPulse;
-            //Globals.debugPrint = false;
-        }
-
-
-
-        if (Globals.debugPrint)
-        {
-            if (hasReceivedEcho)
-            {
-
-            }
-        }
-
-
     }
 
     public override void Set(List<InParameter> inParameters)
@@ -113,7 +77,7 @@ $"\n\t\tAmplitude: {txPulse.amplitude}\n\t\ttxTick = {txTick}\n");
 
     public Radar(Pulse initPulse, Position position, int pulseRepetitionInterval, string pulseSymbol, int txTick, int radius, int id)
     {
-        this.txPulse = zeroPulse;
+        this.txPulse = initPulse;
         this.activePulse = initPulse;
         this.echoPulse = activePulse;
         this.pulseSymbol = pulseSymbol;

@@ -106,22 +106,24 @@
 
 
         //Aircraft a = new Aircraft(new Position(Int32.Parse(aircraftPosX), Int32.Parse(aircraftPosY)), 0);
-        Dictionary<int, Position> waypts = new Dictionary<int, Position>();
-        waypts.Add(0, new Position(5, 5));
-        waypts.Add(5, new Position(10, 10));
-        waypts.Add(10, new Position(15, 10));
-        waypts.Add(15, new Position(20, 5));
-        waypts.Add(20, new Position(15, 0));
-        waypts.Add(25, new Position(10, 0));
-        waypts.Add(30, new Position(5, 5));
+
+        List<Position> waypts = new List<Position>();
+        waypts.Add(new Position(5, 5));
+        waypts.Add(new Position(10, 10));
+        waypts.Add(new Position(15, 10));
+        waypts.Add(new Position(20, 5));
+        waypts.Add(new Position(15, 0));
+        waypts.Add(new Position(10, 0));
+        waypts.Add(new Position(5, 5));
+
         Aircraft a = new Aircraft(waypts, 0);
         //Aircraft a2 = new Aircraft(new Position(0, 0), 4);
 
         //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1Freq), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
         //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2Freq), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
 
-        Radar r = new Radar(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(100, 110), 20, "E1", Globals.Tick, 20, 1);
-        Radar r2 = new Radar(new Pulse(8, 10, 1000, 5, 45, "E2"), new Position(8, 8), 20, "E2", Globals.Tick, 20, 2);
+        Radar r = new Radar(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(0, 15), 20, "E1", Globals.Tick, 10, 1);
+        Radar r2 = new Radar(new Pulse(8, 10, 1000, 5, 45, "E2"), new Position(25, 8), 20, "E2", Globals.Tick, 10, 2);
 
         // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
         // Minimum unambiguous range for a radar is c * PRI / 2 where c is the speed of light
@@ -279,11 +281,15 @@
                                 Console.WriteLine($"{transmitter} {transmitter.id} is visible to {receiver}{receiver.id}\n");
                                 ((RWR)receiver).hasReceivedPulse = true;
                                 globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).activePulse;
+                                if (!((RWR)receiver).receivedPulses.Contains(globalSituationalMatrix[receiver.id, transmitter.id]))
+                                {
+                                    ((RWR)receiver).receivedPulses.Add(globalSituationalMatrix[receiver.id, transmitter.id]);
+                                }
                             }
-                            //else
-                            //{
-                            //    globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).zeroPulse;
-                            //}
+                            else
+                            {
+                                globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).zeroPulse;
+                            }
                         }
                     }
                 }
