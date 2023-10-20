@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 class Aircraft : BattleSystem
 {
     public override bool Stopped { get; set; }
@@ -71,14 +69,9 @@ class Aircraft : BattleSystem
         // number of ticks to reach the next waypoint, i.e. 15 ticks, since the x-distance is 15.
 
         int moveRatio;
-
-        Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
-
-
-
         int[] distToNextWaypoint = computeDistance(currentWaypoint, nextWaypoint);
 
-
+        Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
         Console.WriteLine($"nextWaypoint = {nextWaypoint.x}, {nextWaypoint.y}");
         Console.WriteLine($"distance to next waypoint = {distToNextWaypoint[0]}, {distToNextWaypoint[1]}");
 
@@ -111,8 +104,8 @@ class Aircraft : BattleSystem
                 }
                 if (distToNextWaypoint[1] > 0 && moveRatio < 0)
                 {
-                    this.position.y += -moveRatio;
                     this.position.x += moveRatio;
+                    this.position.y += -moveRatio;
                 }
 
             }
@@ -160,8 +153,8 @@ class Aircraft : BattleSystem
             }
             else if (distToNextWaypoint[1] > distToNextWaypoint[0] && distToNextWaypoint[1] != 0)
             {
-                this.position.y += moveRatio;
                 this.position.x += 1;
+                this.position.y += moveRatio;
             }
 
         }
@@ -178,7 +171,7 @@ class Aircraft : BattleSystem
                     this.position.x += 1;
                 }
             }
-            else if(Math.Abs(distToNextWaypoint[0]) <= Math.Abs(distToNextWaypoint[1]))
+            else if (Math.Abs(distToNextWaypoint[0]) <= Math.Abs(distToNextWaypoint[1]))
             {
                 if (distToNextWaypoint[0] < 0)
                 {
