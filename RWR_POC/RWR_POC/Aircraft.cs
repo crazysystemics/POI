@@ -52,7 +52,7 @@ class Aircraft : BattleSystem
 
         // Aircraft moves once every tick.
 
-        // We first find the ratio of y-distance and x-distance to the next waypoint. This ratio is moveRatio.
+        // We first find the ratio of x and y distances to the next waypoint. This ratio is moveRatio.
 
         // We always choose the bigger value between the two as the numerator.
 
@@ -63,8 +63,12 @@ class Aircraft : BattleSystem
 
         // The number of steps taken by Aircraft to reach the next waypoint is equal to the smaller distance value that is not zero.
         // In case one of the distances is zero, Aircraft covers the non-zero distance in number of steps equal to the distance.
+
         // For example, if the aircraft moves from (5, 5) to (10, 15), the x-distance is the smaller distance, and is 5 cells away.
         // The aircraft in this case will cover 5 cells in x direction in 5 ticks and 10 cells in y direction the same 5 ticks.
+
+        // But if the aircraft is moving from (5, 5) to (20, 5), the y-distance is zero, and hence the aircraft takes x-distance
+        // number of ticks to reach the next waypoint, i.e. 15 ticks, since the x-distance is 15.
 
         int moveRatio = 0;
 
