@@ -51,14 +51,20 @@ class Aircraft : BattleSystem
     {
 
         // Aircraft moves once every tick.
-        // We first find the ratio of y-distance and x-distance to the next waypoint.
-        // The numerator of this ratio is the bigger value and called moveRatio.
-        // The aircraft moves moveRatio number of cells in the direction of bigger distance and 1 cell in the direction of smaller distance.
+
+        // We first find the ratio of y-distance and x-distance to the next waypoint. This ratio is moveRatio.
+
+        // We always choose the bigger value between the two as the numerator.
+
+        // On each tick, the aircraft moves moveRatio number of cells in the direction of bigger distance
+        // and 1 cell in the direction of smaller distance.
+
         // If one of the distances is zero, the aircraft moves one cell per tick only in that direction and moveRatio is not used.
 
         int moveRatio = 0;
 
         Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
+
         if (this.position.x == nextWaypoint.x && this.position.y == nextWaypoint.y)
         {
             if (nextWaypointID != waypoints.Count - 1)
