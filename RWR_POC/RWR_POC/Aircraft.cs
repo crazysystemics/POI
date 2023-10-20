@@ -61,6 +61,11 @@ class Aircraft : BattleSystem
 
         // If one of the distances is zero, the aircraft moves one cell per tick only in that direction and moveRatio is not used.
 
+        // The number of steps taken by Aircraft to reach the next waypoint is equal to the smaller distance value that is not zero.
+        // In case one of the distances is zero, Aircraft covers the non-zero distance in number of steps equal to the distance.
+        // For example, if the aircraft moves from (5, 5) to (10, 15), the x-distance is the smaller distance, and is 5 cells away.
+        // The aircraft in this case will cover 5 cells in x direction in 5 ticks and 10 cells in y direction the same 5 ticks.
+
         int moveRatio = 0;
 
         Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
