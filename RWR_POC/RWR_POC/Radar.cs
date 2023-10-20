@@ -11,9 +11,7 @@ class Radar : BattleSystem
     //public int targetY;
     public int radius;
     public int txTick;
-    public int rxTick;
     public bool hasReceivedEcho = false;
-    public int echoTimeOfArrival;
     public string pulseSymbol;
     public List<int> txTicks = new List<int>();
     public int pulsesSent = 0;
@@ -23,7 +21,6 @@ class Radar : BattleSystem
     {
         public Pulse p;
         public Position pos;
-        public int firstTxTick;
         public int txTick;
         public Out(Pulse p, Position pos, int tcTick, int id) : base(id)
         {
@@ -54,10 +51,13 @@ class Radar : BattleSystem
 
     public override void OnTick()
     {
-        Console.WriteLine($"Pulse emitted by {this} {id}\n");
-        Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
-$"\n\t\tTime of transmission: {txPulse.timeOfTraversal}\n\t\tAngle of transmission: {txPulse.angleOfTraversal}\n\t\tSymbol: {txPulse.symbol}" +
-$"\n\t\tAmplitude: {txPulse.amplitude}\n\t\ttxTick = {txTick}\n");
+        if (Globals.Tick == 0)
+        {
+            Console.WriteLine($"Pulse emitted by {this} {id}\n");
+            Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
+    $"\n\t\tTime of transmission: {txPulse.timeOfTraversal}\n\t\tAngle of transmission: {txPulse.angleOfTraversal}\n\t\tSymbol: {txPulse.symbol}" +
+    $"\n\t\tAmplitude: {txPulse.amplitude}\n\t\ttxTick = {txTick}\n");
+        }
     }
 
     public override void Set(List<InParameter> inParameters)
