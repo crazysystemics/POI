@@ -47,7 +47,6 @@ class Aircraft : BattleSystem
 
     public override void OnTick()
     {
-
         // Aircraft moves once every tick.
 
         // We first find the ratio of x and y distances to the next waypoint. This ratio is moveRatio.
@@ -75,6 +74,19 @@ class Aircraft : BattleSystem
         Console.WriteLine($"nextWaypoint = {nextWaypoint.x}, {nextWaypoint.y}");
         Console.WriteLine($"distance to next waypoint = {distToNextWaypoint[0]}, {distToNextWaypoint[1]}");
 
+        moveAircraft();
+    }
+
+    public int[] computeDistance(Position pos1, Position pos2)
+    {
+        int[] dist = new int[] { (int)(pos2.x - pos1.x), (int)(pos2.y - pos1.y) };
+        return dist;
+    }
+
+    public void moveAircraft()
+    {
+        int moveRatio;
+        int[] distToNextWaypoint = computeDistance(currentWaypoint, nextWaypoint);
         if (distToNextWaypoint.Min() != 0)
         {
             moveRatio = distToNextWaypoint.Max() / distToNextWaypoint.Min();
@@ -192,14 +204,6 @@ class Aircraft : BattleSystem
                 nextWaypoint = waypoints[nextWaypointID];
             }
         }
-
-
-    }
-
-    public int[] computeDistance(Position pos1, Position pos2)
-    {
-        int[] dist = new int[] { (int)(pos2.x - pos1.x), (int)(pos2.y - pos1.y) };
-        return dist;
     }
 
 
