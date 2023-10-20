@@ -70,20 +70,14 @@ class Aircraft : BattleSystem
         // But if the aircraft is moving from (5, 5) to (20, 5), the y-distance is zero, and hence the aircraft takes x-distance
         // number of ticks to reach the next waypoint, i.e. 15 ticks, since the x-distance is 15.
 
-        int moveRatio = 0;
+        int moveRatio;
 
         Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
 
-        if (this.position.x == nextWaypoint.x && this.position.y == nextWaypoint.y)
-        {
-            if (nextWaypointID != waypoints.Count - 1)
-            {
-                nextWaypointID++;
-                nextWaypoint = waypoints[nextWaypointID];
-            }
-        }
+
 
         int[] distToNextWaypoint = computeDistance(currentWaypoint, nextWaypoint);
+
 
         Console.WriteLine($"nextWaypoint = {nextWaypoint.x}, {nextWaypoint.y}");
         Console.WriteLine($"distance to next waypoint = {distToNextWaypoint[0]}, {distToNextWaypoint[1]}");
@@ -97,6 +91,7 @@ class Aircraft : BattleSystem
 
                 if (distToNextWaypoint[0] == distToNextWaypoint[1])
                 {
+
                     if (distToNextWaypoint[0] < 0 && distToNextWaypoint[1] < 0)
                     {
                         this.position.x += -moveRatio;
@@ -130,12 +125,40 @@ class Aircraft : BattleSystem
                 this.position.y += -1;
             }
 
+            else if (distToNextWaypoint[0] > distToNextWaypoint[1] && distToNextWaypoint[1] < 0)
+            {
+                if (moveRatio < 0)
+                {
+                    this.position.x += -moveRatio;
+                    this.position.y += -1;
+                }
+                else
+                {
+                    this.position.x += moveRatio;
+                    this.position.y += -1;
+                }
+            }
+
+            else if (distToNextWaypoint[1] > distToNextWaypoint[0] && distToNextWaypoint[0] < 0)
+            {
+                if (moveRatio < 0)
+                {
+                    this.position.x += -1;
+                    this.position.y += -moveRatio;
+                }
+                else
+                {
+                    this.position.x += -1;
+                    this.position.y += moveRatio;
+                }
+            }
+
             else if (distToNextWaypoint[0] > distToNextWaypoint[1] && distToNextWaypoint[0] != 0)
             {
                 this.position.x += moveRatio;
                 this.position.y += 1;
             }
-            else if (distToNextWaypoint[1]  > distToNextWaypoint[0] && distToNextWaypoint[1] != 0)
+            else if (distToNextWaypoint[1] > distToNextWaypoint[0] && distToNextWaypoint[1] != 0)
             {
                 this.position.y += moveRatio;
                 this.position.x += 1;
@@ -167,6 +190,17 @@ class Aircraft : BattleSystem
                 }
             }
         }
+
+        if (this.position.x == nextWaypoint.x && this.position.y == nextWaypoint.y)
+        {
+            if (nextWaypointID != waypoints.Count - 1)
+            {
+                nextWaypointID++;
+                nextWaypoint = waypoints[nextWaypointID];
+            }
+        }
+
+
     }
 
     public int[] computeDistance(Position pos1, Position pos2)
