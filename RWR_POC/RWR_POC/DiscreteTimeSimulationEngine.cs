@@ -109,8 +109,8 @@
 
         List<Position> waypts = new List<Position>();
         waypts.Add(new Position(5, 5));
-        waypts.Add(new Position(10, 15));
-        waypts.Add(new Position(15, 15));
+        waypts.Add(new Position(10, 10));
+        waypts.Add(new Position(15, 10));
         waypts.Add(new Position(20, 5));
         waypts.Add(new Position(15, 0));
         waypts.Add(new Position(10, 0));
