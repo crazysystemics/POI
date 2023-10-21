@@ -83,24 +83,6 @@ class Aircraft : BattleSystem
         int[] dist = new int[] { (int)(pos2.x - pos1.x), (int)(pos2.y - pos1.y) };
         return dist;
     }
-
-    public int moveRatio(Position currentWaypoint, Position nextWaypoint)
-    {
-        int ratio;
-        int dist_x = Math.Abs(currentWaypoint.x - nextWaypoint.x);
-        int dist_y = Math.Abs(currentWaypoint.y - nextWaypoint.y);
-        int[] distArray = new int[] {dist_x, dist_y};
-        if (distArray.Min() != 0)
-        {
-            ratio = (int)(distArray.Max() / distArray.Min());
-        }
-        else
-        {
-            ratio = 0;
-        }
-        return ratio;
-    }
-
     public void moveAircraft()
     {
         int moveRatio;
