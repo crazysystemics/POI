@@ -1,3 +1,5 @@
+using System.Collections;
+
 class Aircraft : BattleSystem
 {
     public override bool Stopped { get; set; }
@@ -67,12 +69,11 @@ class Aircraft : BattleSystem
         // But if the aircraft is moving from (5, 5) to (20, 5), the y-distance is zero, and hence the aircraft takes x-distance
         // number of ticks to reach the next waypoint, i.e. 15 ticks, since the x-distance is 15.
 
-        int moveRatio;
-        int[] distToNextWaypoint = computeDistance(currentWaypoint, nextWaypoint);
+        //int[] distToNextWaypoint = computeDistance(currentWaypoint, nextWaypoint);
 
         Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
         Console.WriteLine($"nextWaypoint = {nextWaypoint.x}, {nextWaypoint.y}");
-        Console.WriteLine($"distance to next waypoint = {distToNextWaypoint[0]}, {distToNextWaypoint[1]}");
+        //Console.WriteLine($"distance to next waypoint = {distToNextWaypoint[0]}, {distToNextWaypoint[1]}");
 
         moveAircraft();
     }
@@ -83,115 +84,201 @@ class Aircraft : BattleSystem
         return dist;
     }
 
-    public void moveAircraft()
+    public int moveRatio(Position currentWaypoint, Position nextWaypoint)
     {
-        int moveRatio;
-        int[] distToNextWaypoint = computeDistance(currentWaypoint, nextWaypoint);
-        if (distToNextWaypoint.Min() != 0)
+        int ratio;
+        int dist_x = Math.Abs(currentWaypoint.x - nextWaypoint.x);
+        int dist_y = Math.Abs(currentWaypoint.y - nextWaypoint.y);
+        int[] distArray = new int[] {dist_x, dist_y};
+        if (distArray.Min() != 0)
         {
-            moveRatio = distToNextWaypoint.Max() / distToNextWaypoint.Min();
-
-            if (Math.Abs(distToNextWaypoint[0]) == Math.Abs(distToNextWaypoint[1]))
-            {
-
-                if (distToNextWaypoint[0] == distToNextWaypoint[1])
-                {
-
-                    if (distToNextWaypoint[0] < 0 && distToNextWaypoint[1] < 0)
-                    {
-                        this.position.x += -moveRatio;
-                        this.position.y += -moveRatio;
-                    }
-                    else
-                    {
-                        this.position.x += moveRatio;
-                        this.position.y += moveRatio;
-                    }
-                }
-
-                if (distToNextWaypoint[0] > 0 && moveRatio < 0)
-                {
-                    this.position.x += -moveRatio;
-                    this.position.y += moveRatio;
-                }
-                if (distToNextWaypoint[1] > 0 && moveRatio < 0)
-                {
-                    this.position.x += moveRatio;
-                    this.position.y += -moveRatio;
-                }
-
-            }
-            else if (distToNextWaypoint[0] < 0 && distToNextWaypoint[1] == 0)
-            {
-                this.position.x += -1;
-            }
-            else if (distToNextWaypoint[1] < 0 && distToNextWaypoint[0] == 0)
-            {
-                this.position.y += -1;
-            }
-
-            else if (distToNextWaypoint[0] > distToNextWaypoint[1] && distToNextWaypoint[1] < 0)
-            {
-                if (moveRatio < 0)
-                {
-                    this.position.x += -moveRatio;
-                    this.position.y += -1;
-                }
-                else
-                {
-                    this.position.x += moveRatio;
-                    this.position.y += -1;
-                }
-            }
-
-            else if (distToNextWaypoint[1] > distToNextWaypoint[0] && distToNextWaypoint[0] < 0)
-            {
-                if (moveRatio < 0)
-                {
-                    this.position.x += -1;
-                    this.position.y += -moveRatio;
-                }
-                else
-                {
-                    this.position.x += -1;
-                    this.position.y += moveRatio;
-                }
-            }
-
-            else if (distToNextWaypoint[0] > distToNextWaypoint[1] && distToNextWaypoint[0] != 0)
-            {
-                this.position.x += moveRatio;
-                this.position.y += 1;
-            }
-            else if (distToNextWaypoint[1] > distToNextWaypoint[0] && distToNextWaypoint[1] != 0)
-            {
-                this.position.x += 1;
-                this.position.y += moveRatio;
-            }
-
+            ratio = (int)(distArray.Max() / distArray.Min());
         }
         else
         {
-            if (Math.Abs(distToNextWaypoint[0]) > Math.Abs(distToNextWaypoint[1]))
+            ratio = 0;
+        }
+        return ratio;
+    }
+
+    public void moveAircraft()
+    {
+        int moveRatio;
+        int[] displacementArray = computeDistance(this.currentWaypoint, this.nextWaypoint);
+        int[] distanceToNextWaypoint = new int[2];
+        distanceToNextWaypoint[0] = Math.Abs(displacementArray[0]);
+        distanceToNextWaypoint[1] = Math.Abs(displacementArray[1]);
+
+        bool minIsZero = distanceToNextWaypoint.Min() == 0;
+
+        // Case: neither of the displacements are zero
+
+        if (!minIsZero)
+        {
+            moveRatio = (int)(distanceToNextWaypoint.Max() / distanceToNextWaypoint.Min());
+            
+            // Case 1: Both x-displacment and y-displacement are positive
+
+            if (displacementArray[0] > 0 && displacementArray[1] > 0)
             {
-                if (distToNextWaypoint[1] < 0)
+
+                // If x_distance > y-distance
+
+                if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
                 {
-                    this.position.x += -1;
+                    this.position.x += moveRatio;
+                    this.position.y += 1;
                 }
+
+                // If y-distance > x-distance
+
+                else if (distanceToNextWaypoint[1] > distanceToNextWaypoint[0])
+                {
+                    this.position.x += 1;
+                    this.position.y += moveRatio;
+                }
+
+                // If x-distance = y-distance
+
                 else
                 {
                     this.position.x += 1;
+                    this.position.y += 1;
                 }
             }
-            else if (Math.Abs(distToNextWaypoint[0]) <= Math.Abs(distToNextWaypoint[1]))
+
+            // Case 2: Both x-displacement and y-displacement are negative
+
+            if (displacementArray[0] < 0 && displacementArray[1] < 0)
             {
-                if (distToNextWaypoint[0] < 0)
+
+                // If x-distance > y-distance
+
+                if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
+                {
+                    this.position.x += -moveRatio;
+                    this.position.y += -1;
+                }
+
+                // If y-distance > x-distance
+
+                else if (distanceToNextWaypoint[1] > distanceToNextWaypoint[0])
+                {
+                    this.position.x += -1;
+                    this.position.y += -moveRatio;
+                }
+
+                // If x-distance = y-distance
+
+                else
+                {
+                    this.position.x += -1;
+                    this.position.y += -1;
+                }
+            }
+
+            // Case 3: x-displacement is positive, y-displacement is negative
+
+            if (displacementArray[0] > 0 && displacementArray[1] < 0)
+            {
+
+                // If x-distance > y-distance
+
+                if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
+                {
+                    this.position.x += moveRatio;
+                    this.position.y += -1;
+                }
+
+                // If y-distance > x-distance
+
+                else if (distanceToNextWaypoint[1] > distanceToNextWaypoint[0])
+                {
+                    this.position.x += 1;
+                    this.position.y += -moveRatio;
+                }
+
+                // If x-distance = y-distance
+
+                else
+                {
+                    this.position.x += 1;
+                    this.position.y += -1;
+                }
+            }
+
+            // Case 4: x-displacement is negative, y-displacement is positive
+
+            if (displacementArray[0] < 0 && displacementArray[1] > 0)
+            {
+
+                // If x-distance > y-distance
+                
+                if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
+                {
+                    this.position.x += -moveRatio;
+                    this.position.y += 1;
+                }
+
+                // If y-distance > x-distance
+
+                else if (distanceToNextWaypoint[1] > distanceToNextWaypoint[0])
+                {
+                    this.position.x += -1;
+                    this.position.y += moveRatio;
+                }
+
+                // If x-distance = y-distance
+
+                else
+                {
+                    this.position.x += -1;
+                    this.position.y += 1;
+                }
+            }
+        }
+
+        // Case: At least one of the displacements is zero
+
+        else
+        {
+            // Case 1: If x-displacement is zero
+
+            if (displacementArray[0] == 0)
+            {
+
+                // If y-displacement is positive
+
+                if (displacementArray[1] > 0)
+                {
+                    this.position.y += 1;
+                }
+
+                // If y-displacement is negative
+
+                else if (displacementArray[1] < 0)
                 {
                     this.position.y += -1;
                 }
-                else
+            }
+
+            // Case 2: If y-displacement is zero
+
+            if (displacementArray[1] == 0)
+            {
+
+                // If x-displacement is positive
+
+                if (displacementArray[0] > 0)
                 {
-                    this.position.y += 1;
+                    this.position.x += 1;
+                }
+
+                // If x-displacement is negative
+
+                else if (displacementArray[0] < 0)
+                {
+                    this.position.x += -1;
                 }
             }
         }
