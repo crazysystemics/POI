@@ -7,7 +7,7 @@
     public static bool distDebugPrint = true;
     public static bool aircraftDebugPrint = true;
 
-    public static void debugWriteLine(string s)
+    public static void DebugWriteLine(string s)
     {
         Console.WriteLine(s);
     }

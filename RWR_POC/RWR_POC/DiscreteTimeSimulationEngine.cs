@@ -2,13 +2,13 @@
 {
     public List<SimulationModel> simMod;
     public List<InParameter> dtseInParameters;
-    public List<OutParameter> dtseOutParameter = new List<OutParameter>();
-    public List<InParameter> receiverInParams = new List<InParameter>();
-    public PhysicalSimulationEngine pse = new PhysicalSimulationEngine(99);
-    public Pulse echoedPulse = new Pulse(0, 0, 0, 0, 0, "zero");
+    public List<OutParameter> dtseOutParameter = new();
+    public List<InParameter> receiverInParams = new();
+    public PhysicalSimulationEngine pse = new(99);
+    public Pulse echoedPulse = new(0, 0, 0, 0, 0, "zero");
     public bool echoPulseSet = false;
     public int rxTick = Globals.Tick;
-    public RWR.Emitter detectedRadar = new RWR.Emitter();
+    public RWR.Emitter detectedRadar = new();
     public Pulse[,] globalSituationalMatrix;
     public int transmitterCount;
     //List<Pulse> txPulses = new List<Pulse>();
@@ -107,29 +107,45 @@
 
         //Aircraft a = new Aircraft(new Position(Int32.Parse(aircraftPosX), Int32.Parse(aircraftPosY)), 0);
 
-        List<Position> waypts = new List<Position>();
-        waypts.Add(new Position(5, 5));
-        waypts.Add(new Position(10, 10));
-        waypts.Add(new Position(15, 10));
-        waypts.Add(new Position(20, 5));
-        waypts.Add(new Position(15, 0));
-        waypts.Add(new Position(10, 0));
-        waypts.Add(new Position(5, 5));
+        List<Position> waypts = new()
+        {
+            new Position(5, 5),
+            new Position(10, 10),
+            new Position(15, 10),
+            new Position(20, 5),
+            new Position(15, 0),
+            new Position(10, 0),
+            new Position(5, 5)
+        };
 
-        Aircraft a = new Aircraft(waypts, 0);
-        //Aircraft a2 = new Aircraft(new Position(0, 0), 4);
+        List<Position> waypts2 = new()
+        {
+            new Position(10, 10),
+            new Position(15, 10),
+            new Position(20, 5),
+            new Position(15, 0),
+            new Position(10, 0),
+            new Position(5, 5),
+            new Position(10, 10)
+        };
+
+
+
+
+        Aircraft a = new(waypts, 0);
+        Aircraft a2 = new(waypts2, 4);
 
         //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1Freq), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
         //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2Freq), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
 
-        Radar r = new Radar(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(0, 15), 20, "E1", Globals.Tick, 10, 1);
-        Radar r2 = new Radar(new Pulse(8, 10, 1000, 5, 45, "E2"), new Position(25, 8), 20, "E2", Globals.Tick, 10, 2);
+        Radar r = new(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(0, 15), 20, "E1", Globals.Tick, 10, 1);
+        Radar r2 = new(new Pulse(8, 10, 1000, 5, 45, "E2"), new Position(15, 10), 20, "E2", Globals.Tick, 10, 2);
 
         // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
         // Minimum unambiguous range for a radar is c * PRI / 2 where c is the speed of light
 
         a.rwr = new RWR(ref a.position, 3);
-        //a2.rwr = new RWR(ref a2.position, 5);
+        a2.rwr = new RWR(ref a2.position, 5);
         // be careful with ref operator
 
         simMod.Add(a);
@@ -157,7 +173,7 @@
 
     public void RunSimulationEngine()
     {
-        List<InParameter> inParameters = new List<InParameter>();
+        List<InParameter> inParameters = new();
 
         Console.WriteLine($"----------\nTick = {Globals.Tick}\n----------");
 
@@ -188,7 +204,7 @@
             }
         }
 
-        buildGlobalSituationAwareness();
+        BuildGlobalSituationAwareness();
 
         // Set() on every Simulation Model
 
@@ -198,7 +214,7 @@
 
             if (receiver is Radar)
             {
-                List<InParameter> inParameters2 = new List<InParameter>();
+                List<InParameter> inParameters2 = new();
                 for (int j = 0; j < simMod.Count; j++)
                 {
                     //if (transmitter is RWR)
@@ -227,7 +243,7 @@
                         //int radius = ((Radar)simMod[j]).radius;
                         if (globalSituationalMatrix[receiver.id, j] != null)
                         {
-                            RWR.In globalSituation = new RWR.In(globalSituationalMatrix[receiver.id, j], receiver.id);
+                            RWR.In globalSituation = new(globalSituationalMatrix[receiver.id, j], receiver.id);
                             receiverInParams.Add(globalSituation);
                         }
                     }
@@ -248,7 +264,7 @@
         Globals.Tick++;
     }
 
-    public void buildGlobalSituationAwareness()
+    public void BuildGlobalSituationAwareness()
     {
 
         // TODO: Build semantic net or graph connecting all simulation models
@@ -265,7 +281,7 @@
 
                     if (receiver is RWR)
                     {
-                        int dist = pse.GetDistance(receiver.position, transmitter.position);
+                        int dist = PhysicalSimulationEngine.GetDistance(receiver.position, transmitter.position);
                         int radius = ((Radar)transmitter).radius;
                         //if (Globals.distDebugPrint)
                         {

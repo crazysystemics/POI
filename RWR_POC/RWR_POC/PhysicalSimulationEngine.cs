@@ -1,6 +1,6 @@
 ﻿class PhysicalSimulationEngine : SimulationModel
 {
-    public Dictionary<int, Position> physicalObjects = new Dictionary<int, Position>();
+    public Dictionary<int, Position> physicalObjects = new();
     //public Pulse previousActivePulse;
 
     public PhysicalSimulationEngine(int id)
@@ -8,7 +8,7 @@
         this.id = id;
     }
 
-    public int GetDistance(Position p1, Position p2)
+    public static int GetDistance(Position p1, Position p2)
     {
         //if (!physicalObjects.ContainsKey(objID1) || !physicalObjects.ContainsKey(objID2)) return 0;
         //Position p1 = physicalObjects[objID1];
@@ -34,7 +34,7 @@
 
     public class In : InParameter
     {
-        public Position position = new Position();
+        public Position position = new();
         public In(Position position, int id) : base(id)
         {
             this.position = position;

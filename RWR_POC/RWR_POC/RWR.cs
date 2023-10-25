@@ -5,7 +5,7 @@
     public bool hasReceivedPulse = false;
     public int rxTick;
     public int receivedPulseCount = 0;
-    public List<Pulse> receivedPulses = new List<Pulse>();
+    public List<Pulse> receivedPulses = new();
 
     public RWR(ref Position positon, int id)
     {
@@ -33,7 +33,7 @@
             this.id = id;
         }
     }
-    public List<Pulse> RxBuf = new List<Pulse>();
+    public List<Pulse> RxBuf = new();
     public class Out : OutParameter
     {
         public int r;
@@ -51,7 +51,7 @@
     {
 
         // Pulse as InParameter
-        public Pulse p = new Pulse(0, 0, 0, 0, 0, "zero");
+        public Pulse p = new(0, 0, 0, 0, 0, "zero");
 
         public In(Pulse p, int id) : base(id)
         {
@@ -62,13 +62,13 @@
 
     public override OutParameter Get()
     {
-        Out rwrParams = new Out(0, 0, position, 2);
+        Out rwrParams = new(0, 0, position, 2);
         return rwrParams;
     }
 
     public override void OnTick()
     {
-        Console.WriteLine("\n-----------------------------------\nSignals received by RWR:\n");
+        Console.WriteLine($"\n-----------------------------------\nSignals received by RWR {id}:\n");
         if (RxBuf.Count == 0)
         {
             Console.WriteLine("None");
@@ -81,11 +81,11 @@
                 // print all characteristics
             }
         }
-        Console.WriteLine($"\nEmitters scanned during mission:\n");
-        foreach (Pulse emitter in this.receivedPulses)
-        {
-            Console.WriteLine($"Pulse Symbol: {emitter.symbol}\n\t\tAmplitude: {emitter.amplitude}\n\t\tPulse Width: {emitter.pulseWidth}\n\t\tFrequency: {emitter.frequency}\n");
-        }
+        //Console.WriteLine($"\nEmitters scanned during mission:\n");
+        //foreach (Pulse emitter in this.receivedPulses)
+        //{
+        //    Console.WriteLine($"Pulse Symbol: {emitter.symbol}\n\t\tAmplitude: {emitter.amplitude}\n\t\tPulse Width: {emitter.pulseWidth}\n\t\tFrequency: {emitter.frequency}\n");
+        //}
 
         Console.WriteLine("-----------------------------------\n");
     }

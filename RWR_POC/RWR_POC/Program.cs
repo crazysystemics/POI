@@ -5,7 +5,7 @@ namespace RWRPOC
         static void Main(string[] args)
         {
 
-            DiscreteTimeSimulationEngine DTSE = new DiscreteTimeSimulationEngine();
+            DiscreteTimeSimulationEngine DTSE = new();
             DTSE.Init();
 
             while (true)
@@ -16,6 +16,14 @@ namespace RWRPOC
                     Console.ReadLine();
                 }
             }
+
+            //Pulse inpPulse;
+            //string inputfile = @"C:\Users\RohitChaoji\source\repos\crazysystemics\POI\RWR_POC\RWR_POC\output_results.txt";
+            //PulseInputParser pInp = new(inputfile);
+            //inpPulse = pInp.ParseText();
+
+            //Console.WriteLine($"Pulse Width = {inpPulse.pulseWidth}");
+            //Console.WriteLine($"Time of Arrival = {inpPulse.timeOfTraversal}");
         }
     }
 }

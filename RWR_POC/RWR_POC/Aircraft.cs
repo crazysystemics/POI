@@ -4,7 +4,7 @@ class Aircraft : BattleSystem
 {
     public override bool Stopped { get; set; }
     public RWR rwr;
-    public List<Position> waypoints = new List<Position>();
+    public List<Position> waypoints = new();
     public Position currentWaypoint;
     public int currentWaypointID;
     public Position nextWaypoint;
@@ -38,7 +38,7 @@ class Aircraft : BattleSystem
     }
     public override Out Get()
     {
-        Out aircraftPosition = new Out(position.x, position.y, 0);
+        Out aircraftPosition = new(position.x, position.y, 0);
         return aircraftPosition;
     }
 
@@ -75,18 +75,18 @@ class Aircraft : BattleSystem
         Console.WriteLine($"nextWaypoint = {nextWaypoint.x}, {nextWaypoint.y}");
         //Console.WriteLine($"distance to next waypoint = {distToNextWaypoint[0]}, {distToNextWaypoint[1]}");
 
-        moveAircraft();
+        MoveAircraft();
     }
 
-    public int[] computeDistance(Position pos1, Position pos2)
+    public static int[] ComputeDistance(Position pos1, Position pos2)
     {
         int[] dist = new int[] { (int)(pos2.x - pos1.x), (int)(pos2.y - pos1.y) };
         return dist;
     }
-    public void moveAircraft()
+    public void MoveAircraft()
     {
         int moveRatio;
-        int[] displacementArray = computeDistance(this.currentWaypoint, this.nextWaypoint);
+        int[] displacementArray = ComputeDistance(this.currentWaypoint, this.nextWaypoint);
         int[] distanceToNextWaypoint = new int[2];
         distanceToNextWaypoint[0] = Math.Abs(displacementArray[0]);
         distanceToNextWaypoint[1] = Math.Abs(displacementArray[1]);
@@ -98,7 +98,7 @@ class Aircraft : BattleSystem
         if (!minIsZero)
         {
             moveRatio = (int)(distanceToNextWaypoint.Max() / distanceToNextWaypoint.Min());
-            
+
             // Case 1: Both x-displacment and y-displacement are positive
 
             if (displacementArray[0] > 0 && displacementArray[1] > 0)
@@ -108,6 +108,7 @@ class Aircraft : BattleSystem
 
                 if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
                 {
+                    // x = distanceToNextWaypoint[0] * moveRatio
                     this.position.x += moveRatio;
                     this.position.y += 1;
                 }
@@ -195,7 +196,7 @@ class Aircraft : BattleSystem
             {
 
                 // If x-distance > y-distance
-                
+
                 if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
                 {
                     this.position.x += -moveRatio;
