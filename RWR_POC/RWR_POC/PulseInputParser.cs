@@ -1,37 +1,75 @@
-﻿public class PulseInputParser
+﻿using System.Net;
+using System.Runtime.CompilerServices;
+
+public class PulseInputParser
 {
     public string fileName;
     public StreamReader reader;
-    public string[] pulseDescriptionWords;
+    public string[] inputPulses;
     public string? parsedLine;
-    public Pulse inputPulse = new(0, 0, 0, 0, 0, "zero");
+    public Pulse received;
+    public List<Pulse> receivedPulses = new List<Pulse>();
+    public string[] pulseCharacteristics;
+    public int linesInFile;
 
-    // PDW[0] = Clock
-    // PDW[1] = Reset
-    // PDW[2] = Time of Arrival
-    // PDW[3] = Pulse Width
-    // PDW[4] = Pulse Repetition Interval
-    // PDW[5] = dOut
-    // PDW[6] = Pulse
+    // inputPulseData[0] = Clock
+    // inputPulseData[1] = Reset
+    // inputPulseData[2] = Time of Arrival
+    // inputPulseData[3] = Pulse Width
+    // inputPulseData[4] = Pulse Repetition Interval
+    // inputPulseData[5] = dOut
+    // inputPulseData[6] = Pulse
 
     // dOut (from left to right) = "8 zero bits as padding" + "PRI" + "Pulse Width" + "Time of Arrival" : concatenated string of binary bits
 
+    // inputPulseData = physical pulse present + RWR's sensor model
+    // Make inputPulseData class instead of array
+    //public class ReceivedPulse
+    //{
+    //    public int amplitude;
+    //    public int frequency;
+    //    public int pulseWidth;
+    //}
+
     public PulseInputParser(string fileName)
     {
+        this.linesInFile = File.ReadAllLines(fileName).Length;
         this.fileName = fileName;
         this.reader = new StreamReader(fileName);
-        this.pulseDescriptionWords = new string[7];
+        this.inputPulses = new string[linesInFile];
+        this.received = new Pulse(0, 0, 0, 0, 0, "zero");
+        this.pulseCharacteristics = new string[4];
     }
 
-    public Pulse ParseText()
+    public List<Pulse> ParseText()
     {
-        for (int i = 0; i < this.pulseDescriptionWords.Length; i++)
-        {
-            this.pulseDescriptionWords[i] = reader.ReadLine();
-        }
-        this.inputPulse.pulseWidth = Convert.ToInt32(this.pulseDescriptionWords[3], 2);
-        this.inputPulse.timeOfTraversal = Convert.ToInt32(this.pulseDescriptionWords[2], 2);
 
-        return this.inputPulse;
+        for (int i = 0; i < this.linesInFile; i++)
+        {
+            this.inputPulses[i] = reader.ReadLine();
+            for (int j = 0; j < 4; j++)
+            {
+                this.pulseCharacteristics[j] = inputPulses[i][(8 * j)..(8 * (j + 1))];
+            }
+
+            // pulseCharacteristics[1] contains amplitude information.
+            // pulseCharacteristics[2] contains frequency information.
+            // pulseCharacteristics[3] contains pulse width information.
+            // Which leading bits represent which information might be different based on the generated pulse data.
+
+            this.received = new Pulse(Convert.ToInt32(this.pulseCharacteristics[3], 2), Convert.ToInt32(this.pulseCharacteristics[1], 2), Convert.ToInt32(this.pulseCharacteristics[2], 2), 0, 0, i.ToString());
+            this.receivedPulses.Add(received);
+        }
+
+        // Ideally, each pulse will have at least amplitude, pulse width, frequency.
+        // PRI = number of pulses received by RWR in duration of a tick.
+        // If each pulse is a 32-bit packet, with leading bits encoding the Pulse Width, Amplitude and Frequency, then:
+        // each characteristic is sleected using string slicing.
+        // Padding bits are data[..8], first encoded value is data[8..16], second encoded value is data[16..24] and the last one is data[24..32]
+        // received.pulseWidth = data[24..32]
+        // received.frequency = data[16..24]
+        // received.amplitude = data[8..16]
+
+        return this.receivedPulses;
     }
 }

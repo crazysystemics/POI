@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 namespace RWRPOC
 {
     class Program
@@ -5,25 +7,30 @@ namespace RWRPOC
         static void Main(string[] args)
         {
 
-            DiscreteTimeSimulationEngine DTSE = new();
-            DTSE.Init();
+            //DiscreteTimeSimulationEngine DTSE = new();
+            //DTSE.Init();
 
-            while (true)
+            //while (true)
+            //{
+            //    DTSE.RunSimulationEngine();
+            //    {
+            //        Console.WriteLine("\n----------------\n\nPress Enter/Return to display next tick");
+            //        Console.ReadLine();
+            //    }
+            //}
+
+            List<Pulse> inpPulse;
+            string inputfile = @"C:\Users\RohitChaoji\source\repos\crazysystemics\POI\RWR_POC\RWR_POC\testfile.txt";
+            PulseInputParser pInp = new(inputfile);
+            inpPulse = pInp.ParseText();
+
+            foreach (Pulse inp in inpPulse )
             {
-                DTSE.RunSimulationEngine();
-                {
-                    Console.WriteLine("\n----------------\n\nPress Enter/Return to display next tick");
-                    Console.ReadLine();
-                }
+                Console.WriteLine($"Pulse {inp.symbol}:\n");
+                Console.WriteLine($"Pulse Width = {inp.pulseWidth}");
+                Console.WriteLine($"Amplitude = {inp.amplitude}");
+                Console.WriteLine($"Frequency = {inp.frequency}\n");
             }
-
-            //Pulse inpPulse;
-            //string inputfile = @"C:\Users\RohitChaoji\source\repos\crazysystemics\POI\RWR_POC\RWR_POC\output_results.txt";
-            //PulseInputParser pInp = new(inputfile);
-            //inpPulse = pInp.ParseText();
-
-            //Console.WriteLine($"Pulse Width = {inpPulse.pulseWidth}");
-            //Console.WriteLine($"Time of Arrival = {inpPulse.timeOfTraversal}");
         }
     }
 }

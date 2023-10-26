@@ -150,8 +150,8 @@
 
         simMod.Add(a);
         simMod.Add(a.rwr);
-        //simMod.Add(a2);
-        //simMod.Add(a2.rwr);
+        simMod.Add(a2);
+        simMod.Add(a2.rwr);
         simMod.Add(r);
         simMod.Add(r2);
         //simMod.Add(r3);
