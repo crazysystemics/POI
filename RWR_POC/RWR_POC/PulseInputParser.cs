@@ -61,14 +61,10 @@ public class PulseInputParser
             this.receivedPulses.Add(received);
         }
 
-        // Ideally, each pulse will have at least amplitude, pulse width, frequency.
         // PRI = number of pulses received by RWR in duration of a tick.
         // If each pulse is a 32-bit packet, with leading bits encoding the Pulse Width, Amplitude and Frequency, then:
         // each characteristic is sleected using string slicing.
         // Padding bits are data[..8], first encoded value is data[8..16], second encoded value is data[16..24] and the last one is data[24..32]
-        // received.pulseWidth = data[24..32]
-        // received.frequency = data[16..24]
-        // received.amplitude = data[8..16]
 
         return this.receivedPulses;
     }
