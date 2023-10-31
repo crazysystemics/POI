@@ -33,12 +33,19 @@ namespace RWRPOC
             //    Console.WriteLine($"Time of Arrival = Current Tick + (PRI * {inp.timeOfTraversal})\n");
             //}
 
-            PulseGenerator pg = new PulseGenerator(5, 20, 10, 200, 500);
+            PulseGenerator pg = new PulseGenerator(5, 20, 10, 200, 125);
             List<PDWs> pulses = new List<PDWs>();
             pulses = pg.GeneratePulseTrain();
+            int counter = 1;
+            Console.WriteLine($"PRI for emitter = {pg.PRI}");
             foreach (PDWs p in pulses)
             {
-                Console.WriteLine(p.timeOfArrival);
+                Console.WriteLine($"\nPulse {counter}:\n");
+                Console.WriteLine($"Width = {p.pulseWidth} ns");
+                Console.WriteLine($"Amplitude = {p.amplitude} dB");
+                Console.WriteLine($"Frequency = {p.frequency} MHz");
+                Console.WriteLine($"Time of Arrival = {p.timeOfArrival} ns\n----------------");
+                counter++;
             }
         }
     }
