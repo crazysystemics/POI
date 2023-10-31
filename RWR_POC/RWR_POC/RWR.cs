@@ -6,6 +6,7 @@
     public int rxTick;
     public int receivedPulseCount = 0;
     public List<Pulse> receivedPulses = new();
+    public bool inputchannelOpen = false;
 
     public RWR(ref Position positon, int id)
     {
@@ -68,6 +69,14 @@
 
     public override void OnTick()
     {
+        if (Globals.Tick == 20)
+        {
+            inputchannelOpen = true;
+        }
+        else
+        {
+            inputchannelOpen = false;
+        }
         Console.WriteLine($"\n-----------------------------------\nSignals received by RWR {id}:\n");
         if (RxBuf.Count == 0)
         {

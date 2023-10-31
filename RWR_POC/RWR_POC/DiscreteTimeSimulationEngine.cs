@@ -291,11 +291,19 @@
 
                         //if (((Radar)transmitter).txTicks.Count != 0)
                         {
-                            if (dist <= radius)
+                            if (dist <= radius && ((RWR)receiver).inputchannelOpen)
                             {
                                 Globals.debugPrint = true;
                                 Console.WriteLine($"{transmitter} {transmitter.id} is visible to {receiver}{receiver.id}\n");
                                 ((RWR)receiver).hasReceivedPulse = true;
+                                //List<Pulse> pulsesfromTrain = new List<Pulse>();
+                                //PulseGenerator pg = new PulseGenerator(5, 20, 10, 200, 125);
+                                //List<PDWs> pulses = new List<PDWs>();
+                                //pulses = pg.GeneratePulseTrain();
+                                //foreach (PDWs pulse in pulses)
+                                //{
+                                //    pulsesfromTrain.Add(new Pulse(pulse.pulseWidth, pulse.amplitude, pulse.frequency, pulse.timeOfArrival, 0, "X"));
+                                //}
                                 globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).activePulse;
                                 if (!((RWR)receiver).receivedPulses.Contains(globalSituationalMatrix[receiver.id, transmitter.id]))
                                 {
