@@ -19,17 +19,26 @@ namespace RWRPOC
             //    }
             //}
 
-            List<Pulse> inpPulse;
-            string inputfile = @"C:\Users\RohitChaoji\source\repos\crazysystemics\POI\RWR_POC\RWR_POC\testfile.txt";
-            PulseInputParser pInp = new(inputfile);
-            inpPulse = pInp.ParseText();
+            //List<Pulse> inpPulse;
+            //string inputfile = @"C:\Users\RohitChaoji\source\repos\crazysystemics\POI\RWR_POC\RWR_POC\testfile.txt";
+            //PulseInputParser pInp = new(inputfile);
+            //inpPulse = pInp.ParseText();
 
-            foreach (Pulse inp in inpPulse )
+            //foreach (Pulse inp in inpPulse )
+            //{
+            //    Console.WriteLine($"Pulse {inp.symbol}:\n");
+            //    Console.WriteLine($"Pulse Width = {inp.pulseWidth}");
+            //    Console.WriteLine($"Amplitude = {inp.amplitude}");
+            //    Console.WriteLine($"Frequency = {inp.frequency}");
+            //    Console.WriteLine($"Time of Arrival = Current Tick + (PRI * {inp.timeOfTraversal})\n");
+            //}
+
+            PulseGenerator pg = new PulseGenerator(5, 20, 10, 200, 500);
+            List<PDWs> pulses = new List<PDWs>();
+            pulses = pg.GeneratePulseTrain();
+            foreach (PDWs p in pulses)
             {
-                Console.WriteLine($"Pulse {inp.symbol}:\n");
-                Console.WriteLine($"Pulse Width = {inp.pulseWidth}");
-                Console.WriteLine($"Amplitude = {inp.amplitude}");
-                Console.WriteLine($"Frequency = {inp.frequency}\n");
+                Console.WriteLine(p.timeOfArrival);
             }
         }
     }

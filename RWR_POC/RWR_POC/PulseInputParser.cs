@@ -8,7 +8,7 @@ public class PulseInputParser
     public string[] inputPulses;
     public string? parsedLine;
     public Pulse received;
-    public List<Pulse> receivedPulses = new List<Pulse>();
+    public List<Pulse> receivedPulses = new();
     public string[] pulseCharacteristics;
     public int linesInFile;
 
@@ -52,14 +52,22 @@ public class PulseInputParser
                 this.pulseCharacteristics[j] = inputPulses[i][(8 * j)..(8 * (j + 1))];
             }
 
+            // pulseCharacteristics[0] contains time of arrival information.
             // pulseCharacteristics[1] contains amplitude information.
             // pulseCharacteristics[2] contains frequency information.
             // pulseCharacteristics[3] contains pulse width information.
-            // Which leading bits represent which information might be different based on the generated pulse data.
 
-            this.received = new Pulse(Convert.ToInt32(this.pulseCharacteristics[3], 2), Convert.ToInt32(this.pulseCharacteristics[1], 2), Convert.ToInt32(this.pulseCharacteristics[2], 2), 0, 0, i.ToString());
+            // Every packet should have a time stamp
+            // Which leading bits represent which information might be different based on the generated pulse data.
+            int toa = Convert.ToInt32(this.pulseCharacteristics[0], 2);
+            int amp = Convert.ToInt32(this.pulseCharacteristics[1], 2);
+            int freq = Convert.ToInt32(this.pulseCharacteristics[2], 2);
+            int pwidth = Convert.ToInt32(this.pulseCharacteristics[3], 2);
+            this.received = new Pulse(pwidth, amp, freq, toa, 0, i.ToString());
             this.receivedPulses.Add(received);
+
         }
+
 
         // PRI = number of pulses received by RWR in duration of a tick.
         // If each pulse is a 32-bit packet, with leading bits encoding the Pulse Width, Amplitude and Frequency, then:
