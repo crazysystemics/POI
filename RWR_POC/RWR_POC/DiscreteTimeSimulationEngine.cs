@@ -318,7 +318,7 @@
                                 pulses = ((Radar)transmitter).radarPulseGenerator.GeneratePulseTrain(((Radar)transmitter).pulseSymbol);
                                 foreach (Pulse pulse in pulses)
                                 {
-                                    pulsesfromTrain.Add(new Pulse(pulse.pulseWidth, pulse.amplitude, pulse.frequency, pulse.timeOfTraversal, 0, pulse.symbol));
+                                    pulsesfromTrain.Add(new Pulse(pulse.pulseWidth, pulse.amplitude, pulse.frequency, (pulse.timeOfTraversal + dist), 0, pulse.symbol));
                                 }
                                 //globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).activePulse;
                                 //if (!((RWR)receiver).receivedPulses.Contains(globalSituationalMatrix[receiver.id, transmitter.id]))

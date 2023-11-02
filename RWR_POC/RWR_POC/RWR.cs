@@ -86,7 +86,7 @@
         {
             if (e.amplitude > 0)
             {
-                Console.WriteLine($"RWR {id}\t\tPulse Symbol: {e.symbol}\n\t\tAmplitude: {e.amplitude} dB\n\t\tPulse Width: {e.pulseWidth} ns\n\t\tFrequency: {e.frequency} MHz\n\t\tTime of Arrival: {e.timeOfTraversal} + (dist / c) ns\n");
+                Console.WriteLine($"RWR {id}\t\tPulse Symbol: {e.symbol}\n\t\tAmplitude: {e.amplitude} dB\n\t\tPulse Width: {e.pulseWidth} ns\n\t\tFrequency: {e.frequency} MHz\n\t\tTime of Arrival: {e.timeOfTraversal} ns\n");
                 // print all characteristics
             }
         }
