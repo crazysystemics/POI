@@ -138,8 +138,8 @@
         //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1Freq), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
         //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2Freq), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
 
-        Radar r = new(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(0, 15), 20, "E1", Globals.Tick, 10, 1);
-        Radar r2 = new(new Pulse(8, 10, 1000, 5, 45, "E2"), new Position(15, 10), 20, "E2", Globals.Tick, 10, 2);
+        Radar r = new(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(0, 15), 30, "E1", Globals.Tick, 10, 1);
+        Radar r2 = new(new Pulse(10, 10, 1000, 5, 45, "E2"), new Position(15, 10), 20, "E2", Globals.Tick, 10, 2);
 
         // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
         // Minimum unambiguous range for a radar is c * PRI / 2 where c is the speed of light

@@ -77,7 +77,7 @@
         {
             if (e.amplitude > 0)
             {
-                Console.WriteLine($"RWR {id}\t\tPulse Symbol: {e.symbol}\n\t\tAmplitude: {e.amplitude}\n\t\tPulse Width: {e.pulseWidth}\n\t\tFrequency: {e.frequency}\n");
+                Console.WriteLine($"RWR {id}\t\tPulse Symbol: {e.symbol}\n\t\tAmplitude: {e.amplitude} dB\n\t\tPulse Width: {e.pulseWidth} ns\n\t\tFrequency: {e.frequency} MHz\n");
                 // print all characteristics
             }
         }
