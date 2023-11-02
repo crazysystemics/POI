@@ -10,6 +10,8 @@
     public int rxTick = Globals.Tick;
     public RWR.Emitter detectedRadar = new();
     public Pulse[,] globalSituationalMatrix;
+    List<Pulse> pulsesfromTrain = new List<Pulse>();
+    // Instead of Pulses in each entry, it should be array of pulses
     public int transmitterCount;
     //List<Pulse> txPulses = new List<Pulse>();
 
@@ -107,14 +109,20 @@
 
         //Aircraft a = new Aircraft(new Position(Int32.Parse(aircraftPosX), Int32.Parse(aircraftPosY)), 0);
 
+        //List<Position> waypts = new()
+        //{
+        //    new Position(5, 5),
+        //    new Position(10, 10),
+        //    new Position(15, 10),
+        //    new Position(20, 5),
+        //    new Position(15, 0),
+        //    new Position(10, 0),
+        //    new Position(5, 5)
+        //};
+
         List<Position> waypts = new()
         {
             new Position(5, 5),
-            new Position(10, 10),
-            new Position(15, 10),
-            new Position(20, 5),
-            new Position(15, 0),
-            new Position(10, 0),
             new Position(5, 5)
         };
 
@@ -138,7 +146,7 @@
         //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1Freq), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
         //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2Freq), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
 
-        Radar r = new(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(0, 15), 20, "E1", Globals.Tick, 10, 1);
+        Radar r = new(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(0, 10), 20, "E1", Globals.Tick, 10, 1);
         Radar r2 = new(new Pulse(8, 10, 1000, 5, 45, "E2"), new Position(15, 10), 20, "E2", Globals.Tick, 10, 2);
 
         // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
@@ -150,10 +158,10 @@
 
         simMod.Add(a);
         simMod.Add(a.rwr);
-        simMod.Add(a2);
-        simMod.Add(a2.rwr);
+        //simMod.Add(a2);
+        //simMod.Add(a2.rwr);
         simMod.Add(r);
-        simMod.Add(r2);
+        //simMod.Add(r2);
         //simMod.Add(r3);
         simMod.Add(pse);
 
@@ -232,22 +240,32 @@
             if (receiver is RWR)
             {
                 receiverInParams.Clear();
-                for (int j = 0; j < simMod.Count; j++)
-                {
-                    //if (globalSituationalMatrix[receiver.id, j] is Radar)
-                    {
-                        // Condition not needed but some validation is required
-                        // TODO: It should be possible to selective pick up the sources
+                //for (int j = 0; j < simMod.Count; j++)
+                //{
+                //    //if (globalSituationalMatrix[receiver.id, j] is Radar)
+                //    {
+                //        // Condition not needed but some validation is required
+                //        // TODO: It should be possible to selective pick up the sources
 
-                        //int dist = pse.GetDistance(receiver.position, ((Radar)simMod[j]).position);
-                        //int radius = ((Radar)simMod[j]).radius;
-                        if (globalSituationalMatrix[receiver.id, j] != null)
-                        {
-                            RWR.In globalSituation = new(globalSituationalMatrix[receiver.id, j], receiver.id);
-                            receiverInParams.Add(globalSituation);
-                        }
+                //        //int dist = pse.GetDistance(receiver.position, ((Radar)simMod[j]).position);
+                //        //int radius = ((Radar)simMod[j]).radius;
+                //        if (globalSituationalMatrix[receiver.id, j] != null)
+                //        {
+                //            RWR.In globalSituation = new(globalSituationalMatrix[receiver.id, j], receiver.id);
+                //            receiverInParams.Add(globalSituation);
+                //        }
+                //    }
+                //}
+
+                foreach (Pulse inpPulse in pulsesfromTrain)
+                {
+                    if (inpPulse != null)
+                    {
+                        RWR.In globalSituation = new RWR.In(inpPulse, 2);
+                        receiverInParams.Add(globalSituation);
                     }
                 }
+
                 ((RWR)receiver).Set(receiverInParams);
 
             }
@@ -296,18 +314,18 @@
                                 Globals.debugPrint = true;
                                 Console.WriteLine($"{transmitter} {transmitter.id} is visible to {receiver}{receiver.id}\n");
                                 ((RWR)receiver).hasReceivedPulse = true;
-                                //List<Pulse> pulsesfromTrain = new List<Pulse>();
-                                //PulseGenerator pg = new PulseGenerator(5, 20, 10, 200, 125);
-                                //List<PDWs> pulses = new List<PDWs>();
-                                //pulses = pg.GeneratePulseTrain();
-                                //foreach (PDWs pulse in pulses)
-                                //{
-                                //    pulsesfromTrain.Add(new Pulse(pulse.pulseWidth, pulse.amplitude, pulse.frequency, pulse.timeOfArrival, 0, "X"));
-                                //}
-                                globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).activePulse;
-                                if (!((RWR)receiver).receivedPulses.Contains(globalSituationalMatrix[receiver.id, transmitter.id]))
+
+                                PulseGenerator pg = new PulseGenerator(5, 20, 10, 200, 250);
+                                List<Pulse> pulses = new List<Pulse>();
+                                pulses = pg.GeneratePulseTrain();
+                                foreach (Pulse pulse in pulses)
                                 {
-                                    ((RWR)receiver).receivedPulses.Add(globalSituationalMatrix[receiver.id, transmitter.id]);
+                                    pulsesfromTrain.Add(new Pulse(pulse.pulseWidth, pulse.amplitude, pulse.frequency, pulse.timeOfTraversal, 0, "X"));
+                                }
+                                //globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).activePulse;
+                                //if (!((RWR)receiver).receivedPulses.Contains(globalSituationalMatrix[receiver.id, transmitter.id]))
+                                {
+                                    ((RWR)receiver).receivedPulses = pulsesfromTrain;
                                 }
                             }
                             else

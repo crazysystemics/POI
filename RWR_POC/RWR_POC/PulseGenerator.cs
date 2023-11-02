@@ -29,3 +29,8 @@
         return PDW;
     }
 }
+
+// This will be in Radar Class
+// Send array of 4 values from GeneratePulseTrain
+
+// Should we calculate LSB from min and max values

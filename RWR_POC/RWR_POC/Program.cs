@@ -7,17 +7,17 @@ namespace RWRPOC
         static void Main(string[] args)
         {
 
-            //DiscreteTimeSimulationEngine DTSE = new();
-            //DTSE.Init();
+            DiscreteTimeSimulationEngine DTSE = new();
+            DTSE.Init();
 
-            //while (true)
-            //{
-            //    DTSE.RunSimulationEngine();
-            //    {
-            //        Console.WriteLine("\n----------------\n\nPress Enter/Return to display next tick");
-            //        Console.ReadLine();
-            //    }
-            //}
+            while (true)
+            {
+                DTSE.RunSimulationEngine();
+                {
+                    Console.WriteLine("\n----------------\n\nPress Enter/Return to display next tick");
+                    Console.ReadLine();
+                }
+            }
 
             //List<Pulse> inpPulse;
             //string inputfile = @"C:\Users\RohitChaoji\source\repos\crazysystemics\POI\RWR_POC\RWR_POC\testfile.txt";
@@ -33,20 +33,20 @@ namespace RWRPOC
             //    Console.WriteLine($"Time of Arrival = Current Tick + (PRI * {inp.timeOfTraversal})\n");
             //}
 
-            PulseGenerator pg = new PulseGenerator(5, 20, 10, 200, 125);
-            List<Pulse> pulses = new List<Pulse>();
-            pulses = pg.GeneratePulseTrain();
-            int counter = 1;
-            Console.WriteLine($"PRI for emitter = {pg.PRI}");
-            foreach (Pulse p in pulses)
-            {
-                Console.WriteLine($"\nPulse {counter}:\n");
-                Console.WriteLine($"Width = {p.pulseWidth} ns");
-                Console.WriteLine($"Amplitude = {p.amplitude} dB");
-                Console.WriteLine($"Frequency = {p.frequency} MHz");
-                Console.WriteLine($"Time of Arrival = {p.timeOfTraversal} ns\n----------------");
-                counter++;
-            }
+            //PulseGenerator pg = new PulseGenerator(5, 20, 10, 200, 125);
+            //List<Pulse> pulses = new List<Pulse>();
+            //pulses = pg.GeneratePulseTrain();
+            //int counter = 1;
+            //Console.WriteLine($"PRI for emitter = {pg.PRI}");
+            //foreach (Pulse p in pulses)
+            //{
+            //    Console.WriteLine($"\nPulse {counter}:\n");
+            //    Console.WriteLine($"Width = {p.pulseWidth} ns");
+            //    Console.WriteLine($"Amplitude = {p.amplitude} dB");
+            //    Console.WriteLine($"Frequency = {p.frequency} MHz");
+            //    Console.WriteLine($"Time of Arrival = {p.timeOfTraversal} ns\n----------------");
+            //    counter++;
+            //}
         }
     }
 }
