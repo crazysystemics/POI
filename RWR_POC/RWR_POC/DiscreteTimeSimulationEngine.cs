@@ -146,8 +146,8 @@
         //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1Freq), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
         //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2Freq), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
 
-        Radar r = new(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(0, 10), 20, "E1", Globals.Tick, 10, 1);
-        Radar r2 = new(new Pulse(8, 10, 1000, 5, 45, "E2"), new Position(15, 10), 20, "E2", Globals.Tick, 10, 2);
+        Radar r = new(new Pulse(5, 15, 500, 5, 45, "E1"), new Position(0, 10), 10, "E1", Globals.Tick, 10, 1);
+        Radar r2 = new(new Pulse(5, 20, 1000, 5, 45, "E2"), new Position(5, 10), 20, "E2", Globals.Tick, 10, 2);
 
         // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
         // Minimum unambiguous range for a radar is c * PRI / 2 where c is the speed of light
@@ -161,7 +161,7 @@
         //simMod.Add(a2);
         //simMod.Add(a2.rwr);
         simMod.Add(r);
-        //simMod.Add(r2);
+        simMod.Add(r2);
         //simMod.Add(r3);
         simMod.Add(pse);
 
@@ -315,10 +315,10 @@
                                 Console.WriteLine($"{transmitter} {transmitter.id} is visible to {receiver}{receiver.id}\n");
                                 ((RWR)receiver).hasReceivedPulse = true;
                                 List<Pulse> pulses = new List<Pulse>();
-                                pulses = ((Radar)transmitter).radarPulseGenerator.GeneratePulseTrain();
+                                pulses = ((Radar)transmitter).radarPulseGenerator.GeneratePulseTrain(((Radar)transmitter).pulseSymbol);
                                 foreach (Pulse pulse in pulses)
                                 {
-                                    pulsesfromTrain.Add(new Pulse(pulse.pulseWidth, pulse.amplitude, pulse.frequency, pulse.timeOfTraversal, 0, "X"));
+                                    pulsesfromTrain.Add(new Pulse(pulse.pulseWidth, pulse.amplitude, pulse.frequency, pulse.timeOfTraversal, 0, pulse.symbol));
                                 }
                                 //globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).activePulse;
                                 //if (!((RWR)receiver).receivedPulses.Contains(globalSituationalMatrix[receiver.id, transmitter.id]))

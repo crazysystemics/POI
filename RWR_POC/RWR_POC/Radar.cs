@@ -36,14 +36,14 @@ class Radar : BattleSystem
             this.dwellTime = dwellTime;
         }
 
-        public List<Pulse> GeneratePulseTrain()
+        public List<Pulse> GeneratePulseTrain(string symbol)
         {
             int timeOfTransmission = 0;
             int numberOfPulses = (int)(this.dwellTime / (this.PRI + this.pulseWidth));
 
             for (int i = 0; i < numberOfPulses; i++)
             {
-                PDW.Add(new Pulse(this.pulseWidth, this.amplitude, this.frequency, timeOfTransmission, 0, "X"));
+                PDW.Add(new Pulse(this.pulseWidth, this.amplitude, this.frequency, timeOfTransmission, 0, symbol));
                 timeOfTransmission += this.pulseWidth + this.PRI;
             }
             return PDW;
