@@ -109,5 +109,6 @@
                 RxBuf.Add(((In)inParameter).p);
             }
         }
+        RxBuf = RxBuf.OrderBy(x => x.timeOfTraversal).ToList();
     }
 }
