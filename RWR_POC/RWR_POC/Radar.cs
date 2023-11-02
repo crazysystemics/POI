@@ -2,8 +2,8 @@ class Radar : BattleSystem
 {
 
     public override bool Stopped { get; set; }
-    public Pulse txPulse;
-    public Pulse activePulse;
+    public List<Pulse> txPulses;
+    public List<Pulse> activePulses;
     public Pulse zeroPulse = new Pulse(0, 0, 0, 0, 0, "zero");
     public Pulse echoPulse;
     public int pulseRepetitionInterval;
@@ -15,7 +15,40 @@ class Radar : BattleSystem
     public string pulseSymbol;
     public List<int> txTicks = new List<int>();
     public int pulsesSent = 0;
+    public PulseGenerator radarPulseGenerator;
     //public bool hasPulseReachedTarget = false;
+
+    public class PulseGenerator
+    {
+        public int pulseWidth;
+        public int PRI;
+        public int amplitude;
+        public int frequency;
+        public int dwellTime;
+        public List<Pulse> PDW = new List<Pulse>();
+
+        public PulseGenerator(int pulseWidth, int pRI, int amplitude, int frequency, int dwellTime)
+        {
+            this.pulseWidth = pulseWidth;
+            this.PRI = pRI;
+            this.amplitude = amplitude;
+            this.frequency = frequency;
+            this.dwellTime = dwellTime;
+        }
+
+        public List<Pulse> GeneratePulseTrain()
+        {
+            int timeOfTransmission = 0;
+            int numberOfPulses = (int)(this.dwellTime / (this.PRI + this.pulseWidth));
+
+            for (int i = 0; i < numberOfPulses; i++)
+            {
+                PDW.Add(new Pulse(this.pulseWidth, this.amplitude, this.frequency, timeOfTransmission, 0, "X"));
+                timeOfTransmission += this.pulseWidth + this.PRI;
+            }
+            return PDW;
+        }
+    }
 
     public class Out : OutParameter
     {
@@ -41,23 +74,19 @@ class Radar : BattleSystem
 
     public override OutParameter Get()
     {
-        if (txPulse.amplitude > 0)
-        {
-            //Globals.debugPrint = true;
-        }
-        Out radarOutput = new Out(txPulse, position, txTick, 1);
+        Out radarOutput = new Out(zeroPulse, position, txTick, 1);
         return radarOutput;
     }
 
     public override void OnTick()
     {
-        if (Globals.Tick == 0)
-        {
-            Console.WriteLine($"Pulse emitted by {this} {id}\n");
-            Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
-    $"\n\t\tTime of transmission: {txPulse.timeOfTraversal}\n\t\tAngle of transmission: {txPulse.angleOfTraversal}\n\t\tSymbol: {txPulse.symbol}" +
-    $"\n\t\tAmplitude: {txPulse.amplitude}\n\t\ttxTick = {txTick}\n");
-        }
+    //    if (Globals.Tick == 0)
+    //    {
+    //        Console.WriteLine($"Pulse emitted by {this} {id}\n");
+    //        Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulses.pulseWidth}\n\t\tPRI: {pulseRepetitionInterval}" +
+    //$"\n\t\tTime of transmission: {txPulses.timeOfTraversal}\n\t\tAngle of transmission: {txPulses.angleOfTraversal}\n\t\tSymbol: {txPulses.symbol}" +
+    //$"\n\t\tAmplitude: {txPulses.amplitude}\n\t\ttxTick = {txTick}\n");
+    //    }
     }
 
     public override void Set(List<InParameter> inParameters)
@@ -77,9 +106,11 @@ class Radar : BattleSystem
 
     public Radar(Pulse initPulse, Position position, int pulseRepetitionInterval, string pulseSymbol, int txTick, int radius, int id)
     {
-        this.txPulse = initPulse;
-        this.activePulse = initPulse;
-        this.echoPulse = activePulse;
+        this.radarPulseGenerator = new PulseGenerator(initPulse.pulseWidth, pulseRepetitionInterval, initPulse.amplitude, initPulse.frequency, 250);
+        //List<Pulse> radarPulses = radarPulseGenerator.GeneratePulseTrain();
+        //this.txPulses = radarPulses;
+        //this.activePulses = radarPulses;
+        this.echoPulse = zeroPulse;
         this.pulseSymbol = pulseSymbol;
         this.position = position;
         this.id = id;

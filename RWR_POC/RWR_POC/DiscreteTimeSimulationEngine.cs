@@ -314,9 +314,8 @@
                                 Globals.debugPrint = true;
                                 Console.WriteLine($"{transmitter} {transmitter.id} is visible to {receiver}{receiver.id}\n");
                                 ((RWR)receiver).hasReceivedPulse = true;
-                                PulseGenerator pg = new PulseGenerator(5, 20, 10, 200, 250);
                                 List<Pulse> pulses = new List<Pulse>();
-                                pulses = pg.GeneratePulseTrain();
+                                pulses = ((Radar)transmitter).radarPulseGenerator.GeneratePulseTrain();
                                 foreach (Pulse pulse in pulses)
                                 {
                                     pulsesfromTrain.Add(new Pulse(pulse.pulseWidth, pulse.amplitude, pulse.frequency, pulse.timeOfTraversal, 0, "X"));
