@@ -6,6 +6,7 @@
     public static bool debugPrint = true;
     public static bool distDebugPrint = true;
     public static bool aircraftDebugPrint = true;
+    public static Random randomNumberGenerator = new Random();
 
     public static void DebugWriteLine(string s)
     {

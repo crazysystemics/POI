@@ -15,6 +15,8 @@ class Radar : BattleSystem
     public string pulseSymbol;
     public List<int> txTicks = new List<int>();
     public int pulsesSent = 0;
+    public int effectiveRadiatedPower;
+    public int aperture;
     //public bool hasPulseReachedTarget = false;
 
     public class Out : OutParameter
@@ -75,7 +77,7 @@ class Radar : BattleSystem
     }
 
 
-    public Radar(Pulse initPulse, Position position, int pulseRepetitionInterval, string pulseSymbol, int txTick, int radius, int id)
+    public Radar(Pulse initPulse, Position position, int pulseRepetitionInterval, string pulseSymbol, int txTick, int radius, int effectiveRadiatedPower, int id)
     {
         this.txPulse = initPulse;
         this.activePulse = initPulse;
@@ -86,6 +88,7 @@ class Radar : BattleSystem
         this.radius = radius;
         this.txTick = txTick;
         this.pulseRepetitionInterval = pulseRepetitionInterval;
+        this.effectiveRadiatedPower = effectiveRadiatedPower;
         this.txTicks.Add(Globals.Tick);
     }
 }

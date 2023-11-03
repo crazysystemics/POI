@@ -5,6 +5,10 @@
     public bool hasReceivedPulse = false;
     public int rxTick;
     public int receivedPulseCount = 0;
+    public int sensitivity;
+    public int toaResolution;
+    public int aperture;
+    public int receivedPower;
     public List<Pulse> receivedPulses = new();
 
     public RWR(ref Position positon, int id)
@@ -77,7 +81,7 @@
         {
             if (e.amplitude > 0)
             {
-                Console.WriteLine($"RWR {id}\t\tPulse Symbol: {e.symbol}\n\t\tAmplitude: {e.amplitude} dB\n\t\tPulse Width: {e.pulseWidth} ns\n\t\tFrequency: {e.frequency} MHz\n");
+                Console.WriteLine($"RWR {id}\t\tPulse Symbol: {e.symbol}\n\t\tAmplitude: {e.amplitude} dB\n\t\tPulse Width: {e.pulseWidth} ns\n\t\tFrequency: {e.frequency} MHz\n\t\tReceived Power: {receivedPower}\n");
                 // print all characteristics
             }
         }

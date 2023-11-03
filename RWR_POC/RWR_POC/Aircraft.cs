@@ -72,7 +72,7 @@ class Aircraft : BattleSystem
         //int[] distToNextWaypoint = computeDistance(currentWaypoint, nextWaypoint);
 
         Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
-        Console.WriteLine($"nextWaypoint = {nextWaypoint.x}, {nextWaypoint.y}");
+        //Console.WriteLine($"nextWaypoint = {nextWaypoint.x}, {nextWaypoint.y}");
         //Console.WriteLine($"distance to next waypoint = {distToNextWaypoint[0]}, {distToNextWaypoint[1]}");
 
         MoveAircraft();
