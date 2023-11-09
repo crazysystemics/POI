@@ -220,27 +220,3 @@
 
     }
 }
-//if (transmitter is RWR)
-//{
-//    if (receiver is Radar)
-//    {
-//        int dist = pse.GetDistance(receiver.id, transmitter.id);
-//        int radius = ((Radar)receiver).radius;
-//        //if (((Radar)receiver).txTicks.Count != 0)
-//        {
-//            if (dist <= radius && Globals.Tick != 0)
-//            {
-
-//                Console.WriteLine($"\nEcho received by Radar {receiver.id}\n");
-
-//                Console.WriteLine($"Radar {((Radar)receiver).id}:\n\techoPulse:\n\t\tPulse width: {((Radar)receiver).echoPulse.pulseWidth}\n\t\tPRI: {((Radar)receiver).pulseRepetitionInterval}" +
-//                                  $"\n\t\tTime of arrival: {((Radar)receiver).echoTimeOfArrival}\n\t\tAngle of arrival: {((Radar)receiver).echoPulse.angleOfTraversal}\n\t\tSymbol: {((Radar)receiver).echoPulse.symbol}" +
-//                                  $"\n\t\tAmplitude: {((Radar)receiver).echoPulse.amplitude}\n\t\ttxTick = {((Radar)receiver).txTick}\n");
-
-//                ((Radar)receiver).hasReceivedEcho = true;
-//                globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)receiver).activePulse;
-//                echoPulseSet = true;
-//            }
-//        }
-//    }
-//}
