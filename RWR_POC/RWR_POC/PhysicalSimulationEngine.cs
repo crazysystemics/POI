@@ -10,19 +10,19 @@
 
     public static int GetDistance(Position p1, Position p2)
     {
-        //if (!physicalObjects.ContainsKey(objID1) || !physicalObjects.ContainsKey(objID2)) return 0;
-        //Position p1 = physicalObjects[objID1];
-        //Position p2 = physicalObjects[objID2];
         int distance_x = p1.x - p2.x;
         int distance_y = p1.y - p2.y;
         int distance = (int)Math.Sqrt((distance_x * distance_x) + (distance_y * distance_y));
         return distance;
     }
 
-    //public Pulse Get()
-    //{
-
-    //}
+    public static double GetAngle(Position p1, Position p2)
+    {
+        int distance_x = p1.x - p2.x;
+        int distance_y = p1.y - p2.y;
+        double angle = Math.Atan2(distance_y, distance_x);
+        return angle;
+    }
 
     public class PhysicalSimulationOut : OutParameter
     {

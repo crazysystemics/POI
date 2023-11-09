@@ -4,20 +4,12 @@ class Radar : BattleSystem
     public override bool Stopped { get; set; }
     public Pulse txPulse;
     public Pulse activePulse;
-    public Pulse zeroPulse = new Pulse(0, 0, 0, 0, 0, "zero");
-    public Pulse echoPulse;
+    public Pulse zeroPulse = new Pulse(0, 0, 0, 0, 0);
     public int pulseRepetitionInterval;
-    //public int targetX;
-    //public int targetY;
     public int radius;
     public int txTick;
-    public bool hasReceivedEcho = false;
-    public string pulseSymbol;
-    public List<int> txTicks = new List<int>();
-    public int pulsesSent = 0;
     public int effectiveRadiatedPower;
     public int aperture;
-    //public bool hasPulseReachedTarget = false;
 
     public class Out : OutParameter
     {
@@ -53,42 +45,54 @@ class Radar : BattleSystem
 
     public override void OnTick()
     {
-        if (Globals.Tick == 0)
-        {
-            Console.WriteLine($"Pulse emitted by {this} {id}\n");
-            Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth} ns\n\t\tPRI: {pulseRepetitionInterval} ns" +
-    $"\n\t\tTime of transmission: {txPulse.timeOfTraversal} ns\n\t\tAngle of transmission: {txPulse.angleOfTraversal} rad\n\t\tSymbol: {txPulse.symbol}" +
-    $"\n\t\tAmplitude: {txPulse.amplitude} dB\n\t\ttxTick = {txTick}\n");
-        }
+    //    if (Globals.Tick == 0)
+    //    {
+    //        Console.WriteLine($"Pulse emitted by {this} {id}\n");
+    //        Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth} ns\n\t\tPRI: {pulseRepetitionInterval} ns" +
+    //$"\n\t\tTime of transmission: {txPulse.timeOfTraversal} ns\n\t\tAngle of transmission: {txPulse.angleOfTraversal} rad\n\t\tSymbol: {txPulse.symbol}" +
+    //$"\n\t\tAmplitude: {txPulse.amplitude} dB\n\t\ttxTick = {txTick}\n");
+    //    }
     }
 
     public override void Set(List<InParameter> inParameters)
     {
         foreach (InParameter inParam in inParameters)
         {
-            if (((In)inParam).echoPulse != null)
-            {
-                if (((In)inParam).echoPulse.symbol == this.pulseSymbol)
-                {
-                    this.echoPulse = ((In)(inParam)).echoPulse;
-                }
-            }
+            //if (((In)inParam).echoPulse != null)
+            //{
+            //    if (((In)inParam).echoPulse.symbol == this.pulseSymbol)
+            //    {
+            //        this.echoPulse = ((In)(inParam)).echoPulse;
+            //    }
+            //}
         }
     }
 
+    public List<Pulse> GeneratePulseTrain(int dwellTime, int startTime, double angle)
+    {
+        List<Pulse> pulseTrain = new List<Pulse>();
+        int totalPulses;
+        int currentTime = startTime;
+        int PRI = this.pulseRepetitionInterval;
+        totalPulses = (int)(dwellTime / PRI);
+        for (int i = 0; i < totalPulses; i++)
+        {
+            pulseTrain.Add(new Pulse(this.txPulse.pulseWidth, this.txPulse.amplitude, this.txPulse.frequency, currentTime, angle));
+            currentTime += PRI;
+        }
+        return pulseTrain;
+    }
 
-    public Radar(Pulse initPulse, Position position, int pulseRepetitionInterval, string pulseSymbol, int txTick, int radius, int effectiveRadiatedPower, int id)
+
+    public Radar(Pulse initPulse, Position position, int pulseRepetitionInterval, int txTick, int radius, int effectiveRadiatedPower, int id)
     {
         this.txPulse = initPulse;
         this.activePulse = initPulse;
-        this.echoPulse = activePulse;
-        this.pulseSymbol = pulseSymbol;
         this.position = position;
         this.id = id;
         this.radius = radius;
         this.txTick = txTick;
         this.pulseRepetitionInterval = pulseRepetitionInterval;
         this.effectiveRadiatedPower = effectiveRadiatedPower;
-        this.txTicks.Add(Globals.Tick);
     }
 }
