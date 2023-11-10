@@ -41,35 +41,84 @@
             new Position(85, 85)
         };
 
+        string currentTime = DateTime.Now.ToString();
+        currentTime = currentTime.Replace(":", "-");
+        currentTime = currentTime.Replace(" ", "-");
+        currentTime = currentTime.Remove(16);
+
+        Globals.recFileName = $"erOutputFile{currentTime}.csv";
 
         PFM.emitterIDTable.Add(new EmitterID(1, "E1", 30, 70, 20, 2000, 3000, 200, 100, 200, 50));
         PFM.emitterIDTable.Add(new EmitterID(2, "E2", 60, 100, 20, 1000, 2500, 500, 50, 150, 25));
 
+        JSONReader.AircraftJSON aircraftJSON = new JSONReader.AircraftJSON();
+        JSONReader.AircraftListJSON aircraftListJSON = new JSONReader.AircraftListJSON();
+        JSONReader.RadarListJSON radarListJSON = new JSONReader.RadarListJSON();
+        JSONReader jsonReader = new JSONReader();
 
-        Aircraft a = new(waypts, 0);
-        Aircraft a2 = new(waypts2, 1);
+        aircraftListJSON = jsonReader.ParseAircraftList("aircraft_inputs.json");
+        radarListJSON = jsonReader.ParseRadarList("radar_inputs.json");
+
+        List<Radar> radarList = new List<Radar>();
+        List<Aircraft> aircraftList = new List<Aircraft>();
+
+        for (int i = 0; i < aircraftListJSON.aircraftJSONs.Count; i++)
+        {
+            aircraftList.Add(new Aircraft(aircraftListJSON.aircraftJSONs[i].waypoints, aircraftListJSON.aircraftJSONs[i].id));
+        }
+
+        for (int i = 0; i < radarListJSON.radarJSONs.Count; i++)
+        {
+            radarList.Add(new Radar(new Pulse(radarListJSON.radarJSONs[i].initPulse.pulseWidth,
+                                              radarListJSON.radarJSONs[i].initPulse.amplitude,
+                                              radarListJSON.radarJSONs[i].initPulse.frequency,
+                                              radarListJSON.radarJSONs[i].initPulse.timeOfTraversal,
+                                              (int)radarListJSON.radarJSONs[i].initPulse.angleOfTraversal),
+                                    radarListJSON.radarJSONs[i].position,
+                                    radarListJSON.radarJSONs[i].pulseRepetitionInterval,
+                                    radarListJSON.radarJSONs[i].txTick,
+                                    radarListJSON.radarJSONs[i].radius,
+                                    radarListJSON.radarJSONs[i].id));
+        }
+
+        foreach (Aircraft air in aircraftList)
+        {
+            air.rwr = new RWR(ref air.position, (air.id + 10));
+            simMod.Add(air);
+            simMod.Add(air.rwr);
+        }
+
+        foreach (Radar radar in radarList)
+        {
+            simMod.Add(radar);
+        }
+
+        //Aircraft a = new(aircraftJSON.waypoints, aircraftJSON.id);
+
+        //Aircraft a = new(waypts, 0);
+        //Aircraft a2 = new(waypts2, 1);
 
         //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1Freq), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
         //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2Freq), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
 
-        Radar r = new(new Pulse(150, 15, 2500, 5, 0), new Position(110, 100), 50, Globals.Tick, 15, 75, 4);
-        Radar r2 = new(new Pulse(100, 10, 1000, 5, 0), new Position(185, 50), 80, Globals.Tick, 20, 150, 5);
-        Radar r3 = new(new Pulse(200, 15, 3000, 5, 0), new Position(110, 0), 70, Globals.Tick, 15, 270, 6);
-        Radar r4 = new(new Pulse(350, 20, 5000, 5, 0), new Position(110, 50), 30, Globals.Tick, 20, 200, 7);
+        //Radar r = new(new Pulse(150, 15, 2500, 5, 0), new Position(110, 100), 50, Globals.Tick, 15, 4);
+        //Radar r2 = new(new Pulse(100, 10, 1000, 5, 0), new Position(185, 50), 80, Globals.Tick, 20, 5);
+        //Radar r3 = new(new Pulse(200, 15, 3000, 5, 0), new Position(110, 0), 70, Globals.Tick, 15, 6);
+        //Radar r4 = new(new Pulse(350, 20, 5000, 5, 0), new Position(110, 50), 30, Globals.Tick, 20, 7);
 
         // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
         // Minimum unambiguous range for a radar is c * PRI / 2 where c is the speed of light
 
-        a.rwr = new RWR(ref a.position, 2);
-        a2.rwr = new RWR(ref a2.position, 3);
+        //a.rwr = new RWR(ref a.position, 2);
+        //a2.rwr = new RWR(ref a2.position, 3);
         // be careful with ref operator
 
-        simMod.Add(a);
-        simMod.Add(a.rwr);
+        //simMod.Add(a);
+        //simMod.Add(a.rwr);
         //simMod.Add(a2);
         //simMod.Add(a2.rwr);
-        simMod.Add(r);
-        simMod.Add(r2);
+        //simMod.Add(r);
+        //simMod.Add(r2);
         //simMod.Add(r3);
         //simMod.Add(r4);
         simMod.Add(pse);

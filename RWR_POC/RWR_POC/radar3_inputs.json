@@ -1,1 +1,0 @@
-{"id": 6, "initPulse": {"pulseWidth": 200, "amplitude": 15, "frequency": 3000, "timeOfTraversal": 5, "angleOfTraversal": 45, "symbol": "E3"}, "position": [110, 0], "pulseRepetitionInterval": 10000, "pulseSymbol": "E3", "txTick": 0, "radius": 15, "effectiveRadiatedPower": 270}

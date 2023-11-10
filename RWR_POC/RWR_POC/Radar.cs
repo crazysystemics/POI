@@ -3,13 +3,9 @@ class Radar : BattleSystem
 
     public override bool Stopped { get; set; }
     public Pulse txPulse;
-    public Pulse activePulse;
-    public Pulse zeroPulse = new Pulse(0, 0, 0, 0, 0);
     public int pulseRepetitionInterval;
     public int radius;
     public int txTick;
-    public int effectiveRadiatedPower;
-    public int aperture;
 
     public class Out : OutParameter
     {
@@ -84,15 +80,13 @@ class Radar : BattleSystem
     }
 
 
-    public Radar(Pulse initPulse, Position position, int pulseRepetitionInterval, int txTick, int radius, int effectiveRadiatedPower, int id)
+    public Radar(Pulse initPulse, Position position, int pulseRepetitionInterval, int txTick, int radius, int id)
     {
         this.txPulse = initPulse;
-        this.activePulse = initPulse;
         this.position = position;
         this.id = id;
         this.radius = radius;
         this.txTick = txTick;
         this.pulseRepetitionInterval = pulseRepetitionInterval;
-        this.effectiveRadiatedPower = effectiveRadiatedPower;
     }
 }
