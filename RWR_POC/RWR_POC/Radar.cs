@@ -41,13 +41,7 @@ class Radar : BattleSystem
 
     public override void OnTick()
     {
-    //    if (Globals.Tick == 0)
-    //    {
-    //        Console.WriteLine($"Pulse emitted by {this} {id}\n");
-    //        Console.WriteLine($"Radar {id}:\n\ttxPulse:\n\t\tPulse width: {txPulse.pulseWidth} ns\n\t\tPRI: {pulseRepetitionInterval} ns" +
-    //$"\n\t\tTime of transmission: {txPulse.timeOfTraversal} ns\n\t\tAngle of transmission: {txPulse.angleOfTraversal} rad\n\t\tSymbol: {txPulse.symbol}" +
-    //$"\n\t\tAmplitude: {txPulse.amplitude} dB\n\t\ttxTick = {txTick}\n");
-    //    }
+        Console.WriteLine($"Position: {this.position.x}, {this.position.y}");
     }
 
     public override void Set(List<InParameter> inParameters)

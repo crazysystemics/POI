@@ -17,40 +17,8 @@
         Globals.Tick = 0;
     }
 
-    public void Init()
+    public void GetJSONData()
     {
-        List<Position> waypts = new()
-        {
-            new Position(50, 50),
-            new Position(85, 85),
-            new Position(135, 85),
-            new Position(170, 50),
-            new Position(135, 15),
-            new Position(85, 15),
-            new Position(50, 50)
-        };
-
-        List<Position> waypts2 = new()
-        {
-            new Position(85, 85),
-            new Position(135, 85),
-            new Position(170, 50),
-            new Position(135, 15),
-            new Position(85, 15),
-            new Position(50, 50),
-            new Position(85, 85)
-        };
-
-        string currentTime = DateTime.Now.ToString();
-        currentTime = currentTime.Replace(":", "-");
-        currentTime = currentTime.Replace(" ", "-");
-        currentTime = currentTime.Remove(16);
-
-        Globals.recFileName = $"erOutputFile{currentTime}.csv";
-
-        PFM.emitterIDTable.Add(new EmitterID(1, "E1", 30, 70, 20, 2000, 3000, 200, 100, 200, 50));
-        PFM.emitterIDTable.Add(new EmitterID(2, "E2", 60, 100, 20, 1000, 2500, 500, 50, 150, 25));
-
         JSONReader.AircraftJSON aircraftJSON = new JSONReader.AircraftJSON();
         JSONReader.AircraftListJSON aircraftListJSON = new JSONReader.AircraftListJSON();
         JSONReader.RadarListJSON radarListJSON = new JSONReader.RadarListJSON();
@@ -92,35 +60,43 @@
         {
             simMod.Add(radar);
         }
+    }
 
-        //Aircraft a = new(aircraftJSON.waypoints, aircraftJSON.id);
+    public void Init()
+    {
+        List<Position> waypts = new()
+        {
+            new Position(50, 50),
+            new Position(85, 85),
+            new Position(135, 85),
+            new Position(170, 50),
+            new Position(135, 15),
+            new Position(85, 15),
+            new Position(50, 50)
+        };
 
-        //Aircraft a = new(waypts, 0);
-        //Aircraft a2 = new(waypts2, 1);
+        List<Position> waypts2 = new()
+        {
+            new Position(85, 85),
+            new Position(135, 85),
+            new Position(170, 50),
+            new Position(135, 15),
+            new Position(85, 15),
+            new Position(50, 50),
+            new Position(85, 85)
+        };
 
-        //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1Freq), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
-        //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2Freq), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
+        string currentTime = DateTime.Now.ToString();
+        currentTime = currentTime.Replace(":", "-");
+        currentTime = currentTime.Replace(" ", "-");
+        currentTime = currentTime.Remove(16);
 
-        //Radar r = new(new Pulse(150, 15, 2500, 5, 0), new Position(110, 100), 50, Globals.Tick, 15, 4);
-        //Radar r2 = new(new Pulse(100, 10, 1000, 5, 0), new Position(185, 50), 80, Globals.Tick, 20, 5);
-        //Radar r3 = new(new Pulse(200, 15, 3000, 5, 0), new Position(110, 0), 70, Globals.Tick, 15, 6);
-        //Radar r4 = new(new Pulse(350, 20, 5000, 5, 0), new Position(110, 50), 30, Globals.Tick, 20, 7);
+        Globals.recFileName = $"erOutputFile{currentTime}.csv";
 
-        // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
-        // Minimum unambiguous range for a radar is c * PRI / 2 where c is the speed of light
+        PFM.emitterIDTable.Add(new EmitterID(1, "E1", 30, 70, 20, 2000, 3000, 200, 100, 200, 50));
+        PFM.emitterIDTable.Add(new EmitterID(2, "E2", 60, 100, 20, 1000, 2500, 500, 50, 150, 25));
 
-        //a.rwr = new RWR(ref a.position, 2);
-        //a2.rwr = new RWR(ref a2.position, 3);
-        // be careful with ref operator
-
-        //simMod.Add(a);
-        //simMod.Add(a.rwr);
-        //simMod.Add(a2);
-        //simMod.Add(a2.rwr);
-        //simMod.Add(r);
-        //simMod.Add(r2);
-        //simMod.Add(r3);
-        //simMod.Add(r4);
+        GetJSONData();
         simMod.Add(pse);
 
         globalSituationalMatrix = new Pulse[simMod.Count, simMod.Count];
