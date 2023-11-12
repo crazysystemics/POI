@@ -278,11 +278,7 @@ public class EmitterTrackRecord
 
     public void Record(string label)
     {
-        string currentTime = DateTime.Now.ToString();
-        currentTime = currentTime.Replace(":", "-");
-        currentTime = currentTime.Replace(" ", "-");
-        currentTime = currentTime.Remove(16);
-        StreamWriter sw = new StreamWriter($"erOutputFile{currentTime}.csv", true);
+        StreamWriter sw = new StreamWriter(Globals.recFileName, true);
         sw.WriteLine($"{label}, {received}, {trackID}, {priCurrent}, {freqCurrent}, {pwCurrent}, {Globals.Tick}");
         sw.Close();
     }

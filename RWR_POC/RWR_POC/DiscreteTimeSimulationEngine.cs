@@ -42,6 +42,13 @@
         };
 
 
+        string currentTime = DateTime.Now.ToString();
+        currentTime = currentTime.Replace(":", "-");
+        currentTime = currentTime.Replace(" ", "-");
+        currentTime = currentTime.Remove(16);
+
+        Globals.recFileName = $"erOutputFile{currentTime}.csv";
+
         PFM.emitterIDTable.Add(new EmitterID(1, "E1", 30, 70, 20, 2000, 3000, 200, 100, 200, 50));
         PFM.emitterIDTable.Add(new EmitterID(2, "E2", 60, 100, 20, 1000, 2500, 500, 50, 150, 25));
 
