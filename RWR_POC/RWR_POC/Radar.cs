@@ -1,4 +1,4 @@
-class Radar : BattleSystem
+public class Radar : BattleSystem
 {
 
     public override bool Stopped { get; set; }
@@ -10,6 +10,7 @@ class Radar : BattleSystem
     public int txTick;
     public int effectiveRadiatedPower;
     public int aperture;
+    public string radarType;
 
     public class Out : OutParameter
     {
@@ -66,21 +67,6 @@ class Radar : BattleSystem
             //    }
             //}
         }
-    }
-
-    public List<Pulse> GeneratePulseTrain(int dwellTime, int startTime, double angle)
-    {
-        List<Pulse> pulseTrain = new List<Pulse>();
-        int totalPulses;
-        int currentTime = startTime;
-        int PRI = this.pulseRepetitionInterval;
-        totalPulses = (int)(dwellTime / PRI);
-        for (int i = 0; i < totalPulses; i++)
-        {
-            pulseTrain.Add(new Pulse(this.txPulse.pulseWidth, this.txPulse.amplitude, this.txPulse.frequency, currentTime, angle));
-            currentTime += PRI;
-        }
-        return pulseTrain;
     }
 
 

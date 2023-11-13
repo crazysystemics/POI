@@ -93,7 +93,10 @@
         {
             EmitterRecord emitterRecord = BuildEmitterRecord(receivedPDW);
             EmitterID emitterID = Identify(emitterRecord, PFM.emitterIDTable);
-            emitterRecord.eID = emitterID.eID;
+            if (emitterID != null )
+            {
+                emitterRecord.eID = emitterID.eID;
+            }
             ManageTracks(emitterRecord, emitterID, emitterTrackFile);
 
             Console.WriteLine($"Emitter Record:\n\t\tPRI: {emitterRecord.pri} mcs\n\t\tPulse Width: {emitterRecord.pw} ns\n\t\tFrequency: {emitterRecord.freq} MHz\n");
@@ -215,7 +218,7 @@
             }
         }
 
-        if (!foundInETF)
+        if (!foundInETF && emitterID != null)
         {
             EmitterTrackRecord etr = new EmitterTrackRecord();
 

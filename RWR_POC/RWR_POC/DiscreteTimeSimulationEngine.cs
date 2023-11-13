@@ -41,6 +41,12 @@
             new Position(85, 85)
         };
 
+        List<Position> wayptsLinear = new()
+        {
+            new Position(0, 5),
+            new Position(200, 5)
+        };
+
 
         string currentTime = DateTime.Now.ToString();
         currentTime = currentTime.Replace(":", "-");
@@ -53,7 +59,7 @@
         PFM.emitterIDTable.Add(new EmitterID(2, "E2", 60, 100, 20, 1000, 2500, 500, 50, 150, 25));
 
 
-        Aircraft a = new(waypts, 0);
+        Aircraft a = new(wayptsLinear, 0);
         Aircraft a2 = new(waypts2, 1);
 
         //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1Freq), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
@@ -63,6 +69,7 @@
         Radar r2 = new(new Pulse(100, 10, 1000, 5, 0), new Position(185, 50), 80, Globals.Tick, 20, 150, 5);
         Radar r3 = new(new Pulse(200, 15, 3000, 5, 0), new Position(110, 0), 70, Globals.Tick, 15, 270, 6);
         Radar r4 = new(new Pulse(350, 20, 5000, 5, 0), new Position(110, 50), 30, Globals.Tick, 20, 200, 7);
+        Radar r5 = new(new Pulse(350, 20, 5000, 5, 0), new Position(100, 0), 30, Globals.Tick, 20, 200, 8);
 
         // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
         // Minimum unambiguous range for a radar is c * PRI / 2 where c is the speed of light
@@ -75,10 +82,11 @@
         simMod.Add(a.rwr);
         //simMod.Add(a2);
         //simMod.Add(a2.rwr);
-        simMod.Add(r);
-        simMod.Add(r2);
+        //simMod.Add(r);
+        //simMod.Add(r2);
         //simMod.Add(r3);
         //simMod.Add(r4);
+        simMod.Add(r5);
         simMod.Add(pse);
 
         globalSituationalMatrix = new Pulse[simMod.Count, simMod.Count];
