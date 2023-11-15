@@ -9,6 +9,7 @@
     public Pulse[,] globalSituationalMatrix;
     public List<Pulse> pulseTrainFromRadar = new();
     public double[] receiverAmps = new double[4];
+    public Position detectedAircraftPosition = new Position();
 
     public DiscreteTimeSimulationEngine()
     {
@@ -43,8 +44,8 @@
 
         List<Position> wayptsLinear = new()
         {
-            new Position(0, 5),
-            new Position(200, 5)
+            new Position(0, 50),
+            new Position(300, 50)
         };
 
 
@@ -55,7 +56,7 @@
 
         Globals.recFileName = $"erOutputFile{currentTime}.csv";
 
-        PFM.emitterIDTable.Add(new EmitterID(1, "E1", 30, 70, 20, 2000, 3000, 200, 100, 200, 50));
+        PFM.emitterIDTable.Add(new EmitterID(1, "E1", 800, 1500, 200, 3000, 4000, 500, 100, 200, 50));
         PFM.emitterIDTable.Add(new EmitterID(2, "E2", 60, 100, 20, 1000, 2500, 500, 50, 150, 25));
 
 
@@ -65,14 +66,14 @@
         //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1Freq), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
         //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2Freq), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
 
-        Radar r = new(new Pulse(150, 15, 2500, 5, 0), new Position(110, 100), 50, Globals.Tick, 15, 75, 4);
-        Radar r2 = new(new Pulse(100, 10, 1000, 5, 0), new Position(185, 50), 80, Globals.Tick, 20, 150, 5);
-        Radar r3 = new(new Pulse(200, 15, 3000, 5, 0), new Position(110, 0), 70, Globals.Tick, 15, 270, 6);
-        Radar r4 = new(new Pulse(350, 20, 5000, 5, 0), new Position(110, 50), 30, Globals.Tick, 20, 200, 7);
-        Radar r5 = new(new Pulse(350, 20, 5000, 5, 0), new Position(100, 0), 30, Globals.Tick, 20, 200, 8);
+        //Radar r = new(new Pulse(150, 15, 2500, 5, 0), new Position(110, 100), 50, Globals.Tick, 15, 75, 4);
+        //Radar r2 = new(new Pulse(100, 10, 1000, 5, 0), new Position(185, 50), 80, Globals.Tick, 20, 150, 5);
+        //Radar r3 = new(new Pulse(200, 15, 3000, 5, 0), new Position(110, 0), 70, Globals.Tick, 15, 270, 6);
+        //Radar r4 = new(new Pulse(350, 20, 5000, 5, 0), new Position(110, 50), 30, Globals.Tick, 20, 200, 7);
+        //Radar r5 = new(new Pulse(350, 20, 5000, 5, 0), new Position(100, 0), 30, Globals.Tick, 20, 200, 8);
 
-        // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
-        // Minimum unambiguous range for a radar is c * PRI / 2 where c is the speed of light
+        AcquisitionRadar ar1 = new(new Position(150, 0), 100, 15, Globals.Tick, 5);
+        FireControlRadar fcr1 = new(new Position(170, 0), 100, 15, Globals.Tick, 7);
 
         a.rwr = new RWR(ref a.position, 2);
         a2.rwr = new RWR(ref a2.position, 3);
@@ -86,7 +87,8 @@
         //simMod.Add(r2);
         //simMod.Add(r3);
         //simMod.Add(r4);
-        simMod.Add(r5);
+        simMod.Add(ar1);
+        simMod.Add(fcr1);
         simMod.Add(pse);
 
         globalSituationalMatrix = new Pulse[simMod.Count, simMod.Count];
@@ -152,6 +154,18 @@
                 ((Radar)receiver).Set(inParameters2);
             }
 
+            if (receiver is FireControlRadar)
+            {
+                receiverInParams.Clear();
+                List<InParameter> inParameters3 = new();
+                if (detection)
+                {
+                    FireControlRadar.In targetPositions = new FireControlRadar.In(detectedAircraftPosition, 6);
+                    receiverInParams.Add(targetPositions);
+                }
+                receiver.Set(receiverInParams);
+            }
+
 
             if (receiver is RWR)
             {
@@ -189,7 +203,7 @@
         {
             foreach (SimulationModel receiver in simMod)
             {
-                if (transmitter is Radar)
+                if (transmitter is AcquisitionRadar)
                 {
 
                     if (receiver is RWR)
@@ -197,37 +211,42 @@
                         int dist = PhysicalSimulationEngine.GetDistance(receiver.position, transmitter.position);
                         double angle = PhysicalSimulationEngine.GetAngle(receiver.position, transmitter.position);
                         int radius = ((Radar)transmitter).radius;
-                        //if (Globals.distDebugPrint)
-                        {
-                            Console.WriteLine($"Distance between {receiver} {receiver.id} and Radar {transmitter.id} = {dist}");
-                            Globals.distDebugPrint = false;
-                        }
 
-                        //if (((Radar)transmitter).txTicks.Count != 0)
+                        Console.WriteLine($"Distance between {receiver} {receiver.id} and Radar {transmitter.id} = {dist}");
+                        Globals.distDebugPrint = false;
+
+                        if (((Radar)transmitter).beamContains(receiver.position))
                         {
-                            if (dist <= radius)
+                            detection = true;
+                            detectedAircraftPosition = receiver.position;
+                            //foreach (SimulationModel sim in simMod)
+                            //{
+                            //    if (sim is FireControlRadar)
+                            //    {
+                            //        ((FireControlRadar)sim).targetObtained = true;
+                            //        ((FireControlRadar)sim).targetPosition = receiver.position;
+                            //    }
+                            //}
+                            List<Pulse> pulseTrainTemp = ((Radar)transmitter).GeneratePulseTrain(Globals.Tick * 1000, angle);
+                            pulseTrainFromRadar.AddRange(pulseTrainTemp);
+
+                            int amp = pulseTrainFromRadar[0].amplitude;
+
+                            receiverAmps[0] = amp * Math.Cos(angle - (Math.PI / 4));
+                            receiverAmps[1] = amp * Math.Cos(angle + (Math.PI / 4));
+                            receiverAmps[2] = amp * Math.Cos(angle - (3 * Math.PI / 4));
+                            receiverAmps[3] = amp * Math.Cos(angle - (5 * Math.PI / 4));
+
+                            for (int i = 0; i < 4; i++)
                             {
-                                detection = true;
-                                List<Pulse> pulseTrainTemp = ((Radar)transmitter).GeneratePulseTrain(1000, Globals.Tick * 1000, angle);
-                                pulseTrainFromRadar.AddRange(pulseTrainTemp);
-
-                                int amp = pulseTrainFromRadar[0].amplitude;
-
-                                receiverAmps[0] = amp * Math.Cos(angle - (Math.PI / 4));
-                                receiverAmps[1] = amp * Math.Cos(angle + (Math.PI / 4));
-                                receiverAmps[2] = amp * Math.Cos(angle - (3 * Math.PI / 4));
-                                receiverAmps[3] = amp * Math.Cos(angle - (5 * Math.PI / 4));
-
-                                for (int i = 0; i < 4; i++)
+                                if (receiverAmps[i] <= 0)
                                 {
-                                    if (receiverAmps[i] <= 0)
-                                    {
-                                        receiverAmps[i] = 0;
-                                    }
+                                    receiverAmps[i] = 0;
                                 }
-
                             }
+
                         }
+
                     }
                 }
             }
