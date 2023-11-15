@@ -219,14 +219,6 @@
                         {
                             detection = true;
                             detectedAircraftPosition = receiver.position;
-                            //foreach (SimulationModel sim in simMod)
-                            //{
-                            //    if (sim is FireControlRadar)
-                            //    {
-                            //        ((FireControlRadar)sim).targetObtained = true;
-                            //        ((FireControlRadar)sim).targetPosition = receiver.position;
-                            //    }
-                            //}
                             List<Pulse> pulseTrainTemp = ((Radar)transmitter).GeneratePulseTrain(Globals.Tick * 1000, angle);
                             pulseTrainFromRadar.AddRange(pulseTrainTemp);
 
