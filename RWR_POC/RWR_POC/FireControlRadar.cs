@@ -19,6 +19,7 @@
     public int startFrameAzimuth;
     public int endFrameAzimuth;
     public bool targetObtained;
+    public bool launchedMissile;
     public Position targetPosition = new Position(0, 0);
 
 
@@ -130,5 +131,6 @@
         this.endToEndScanSector = Math.Abs(this.startFrameAzimuth - this.endFrameAzimuth);
         this.mainBeamAzimuth = this.startFrameAzimuth - (this.beamWidth / 2);
         this.frameOffSet = this.startFrameAzimuth;
+        this.launchedMissile = false;
     }
 }

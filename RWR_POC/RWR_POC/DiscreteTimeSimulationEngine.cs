@@ -167,6 +167,7 @@
             }
 
 
+
             if (receiver is RWR)
             {
                 receiverInParams.Clear();
@@ -219,6 +220,18 @@
                         {
                             detection = true;
                             detectedAircraftPosition = receiver.position;
+                            foreach (SimulationModel fcr in simMod.ToList())
+                            {
+                                if (fcr is FireControlRadar)
+                                {
+                                    if (!(((FireControlRadar)fcr).launchedMissile))
+                                    {
+                                        Missile missile = new Missile(fcr.position, receiver.position);
+                                        simMod.Add(missile);
+                                        ((FireControlRadar)fcr).launchedMissile = true;
+                                    }
+                                }
+                            }
                             List<Pulse> pulseTrainTemp = ((Radar)transmitter).GeneratePulseTrain(Globals.Tick * 1000, angle);
                             pulseTrainFromRadar.AddRange(pulseTrainTemp);
 
