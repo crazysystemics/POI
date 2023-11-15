@@ -220,14 +220,13 @@
                         {
                             detection = true;
                             detectedAircraftPosition = receiver.position;
-                            foreach (SimulationModel fcr in simMod.ToList())
+                            foreach (SimulationModel fcr in simMod)
                             {
                                 if (fcr is FireControlRadar)
                                 {
                                     if (!(((FireControlRadar)fcr).launchedMissile))
                                     {
                                         Missile missile = new Missile(fcr.position, receiver.position);
-                                        simMod.Add(missile);
                                         ((FireControlRadar)fcr).launchedMissile = true;
                                     }
                                 }
