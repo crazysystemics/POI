@@ -45,7 +45,7 @@
         List<Position> wayptsLinear = new()
         {
             new Position(0, 50),
-            new Position(300, 50)
+            new Position(500, 50)
         };
 
 
@@ -57,7 +57,7 @@
         Globals.recFileName = $"erOutputFile{currentTime}.csv";
 
         PFM.emitterIDTable.Add(new EmitterID(1, "E1", 800, 1500, 200, 3000, 4000, 500, 100, 200, 50));
-        PFM.emitterIDTable.Add(new EmitterID(2, "E2", 60, 100, 20, 1000, 2500, 500, 50, 150, 25));
+        PFM.emitterIDTable.Add(new EmitterID(2, "E2", 500, 800, 150, 8000, 10000, 500, 50, 150, 25));
 
 
         Aircraft a = new(wayptsLinear, 0);
@@ -72,8 +72,8 @@
         //Radar r4 = new(new Pulse(350, 20, 5000, 5, 0), new Position(110, 50), 30, Globals.Tick, 20, 200, 7);
         //Radar r5 = new(new Pulse(350, 20, 5000, 5, 0), new Position(100, 0), 30, Globals.Tick, 20, 200, 8);
 
-        AcquisitionRadar ar1 = new(new Position(150, 0), 100, 15, Globals.Tick, 5);
-        FireControlRadar fcr1 = new(new Position(170, 0), 100, 15, Globals.Tick, 7);
+        AcquisitionRadar ar1 = new(new Position(70, 0), 100, 15, Globals.Tick, 5);
+        FireControlRadar fcr1 = new(new Position(370, 0), 100, 15, Globals.Tick, 7);
 
         a.rwr = new RWR(ref a.position, 2);
         a2.rwr = new RWR(ref a2.position, 3);
@@ -204,7 +204,7 @@
         {
             foreach (SimulationModel receiver in simMod)
             {
-                if (transmitter is AcquisitionRadar)
+                if (transmitter is Radar)
                 {
 
                     if (receiver is RWR)

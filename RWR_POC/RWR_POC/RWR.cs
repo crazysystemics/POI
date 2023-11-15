@@ -75,14 +75,14 @@
             receivedPDW.Add(new PDW(rxPDW.pulseWidth, rxPDW.amplitude, rxPDW.frequency, rxPDW.timeOfArrival));
         }
 
-        int pulseCount = 1;
-        foreach (PDW pdw in receivedPDW)
-        {
-            Console.WriteLine($"Pulse {pulseCount}\nPulse Width: {pdw.pulseWidth} ns\n" +
-                              $"Amplitudes: {pdw.amplitude[0]}, {pdw.amplitude[1]}, {pdw.amplitude[2]}, {pdw.amplitude[3]}\n" +
-                              $"Frequency: {pdw.frequency} MHz\nTime of Arrival: {pdw.timeOfArrival} ns\n");
-            pulseCount++;
-        }
+        //int pulseCount = 1;
+        //foreach (PDW pdw in receivedPDW)
+        //{
+        //    Console.WriteLine($"Pulse {pulseCount}\nPulse Width: {pdw.pulseWidth} ns\n" +
+        //                      $"Amplitudes: {pdw.amplitude[0]}, {pdw.amplitude[1]}, {pdw.amplitude[2]}, {pdw.amplitude[3]}\n" +
+        //                      $"Frequency: {pdw.frequency} MHz\nTime of Arrival: {pdw.timeOfArrival} ns\n");
+        //    pulseCount++;
+        //}
 
         foreach (EmitterTrackRecord etr in emitterTrackFile)
         {
