@@ -1,18 +1,6 @@
 ﻿public class EarlyWarningRadar : Radar
 {
     public override bool Stopped { get; set; }
-    public override Pulse txPulse { get; set; }
-    public override Pulse activePulse { get; set; }
-    public override int pulseRepetitionInterval { get; set; }
-    public override int radius { get; set; }
-    public override int txTick { get; set; }
-    public override int effectiveRadiatedPower { get; set; }
-    public override int aperture { get; set; }
-    public override string radarType { get; set; }
-    public override int endToEndDuration { get; set; }
-    public override int endToEndScanSector { get; set; }
-    public override int mainBeamAzimuth { get; set; }
-    public override int beamWidth { get; set; }
 
     public int frameOffSet;
     public int numberOfFrames;
@@ -29,18 +17,6 @@
         }
     }
 
-    public class Out : OutParameter
-    {
-        public Pulse p;
-        public Position pos;
-        public int txTick;
-        public Out(Pulse p, Position pos, int tcTick, int id) : base(id)
-        {
-            this.pos = pos;
-            this.p = p;
-            this.txTick = tcTick;
-        }
-    }
     public override OutParameter Get()
     {
         Out radarOutput = new Out(txPulse, position, txTick, 1);
@@ -94,7 +70,7 @@
         }
     }
 
-    public EarlyWarningRadar(Position position, int radius, int beamWidth, int txTick, int id)
+    public EarlyWarningRadar(Position position, int radius, int beamWidth, int txTick, int id, int startFrameAzimuth = 135, int endFrameAzimuth = 45)
     {
         this.pulseRepetitionInterval = Globals.randomNumberGenerator.Next(1000, 2000);
         int pulseWidth = (Globals.randomNumberGenerator.Next(10, 15) * pulseRepetitionInterval) / 100;
@@ -105,12 +81,12 @@
         this.radius = radius;
         this.txTick = txTick;
         this.effectiveRadiatedPower = 128;
-        this.radarType = "Acquisition";
+        this.radarType = Globals.RadarTypes.EarlyWarning;
         this.beamWidth = beamWidth;
         this.endToEndDuration = 1;
         this.numberOfFrames = (int)(this.endToEndScanSector / this.beamWidth);
-        this.startFrameAzimuth = 135;
-        this.endFrameAzimuth = 45;
+        this.startFrameAzimuth = startFrameAzimuth;
+        this.endFrameAzimuth = endFrameAzimuth;
         this.endToEndScanSector = Math.Abs(this.startFrameAzimuth - this.endFrameAzimuth);
         this.mainBeamAzimuth = this.startFrameAzimuth - (this.beamWidth / 2);
         this.frameOffSet = this.startFrameAzimuth;

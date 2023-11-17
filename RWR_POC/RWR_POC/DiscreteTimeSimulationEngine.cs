@@ -63,16 +63,7 @@
         Aircraft a = new(wayptsLinear, 0);
         Aircraft a2 = new(waypts2, 1);
 
-        //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1Freq), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
-        //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2Freq), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
-
-        //Radar r = new(new Pulse(150, 15, 2500, 5, 0), new Position(110, 100), 50, Globals.Tick, 15, 75, 4);
-        //Radar r2 = new(new Pulse(100, 10, 1000, 5, 0), new Position(185, 50), 80, Globals.Tick, 20, 150, 5);
-        //Radar r3 = new(new Pulse(200, 15, 3000, 5, 0), new Position(110, 0), 70, Globals.Tick, 15, 270, 6);
-        //Radar r4 = new(new Pulse(350, 20, 5000, 5, 0), new Position(110, 50), 30, Globals.Tick, 20, 200, 7);
-        //Radar r5 = new(new Pulse(350, 20, 5000, 5, 0), new Position(100, 0), 30, Globals.Tick, 20, 200, 8);
-
-        AcquisitionRadar ar1 = new(new Position(70, 0), 100, 15, Globals.Tick, 5);
+        AcquisitionRadar ar1 = new(new Position(130, 0), 100, 15, Globals.Tick, 5);
         FireControlRadar fcr1 = new(new Position(370, 0), 100, 15, Globals.Tick, 7);
 
         a.rwr = new RWR(ref a.position, 2);
@@ -83,12 +74,9 @@
         simMod.Add(a.rwr);
         //simMod.Add(a2);
         //simMod.Add(a2.rwr);
-        //simMod.Add(r);
-        //simMod.Add(r2);
-        //simMod.Add(r3);
-        //simMod.Add(r4);
         simMod.Add(ar1);
         simMod.Add(fcr1);
+        //simMod.Add(fcr1.missile1);
         simMod.Add(pse);
 
         globalSituationalMatrix = new Pulse[simMod.Count, simMod.Count];
@@ -220,17 +208,7 @@
                         {
                             detection = true;
                             detectedAircraftPosition = receiver.position;
-                            foreach (SimulationModel fcr in simMod)
-                            {
-                                if (fcr is FireControlRadar)
-                                {
-                                    if (!(((FireControlRadar)fcr).launchedMissile))
-                                    {
-                                        Missile missile = new Missile(fcr.position, receiver.position);
-                                        ((FireControlRadar)fcr).launchedMissile = true;
-                                    }
-                                }
-                            }
+
                             List<Pulse> pulseTrainTemp = ((Radar)transmitter).GeneratePulseTrain(Globals.Tick * 1000, angle);
                             pulseTrainFromRadar.AddRange(pulseTrainTemp);
 

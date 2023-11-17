@@ -1,18 +1,6 @@
 ﻿public class FireControlRadar : Radar
 {
     public override bool Stopped { get; set; }
-    public override Pulse txPulse { get; set; }
-    public override Pulse activePulse { get; set; }
-    public override int pulseRepetitionInterval { get; set; }
-    public override int radius { get; set; }
-    public override int txTick { get; set; }
-    public override int effectiveRadiatedPower { get; set; }
-    public override int aperture { get; set; }
-    public override string radarType { get; set; }
-    public override int endToEndDuration { get; set; }
-    public override int endToEndScanSector { get; set; }
-    public override int mainBeamAzimuth { get; set; }
-    public override int beamWidth { get; set; }
 
     public int frameOffSet;
     public int numberOfFrames;
@@ -21,6 +9,7 @@
     public bool targetObtained;
     public bool launchedMissile;
     public Position targetPosition = new Position(0, 0);
+    public Missile missile1 = new Missile(new Position(0, 0), new Position(0, 0));
 
 
     public class In : InParameter
@@ -29,19 +18,6 @@
         public In(Position targPos, int id) : base(id)
         {
             this.targPos = targPos;
-        }
-    }
-
-    public class Out : OutParameter
-    {
-        public Pulse p;
-        public Position pos;
-        public int txTick;
-        public Out(Pulse p, Position pos, int tcTick, int id) : base(id)
-        {
-            this.pos = pos;
-            this.p = p;
-            this.txTick = tcTick;
         }
     }
     public override OutParameter Get()
@@ -67,10 +43,17 @@
         if (targetObtained)
         {
             this.mainBeamAzimuth = (int)(PhysicalSimulationEngine.GetAngle(this.targetPosition, this.position) * (180 / Math.PI));
+            int targetDistance = PhysicalSimulationEngine.GetDistance(this.targetPosition, this.position);
+            if (targetDistance <= radius)
+            {
+                this.missile1.launched = true;
+                this.missile1.targetPosition = this.targetPosition;
+            }
         }
+
         Console.WriteLine($"Target obtained: {this.targetObtained}");
         Console.WriteLine($"Target position: {this.targetPosition.x}, {this.targetPosition.y}");
-        Console.WriteLine($"Fire control radar angle: {this.mainBeamAzimuth}");
+        Console.WriteLine($"Fire control radar azimuth: {this.mainBeamAzimuth}");
     }
 
     public override List<Pulse> GeneratePulseTrain(int startTime, double angle)
@@ -110,7 +93,7 @@
         }
     }
 
-    public FireControlRadar(Position position, int radius, int beamWidth, int txTick, int id)
+    public FireControlRadar(Position position, int radius, int beamWidth, int txTick, int id, int startFrameAzimuth = 135, int endFrameAzimuth = 45)
     {
         this.pulseRepetitionInterval = Globals.randomNumberGenerator.Next(500, 800);
         int pulseWidth = (Globals.randomNumberGenerator.Next(10, 15) * pulseRepetitionInterval) / 100;
@@ -122,15 +105,244 @@
         this.radius = radius;
         this.txTick = txTick;
         this.effectiveRadiatedPower = 128;
-        this.radarType = "Acquisition";
+        this.radarType = Globals.RadarTypes.FireControl;
         this.beamWidth = beamWidth;
         this.endToEndDuration = 1;
         this.numberOfFrames = (int)(this.endToEndScanSector / this.beamWidth);
-        this.startFrameAzimuth = 135;
-        this.endFrameAzimuth = 45;
+        this.startFrameAzimuth = startFrameAzimuth;
+        this.endFrameAzimuth = endFrameAzimuth;
         this.endToEndScanSector = Math.Abs(this.startFrameAzimuth - this.endFrameAzimuth);
         this.mainBeamAzimuth = this.startFrameAzimuth - (this.beamWidth / 2);
         this.frameOffSet = this.startFrameAzimuth;
         this.launchedMissile = false;
+        this.missile1.position = new Position(this.position.x, this.position.y);
+    }
+
+    public class Missile : BattleSystem
+    {
+        public Position targetPosition;
+        public bool reachedTarget;
+        public bool launched;
+        public override bool Stopped { get; set; }
+
+        public override OutParameter Get()
+        {
+            return null;
+        }
+
+        public override void Set(List<InParameter> inParameters)
+        {
+
+        }
+
+        public override void OnTick()
+        {
+            if (this.launched)
+            {
+                Console.WriteLine($"Missile position: {this.position.x}, {this.position.y}");
+                MoveMissile();
+            }
+        }
+
+        public static int[] ComputeDistance(Position pos1, Position pos2)
+        {
+            int[] dist = new int[] { (int)(pos2.x - pos1.x), (int)(pos2.y - pos1.y) };
+            return dist;
+        }
+
+        public void MoveMissile()
+        {
+            int moveRatio;
+            int[] displacementArray = ComputeDistance(this.position, this.targetPosition);
+            int[] distanceToNextWaypoint = new int[2];
+            distanceToNextWaypoint[0] = Math.Abs(displacementArray[0]);
+            distanceToNextWaypoint[1] = Math.Abs(displacementArray[1]);
+
+            bool minIsZero = distanceToNextWaypoint.Min() == 0;
+
+            // Case: neither of the displacements are zero
+
+            if (!minIsZero)
+            {
+                moveRatio = (int)(distanceToNextWaypoint.Max() / distanceToNextWaypoint.Min());
+
+                // Case 1: Both x-displacment and y-displacement are positive
+
+                if (displacementArray[0] > 0 && displacementArray[1] > 0)
+                {
+
+                    // If x_distance > y-distance
+
+                    if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
+                    {
+                        // x = distanceToNextWaypoint[0] * moveRatio
+                        this.position.x += moveRatio;
+                        this.position.y += 1;
+                    }
+
+                    // If y-distance > x-distance
+
+                    else if (distanceToNextWaypoint[1] > distanceToNextWaypoint[0])
+                    {
+                        this.position.x += 1;
+                        this.position.y += moveRatio;
+                    }
+
+                    // If x-distance = y-distance
+
+                    else
+                    {
+                        this.position.x += 1;
+                        this.position.y += 1;
+                    }
+                }
+
+                // Case 2: Both x-displacement and y-displacement are negative
+
+                if (displacementArray[0] < 0 && displacementArray[1] < 0)
+                {
+
+                    // If x-distance > y-distance
+
+                    if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
+                    {
+                        this.position.x += -moveRatio;
+                        this.position.y += -1;
+                    }
+
+                    // If y-distance > x-distance
+
+                    else if (distanceToNextWaypoint[1] > distanceToNextWaypoint[0])
+                    {
+                        this.position.x += -1;
+                        this.position.y += -moveRatio;
+                    }
+
+                    // If x-distance = y-distance
+
+                    else
+                    {
+                        this.position.x += -1;
+                        this.position.y += -1;
+                    }
+                }
+
+                // Case 3: x-displacement is positive, y-displacement is negative
+
+                if (displacementArray[0] > 0 && displacementArray[1] < 0)
+                {
+
+                    // If x-distance > y-distance
+
+                    if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
+                    {
+                        this.position.x += moveRatio;
+                        this.position.y += -1;
+                    }
+
+                    // If y-distance > x-distance
+
+                    else if (distanceToNextWaypoint[1] > distanceToNextWaypoint[0])
+                    {
+                        this.position.x += 1;
+                        this.position.y += -moveRatio;
+                    }
+
+                    // If x-distance = y-distance
+
+                    else
+                    {
+                        this.position.x += 1;
+                        this.position.y += -1;
+                    }
+                }
+
+                // Case 4: x-displacement is negative, y-displacement is positive
+
+                if (displacementArray[0] < 0 && displacementArray[1] > 0)
+                {
+
+                    // If x-distance > y-distance
+
+                    if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
+                    {
+                        this.position.x += -moveRatio;
+                        this.position.y += 1;
+                    }
+
+                    // If y-distance > x-distance
+
+                    else if (distanceToNextWaypoint[1] > distanceToNextWaypoint[0])
+                    {
+                        this.position.x += -1;
+                        this.position.y += moveRatio;
+                    }
+
+                    // If x-distance = y-distance
+
+                    else
+                    {
+                        this.position.x += -1;
+                        this.position.y += 1;
+                    }
+                }
+            }
+
+            // Case: At least one of the displacements is zero
+
+            else
+            {
+                // Case 1: If x-displacement is zero
+
+                if (displacementArray[0] == 0)
+                {
+
+                    // If y-displacement is positive
+
+                    if (displacementArray[1] > 0)
+                    {
+                        this.position.y += 1;
+                    }
+
+                    // If y-displacement is negative
+
+                    else if (displacementArray[1] < 0)
+                    {
+                        this.position.y += -1;
+                    }
+                }
+
+                // Case 2: If y-displacement is zero
+
+                if (displacementArray[1] == 0)
+                {
+
+                    // If x-displacement is positive
+
+                    if (displacementArray[0] > 0)
+                    {
+                        this.position.x += 1;
+                    }
+
+                    // If x-displacement is negative
+
+                    else if (displacementArray[0] < 0)
+                    {
+                        this.position.x += -1;
+                    }
+                }
+            }
+
+            if (this.position.x == targetPosition.x && this.position.y == targetPosition.y)
+            {
+                this.reachedTarget = true;
+            }
+        }
+
+        public Missile(Position missilePosition, Position targetPosition)
+        {
+            this.position = missilePosition;
+            this.targetPosition = targetPosition;
+        }
     }
 }

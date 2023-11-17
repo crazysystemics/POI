@@ -1,4 +1,4 @@
-﻿static class Globals
+﻿public static class Globals
 {
     public static int Tick = 0;
     public static float TimeResolution = 0.10f;
@@ -14,5 +14,13 @@
     public static void DebugWriteLine(string s)
     {
         Console.WriteLine(s);
+    }
+
+    public enum RadarTypes
+    {
+        EarlyWarning,
+        Acquisition,
+        FireControl,
+        GCI
     }
 }
