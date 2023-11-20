@@ -35,6 +35,11 @@
         {
             this.mainBeamAzimuth = this.startFrameAzimuth - (this.beamWidth / 2);
         }
+
+        if (this.mainBeamAzimuth <= 0)
+        {
+            this.mainBeamAzimuth += 360;
+        }
     }
 
     public override List<Pulse> GeneratePulseTrain(int startTime, double angle)
@@ -85,12 +90,51 @@
         this.radius = radius;
         this.txTick = txTick;
         this.effectiveRadiatedPower = 128;
-        this.radarType = Globals.RadarTypes.Acquisition;
+        this.radarType = Globals.RadarTypes.ACQUISITION;
         this.beamWidth = beamWidth;
         this.endToEndDuration = 1;
         this.numberOfFrames = (int)(this.endToEndScanSector / this.beamWidth);
         this.startFrameAzimuth = startFrameAzimuth;
         this.endFrameAzimuth = endFrameAzimuth;
+
+
+        // Ensuring that the scan goes clockwise from startFrameAzimuth to endFrameAzimuth.
+        // Handles cases for negative values of azimuth as well as values greater than 360.
+        // Also handles the case for 0 degree cross-over.
+
+        if (this.startFrameAzimuth < 0)
+        {
+            if (this.startFrameAzimuth < -360)
+            {
+                this.startFrameAzimuth %= 360;
+            }
+            this.startFrameAzimuth += 360;
+        }
+        if (this.startFrameAzimuth > 360)
+        {
+            this.startFrameAzimuth %= 360;
+        }
+        if (this.endFrameAzimuth < 0)
+        {
+            if (this.endFrameAzimuth < -360)
+            {
+                this.endFrameAzimuth %= 360;
+            }
+            this.endFrameAzimuth += 360;
+        }
+        if (this.endFrameAzimuth > 360)
+        {
+            this.endFrameAzimuth %= 360;
+        }
+        if (this.endFrameAzimuth > this.startFrameAzimuth)
+        {
+            int temp1 = this.startFrameAzimuth;
+            int temp2 = this.endFrameAzimuth;
+            this.startFrameAzimuth = temp2;
+            this.endFrameAzimuth = temp1;
+        }
+
+
         this.endToEndScanSector = Math.Abs(this.startFrameAzimuth - this.endFrameAzimuth);
         this.mainBeamAzimuth = this.startFrameAzimuth - (this.beamWidth / 2);
         this.frameOffSet = this.startFrameAzimuth;

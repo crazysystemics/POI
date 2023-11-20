@@ -27,6 +27,7 @@ public abstract class Radar : BattleSystem
     public int endToEndScanSector;
     public int mainBeamAzimuth;
     public int beamWidth;
+    public bool detection;
 
     public class Out : OutParameter
     {

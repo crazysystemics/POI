@@ -18,9 +18,9 @@
 
     public enum RadarTypes
     {
-        EarlyWarning,
-        Acquisition,
-        FireControl,
+        EARLYWARNING,
+        ACQUISITION,
+        FIRECONTROL,
         GCI
     }
 }
