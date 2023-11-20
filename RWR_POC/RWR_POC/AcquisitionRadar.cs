@@ -6,6 +6,7 @@
     public int numberOfFrames;
     public int startFrameAzimuth;
     public int endFrameAzimuth;
+    public Position targetPosition = new Position(0, 0);
 
 
     public class In : InParameter

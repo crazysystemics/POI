@@ -40,10 +40,10 @@
 
     public override void OnTick()
     {
-        if (targetObtained)
+        int targetDistance = PhysicalSimulationEngine.GetDistance(targetPosition, this.position);
+        if (targetObtained && targetDistance <= radius)
         {
             this.mainBeamAzimuth = (int)(PhysicalSimulationEngine.GetAngle(this.targetPosition, this.position) * (180 / Math.PI));
-            int targetDistance = PhysicalSimulationEngine.GetDistance(this.targetPosition, this.position);
             if (targetDistance <= radius)
             {
                 this.missile1.launched = true;

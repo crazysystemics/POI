@@ -142,17 +142,35 @@
                 ((Radar)receiver).Set(inParameters2);
             }
 
-            if (receiver is FireControlRadar)
+            if (receiver is AcquisitionRadar)
             {
-                receiverInParams.Clear();
-                List<InParameter> inParameters3 = new();
-                if (detection)
+                foreach (SimulationModel fcr in simMod)
                 {
-                    FireControlRadar.In targetPositions = new FireControlRadar.In(detectedAircraftPosition, 6);
-                    receiverInParams.Add(targetPositions);
+                    if (fcr is FireControlRadar)
+                    {
+                        receiverInParams.Clear();
+                        List<InParameter> inParameters3 = new();
+                        if (((AcquisitionRadar)receiver).detection)
+                        {
+                            FireControlRadar.In targetPositions = new FireControlRadar.In(((AcquisitionRadar)receiver).targetPosition, 6);
+                            receiverInParams.Add(targetPositions);
+                        }
+                        fcr.Set(receiverInParams);
+                    }
                 }
-                receiver.Set(receiverInParams);
             }
+
+            //if (receiver is FireControlRadar)
+            //{
+            //    receiverInParams.Clear();
+            //    List<InParameter> inParameters3 = new();
+            //    if (detection)
+            //    {
+            //        FireControlRadar.In targetPositions = new FireControlRadar.In(detectedAircraftPosition, 6);
+            //        receiverInParams.Add(targetPositions);
+            //    }
+            //    receiver.Set(receiverInParams);
+            //}
 
 
 
@@ -207,7 +225,11 @@
                         if (((Radar)transmitter).beamContains(receiver.position))
                         {
                             detection = true;
-                            detectedAircraftPosition = receiver.position;
+                            if (transmitter is AcquisitionRadar)
+                            {
+                                ((AcquisitionRadar)transmitter).detection = true;
+                                ((AcquisitionRadar)transmitter).targetPosition = receiver.position;
+                            }
 
                             List<Pulse> pulseTrainTemp = ((Radar)transmitter).GeneratePulseTrain(Globals.Tick * 1000, angle);
                             pulseTrainFromRadar.AddRange(pulseTrainTemp);
