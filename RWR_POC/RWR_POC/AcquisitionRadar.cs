@@ -41,6 +41,11 @@
         {
             this.mainBeamAzimuth += 360;
         }
+
+        if (PhysicalSimulationEngine.GetDistance(this.targetPosition, this.position) <= radius)
+        {
+            this.detection = false;
+        }
     }
 
     public override List<Pulse> GeneratePulseTrain(int startTime, double angle)
@@ -93,7 +98,7 @@
         this.effectiveRadiatedPower = 128;
         this.radarType = Globals.RadarTypes.ACQUISITION;
         this.beamWidth = beamWidth;
-        this.endToEndDuration = 1;
+        this.endToEndDuration = 2;
         this.numberOfFrames = (int)(this.endToEndScanSector / this.beamWidth);
         this.startFrameAzimuth = startFrameAzimuth;
         this.endFrameAzimuth = endFrameAzimuth;

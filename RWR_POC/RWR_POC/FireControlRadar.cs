@@ -31,7 +31,7 @@
         foreach (InParameter inParameter in inParameters)
         {
             if (((In)inParameter).targPos != null && !this.targetObtained)
-            {
+            {    
                 this.targetObtained = true;
                 this.targetPosition = ((In)inParameter).targPos;
             }
@@ -40,7 +40,7 @@
 
     public override void OnTick()
     {
-        int targetDistance = PhysicalSimulationEngine.GetDistance(targetPosition, this.position);
+        int targetDistance = PhysicalSimulationEngine.GetDistance(this.targetPosition, this.position);
         if (targetObtained && targetDistance <= radius)
         {
             this.mainBeamAzimuth = (int)(PhysicalSimulationEngine.GetAngle(this.targetPosition, this.position) * (180 / Math.PI));

@@ -5,9 +5,11 @@
     public int toaResolution;
     public int aperture;
     public double[] amps = new double[4];
+    public bool receivingEmitterRecord = false;
     public EmitterRecord emRecord = new EmitterRecord();
     public List<EmitterRecord> emRecordList = new List<EmitterRecord>();
     public List<PDW> receivedPDW = new List<PDW>();
+    public EmitterRecord receivedRecord = new EmitterRecord();
     public EmitterID eID;
     public List<EmitterTrackRecord> emitterTrackFile = new List<EmitterTrackRecord>();
 
@@ -35,13 +37,12 @@
     {
 
         // Pulse as InParameter
-        public Pulse p = new(0, 0, 0, 0, 0);
         public double[] amps = new double[4];
+        public EmitterRecord emRecord = new EmitterRecord();
 
-        public In(Pulse p, double[] amps, int id) : base(id)
+        public In(EmitterRecord emRecord, int id) : base(id)
         {
-            this.p = p;
-            this.amps = amps;
+            this.emRecord = emRecord;
         }
 
     }
@@ -54,26 +55,17 @@
 
     public override void Set(List<InParameter> inParameters)
     {
-        RxBuf.Clear();
         foreach (InParameter inParameter in inParameters)
         {
-            if (((In)inParameter).p.amplitude > 0)
+            if (((In)inParameter).emRecord.pw > 0)
             {
-                Pulse tempPulse = ((In)inParameter).p;
-                double[] amps = ((In)inParameter).amps;
-                RxBuf.Add(new PDW(tempPulse.pulseWidth, amps, tempPulse.frequency, tempPulse.timeOfTraversal));
+                this.receivedRecord = ((In)inParameter).emRecord;
             }
         }
-        RxBuf = RxBuf.OrderBy(x => x.timeOfArrival).ToList();
     }
 
     public override void OnTick()
     {
-
-        foreach (PDW rxPDW in RxBuf)
-        {
-            receivedPDW.Add(new PDW(rxPDW.pulseWidth, rxPDW.amplitude, rxPDW.frequency, rxPDW.timeOfArrival));
-        }
 
         //int pulseCount = 1;
         //foreach (PDW pdw in receivedPDW)
@@ -89,9 +81,17 @@
             etr.received = false;
         }
 
-        if (receivedPDW.Count > 0)
+        EmitterRecord tempReceived = new EmitterRecord();
+        tempReceived.erID = this.receivedRecord.erID;
+        tempReceived.pri = this.receivedRecord.pri;
+        tempReceived.pw = this.receivedRecord.pw;
+        tempReceived.freq = this.receivedRecord.freq;
+        tempReceived.erIdentifier = this.receivedRecord.erIdentifier;
+        tempReceived.eID = this.receivedRecord.eID;
+
+        if (this.receivingEmitterRecord)
         {
-            EmitterRecord emitterRecord = BuildEmitterRecord(receivedPDW);
+            EmitterRecord emitterRecord = this.receivedRecord;
             EmitterID emitterID = Identify(emitterRecord, PFM.emitterIDTable);
             if (emitterID != null )
             {
@@ -119,7 +119,9 @@
 
         emitterTrackFile = tempETF;
 
-        receivedPDW.Clear();
+        receivingEmitterRecord = false;
+
+        receivedRecord = new EmitterRecord();
 
 
         Console.WriteLine("-----------------------------------\n");
@@ -244,6 +246,8 @@
             etr.ageIn = emitterID.ageIn;
             etr.ageOut = emitterID.ageOut;
 
+            etr.identifier = emitterRecord.erIdentifier;
+
             etr.received = true;
 
             emitterTrackFile.Add(etr);
@@ -279,10 +283,12 @@ public class EmitterTrackRecord
     public int ageIn;
     public double ageOut;
 
+    public string identifier;
+
     public void Record(string label)
     {
         StreamWriter sw = new StreamWriter(Globals.recFileName, true);
-        sw.WriteLine($"{label}, {received}, {trackID}, {priCurrent}, {freqCurrent}, {pwCurrent}, {Globals.Tick}");
+        sw.WriteLine($"{label}, {received}, {trackID}, {priCurrent}, {freqCurrent}, {pwCurrent}, {identifier}, {Globals.Tick}");
         sw.Close();
     }
 }

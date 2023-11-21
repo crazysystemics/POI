@@ -10,6 +10,7 @@
     public List<Pulse> pulseTrainFromRadar = new();
     public double[] receiverAmps = new double[4];
     public Position detectedAircraftPosition = new Position();
+    public EmitterRecord receivedEmitterRecord = new EmitterRecord();
 
     public DiscreteTimeSimulationEngine()
     {
@@ -64,7 +65,8 @@
         Aircraft a2 = new(waypts2, 1);
 
         AcquisitionRadar ar1 = new(new Position(130, 0), 100, 15, Globals.Tick, 5);
-        FireControlRadar fcr1 = new(new Position(370, 0), 100, 15, Globals.Tick, 7);
+        FireControlRadar fcr1 = new(new Position(220, 0), 100, 15, Globals.Tick, 7);
+        FireControlRadar fcr2 = new(new Position(370, 0), 75, 15, Globals.Tick, 9);
 
         a.rwr = new RWR(ref a.position, 2);
         a2.rwr = new RWR(ref a2.position, 3);
@@ -76,6 +78,7 @@
         //simMod.Add(a2.rwr);
         simMod.Add(ar1);
         simMod.Add(fcr1);
+        simMod.Add(fcr2);
         //simMod.Add(fcr1.missile1);
         simMod.Add(pse);
 
@@ -177,13 +180,10 @@
             if (receiver is RWR)
             {
                 receiverInParams.Clear();
-                if (detection)
+                if (detection && ((RWR)receiver).receivingEmitterRecord)
                 {
-                    foreach (Pulse pulse in pulseTrainFromRadar)
-                    {
-                        RWR.In globalSituation = new RWR.In(pulse, receiverAmps, receiver.id);
-                        receiverInParams.Add(globalSituation);
-                    }
+                    RWR.In globalSituation = new RWR.In(receivedEmitterRecord, receiver.id);
+                    receiverInParams.Add(globalSituation);
                 }
 
                 ((RWR)receiver).Set(receiverInParams);
@@ -233,6 +233,16 @@
 
                             List<Pulse> pulseTrainTemp = ((Radar)transmitter).GeneratePulseTrain(Globals.Tick * 1000, angle);
                             pulseTrainFromRadar.AddRange(pulseTrainTemp);
+
+                            receivedEmitterRecord = new EmitterRecord();
+                            receivedEmitterRecord.pri = ((Radar)transmitter).pulseRepetitionInterval;
+                            receivedEmitterRecord.freq = ((Radar)transmitter).txPulse.frequency;
+                            receivedEmitterRecord.pw = ((Radar)transmitter).txPulse.pulseWidth;
+                            receivedEmitterRecord.erID = ((Radar)transmitter).id;
+                            receivedEmitterRecord.erIdentifier = ((Radar)transmitter).radarType.ToString();
+                            receivedEmitterRecord.eID = ((Radar)transmitter).id + 10;
+
+                            ((RWR)receiver).receivingEmitterRecord = true;
 
                             int amp = pulseTrainFromRadar[0].amplitude;
 
