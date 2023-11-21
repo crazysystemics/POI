@@ -43,6 +43,17 @@
             new Position(85, 85)
         };
 
+        List<Position> waypts3 = new()
+        {
+            new Position(100, 100),
+            new Position(200, 200),
+            new Position(300, 200),
+            new Position(400, 100),
+            new Position(300, 0),
+            new Position(200, 0),
+            new Position(100, 100)
+        };
+
         List<Position> wayptsLinear = new()
         {
             new Position(0, 50),
@@ -61,15 +72,15 @@
         PFM.emitterIDTable.Add(new EmitterID(2, "E2", 500, 800, 150, 8000, 10000, 500, 50, 150, 25));
 
 
-        Aircraft a = new(wayptsLinear, 0);
-        Aircraft a2 = new(waypts2, 1);
+        Aircraft a = new(waypts3, 0);
+        //Aircraft a2 = new(waypts2, 1);
 
-        AcquisitionRadar ar1 = new(new Position(130, 0), 100, 15, Globals.Tick, 5);
-        FireControlRadar fcr1 = new(new Position(220, 0), 100, 15, Globals.Tick, 7);
-        FireControlRadar fcr2 = new(new Position(370, 0), 75, 15, Globals.Tick, 9);
+        AcquisitionRadar ar1 = new(new Position(200, 180), 150, 15, Globals.Tick, 5, 359, 0);
+        FireControlRadar fcr1 = new(new Position(300, 180), 100, 15, Globals.Tick, 7, 359, 0);
+        FireControlRadar fcr2 = new(new Position(200, 0), 100, 15, Globals.Tick, 9, 359, 0);
 
         a.rwr = new RWR(ref a.position, 2);
-        a2.rwr = new RWR(ref a2.position, 3);
+        //a2.rwr = new RWR(ref a2.position, 3);
         // be careful with ref operator
 
         simMod.Add(a);

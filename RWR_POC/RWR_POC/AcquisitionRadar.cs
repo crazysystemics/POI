@@ -30,8 +30,14 @@
 
     public override void OnTick()
     {
+        int angle = (int)(PhysicalSimulationEngine.GetAngle(targetPosition, this.position) * (180 / Math.PI));
+        if (angle < 0)
+        {
+            angle += 360;
+        }
         this.mainBeamAzimuth -= (this.beamWidth / 2);
         Console.WriteLine($"Acquisition radar azimuth: {this.mainBeamAzimuth}");
+        Console.WriteLine($"Angle to target: {angle}");
         if (this.mainBeamAzimuth <= this.endFrameAzimuth + (this.beamWidth / 2))
         {
             this.mainBeamAzimuth = this.startFrameAzimuth - (this.beamWidth / 2);
@@ -68,6 +74,11 @@
     {
         int radialDistance = PhysicalSimulationEngine.GetDistance(targetPosition, this.position);
         int azimuth = (int)(PhysicalSimulationEngine.GetAngle(targetPosition, this.position) * (180 / Math.PI));
+        Console.WriteLine($"Azimuth: {azimuth}");
+        if (azimuth < 0)
+        {
+            azimuth += 360;
+        }
         if (radialDistance < this.radius)
         {
             if (azimuth < (mainBeamAzimuth + (beamWidth / 2)) && azimuth > (mainBeamAzimuth - (beamWidth / 2)))
@@ -98,7 +109,7 @@
         this.effectiveRadiatedPower = 128;
         this.radarType = Globals.RadarTypes.ACQUISITION;
         this.beamWidth = beamWidth;
-        this.endToEndDuration = 2;
+        this.endToEndDuration = 1;
         this.numberOfFrames = (int)(this.endToEndScanSector / this.beamWidth);
         this.startFrameAzimuth = startFrameAzimuth;
         this.endFrameAzimuth = endFrameAzimuth;

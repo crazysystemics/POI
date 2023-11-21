@@ -247,6 +247,7 @@
             etr.ageOut = emitterID.ageOut;
 
             etr.identifier = emitterRecord.erIdentifier;
+            etr.ecmTechnique = emitterRecord.ecmTechnique;
 
             etr.received = true;
 
@@ -284,11 +285,12 @@ public class EmitterTrackRecord
     public double ageOut;
 
     public string identifier;
+    public int ecmTechnique;
 
     public void Record(string label)
     {
         StreamWriter sw = new StreamWriter(Globals.recFileName, true);
-        sw.WriteLine($"{label}, {received}, {trackID}, {priCurrent}, {freqCurrent}, {pwCurrent}, {identifier}, {Globals.Tick}");
+        sw.WriteLine($"{label}, {received}, {trackID}, {identifier}, {priCurrent}, {freqCurrent}, {pwCurrent}, {Globals.Tick}");
         sw.Close();
     }
 }
@@ -298,6 +300,7 @@ public class EmitterRecord
     public string erIdentifier;
     public int erID;
     public int eID;
+    public int ecmTechnique;
 
     public double pri;
     public double freq;
