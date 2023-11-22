@@ -72,12 +72,12 @@
         PFM.emitterIDTable.Add(new EmitterID(2, "E2", 500, 800, 150, 8000, 10000, 500, 50, 150, 25));
 
 
-        Aircraft a = new(waypts3, 0);
+        Aircraft a = new(waypts3, 1, 0);
         //Aircraft a2 = new(waypts2, 1);
 
-        AcquisitionRadar ar1 = new(new Position(200, 180), 150, 15, Globals.Tick, 5, 359, 0);
-        FireControlRadar fcr1 = new(new Position(300, 180), 100, 15, Globals.Tick, 7, 359, 0);
-        FireControlRadar fcr2 = new(new Position(200, 0), 100, 15, Globals.Tick, 9, 359, 0);
+        AcquisitionRadar ar1 = new(new Position(200, 180), 150, 15, Globals.Tick, 1, 5, 360, 0);
+        FireControlRadar fcr1 = new(new Position(300, 180), 100, 15, Globals.Tick, 1, 7, 360, 0);
+        FireControlRadar fcr2 = new(new Position(200, 0), 100, 15, Globals.Tick, 1, 9, 360, 0);
 
         a.rwr = new RWR(ref a.position, 2);
         //a2.rwr = new RWR(ref a2.position, 3);

@@ -9,6 +9,7 @@ class Aircraft : BattleSystem
     public int currentWaypointID;
     public Position nextWaypoint;
     public int nextWaypointID;
+    public int velocityMultiplier;
 
     public class Out : OutParameter
     {
@@ -82,24 +83,24 @@ class Aircraft : BattleSystem
                 if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
                 {
                     // x = distanceToNextWaypoint[0] * moveRatio
-                    this.position.x += moveRatio;
-                    this.position.y += 1;
+                    this.position.x += (moveRatio * this.velocityMultiplier);
+                    this.position.y += (1 * this.velocityMultiplier);
                 }
 
                 // If y-distance > x-distance
 
                 else if (distanceToNextWaypoint[1] > distanceToNextWaypoint[0])
                 {
-                    this.position.x += 1;
-                    this.position.y += moveRatio;
+                    this.position.x += (1 * this.velocityMultiplier);
+                    this.position.y += (moveRatio * this.velocityMultiplier);
                 }
 
                 // If x-distance = y-distance
 
                 else
                 {
-                    this.position.x += 1;
-                    this.position.y += 1;
+                    this.position.x += (1 * this.velocityMultiplier);
+                    this.position.y += (1 * this.velocityMultiplier);
                 }
             }
 
@@ -112,24 +113,24 @@ class Aircraft : BattleSystem
 
                 if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
                 {
-                    this.position.x += -moveRatio;
-                    this.position.y += -1;
+                    this.position.x += (-moveRatio * this.velocityMultiplier);
+                    this.position.y += (-1 * this.velocityMultiplier);
                 }
 
                 // If y-distance > x-distance
 
                 else if (distanceToNextWaypoint[1] > distanceToNextWaypoint[0])
                 {
-                    this.position.x += -1;
-                    this.position.y += -moveRatio;
+                    this.position.x += (-1 * this.velocityMultiplier);
+                    this.position.y += (-moveRatio * this.velocityMultiplier);
                 }
 
                 // If x-distance = y-distance
 
                 else
                 {
-                    this.position.x += -1;
-                    this.position.y += -1;
+                    this.position.x += (-1 * this.velocityMultiplier);
+                    this.position.y += (-1 * this.velocityMultiplier);
                 }
             }
 
@@ -142,24 +143,24 @@ class Aircraft : BattleSystem
 
                 if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
                 {
-                    this.position.x += moveRatio;
-                    this.position.y += -1;
+                    this.position.x += (moveRatio * this.velocityMultiplier);
+                    this.position.y += (-1 * this.velocityMultiplier);
                 }
 
                 // If y-distance > x-distance
 
                 else if (distanceToNextWaypoint[1] > distanceToNextWaypoint[0])
                 {
-                    this.position.x += 1;
-                    this.position.y += -moveRatio;
+                    this.position.x += (1 * this.velocityMultiplier);
+                    this.position.y += (-moveRatio * this.velocityMultiplier);
                 }
 
                 // If x-distance = y-distance
 
                 else
                 {
-                    this.position.x += 1;
-                    this.position.y += -1;
+                    this.position.x += (1 * this.velocityMultiplier);
+                    this.position.y += (-1 * this.velocityMultiplier);
                 }
             }
 
@@ -172,24 +173,24 @@ class Aircraft : BattleSystem
 
                 if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
                 {
-                    this.position.x += -moveRatio;
-                    this.position.y += 1;
+                    this.position.x += (-moveRatio * this.velocityMultiplier);
+                    this.position.y += (1 * this.velocityMultiplier);
                 }
 
                 // If y-distance > x-distance
 
                 else if (distanceToNextWaypoint[1] > distanceToNextWaypoint[0])
                 {
-                    this.position.x += -1;
-                    this.position.y += moveRatio;
+                    this.position.x += (-1 * this.velocityMultiplier);
+                    this.position.y += (moveRatio * this.velocityMultiplier);
                 }
 
                 // If x-distance = y-distance
 
                 else
                 {
-                    this.position.x += -1;
-                    this.position.y += 1;
+                    this.position.x += (-1 * this.velocityMultiplier);
+                    this.position.y += (1 * this.velocityMultiplier);
                 }
             }
         }
@@ -207,14 +208,14 @@ class Aircraft : BattleSystem
 
                 if (displacementArray[1] > 0)
                 {
-                    this.position.y += 1;
+                    this.position.y += (1 * this.velocityMultiplier);
                 }
 
                 // If y-displacement is negative
 
                 else if (displacementArray[1] < 0)
                 {
-                    this.position.y += -1;
+                    this.position.y += (-1 * this.velocityMultiplier);
                 }
             }
 
@@ -227,14 +228,14 @@ class Aircraft : BattleSystem
 
                 if (displacementArray[0] > 0)
                 {
-                    this.position.x += 1;
+                    this.position.x += (1 * this.velocityMultiplier);
                 }
 
                 // If x-displacement is negative
 
                 else if (displacementArray[0] < 0)
                 {
-                    this.position.x += -1;
+                    this.position.x += (-1 * this.velocityMultiplier);
                 }
             }
         }
@@ -250,7 +251,7 @@ class Aircraft : BattleSystem
     }
 
 
-    public Aircraft(List<Position> waypoints, int id)
+    public Aircraft(List<Position> waypoints, int velocityMultiplier, int id)
     {
         this.position = waypoints.ToList()[0];
         this.waypoints = waypoints;
@@ -258,6 +259,7 @@ class Aircraft : BattleSystem
         this.nextWaypoint = waypoints[1];
         this.currentWaypointID = 0;
         this.nextWaypointID = 1;
+        this.velocityMultiplier = velocityMultiplier;
         this.id = id;
     }
 

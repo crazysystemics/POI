@@ -93,7 +93,7 @@
         }
     }
 
-    public FireControlRadar(Position position, int radius, int beamWidth, int txTick, int id, int startFrameAzimuth = 135, int endFrameAzimuth = 45)
+    public FireControlRadar(Position position, int radius, int beamWidth, int txTick, int endToEndDuration, int id, int startFrameAzimuth = 135, int endFrameAzimuth = 45)
     {
         this.pulseRepetitionInterval = Globals.randomNumberGenerator.Next(500, 800);
         int pulseWidth = (Globals.randomNumberGenerator.Next(10, 15) * pulseRepetitionInterval) / 100;
@@ -107,7 +107,7 @@
         this.effectiveRadiatedPower = 128;
         this.radarType = Globals.RadarTypes.FIRECONTROL;
         this.beamWidth = beamWidth;
-        this.endToEndDuration = 1;
+        this.endToEndDuration = endToEndDuration;
         this.numberOfFrames = (int)(this.endToEndScanSector / this.beamWidth);
         this.startFrameAzimuth = startFrameAzimuth;
         this.endFrameAzimuth = endFrameAzimuth;
