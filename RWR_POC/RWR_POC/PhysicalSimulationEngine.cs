@@ -1,7 +1,6 @@
 ﻿class PhysicalSimulationEngine : SimulationModel
 {
-    public Dictionary<int, Position> physicalObjects = new Dictionary<int, Position>();
-    public Pulse pulseInspace;
+    public Dictionary<int, Position> physicalObjects = new();
     //public Pulse previousActivePulse;
 
     public PhysicalSimulationEngine(int id)
@@ -9,21 +8,21 @@
         this.id = id;
     }
 
-    public int GetDistance(int objID1, int objID2)
+    public static int GetDistance(Position p1, Position p2)
     {
-        if (!physicalObjects.ContainsKey(objID1) || !physicalObjects.ContainsKey(objID2)) return 0;
-        Position p1 = physicalObjects[objID1];
-        Position p2 = physicalObjects[objID2];
         int distance_x = p1.x - p2.x;
         int distance_y = p1.y - p2.y;
         int distance = (int)Math.Sqrt((distance_x * distance_x) + (distance_y * distance_y));
         return distance;
     }
 
-    //public Pulse Get()
-    //{
-
-    //}
+    public static double GetAngle(Position p1, Position p2)
+    {
+        int distance_x = p1.x - p2.x;
+        int distance_y = p1.y - p2.y;
+        double angle = Math.Atan2(distance_y, distance_x);
+        return angle;
+    }
 
     public class PhysicalSimulationOut : OutParameter
     {
@@ -35,7 +34,7 @@
 
     public class In : InParameter
     {
-        public Position position = new Position();
+        public Position position = new();
         public In(Position position, int id) : base(id)
         {
             this.position = position;
@@ -73,10 +72,10 @@
 
     }
 
-    public Pulse GetPulse(Pulse txPulse, int txTick, Position txPosition,
-                          int rxTick, Position rxPosition)
-    {
-        pulseInspace = txPulse;
-        return pulseInspace;
-    }
+    //public Pulse GetPulse(Pulse txPulse, int txTick, Position txPosition,
+    //                      int rxTick, Position rxPosition)
+    //{
+    //    pulseInspace = txPulse;
+    //    return pulseInspace;
+    //}
 }

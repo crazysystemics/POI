@@ -1,21 +1,16 @@
-﻿using System.ComponentModel;
-
-class DiscreteTimeSimulationEngine
+﻿class DiscreteTimeSimulationEngine
 {
     public List<SimulationModel> simMod;
     public List<InParameter> dtseInParameters;
-    public List<OutParameter> dtseOutParameter = new List<OutParameter>();
-    public List<InParameter> receiverInParams = new List<InParameter>();
-    public PhysicalSimulationEngine pse = new PhysicalSimulationEngine(99);
-    public Pulse echoedPulse = new Pulse(0, 0, 0, 0, "zero");
-    public bool echoPulseSet = false;
-    public int rxTick = Globals.Tick;
-    public RWR.Emitter detectedRadar = new RWR.Emitter();
+    public List<OutParameter> dtseOutParameter = new();
+    public List<InParameter> receiverInParams = new();
+    public PhysicalSimulationEngine pse = new(99);
+    public bool detection = false;
     public Pulse[,] globalSituationalMatrix;
-    public int transmitterCount;
-    OutParameter pulseOut;
-    Pulse txPulse = new Pulse(0, 0, 0, 0, "E0");
-    //List<Pulse> txPulses = new List<Pulse>();
+    public List<Pulse> pulseTrainFromRadar = new();
+    public double[] receiverAmps = new double[4];
+    public Position detectedAircraftPosition = new Position();
+    public EmitterRecord receivedEmitterRecord = new EmitterRecord();
 
     public DiscreteTimeSimulationEngine()
     {
@@ -26,115 +21,77 @@ class DiscreteTimeSimulationEngine
 
     public void Init()
     {
-        //string aircraftPosX;
-        //string aircraftPosY;
+        List<Position> waypts = new()
+        {
+            new Position(50, 50),
+            new Position(85, 85),
+            new Position(135, 85),
+            new Position(170, 50),
+            new Position(135, 15),
+            new Position(85, 15),
+            new Position(50, 50)
+        };
 
-        //string radar1PosX;
-        //string radar1PosY;
-        //string radar1Symbol;
-        //string radar1PRI;
-        //string pulse1PW;
-        //string pulse1Amp;
-        //string pulse1TimeOfTraversal;
-        //string pulse1AngleOfTraversal;
+        List<Position> waypts2 = new()
+        {
+            new Position(85, 85),
+            new Position(135, 85),
+            new Position(170, 50),
+            new Position(135, 15),
+            new Position(85, 15),
+            new Position(50, 50),
+            new Position(85, 85)
+        };
 
-        //string radar2PosX;
-        //string radar2PosY;
-        //string radar2Symbol;
-        //string radar2PRI;
-        //string pulse2PW;
-        //string pulse2Amp;
-        //string pulse2TimeOfTraversal;
-        //string pulse2AngleOfTraversal;
+        List<Position> waypts3 = new()
+        {
+            new Position(100, 100),
+            new Position(200, 200),
+            new Position(300, 200),
+            new Position(400, 100),
+            new Position(300, 0),
+            new Position(200, 0),
+            new Position(100, 100)
+        };
 
-        //static string GetValidInput(string prompt, string errorMessage)
-        //{
-        //    string userInput;
-        //    int parseOut;
-
-        //    do
-        //    {
-        //        Console.WriteLine(prompt);
-        //        userInput = Console.ReadLine();
-        //        if (prompt == "Enter the symbol for radar/pulse:")
-        //        {
-        //            if (string.IsNullOrEmpty(userInput))
-        //            {
-        //                Console.WriteLine("Please enter a valid non-empty and non-null value.");
-        //                continue;
-        //            }
-        //            else
-        //            {
-        //                break;
-        //            }
-        //        }
-        //        if (string.IsNullOrEmpty(userInput) || !int.TryParse(userInput, out parseOut))
-        //        {
-        //            Console.WriteLine(errorMessage);
-        //        }
-        //    }
-        //    while (string.IsNullOrEmpty(userInput) || !int.TryParse(userInput, out parseOut));
-
-        //    return userInput;
-        //}
-
-        //aircraftPosX = GetValidInput("Enter the position for aircraft (X):", "Please enter a valid integer value.");
-        //aircraftPosY = GetValidInput("Enter the position for aircraft (Y):", "Please enter a valid integer value.");
-
-        //radar1PosX = GetValidInput("Enter the position for radar 1 (X):", "Please enter a valid integer value.");
-        //radar1PosY = GetValidInput("Enter the position for radar 1 (Y):", "Please enter a valid integer value.");
-        //radar1PRI = GetValidInput("Enter the PRI for radar 1:", "Please enter a valid integer value.");
-        //radar1Symbol = GetValidInput("Enter the symbol for radar/pulse:", "Please enter a valid non-empty and non-null value.");
-        //pulse1PW = GetValidInput("Enter the pulse 1 width:", "Please enter a valid integer value.");
-        //pulse1Amp = GetValidInput("Enter the pulse 1 amplitude:", "Please enter a valid integer value.");
-        //pulse1TimeOfTraversal = GetValidInput("Enter the pulse 1 time of traversal:", "Please enter a valid integer value.");
-        //pulse1AngleOfTraversal = GetValidInput("Enter the pulse 1 angle of traversal:", "Please enter a valid integer value.");
-
-        //radar2PosX = GetValidInput("Enter the position for radar 2 (X):", "Please enter a valid integer value.");
-        //radar2PosY = GetValidInput("Enter the position for radar 2 (Y):", "Please enter a valid integer value.");
-        //radar2PRI = GetValidInput("Enter the PRI for radar 2:", "Please enter a valid integer value.");
-        //radar2Symbol = GetValidInput("Enter the symbol for radar/pulse:", "Please enter a valid non-empty and non-null value.");
-        //while (radar2Symbol == radar1Symbol)
-        //{
-        //    Console.WriteLine("Radar 2 symbol cannot be same as Radar 1 symbol. Please try again.");
-        //    radar1Symbol = GetValidInput("Enter the symbol for radar/pulse:", "Please enter a valid non-empty and non-null value.");
-        //}
-        //pulse2PW = GetValidInput("Enter the pulse 2 width:", "Please enter a valid integer value.");
-        //pulse2Amp = GetValidInput("Enter the pulse 2 amplitude:", "Please enter a valid integer value.");
-        //pulse2TimeOfTraversal = GetValidInput("Enter the pulse 2 time of traversal:", "Please enter a valid integer value.");
-        //pulse2AngleOfTraversal = GetValidInput("Enter the pulse 2 angle of traversal:", "Please enter a valid integer value.");
+        List<Position> wayptsLinear = new()
+        {
+            new Position(0, 50),
+            new Position(500, 50)
+        };
 
 
-        //Aircraft a = new Aircraft(new Position(Int32.Parse(aircraftPosX), Int32.Parse(aircraftPosY)), 0);
-        Aircraft a = new Aircraft(new Position(10, 10), 0);
+        string currentTime = DateTime.Now.ToString();
+        currentTime = currentTime.Replace(":", "-");
+        currentTime = currentTime.Replace(" ", "-");
+        currentTime = currentTime.Remove(16);
 
-        //Radar r = new Radar(new Pulse(Int32.Parse(pulse1PW), Int32.Parse(pulse1Amp), Int32.Parse(pulse1TimeOfTraversal), Int32.Parse(pulse1AngleOfTraversal), radar1Symbol), new Position(Int32.Parse(radar1PosX), Int32.Parse(radar1PosY)), Int32.Parse(radar1PRI), radar1Symbol, Globals.Tick, 50, 1);
-        //Radar r2 = new Radar(new Pulse(Int32.Parse(pulse2PW), Int32.Parse(pulse2Amp), Int32.Parse(pulse2TimeOfTraversal), Int32.Parse(pulse2AngleOfTraversal), radar2Symbol), new Position(Int32.Parse(radar2PosX), Int32.Parse(radar2PosY)), Int32.Parse(radar2PRI), radar2Symbol, Globals.Tick, 50, 2);
+        Globals.recFileName = $"erOutputFile{currentTime}.csv";
 
-        Radar r = new Radar(new Pulse(5, 15, 5, 45, "E1"), new Position(5, 5), 20, "E1", Globals.Tick, 50, 1);
-        Radar r2 = new Radar(new Pulse(8, 10, 5, 45, "E2"), new Position(5, 5), 20, "E2", Globals.Tick, 50, 2);
+        PFM.emitterIDTable.Add(new EmitterID(1, "E1", 800, 1500, 200, 3000, 4000, 500, 100, 200, 50));
+        PFM.emitterIDTable.Add(new EmitterID(2, "E2", 500, 800, 150, 8000, 10000, 500, 50, 150, 25));
 
-        // PRI for each radar should be greater than 2x the distance to any aircraft (for pulse speed of 1 cell per tick)
-        // Minimum unambiguous range for a radar is c * PRI / 2 where c is the speed of light
 
-        a.rwr = new RWR(ref a.position, 3);
-        //a2.rwr = new RWR(ref a2.position, 6);
+        Aircraft a = new(waypts3, 1, 0);
+        //Aircraft a2 = new(waypts2, 1);
+
+        AcquisitionRadar ar1 = new(new Position(200, 180), 150, 15, Globals.Tick, 1, 5, 360, 0);
+        FireControlRadar fcr1 = new(new Position(300, 180), 100, 15, Globals.Tick, 1, 7, 360, 0);
+        FireControlRadar fcr2 = new(new Position(200, 0), 100, 15, Globals.Tick, 1, 9, 360, 0);
+
+        a.rwr = new RWR(ref a.position, 2);
+        //a2.rwr = new RWR(ref a2.position, 3);
         // be careful with ref operator
 
         simMod.Add(a);
         simMod.Add(a.rwr);
-        simMod.Add(r);
-        simMod.Add(r2);
-        //simMod.Add(r3);
+        //simMod.Add(a2);
+        //simMod.Add(a2.rwr);
+        simMod.Add(ar1);
+        simMod.Add(fcr1);
+        simMod.Add(fcr2);
+        //simMod.Add(fcr1.missile1);
         simMod.Add(pse);
-
-        foreach (SimulationModel sim_mod in simMod)
-        {
-            if (sim_mod is Radar)
-            {
-                transmitterCount++;
-            }
-        }
 
         globalSituationalMatrix = new Pulse[simMod.Count, simMod.Count];
 
@@ -144,7 +101,7 @@ class DiscreteTimeSimulationEngine
 
     public void RunSimulationEngine()
     {
-        List<InParameter> inParameters = new List<InParameter>();
+        List<InParameter> inParameters = new();
 
         Console.WriteLine($"----------\nTick = {Globals.Tick}\n----------");
 
@@ -175,43 +132,71 @@ class DiscreteTimeSimulationEngine
             }
         }
 
-        buildGlobalSituationAwareness();
+        BuildGlobalSituationAwareness();
 
         // Set() on every Simulation Model
 
         foreach (SimulationModel receiver in simMod)
         {
-            pse.Set(inParameters);
-            int radius = 0;
+            //pse.Set(inParameters);
 
             if (receiver is Radar)
             {
-                List<InParameter> inParameters2 = new List<InParameter>();
+                List<InParameter> inParameters2 = new();
                 for (int j = 0; j < simMod.Count; j++)
                 {
                     //if (transmitter is RWR)
                     {
-                        if (echoPulseSet)
-                        {
-                            inParameters2.Add(new Radar.In(globalSituationalMatrix[receiver.id, j], 2));
-                        }
+                        //if (echoPulseSet)
+                        //{
+                        //    inParameters2.Add(new Radar.In(globalSituationalMatrix[receiver.id, j], 2));
+                        //}
                     }
                 }
                 ((Radar)receiver).Set(inParameters2);
             }
 
+            if (receiver is AcquisitionRadar)
+            {
+                foreach (SimulationModel fcr in simMod)
+                {
+                    if (fcr is FireControlRadar)
+                    {
+                        receiverInParams.Clear();
+                        List<InParameter> inParameters3 = new();
+                        if (((AcquisitionRadar)receiver).detection)
+                        {
+                            FireControlRadar.In targetPositions = new FireControlRadar.In(((AcquisitionRadar)receiver).targetPosition, 6);
+                            receiverInParams.Add(targetPositions);
+                        }
+                        fcr.Set(receiverInParams);
+                    }
+                }
+            }
+
+            //if (receiver is FireControlRadar)
+            //{
+            //    receiverInParams.Clear();
+            //    List<InParameter> inParameters3 = new();
+            //    if (detection)
+            //    {
+            //        FireControlRadar.In targetPositions = new FireControlRadar.In(detectedAircraftPosition, 6);
+            //        receiverInParams.Add(targetPositions);
+            //    }
+            //    receiver.Set(receiverInParams);
+            //}
+
+
 
             if (receiver is RWR)
             {
                 receiverInParams.Clear();
-                for (int j = 0; j < simMod.Count; j++)
+                if (detection && ((RWR)receiver).receivingEmitterRecord)
                 {
-                    if (globalSituationalMatrix[receiver.id, j] != null)
-                    {
-                        RWR.In globalSituation = new RWR.In(globalSituationalMatrix[receiver.id, j], receiver.id);
-                        receiverInParams.Add(globalSituation);
-                    }
+                    RWR.In globalSituation = new RWR.In(receivedEmitterRecord, receiver.id);
+                    receiverInParams.Add(globalSituation);
                 }
+
                 ((RWR)receiver).Set(receiverInParams);
 
             }
@@ -228,89 +213,65 @@ class DiscreteTimeSimulationEngine
         Globals.Tick++;
     }
 
-    public void buildGlobalSituationAwareness()
+    public void BuildGlobalSituationAwareness()
     {
-
-        // TODO: Build semantic net or graph connecting all simulation models
-
-
-        //int transmittorCount = 0;
+        pulseTrainFromRadar.Clear();
 
         foreach (SimulationModel transmitter in simMod)
         {
             foreach (SimulationModel receiver in simMod)
             {
-
-
                 if (transmitter is Radar)
                 {
 
-                    // Note: This will work at the Pulse's scale but not at physical scale of movement of aircraft
                     if (receiver is RWR)
                     {
-                        int dist = pse.GetDistance(receiver.id, transmitter.id);
-                        int pulseTravelTime = dist / Globals.pulseTravelSpeed;
+                        int dist = PhysicalSimulationEngine.GetDistance(receiver.position, transmitter.position);
+                        double angle = PhysicalSimulationEngine.GetAngle(receiver.position, transmitter.position);
                         int radius = ((Radar)transmitter).radius;
-                        //if (Globals.distDebugPrint)
-                        {
-                            Console.WriteLine($"Distance between {receiver} {receiver.id} and Radar {transmitter.id} = {dist}");
-                            Globals.distDebugPrint = false;
-                        }
 
-                        if (((Radar)transmitter).txTicks.Count != 0)
+                        Console.WriteLine($"Distance between {receiver} {receiver.id} and Radar {transmitter.id} = {dist}");
+                        Globals.distDebugPrint = false;
+
+                        if (((Radar)transmitter).beamContains(receiver.position))
                         {
-                            if (Math.Abs(Globals.Tick - ((Radar)transmitter).txTicks.Max()) == pulseTravelTime && Globals.Tick != 0)
+                            detection = true;
+                            if (transmitter is AcquisitionRadar)
                             {
-                                Globals.debugPrint = true;
-                                Console.WriteLine($"\nPulse from {transmitter} {transmitter.id} arrived at cell of {receiver} {receiver.id}\n");
-                                ((RWR)receiver).hasReceivedPulse = true;
-                                globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).activePulse;
-
-                                // at current tick at current location, what will be the amplitude of the pulse
-                                // no attenuation in amplitude
-                                // only pse should the energy at a location and time
-                                // only when we introduce sensor model of RWR
+                                ((AcquisitionRadar)transmitter).detection = true;
+                                ((AcquisitionRadar)transmitter).targetPosition = receiver.position;
                             }
 
-                            else
-                            {
-                                globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)transmitter).zeroPulse;
-                            }
-                        }
-                        
-                    }
-                }
+                            List<Pulse> pulseTrainTemp = ((Radar)transmitter).GeneratePulseTrain(Globals.Tick * 1000, angle);
+                            pulseTrainFromRadar.AddRange(pulseTrainTemp);
 
-                if (transmitter is RWR)
-                {
-                    if (receiver is Radar)
-                    {
-                        int dist = pse.GetDistance(receiver.id, transmitter.id);
-                        int pulseTravelTime = dist / Globals.pulseTravelSpeed;
-                        if (((Radar)receiver).txTicks.Count != 0)
-                        {
-                            if (Math.Abs(Globals.Tick - ((Radar)receiver).txTicks.Min()) == 2 * pulseTravelTime && Globals.Tick != 0)
+                            receivedEmitterRecord = new EmitterRecord();
+                            receivedEmitterRecord.pri = ((Radar)transmitter).pulseRepetitionInterval;
+                            receivedEmitterRecord.freq = ((Radar)transmitter).txPulse.frequency;
+                            receivedEmitterRecord.pw = ((Radar)transmitter).txPulse.pulseWidth;
+                            receivedEmitterRecord.erID = ((Radar)transmitter).id;
+                            receivedEmitterRecord.erIdentifier = ((Radar)transmitter).radarType.ToString();
+                            receivedEmitterRecord.eID = ((Radar)transmitter).id + 10;
+
+                            ((RWR)receiver).receivingEmitterRecord = true;
+
+                            int amp = pulseTrainFromRadar[0].amplitude;
+
+                            receiverAmps[0] = amp * Math.Cos(angle - (Math.PI / 4));
+                            receiverAmps[1] = amp * Math.Cos(angle + (Math.PI / 4));
+                            receiverAmps[2] = amp * Math.Cos(angle - (3 * Math.PI / 4));
+                            receiverAmps[3] = amp * Math.Cos(angle - (5 * Math.PI / 4));
+
+                            for (int i = 0; i < 4; i++)
                             {
-                                int txTickMin = ((Radar)receiver).txTicks.Min();
-                                //if (transmitterCount > 1)
+                                if (receiverAmps[i] <= 0)
                                 {
-                                    ((Radar)receiver).txTicks.RemoveAll(item => item == txTickMin);
+                                    receiverAmps[i] = 0;
                                 }
-
-                                //((Radar)receiver).pulsesSent--;
-
-                                Console.WriteLine($"\nEcho received by Radar {receiver.id}\n");
-
-                                Console.WriteLine($"Radar {((Radar)receiver).id}:\n\techoPulse:\n\t\tPulse width: {((Radar)receiver).echoPulse.pulseWidth}\n\t\tPRI: {((Radar)receiver).pulseRepetitionInterval}" +
-                                                  $"\n\t\tTime of arrival: {((Radar)receiver).echoTimeOfArrival}\n\t\tAngle of arrival: {((Radar)receiver).echoPulse.angleOfTraversal}\n\t\tSymbol: {((Radar)receiver).echoPulse.symbol}" +
-                                                  $"\n\t\tAmplitude: {((Radar)receiver).echoPulse.amplitude}\n\t\ttxTick = {((Radar)receiver).txTick}\n");
-
-                                ((Radar)receiver).hasReceivedEcho = true;
-                                ((Radar)receiver).echoTimeOfArrival = Globals.Tick;
-                                globalSituationalMatrix[receiver.id, transmitter.id] = ((Radar)receiver).activePulse;
-                                echoPulseSet = true;
                             }
+
                         }
+
                     }
                 }
             }
