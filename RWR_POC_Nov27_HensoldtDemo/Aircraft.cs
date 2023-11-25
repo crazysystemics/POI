@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-class Aircraft : BattleSystem
+public class Aircraft : BattleSystem
 {
     public override bool Stopped { get; set; }
     public RWR rwr;
