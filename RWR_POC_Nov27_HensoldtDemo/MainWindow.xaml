@@ -1,0 +1,21 @@
+﻿<Window x:Class="RWR_POC_GUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RWR_POC_GUI"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="672.991" Width="1181.006">
+    <Grid Name="myGrid" Margin="0,1,0,-1">
+        <Button x:Name="btn_start_tick" Content="START TICK" HorizontalAlignment="Left" Margin="20,43,0,0" VerticalAlignment="Top" Width="84" Click="Btn_start_tick_Click" Background="LightBlue" FontSize="14" FontWeight="Bold" BorderBrush="#FF959292"/>
+        <Button x:Name="btn_pause_tick" Content="PAUSE TICK" HorizontalAlignment="Left" Margin="139,43,0,0" VerticalAlignment="Top" Width="91" Click="Btn_pause_tick_Click" Background="LightBlue" FontSize="14" FontWeight="Bold" BorderBrush="#FF959292"/>
+        <Button x:Name="btn_next_tick" Content="NEXT TICK" HorizontalAlignment="Left" Margin="269,43,0,0" VerticalAlignment="Top" Width="91" Click="Btn_next_tick_Click" Background="LightBlue" FontSize="14" FontWeight="Bold" BorderBrush="#FF959292"/>
+        <Menu HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="792">
+            <MenuItem x:Name="menu_rwr_display" Header="RWR Display" Height="24" Width="100" BorderBrush="#FFCDCDC7" FontSize="14" Click ="menu_rwr_display_Click" />
+            <MenuItem x:Name="menu_a_rdr_display" Header="RADAR Display" Height="24" Width="112" BorderBrush="#FFCDCDC7" FontSize="14" Click ="Menu_rdr_display_Click"/>
+            <MenuItem x:Name="menu_for_display" Header="FCR Display" Height="24" Width="112" BorderBrush="#FFCDCDC7" FontSize="14" Click = "Menu_fcr_display_Click"/>
+        </Menu>
+        <Canvas Name="canvas" Margin="0,116,0,0" Background="#FFEFF7E4"/>
+        <Label Content="MISSION SIMULATION" HorizontalAlignment="Left" Height="34" Margin="478,77,0,0" VerticalAlignment="Top" Width="191" FontSize="16" FontWeight="Bold" Foreground="#FF0B61DE" RenderTransformOrigin="1.563,0.692"/>
+    </Grid>
+</Window>
