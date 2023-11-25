@@ -28,6 +28,8 @@ class DiscreteTimeSimulationEngine
 
     public void Init()
     {
+        Globals.debugPrint = Globals.DebugLevel.BRIEF;
+
         List<Position> waypts = new List<Position>()
         {
             new Position(25, 25),
@@ -128,14 +130,12 @@ class DiscreteTimeSimulationEngine
                     emitterRecords.Clear();
                     List<InParameter> inParameters = new List<InParameter>();
 
-                    Console.WriteLine($"----------\nTick = {Globals.Tick}\n----------");
+                    if (Globals.debugPrint == Globals.DebugLevel.VERBOSE || Globals.debugPrint == Globals.DebugLevel.BRIEF)
+                    {
+                        Console.WriteLine($"----------\nTick = {Globals.Tick}\n----------");
+                    }
 
                     // Get() on every Simulation Model
-
-                    if (Globals.Tick != 0)
-                    {
-                        Globals.debugPrint = false;
-                    }
 
                     foreach (SimulationModel sim_model in simMod)
                     {
@@ -289,9 +289,6 @@ class DiscreteTimeSimulationEngine
     {
         pulseTrainFromRadar.Clear();
 
-        Console.WriteLine(Math.Atan2(0, 10));
-        Console.WriteLine(Math.Atan2(0, -10));
-
         foreach (SimulationModel transmitter in simMod)
         {
             foreach (SimulationModel receiver in simMod)
@@ -313,9 +310,11 @@ class DiscreteTimeSimulationEngine
                         double angle = PhysicalSimulationEngine.GetAngle(receiver.position, transmitter.position) + (Math.PI / 2);
                         int radius = ((Radar)transmitter).radius;
 
-                        Console.WriteLine($"Distance between {receiver} {receiver.id} and Radar {transmitter.id} = {dist}");
-                        Console.WriteLine($"Azimuth = {angle}");
-                        Globals.distDebugPrint = false;
+                        if (Globals.debugPrint == Globals.DebugLevel.VERBOSE)
+                        {
+                            Console.WriteLine($"Distance between {receiver} {receiver.id} and Radar {transmitter.id} = {dist}");
+                            Console.WriteLine($"Azimuth = {angle}");
+                        }
 
                         if (((Radar)transmitter).beamContains(receiver.position))
                         {

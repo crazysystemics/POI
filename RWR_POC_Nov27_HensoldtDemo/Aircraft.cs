@@ -50,7 +50,10 @@ class Aircraft : BattleSystem
 
     public override void OnTick()
     {
-        Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
+        if (Globals.debugPrint == Globals.DebugLevel.VERBOSE)
+        {
+            Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
+        }
 
         this.nextWaypointAzimuth = PhysicalSimulationEngine.GetAngle(this.currentWaypoint, this.nextWaypoint);
         MoveAircraft();

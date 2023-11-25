@@ -108,7 +108,10 @@ public class RWR : BattleSystem
                 }
                 ManageTracks(emitterRecord, emitterID, emitterTrackFile);
 
-                Console.WriteLine($"Emitter Record:\n\t\tPRI: {emitterRecord.pri} mcs\n\t\tPulse Width: {emitterRecord.pw} ns\n\t\tFrequency: {emitterRecord.freq} MHz\n");
+                if (Globals.debugPrint == Globals.DebugLevel.VERBOSE)
+                {
+                    Console.WriteLine($"Emitter Record:\n\t\tPRI: {emitterRecord.pri} mcs\n\t\tPulse Width: {emitterRecord.pw} ns\n\t\tFrequency: {emitterRecord.freq} MHz\n");
+                }
             }
 
         }
@@ -242,7 +245,10 @@ public class RWR : BattleSystem
         this.emRecordList.Clear();
         Globals.emitterTrackFile = emitterTrackFile;
 
-        Console.WriteLine("-----------------------------------\n");
+        if (Globals.debugPrint == Globals.DebugLevel.VERBOSE)
+        {
+            Console.WriteLine("-----------------------------------\n");
+        }
     }
 
     public EmitterRecord BuildEmitterRecord(List<PDW> PDWs)
@@ -335,8 +341,12 @@ public class RWR : BattleSystem
                     etr.pwCurrent = emitterRecord.pw;
                     etr.freqCurrent = emitterRecord.freq;
 
-                    Console.WriteLine($"Match found in tracks:\n\t\tID: {etr.eid}\n\t\tFrequency: {etr.freqCurrent} MHz\n\t\t" +
-                                      $"PRI: {etr.priCurrent} mcs\n\t\tPulse Width: {etr.pwCurrent} ns");
+                    if (Globals.debugPrint == Globals.DebugLevel.VERBOSE)
+                    {
+                        Console.WriteLine($"Match found in tracks:\n\t\tID: {etr.eid}\n\t\tFrequency: {etr.freqCurrent} MHz\n\t\t" +
+                  $"PRI: {etr.priCurrent} mcs\n\t\tPulse Width: {etr.pwCurrent} ns");
+                    }
+
 
                     //OnUpdate
 

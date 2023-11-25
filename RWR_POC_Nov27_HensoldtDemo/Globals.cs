@@ -11,9 +11,7 @@ public static class Globals
     public static int pulseTravelSpeed = 1;
     public static int guID = 0;
     public static int gTrackID = 0;
-    public static bool debugPrint = true;
-    public static bool distDebugPrint = true;
-    public static bool aircraftDebugPrint = true;
+    public static DebugLevel debugPrint;
     public static string recFileName;
     public static string trackRecFileName;
     public static Random randomNumberGenerator = new Random();
@@ -43,5 +41,13 @@ public static class Globals
         FIRECONTROL,
         GCI,
         SIMPLE
+    }
+
+    public enum DebugLevel
+    {
+        NONE,
+        BRIEF,
+        SPOT,
+        VERBOSE
     }
 }
