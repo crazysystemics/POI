@@ -130,7 +130,7 @@ class DiscreteTimeSimulationEngine
                     emitterRecords.Clear();
                     List<InParameter> inParameters = new List<InParameter>();
 
-                    if (Globals.debugPrint == Globals.DebugLevel.VERBOSE || Globals.debugPrint == Globals.DebugLevel.BRIEF)
+                    if (Globals.debugPrint == Globals.DebugLevel.BRIEF || Globals.debugPrint == Globals.DebugLevel.VERBOSE)
                     {
                         Console.WriteLine($"----------\nTick = {Globals.Tick}\n----------");
                     }
