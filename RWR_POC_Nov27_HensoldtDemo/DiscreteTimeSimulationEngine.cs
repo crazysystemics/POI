@@ -128,7 +128,7 @@ class DiscreteTimeSimulationEngine
                     emitterRecords.Clear();
                     List<InParameter> inParameters = new List<InParameter>();
 
-                    Console.WriteLine($"----------\nTick = {Globals.Tick}\n----------");
+                    Console.WriteLine($"----------\nTick2 = {Globals.Tick}\n----------");
 
                     // Get() on every Simulation Model
 
