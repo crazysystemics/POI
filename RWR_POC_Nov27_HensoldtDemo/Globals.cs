@@ -7,9 +7,9 @@ using System.Windows.Threading;
 public static class Globals
 {
     // Episode configuration
-    public static Random randomNumberGenerator = new Random();
-    public static int flightPathNumber = 2;
-    public static int radarSetNumber = -1;
+    public static Random randomNumberGenerator = new Random(10);
+    public static int flightPathNumber = 2; //-1 random
+    public static int radarSetNumber = 0;//(130,50) //-1;
 
     public static int Tick = 0;
     public static float TimeResolution = 0.10f;
@@ -27,6 +27,8 @@ public static class Globals
     public static int ageIn;
     public static int ageOut;
 
+    public static int action_t;
+
     public static bool isDone = false;
     public static CommandExecutive commandExecutive = new CommandExecutive();
 
@@ -36,6 +38,21 @@ public static class Globals
     public static void DebugWriteLine(string s)
     {
         Console.WriteLine(s);
+    }
+
+    public static void ExecuteShell()
+    {
+        Globals.timer.Stop();
+        TrackGenerator trackGenerator = new TrackGenerator();
+ 
+        string command = string.Empty;
+        while (command != "quit")
+        {
+            Console.WriteLine("Enter the Command");
+             command = Console.ReadLine();
+            Globals.commandExecutive.ParsePipelineCommand(command);
+        }
+        Globals.timer.Start();
     }
 
     public enum RadarTypes

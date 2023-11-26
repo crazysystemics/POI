@@ -9,7 +9,7 @@ public class RadarDataset
     {
         List<SimpleRadar> set1 = new List<SimpleRadar>()
         {
-            new SimpleRadar(new Position(130, 50), 40, 15, Globals.Tick, 1)
+            new SimpleRadar(new Position(110, 50), 40, 15, Globals.Tick, 2)
         };
         List<SimpleRadar> set2 = new List<SimpleRadar>()
         {

@@ -28,149 +28,6 @@ class TrackGenerator
             Globals.trackParameters.tracks.Add(i);
     }
 
-    //public void RunSimulation()
-
-    //{
-    //    Console.WriteLine("\t\t EmitterRecord");
-
-    //    Console.WriteLine();
-
-    //    Console.WriteLine("Tick No.\tTrack ID\tAGEIN\tAGEOUT\t\tVisibility\t\tACTION\t\tSTATE\t\tAgingOUT count");
-
-    //    Console.WriteLine();
-
-
-
-    //    emitterTrackFile.Clear();
-
-    //    while (Globals.Tick < 10)
-
-    //    {
-    //        foreach (EmitterTrackRecord etr in emitterTrackFile)
-    //            etr.received = false;
-
-    //        emitterRecords_Table = rwr.getEmitterRecord();
-
-    //        foreach (EmitterRecord er in emitterRecords_Table)
-    //        {
-    //            EmitterID pfmeid = new EmitterID(0, "eid", 0, 0, 0, 0, 0, 0, 0, 0, 0, Globals.ageIn, Globals.ageOut);
-
-    //            rwr.ManageTracks(er, pfmeid, emitterTrackFile);
-    //        }
-
-    //        //All emitter records are processed
-
-    //        //ON DELETE
-
-
-    //        List<EmitterTrackRecord> tempEFT = new List<EmitterTrackRecord>();
-
-    //        foreach (EmitterTrackRecord etr in emitterTrackFile)
-
-    //        {
-
-
-    //            if (etr.received)
-
-    //                tempEFT.Add(etr);
-
-
-    //            else
-
-    //            {
-
-    //                // On Delete
-    //                if (etr.ageIn > 0)
-
-    //                {
-
-    //                    // not copying to tempETF is deleting
-    //                    etr.valid = false;
-
-    //                    if (Globals.Tick >= Globals.trackParameters.start_tick && Globals.Tick <= Globals.trackParameters.end_tick
-    //                    && (Globals.trackParameters.action == ACTION.IDELETE || Globals.trackParameters.action == ACTION.ALL))
-    //                    {
-
-    //                        if (Globals.trackParameters.tracks.Contains(etr.trackID))
-
-    //                        {
-
-    //                            Console.WriteLine($"{Globals.Tick}\t\t{etr.trackID}\t\t{etr.ageIn}\t{etr.ageOut}\t\tNOT RCV \t\tiDELETE");
-
-    //                        }
-
-    //                    }
-
-    //                    // Globals.recorded Tracks.Add(new RecordedData(Globals. Tick, etr.trackID, etr.ageln, etr.ageOut, etr.vis, etr.action, string state, etr.ageinoutcount));
-    //                }
-
-    //                else
-
-    //                {
-
-    //                    etr.ageOut--;
-
-    //                    etr.AgingOutCount++;
-    //                    if (etr.ageOut > 0)
-
-    //                    {
-
-    //                        etr.valid = true;
-
-    //                        tempEFT.Add(etr);
-
-    //                        Console.WriteLine($"{Globals.Tick}\t\t{etr.trackID}\t\t{etr.ageIn}\t{etr.ageOut}\t\tNOT RCV\t\tAGING OUT");
-
-    //                    }
-
-    //                    else
-
-    //                    {
-
-    //                        // not copying to tempETF is deleting
-
-    //                        if (Globals.Tick >=
-    //                        Globals.trackParameters.start_tick && Globals.Tick <=
-
-    //                        Globals.trackParameters.end_tick
-    //                        && (Globals.trackParameters.action ==
-
-    //                        ACTION.ODELETE || Globals.trackParameters.action ==
-
-    //                        ACTION.ALL))
-
-    //                        {
-    //                            if (Globals.trackParameters.tracks.Contains(etr.trackID))
-
-    //                            {
-
-    //                                Console.WriteLine($"{Globals.Tick}\t\t{etr.trackID} \t\t{etr.ageIn}\t{etr.ageOut}\t\tNOT RCV \t\toDELETE\t\t\t\t{etr.AgingOutCount}");
-
-    //                            }
-
-    //                        }
-
-    //                        // Globals.recorded Tracks.Add(new RecordedData(Globals. Tick, etr.trackID));
-
-    //                    }
-
-    //                }
-
-    //            }
-
-    //        }
-
-
-    //        emitterTrackFile = tempEFT;
-
-    //        Globals.Tick++;
-
-
-    //    }
-
-    //}
-
-
     public void ProcessCommand(string command, string[] args)
     {
         if (command == "list")
@@ -178,14 +35,16 @@ class TrackGenerator
             commandList(args);
         }
 
-        if (command == "set")
-        {
-            commandSet(args);
+        
+
+        if (command == "quit")
+        { 
+            Environment.Exit(0);
         }
 
-        if (command == "ls")
+        if(command == "show")
         {
-            list_of_commands();
+            commandShow(args);
         }
     }
 
@@ -201,38 +60,56 @@ class TrackGenerator
             GetTracks(args);
         }
 
+        if (args[0].ToLower() == "tracks-history")
+        {
+            GetTracksHistory(args);
+        }
+
         if (args[0].ToLower() == "action")
         {
             GetActions(args);
         }
+
+        if (args[0].ToLower() == "commands")
+        {
+            list_of_commands();
+        }
+
+        //if (args[0].ToLower() == "emitterRecords")
+        //{
+        //    list_of_emitterRecords();
+        //}
     }
 
-    private void commandSet(string[] args)
-    {
-        if (args[0].ToLower() == "prob")
-        {
-            SetProb(args);
-        }
+    //private void commandSet(string[] args)
+    //{
+    //    if (args[0].ToLower() == "prob")
+    //    {
+    //        SetProb(args);
+    //    }
 
-        if (args[0].ToLower() == "agein")
-        {
-            SetAgeIn(args);
-        }
+    //    if (args[0].ToLower() == "agein")
+    //    {
+    //        SetAgeIn(args);
+    //    }
 
-        if (args[0].ToLower() == "ageout")
-        {
-            SetAgeOut(args);
-        }
-    }
+    //    if (args[0].ToLower() == "ageout")
+    //    {
+    //        SetAgeOut(args);
+    //    }
+    //}
 
     private void list_of_commands()
     {
-        Console.WriteLine("\nList of Commands\n"); Console.WriteLine("command 1: List ticks <start_tick> <end_tick = start_tick>");
-        Console.WriteLine("command 2: List track <track 1> <track 2> <track 3>...");
-        Console.WriteLine("command 3: List action <I/U/ iD/oD>");
-        Console.WriteLine("command 4: List [ticks/tracks /action] *");
-        Console.WriteLine("command 5: List [ticks / tracks / action] <filter> | List [ticks / tracks / action] <filter>");
-        Console.WriteLine("command 6: List [ticks/tracks /action] | Set prob | Set age_in age_out \n");
+        Console.WriteLine("\nList of Commands\n");
+        Console.WriteLine("command 1: list commands");
+        Console.WriteLine("command 2: List ticks <start_tick> <end_tick = start_tick>");
+        Console.WriteLine("command 3: List tracks-history <track 1> <track 2> <track 3>...");
+        Console.WriteLine("command 4: List action <I/U/ iD/oD>");
+        Console.WriteLine("command 5: List [ticks/tracks /action] *");
+        Console.WriteLine("command 6: List [ticks / tracks / action] <filter> | List [ticks / tracks / action] <filter>");
+        Console.WriteLine("command 7: Show QsaTable ");
+        Console.WriteLine("command 8: quit");
     }
 
     public void GetTicks(string[] args)
@@ -255,6 +132,7 @@ class TrackGenerator
         {
             Globals.trackParameters.end_tick = Globals.Tick;
         }
+        Globals.commandExecutive.DisplayRecords();
     }
 
     public void GetTracks(string[] args)
@@ -266,6 +144,21 @@ class TrackGenerator
                 Globals.trackParameters.tracks.Add(Convert.ToInt32(args[1]));
             }
         }
+
+        Globals.commandExecutive.DisplayTracks();
+    }
+
+    public void GetTracksHistory(string[] args)
+    {
+        if (args[1] != "*")
+        {
+            Globals.trackParameters.tracks.Clear(); for (int i = 1; i < args.Length; i++)
+            {
+                Globals.trackParameters.tracks.Add(Convert.ToInt32(args[1]));
+            }
+        }
+
+        Globals.commandExecutive.DisplayRecords();
     }
 
     public void GetActions(string[] args)
@@ -286,13 +179,13 @@ class TrackGenerator
 
             else if (args[1].ToLower() == "id")
             {
-                Globals.trackParameters.action = TrackState.ETF_DELETED;
+                Globals.trackParameters.action = TrackState.ETF_iDELETE;
             }
 
-            else
+            else if (args[1].ToLower() == "od")
             {
                 Globals.trackParameters.action =
-                TrackState.ETF_DELETED;
+                TrackState.ETF_oDELETE;
             }
         }
     }
@@ -305,6 +198,22 @@ class TrackGenerator
             if (etr.trackID == int.Parse(args[1])) count++;
             Console.WriteLine($" {count} ");
         }
+    }
+
+   
+
+    public void getERec(string[] args)
+    {
+        if (args[1] != "*")
+        {
+            Globals.trackParameters.tracks.Clear(); for (int i = 1; i < args.Length; i++)
+            {
+                Globals.trackParameters.erecs.Add(Convert.ToInt32(args[1]));
+            }
+        }
+
+        Globals.commandExecutive.DisplayErecs();
+    
     }
 
     public void SetProb(string[] args)
@@ -322,9 +231,16 @@ class TrackGenerator
         Globals.ageOut = int.Parse(args[1]);
     }
 
-   
+   public void commandShow(string[] args)
+    {
+        if (args[0].ToLower() == "qsatable")
+        {
+            Console.WriteLine("QsaTable");
+            Console.WriteLine("State\t\tAction-0\tAction-1\tAction-2");
+            foreach (List<double> actionList in Globals.qLearner.Qsa)
+            {
+                Console.WriteLine($"{Globals.qLearner.Qsa.IndexOf(actionList)}\t\t{actionList[0]}\t\t{actionList[1]}\t\t{actionList[2]}");
+            }
+        }
+    }
 }
-
-
-
-

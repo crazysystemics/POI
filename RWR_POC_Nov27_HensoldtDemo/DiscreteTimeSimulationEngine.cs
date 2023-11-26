@@ -304,22 +304,17 @@ class DiscreteTimeSimulationEngine
                 }
             }
 
-            else
-            {
-                Globals.timer.Stop();
-                TrackGenerator trackGenerator = new TrackGenerator();
-
-                while (true)
+                else
                 {
-                    Console.WriteLine("Enter the Command");
-                    string command = Console.ReadLine();
-                    Globals.commandExecutive.ParsePipelineCommand(command);
-                    Globals.commandExecutive.DisplayRecords();
+                    if(Console.KeyAvailable)
+                        Globals.ExecuteShell();
                 }
-            }
-        };
-
+            };
+      
     }
+
+
+
 
     public void BuildGlobalSituationAwareness()
     {
