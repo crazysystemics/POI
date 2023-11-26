@@ -64,11 +64,13 @@
     <Compile Include="PulseInputParser.cs" />
     <Compile Include="QLearner.cs" />
     <Compile Include="Radar.cs" />
+    <Compile Include="RadarDataset.cs" />
     <Compile Include="RecordedData.cs" />
     <Compile Include="RWR.cs" />
     <Compile Include="RWRDisplay.xaml.cs">
       <DependentUpon>RWRDisplay.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Scenario.cs" />
     <Compile Include="SimpleRadar.cs" />
     <Compile Include="SimulationModel.cs" />
     <Compile Include="TrackGenerator.cs" />

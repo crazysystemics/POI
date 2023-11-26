@@ -6,17 +6,19 @@ using System.Windows.Threading;
 
 public static class Globals
 {
+    // Episode configuration
+    public static Random randomNumberGenerator = new Random(10);
+    public static int flightPathNumber = -1;
+    public static int radarSetNumber = -1;
+
     public static int Tick = 0;
     public static float TimeResolution = 0.10f;
     public static int pulseTravelSpeed = 1;
     public static int guID = 0;
     public static int gTrackID = 0;
-    public static bool debugPrint = true;
-    public static bool distDebugPrint = true;
-    public static bool aircraftDebugPrint = true;
+    public static DebugLevel debugPrint;
     public static string recFileName;
     public static string trackRecFileName;
-    public static Random randomNumberGenerator = new Random();
     public static DispatcherTimer timer;
     public static MainWindow mainWindow;
     public static QLearner qLearner = new QLearner();
@@ -61,5 +63,13 @@ public static class Globals
         FIRECONTROL,
         GCI,
         SIMPLE
+    }
+
+    public enum DebugLevel
+    {
+        NONE,
+        BRIEF,
+        SPOT,
+        VERBOSE
     }
 }

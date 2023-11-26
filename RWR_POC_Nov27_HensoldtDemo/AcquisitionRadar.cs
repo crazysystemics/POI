@@ -39,8 +39,14 @@ public class AcquisitionRadar : Radar
             angle += 360;
         }
         this.mainBeamAzimuth -= (this.beamWidth / 2);
-        Console.WriteLine($"Acquisition radar azimuth: {this.mainBeamAzimuth}");
-        Console.WriteLine($"Angle to target: {angle}");
+
+        if (Globals.debugPrint == Globals.DebugLevel.VERBOSE)
+        {
+            Console.WriteLine($"Acquisition radar azimuth: {this.mainBeamAzimuth}");
+            Console.WriteLine($"Angle to target: {angle}");
+        }
+
+
         if (this.mainBeamAzimuth <= this.endFrameAzimuth + (this.beamWidth / 2))
         {
             this.mainBeamAzimuth = this.startFrameAzimuth - (this.beamWidth / 2);

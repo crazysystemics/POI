@@ -259,3 +259,5 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/RWR_POC_Nov27_HensoldtDemo/obj/Debug/RWR_POC_GUI_MarkupCompile.cache
+/RWR_POC_Nov27_HensoldtDemo/obj/Debug/RWR_POC_GUI_MarkupCompile.lref
