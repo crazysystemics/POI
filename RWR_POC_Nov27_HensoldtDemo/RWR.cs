@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Windows.Navigation;
 using RWR_POC_GUI;
 
 public class RWR : BattleSystem
@@ -78,7 +80,38 @@ public class RWR : BattleSystem
 
     public override void OnTick()
     {
+        // QPoint Beginning
 
+        Random random = new Random();
+        double epsi = random.NextDouble();
+        //int action;
+
+        QState stateT = GetState(RxBuf, emitterTrackFile);
+
+        if (epsi < Globals.qLearner.EXPLORE_PROBABILITY)
+        {
+            Random rand = new Random();
+            Globals.action = rand.Next(Globals.qLearner.actionSpaceCount);
+        }
+        //else
+        //{
+        //    double maxQsa = 0.0;
+        //    int maxaction = 0;
+
+        //    for (int action_j = 0; action_j < Globals.qLearner.actionSpaceCount; action_j++)
+        //    {
+        //        int stateIndex = Globals.qLearner.QsaMatch(stateT);
+        //        double qsa = Globals.qLearner.QSaMatrixGet(stateIndex, action_j);
+        //        if (qsa > maxQsa)
+        //        {
+        //            maxQsa = qsa;
+        //            maxaction = action_j;
+        //        }
+        //    }
+        //    Globals.action = maxaction;
+        //}
+        Globals.qLearner.qstates.Add(stateT);
+        Globals.qLearner.Qsa.Add(new List<double> { 0.0, 0.0, 0.0 });
         //int pulseCount = 1;
         //foreach (PDW pdw in receivedPDW)
         //{
@@ -105,6 +138,7 @@ public class RWR : BattleSystem
                 {
                     emitterRecord.eID = emitterID.eID;
                     emitterRecord.erIdentifier = emitterID.erIdentifier + "R" + emitterRecord.eID;
+                    emitterID = UpdateTrackingWindows(emitterID);
                 }
                 ManageTracks(emitterRecord, emitterID, emitterTrackFile);
 
@@ -175,22 +209,23 @@ public class RWR : BattleSystem
                 $"{er.amplitudes[0]}," +
                 $"{er.freq},{er.pri}");
         }
-
+        double currentFitness = 0.0;
         foreach (EmitterTrackRecord etr in emitterTrackFile)
         {
             if (etr.exitTick > -1)
             {
-                double currentFitness = 0.0;
+                currentFitness = 0.0;
                 Globals.qLearner.count++;
                 int trackLength = etr.exitTick - etr.entryTick;
 
                 double temp = (Math.Abs(etr.freqMax - etr.freqMin) + etr.AgingInCount + etr.AgingOutCount);
-                if (temp > 0)
+                if (temp != 0)
                 {
                     currentFitness = trackLength / temp;
                 }
                 else
                 {
+                    Debug.Assert(false);
                     currentFitness = 0.0;
                 }
                 Globals.qLearner.runningSum += currentFitness;
@@ -219,30 +254,65 @@ public class RWR : BattleSystem
 
         // QPoint
 
-        QState qState = new QState();
-        foreach (EmitterRecord er in RxBuf)
-        {
-            qState.ercFrequencies.Add(er.freq);
-        }
+        QState qState = GetState(RxBuf, ETFState);
+      //  Globals.qLearner.qstates.Add(qState);
 
-        foreach (EmitterTrackRecord etr in ETFState)
-        {
-            EtfSnapshot etfSnapshot = new EtfSnapshot(etr.status, etr.freqMin, etr.freqMax, etr.freqCurrent);
-            qState.etfSnapshots.Add(etfSnapshot);
-        }
-        Globals.qLearner.qstates.Add(qState);
+        Globals.qLearner.Qsa_cap(qState, Globals.qLearner.runningAverage);
 
-        if (Console.KeyAvailable)
-        {
-             ConsoleKeyInfo command = Console.ReadKey();
-             
-        }
-       // Globals.qLearner.Qsa_cap(qState, Globals.qLearner.runningAverage);
+        Console.WriteLine($"Tick-State\tEREC-freq\tETR-min-max\tAction\t\tCurFitness\tRunningAverage");
+        Console.WriteLine($"{Globals.Tick}\t\t{stateT.freq}\t\t{stateT.maxWindow}\t\t{Globals.action}\t\t{currentFitness}\t\t{Globals.qLearner.runningAverage}");
 
         this.emRecordList.Clear();
         Globals.emitterTrackFile = emitterTrackFile;
 
         Console.WriteLine("-----------------------------------\n");
+
+      //  if (Console.KeyAvailable)
+            Globals.ExecuteShell();
+    }
+
+    public EmitterID UpdateTrackingWindows(EmitterID eid)
+    {
+        if(Globals.action == 0)
+            eid.freqTrackWindow += eid.freqTrackWindow * 0.1;
+        if(Globals.action == 1)
+            eid.freqTrackWindow -= eid.freqTrackWindow * 0.1;
+
+        return eid;
+    }
+
+    public QState GetState(List<EmitterRecord> emitterRecords, List<EmitterTrackRecord> emitterTrackRecords)
+    {
+        QState qState = new QState();
+        List<double> freqs = new List<double>();
+        List<double> windows = new List<double>();
+        foreach (EmitterRecord er in emitterRecords)
+        {
+            freqs.Add(er.freq);    
+        }
+        if (freqs.Count > 0)
+        {
+            qState.freq = freqs.Max() - freqs.Min();
+            if(qState.freq == 0)
+                qState.freq = -1;
+        }
+        else
+            qState.freq = 0; 
+        
+        foreach (EmitterTrackRecord etr in emitterTrackRecords)
+        {
+            windows.Add(etr.freqMax - etr.freqMin);   
+        }
+        if (windows.Count > 0)
+        {
+            qState.maxWindow = windows.Max();
+            if (qState.maxWindow == 0)
+                qState.maxWindow = -1;
+        }
+        else
+            qState.maxWindow = 0;
+
+        return qState;
     }
 
     public EmitterRecord BuildEmitterRecord(List<PDW> PDWs)

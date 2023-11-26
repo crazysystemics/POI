@@ -70,8 +70,11 @@ public class EtfSnapshot
 }
 public class QState
 {
-    public List<double> ercFrequencies = new List<double>();
-    public List<EtfSnapshot> etfSnapshots = new List<EtfSnapshot>();
+    public double freq;
+    public double maxWindow;
+
+   // public List<double> ercFrequencies = new List<double>();
+   // public List<EtfSnapshot> etfSnapshots = new List<EtfSnapshot>();
 }
 
 public class QLearner
@@ -83,18 +86,26 @@ public class QLearner
     public double runningSum;
     public double runningAverage;
 
+    public double EXPLORE_PROBABILITY = 1.0;
+    public int actionSpaceCount = 3;
+
+
     public List<QState> qstates = new List<QState>();
     public List<int> actions = new List<int>();
     public List<List<double>> Qsa = new List<List<double>>();
 
     public double QSaMatrixGet(int state_i, int action_j)
     {
-        return Qsa.ToArray()[action_j].ToArray()[state_i];
+        if (state_i > -1)
+            return Qsa.ToArray()[state_i].ToArray()[action_j];
+        else
+            return -1;
     }
 
     public void QSaMatrixSet(int state_i, int action_j, double Qval)
     {
-        Qsa.ToArray()[action_j].ToArray()[state_i] = Qval;
+        if (state_i > -1)
+            Qsa.ToArray()[state_i].ToArray()[action_j] = Qval;
     }
 
     public double QsaGet(QState state, int action_j)
@@ -109,7 +120,51 @@ public class QLearner
         QSaMatrixSet(state_i, action_j, Qval);
     }
 
+    public int QsaMatch(QState state)
+    {
+       // bool isMatch = true;
+        int stateIndex = -1;
 
+        foreach (QState qstate in qstates)
+        {
+            if(qstate.freq == state.freq && qstate.maxWindow == state.maxWindow)
+            {
+                stateIndex = qstates.IndexOf(state);
+                return stateIndex;
+            }
+        }
+
+        //if (isMatch)
+        //{
+            
+        //}
+    
+        return stateIndex;
+            //foreach (QState qstate in qstates)
+            //{
+            //    foreach(double freq in state.ercFrequencies)
+            //    {
+            //        if(!state.ercFrequencies.Contains(freq))
+            //        {
+            //            isMatch = false;
+            //            break;
+            //        }
+            //    }
+
+            //    EtfSnapshot[] etfSnapshots = qstate.etfSnapshots.ToArray();
+            //    for (int i = 0; i < state.etfSnapshots.Count; i++)
+            //    {
+            //        for (int j = 0; j < etfSnapshots.Length; j++)
+            //        {
+            //            if (etfSnapshots[j].freqMin != state.etfSnapshots[i].freqMin ||
+            //                    etfSnapshots[j].freqMax != state.etfSnapshots[i].freqMax)
+            //            {
+            //                isMatch = false;
+            //                break;
+            //            }
+            //        }
+            //    }
+    }
 
     public double Qsa_cap(QState state,  double reward)
     {

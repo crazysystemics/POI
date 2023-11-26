@@ -91,7 +91,7 @@ class DiscreteTimeSimulationEngine
         // be careful with ref operator
 
         SimpleRadar r = new SimpleRadar(new Position(70, 50), 20, 15, Globals.Tick, 120);
-        //SimpleRadar r2 = new SimpleRadar(new Position(110, 15), 75, Globals.Tick, 20, 150, 5);
+        SimpleRadar r2 = new SimpleRadar(new Position(80, 100), 50, 20, Globals.Tick, 150, 5);
         //r2.pulseRepetitionInterval = 700;
         //r2.txPulse.frequency = 8500;
         //r2.txPulse.pulseWidth = 75;
@@ -128,7 +128,7 @@ class DiscreteTimeSimulationEngine
                     emitterRecords.Clear();
                     List<InParameter> inParameters = new List<InParameter>();
 
-                    Console.WriteLine($"----------\nTick2 = {Globals.Tick}\n----------");
+                    Console.WriteLine($"----------\nTick = {Globals.Tick}\n----------");
 
                     // Get() on every Simulation Model
 
@@ -270,20 +270,15 @@ class DiscreteTimeSimulationEngine
 
                 else
                 {
-                    Globals.timer.Stop();
-                    TrackGenerator trackGenerator = new TrackGenerator();
-
-                    while (true)
-                    {
-                        Console.WriteLine("Enter the Command");
-                        string command = Console.ReadLine();
-                        Globals.commandExecutive.ParsePipelineCommand(command);
-                        Globals.commandExecutive.DisplayRecords();
-                    }
+                    if(Console.KeyAvailable)
+                        Globals.ExecuteShell();
                 }
             };
       
     }
+
+
+
 
     public void BuildGlobalSituationAwareness()
     {

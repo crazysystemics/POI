@@ -25,6 +25,8 @@ public static class Globals
     public static int ageIn;
     public static int ageOut;
 
+    public static int action;
+
     public static bool isDone = false;
     public static CommandExecutive commandExecutive = new CommandExecutive();
 
@@ -34,6 +36,22 @@ public static class Globals
     public static void DebugWriteLine(string s)
     {
         Console.WriteLine(s);
+    }
+
+    public static void ExecuteShell()
+    {
+        Globals.timer.Stop();
+        TrackGenerator trackGenerator = new TrackGenerator();
+
+        string command = string.Empty;
+        while (command != "quit")
+        {
+            Console.WriteLine("Enter the Command");
+             command = Console.ReadLine();
+            Globals.commandExecutive.ParsePipelineCommand(command);
+            Globals.commandExecutive.DisplayRecords();
+        }
+        Globals.timer.Start();
     }
 
     public enum RadarTypes
