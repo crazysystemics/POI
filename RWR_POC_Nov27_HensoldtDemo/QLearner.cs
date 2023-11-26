@@ -16,7 +16,8 @@ public enum TrackState
     DELETED_FROM_ETF,
     ETF_INSERTED,
     ETF_UPDATED,
-    ETF_DELETED,
+    ETF_iDELETE,
+    ETF_oDELETE,
     ALL
 }
 
@@ -94,6 +95,14 @@ public class QLearner
     public List<int> actions = new List<int>();
     public List<List<double>> Qsa = new List<List<double>>();
 
+    public QLearner()
+    {
+        for(int i= 0; i < 5; i++)
+        {
+            Qsa.Add(new List<double> { 0.0, 0.0, 0.0 });
+        }  
+    }
+
     public double QSaMatrixGet(int state_i, int action_j)
     {
         if (state_i > -1)
@@ -105,18 +114,19 @@ public class QLearner
     public void QSaMatrixSet(int state_i, int action_j, double Qval)
     {
         if (state_i > -1)
-            Qsa.ToArray()[state_i].ToArray()[action_j] = Qval;
+            Qsa.ToArray()[state_i][action_j] = Qval;
+        //Qsa.ToArray()[state_i].ToArray()[action_j] = Qval;
     }
 
     public double QsaGet(QState state, int action_j)
     {
-        int state_i = qstates.IndexOf(state);
+        int state_i = QsaMatch(state);//qstates.IndexOf(state);
         return QSaMatrixGet(state_i, action_j);
     }
 
     public void QsaSet(QState state, int action_j, double Qval)
     {
-        int state_i = qstates.IndexOf(state);
+        int state_i = QsaMatch(state);//qstates.IndexOf(state);
         QSaMatrixSet(state_i, action_j, Qval);
     }
 
@@ -129,97 +139,33 @@ public class QLearner
         {
             if(qstate.freq == state.freq && qstate.maxWindow == state.maxWindow)
             {
-                stateIndex = qstates.IndexOf(state);
+                stateIndex = qstates.IndexOf(qstate);
                 return stateIndex;
             }
         }
 
-        //if (isMatch)
-        //{
-            
-        //}
-    
         return stateIndex;
-            //foreach (QState qstate in qstates)
-            //{
-            //    foreach(double freq in state.ercFrequencies)
-            //    {
-            //        if(!state.ercFrequencies.Contains(freq))
-            //        {
-            //            isMatch = false;
-            //            break;
-            //        }
-            //    }
-
-            //    EtfSnapshot[] etfSnapshots = qstate.etfSnapshots.ToArray();
-            //    for (int i = 0; i < state.etfSnapshots.Count; i++)
-            //    {
-            //        for (int j = 0; j < etfSnapshots.Length; j++)
-            //        {
-            //            if (etfSnapshots[j].freqMin != state.etfSnapshots[i].freqMin ||
-            //                    etfSnapshots[j].freqMax != state.etfSnapshots[i].freqMax)
-            //            {
-            //                isMatch = false;
-            //                break;
-            //            }
-            //        }
-            //    }
     }
 
-    public double Qsa_cap(QState state,  double reward)
+    public double Qsa_cap(QState state_t, int action_t, QState state_t1, double reward)
     {
         double reward0, reward1, reward2;
 
         int action_index = new Random().Next(3);
 
-        //if (action_index == 0)
-        //{
-
-        //}
-
-        //if (action_index == 1)
-        //{
-
-        //}
-
-        //if (action_index == 2)
-        //{
-
-        //}
-        int si;
-        foreach (QState qs in qstates)
+        double maxQsa = 0.0; 
+    
+        int action_t1 = 0;
+        for(action_t1 = 0; action_t1 < 3; action_t1++)
         {
-            if(qs == state)
+            if (QsaGet(state_t1, action_t1) > maxQsa)
             {
-                si = qstates.IndexOf(qs);
-                break;
+                maxQsa = QsaGet(state_t1, action_t1);
             }
         }
-
-        double maxQsa;
-        int maxaction;//action corresponding max reward
-
-
-        reward0 = QsaGet(state, 0);
-        maxQsa = reward0; maxaction = 0;
-
-
-        if (QsaGet(state, 1) > maxQsa)
-        {
-            maxQsa = QsaGet(state, 1); maxaction = 1;
-        };
-
-
-        if (QsaGet(state, 2) > maxQsa)
-        {
-            maxQsa = QsaGet(state, 2); maxaction = 2;
-        };
-
-
-
-
+ 
         double qsa = reward + gamma * maxQsa;//QsaGet(state, maxaction);
-        QsaSet(state, maxaction, qsa);
+        QsaSet(state_t, action_t, qsa);
         return qsa;
     }
 }
