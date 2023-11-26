@@ -76,7 +76,7 @@ namespace RWR_POC_GUI
                 }
                 labels[i] = new Label();
                 //labels[i].FontFamily = new FontFamily("Wingdings 3");
-                labels[i].FontSize = 14;
+                labels[i].FontSize = 16;
                 labels[i].Content = rs.symbol;
                 labels[i].Foreground = Brushes.Yellow;
                 //currentX = centerX + (rs.r * Math.Cos(-angleRadians));

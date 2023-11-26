@@ -97,9 +97,11 @@ public class QLearner
 
     public QLearner()
     {
-        for(int i= 0; i < 5; i++)
+        for(int i= 0; i < 10; i++)
         {
-            Qsa.Add(new List<double> { 0.0, 0.0, 0.0 });
+            Qsa.Add(new List<double> { Globals.randomNumberGenerator.NextDouble(),
+                                       Globals.randomNumberGenerator.NextDouble(),
+                                       Globals.randomNumberGenerator.NextDouble() });
         }  
     }
 

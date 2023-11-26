@@ -327,9 +327,12 @@ public class RWR : BattleSystem
         //{
         //    Console.WriteLine($"{Globals.qLearner.Qsa.IndexOf(actionList)}\t\t{actionList[0]}\t\t{actionList[1]}\t\t{actionList[2]}");
         //}
-         if (Console.KeyAvailable)
+        if (Console.KeyAvailable)
+        {
+            Console.ReadLine();
             Globals.ExecuteShell();
-       
+        }
+
         this.emRecordList.Clear();
         Globals.emitterTrackFile = emitterTrackFile;
 

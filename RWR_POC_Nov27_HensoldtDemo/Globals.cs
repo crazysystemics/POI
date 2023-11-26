@@ -8,7 +8,7 @@ public static class Globals
 {
     // Episode configuration
     public static Random randomNumberGenerator = new Random(10);
-    public static int flightPathNumber = 2; //-1 random
+    public static int flightPathNumber = 0; //-1 random
     public static int radarSetNumber = 0;//(130,50) //-1;
 
     public static int Tick = 0;

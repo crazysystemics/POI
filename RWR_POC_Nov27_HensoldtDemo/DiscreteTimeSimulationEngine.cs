@@ -158,7 +158,7 @@ class DiscreteTimeSimulationEngine
     {
         int count = 0;
 
-        Globals.timer.Interval = TimeSpan.FromMilliseconds(15);
+        Globals.timer.Interval = TimeSpan.FromMilliseconds(50);
         Globals.timer.Tick += (sender, e) =>
         {
             if (!Globals.isDone)
@@ -307,7 +307,11 @@ class DiscreteTimeSimulationEngine
                 else
                 {
                     if(Console.KeyAvailable)
+                    {
+                        Console.ReadLine();
                         Globals.ExecuteShell();
+                    }
+                    
                 }
             };
       
