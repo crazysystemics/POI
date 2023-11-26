@@ -28,7 +28,7 @@ class DiscreteTimeSimulationEngine
 
     public void Init()
     {
-        Globals.debugPrint = Globals.DebugLevel.NONE;
+        Globals.debugPrint = Globals.DebugLevel.BRIEF;
 
         //List<Position> waypts = new List<Position>()
         //{
@@ -96,7 +96,7 @@ class DiscreteTimeSimulationEngine
         //    AircraftList.rwrList.Add(new RWR(ref air.position, air.id + 10));
         //}
 
-        Scenario newScenario = new Scenario(4);
+        Scenario newScenario = new Scenario();
 
         string currentTime = DateTime.Now.ToString();
         currentTime = currentTime.Replace(":", "-");

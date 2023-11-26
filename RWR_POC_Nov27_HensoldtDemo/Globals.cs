@@ -6,6 +6,11 @@ using System.Windows.Threading;
 
 public static class Globals
 {
+    // Episode configuration
+    public static Random randomNumberGenerator = new Random(10);
+    public static int flightPathNumber = -1;
+    public static int radarSetNumber = -1;
+
     public static int Tick = 0;
     public static float TimeResolution = 0.10f;
     public static int pulseTravelSpeed = 1;
@@ -14,7 +19,6 @@ public static class Globals
     public static DebugLevel debugPrint;
     public static string recFileName;
     public static string trackRecFileName;
-    public static Random randomNumberGenerator = new Random();
     public static DispatcherTimer timer;
     public static MainWindow mainWindow;
     public static QLearner qLearner = new QLearner();

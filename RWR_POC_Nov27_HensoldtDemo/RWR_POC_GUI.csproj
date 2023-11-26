@@ -59,13 +59,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AircraftList.cs" />
     <Compile Include="CommandExecutive.cs" />
     <Compile Include="Pulse.cs" />
     <Compile Include="PulseInputParser.cs" />
     <Compile Include="QLearner.cs" />
     <Compile Include="Radar.cs" />
-    <Compile Include="RadarList.cs" />
+    <Compile Include="RadarDataset.cs" />
     <Compile Include="RecordedData.cs" />
     <Compile Include="RWR.cs" />
     <Compile Include="RWRDisplay.xaml.cs">
