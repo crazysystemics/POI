@@ -59,7 +59,7 @@ public class RWR : BattleSystem
         Out rwrOutParams = new Out(0, 0, position, 2);
         foreach (EmitterRecord emitterRecord in RxBuf)
         {
-            rwrOutParams.visibleRadars.Add(new RadarSignature(emitterRecord.distance, emitterRecord.azimuth, emitterRecord.erIdentifier));
+            rwrOutParams.visibleRadars.Add(new RadarSignature(emitterRecord.distance, emitterRecord.azimuth, emitterRecord.maxRange, emitterRecord.erIdentifier));
         }
         return rwrOutParams;
     }
@@ -104,7 +104,8 @@ public class RWR : BattleSystem
                 if (emitterID != null)
                 {
                     emitterRecord.eID = emitterID.eID;
-                    emitterRecord.erIdentifier = emitterID.erIdentifier + "R" + emitterRecord.eID;
+                    string idenfitier = "" + (char)(emitterRecord.erID + 64);
+                    emitterRecord.erIdentifier = idenfitier;
                 }
                 ManageTracks(emitterRecord, emitterID, emitterTrackFile);
 
@@ -498,6 +499,7 @@ public class EmitterRecord
     public double azimuth;
     public int distance;
     public double[] amplitudes = new double[4];
+    public int maxRange;
 }
 
 public class EmitterID
@@ -595,11 +597,14 @@ public class RadarSignature
     public int r;
     public double theta;
     public string symbol;
+    public int maxRange;
+    public bool rangeFound = false;
 
-    public RadarSignature(int r, double theta, string symbol)
+    public RadarSignature(int r, double theta, int maxRange, string symbol)
     {
         this.r = r;
         this.theta = theta;
         this.symbol = symbol;
+        this.maxRange = maxRange;
     }
 }

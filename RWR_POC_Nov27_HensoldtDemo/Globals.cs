@@ -7,8 +7,8 @@ using System.Windows.Threading;
 public static class Globals
 {
     // Episode configuration
-    public static Random randomNumberGenerator = new Random(10);
-    public static int flightPathNumber = -1;
+    public static Random randomNumberGenerator = new Random();
+    public static int flightPathNumber = 2;
     public static int radarSetNumber = -1;
 
     public static int Tick = 0;

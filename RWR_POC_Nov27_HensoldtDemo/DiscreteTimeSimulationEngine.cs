@@ -158,7 +158,7 @@ class DiscreteTimeSimulationEngine
     {
         int count = 0;
 
-        Globals.timer.Interval = TimeSpan.FromMilliseconds(10);
+        Globals.timer.Interval = TimeSpan.FromMilliseconds(15);
         Globals.timer.Tick += (sender, e) =>
         {
             if (!Globals.isDone)
@@ -258,7 +258,7 @@ class DiscreteTimeSimulationEngine
                             {
                                 //if (((RWR)receiver).receivingEmitterRecord)
                                 {
-                                    RWR.In globalSituation = new RWR.In(emitterRecord, receiver.id);
+                                    RWR.In globalSituation = new RWR.In(emitterRecord, emitterRecord.eID);
                                     receiverInParams.Add(globalSituation);
                                 }
                             }
@@ -376,8 +376,9 @@ class DiscreteTimeSimulationEngine
                             receivedEmitterRecord.erID = ((Radar)transmitter).id;
                             receivedEmitterRecord.erIdentifier = ((Radar)transmitter).radarType.ToString();
                             receivedEmitterRecord.distance = dist;
+                            receivedEmitterRecord.maxRange = ((Radar)transmitter).radius;
                             receivedEmitterRecord.azimuth = nextWaypointAngle - angle;
-                            receivedEmitterRecord.eID = ((Radar)transmitter).id + 10;
+                            receivedEmitterRecord.eID = ((Radar)transmitter).id;
                             emitterRecords.Add(receivedEmitterRecord);
 
                             //   ((RWR)receiver).receivingEmitterRecord = true;

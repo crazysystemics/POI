@@ -93,11 +93,13 @@ namespace RWR_POC_GUI
                     label[index] = new Label();
                     line.X1 = currentX[((Aircraft)obj).id];
                     line.Y1 = currentY[((Aircraft)obj).id];
-                    label[index].Content = "A" + ((Aircraft)obj).id +
-                       $"({((Aircraft)obj).currentWaypoint.x}, {((Aircraft)obj).currentWaypoint.y})";
-                    label[index].Foreground = Brushes.Black;
+                    label[index].FontFamily = new FontFamily("Wingdings");
+                    label[index].Content = "Q";
+                    //label[index].Content = "A" + ((Aircraft)obj).id +
+                    //   $"({((Aircraft)obj).currentWaypoint.x}, {((Aircraft)obj).currentWaypoint.y})";
+                    label[index].Foreground = Brushes.Blue;
                     label[index].FontWeight = FontWeights.Bold;
-                    label[index].FontSize = 14;
+                    label[index].FontSize = 28;
                     double X = currentX[index] - 7;
                     double Y = currentY[index] - 7;
 
@@ -107,11 +109,12 @@ namespace RWR_POC_GUI
                 }
                 else
                 {
-                    label[index].Content = "A" + ((Aircraft)obj).id + $" ({((Aircraft)obj).currentWaypoint.x}, {((Aircraft)obj).currentWaypoint.y})";
+                    label[index].FontFamily = new FontFamily("Wingdings");
+                    label[index].Content = "Q";
                     Canvas.SetLeft(label[index], currentX[index]);
                     Canvas.SetTop(label[index], currentY[index]);
                     label[index].Visibility = Visibility.Visible;
-                    label[index].FontSize = 14;
+                    label[index].FontSize = 28;
                 }
                 line.Stroke = Brushes.Black;
                 canvas.Children.Add(line);
@@ -123,11 +126,11 @@ namespace RWR_POC_GUI
                     Label radarLabel = new Label();
                     double currentX = multiplier * ((Radar)obj).position.x + resolution;
                     double currentY = 300 - yMultiplier * ((Radar)obj).position.y - resolution;
-                    radarLabel.Content = "R" + ((Radar)obj).id +
-                        $" ({((Radar)obj).position.x}, {((Radar)obj).position.y})";
+                    radarLabel.FontFamily = new FontFamily("Symbol");
+                    radarLabel.Content = "Y" + $" ({((Radar)obj).position.x}, {((Radar)obj).position.y})";
                     radarLabel.Foreground = Brushes.Black;
                     radarLabel.FontWeight = FontWeights.Bold;
-                    radarLabel.FontSize = 14;
+                    radarLabel.FontSize = 20;
                     double X = currentX - 7;
                     double Y = currentY - 7;
 

@@ -20,7 +20,7 @@ public class Scenario
             for (int i = 0; i < radarCount; i++)
             {
                 Position radarPos = new Position(Globals.randomNumberGenerator.Next(40, 180), Globals.randomNumberGenerator.Next(10, 90));
-                radars.Add(new SimpleRadar(radarPos, Globals.randomNumberGenerator.Next(10, 30), 15, Globals.Tick, i + 10));
+                radars.Add(new SimpleRadar(radarPos, Globals.randomNumberGenerator.Next(30, 75), 15, Globals.Tick, i + 1));
             }
         }
 
@@ -57,6 +57,21 @@ public class Scenario
                 new Position(135, 15),
                 new Position(85, 15),
                 new Position(50, 50)
+            }, 0),
+
+            new Aircraft(new List<Position>()
+            {
+                new Position(Globals.randomNumberGenerator.Next(20, 200), Globals.randomNumberGenerator.Next(10, 90)),
+                new Position(Globals.randomNumberGenerator.Next(20, 200), Globals.randomNumberGenerator.Next(10, 90)),
+                new Position(Globals.randomNumberGenerator.Next(20, 200), Globals.randomNumberGenerator.Next(10, 90)),
+                new Position(Globals.randomNumberGenerator.Next(20, 200), Globals.randomNumberGenerator.Next(10, 90)),
+                new Position(Globals.randomNumberGenerator.Next(20, 200), Globals.randomNumberGenerator.Next(10, 90)),
+                new Position(Globals.randomNumberGenerator.Next(20, 200), Globals.randomNumberGenerator.Next(10, 90)),
+                new Position(Globals.randomNumberGenerator.Next(20, 200), Globals.randomNumberGenerator.Next(10, 90)),
+                new Position(Globals.randomNumberGenerator.Next(20, 200), Globals.randomNumberGenerator.Next(10, 90)),
+                new Position(Globals.randomNumberGenerator.Next(20, 200), Globals.randomNumberGenerator.Next(10, 90)),
+                new Position(Globals.randomNumberGenerator.Next(20, 200), Globals.randomNumberGenerator.Next(10, 90)),
+                new Position(Globals.randomNumberGenerator.Next(20, 200), Globals.randomNumberGenerator.Next(10, 90))
             }, 0)
         };
 
@@ -68,6 +83,6 @@ public class Scenario
         {
             chosenAircraft = aircrafts[Globals.randomNumberGenerator.Next(0, aircrafts.Count)];
         }
-        chosenAircraft.rwr = new RWR(ref chosenAircraft.position, 1);
+        chosenAircraft.rwr = new RWR(ref chosenAircraft.position, 20);
     }
 }

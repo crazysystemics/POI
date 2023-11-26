@@ -9,24 +9,24 @@ public class RadarDataset
     {
         List<SimpleRadar> set1 = new List<SimpleRadar>()
         {
-            new SimpleRadar(new Position(130, 50), 40, 15, Globals.Tick, 2)
+            new SimpleRadar(new Position(130, 50), 40, 15, Globals.Tick, 1)
         };
         List<SimpleRadar> set2 = new List<SimpleRadar>()
         {
-            new SimpleRadar(new Position(130, 30), 40, 15, Globals.Tick, 2)
+            new SimpleRadar(new Position(130, 30), 40, 15, Globals.Tick, 1)
         };
         List<SimpleRadar> set3 = new List<SimpleRadar>()
         {
-            new SimpleRadar(new Position(110, 50), 50, 15, Globals.Tick, 2),
-            new SimpleRadar(new Position(110, 90), 20, 15, Globals.Tick, 3),
-            new SimpleRadar(new Position(110, 10), 20, 15, Globals.Tick, 4)
+            new SimpleRadar(new Position(110, 50), 50, 15, Globals.Tick, 1),
+            new SimpleRadar(new Position(110, 90), 20, 15, Globals.Tick, 2),
+            new SimpleRadar(new Position(110, 10), 20, 15, Globals.Tick, 3)
         };
         List<SimpleRadar> set4 = new List<SimpleRadar>()
         {
-            new SimpleRadar(new Position(80, 90), 20, 15, Globals.Tick, 2),
-            new SimpleRadar(new Position(140, 90), 20, 15, Globals.Tick, 3),
-            new SimpleRadar(new Position(140, 10), 20, 15, Globals.Tick, 4),
-            new SimpleRadar(new Position(80, 10), 20, 15, Globals.Tick, 5)
+            new SimpleRadar(new Position(80, 90), 20, 15, Globals.Tick, 1),
+            new SimpleRadar(new Position(140, 90), 20, 15, Globals.Tick, 2),
+            new SimpleRadar(new Position(140, 10), 20, 15, Globals.Tick, 3),
+            new SimpleRadar(new Position(80, 10), 20, 15, Globals.Tick, 4)
         };
 
         this.radarSets.Add(0, set1);
