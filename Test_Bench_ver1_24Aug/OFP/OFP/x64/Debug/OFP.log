@@ -1,0 +1,43 @@
+﻿  IOTask.c
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\Port.h(9,2): warning C4091: 'typedef ': ignored on left of 'Port' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\Port.h(15,2): warning C4091: 'typedef ': ignored on left of 'Channel' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\Port.h(22,2): warning C4091: 'typedef ': ignored on left of 'AnalogChannel' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\Port.h(30,2): warning C4091: 'typedef ': ignored on left of 'DiscreteChannel' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\UDP.h(27,2): warning C4091: 'typedef ': ignored on left of 'UDP' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\IOTask.c(265,90): warning C4047: 'function': 'unsigned int *' differs in levels of indirection from 'unsigned int (*)[10]'
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\IOTask.c(265,80): warning C4024: 'convertBytesToUInts': different types for formal and actual parameter 4
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\IOTask.c(257,15): warning C4101: 'l': unreferenced local variable
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\IOTask.c(291,46): warning C4244: '=': conversion from 'unsigned int' to 'float', possible loss of data
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\IOTask.c(342,46): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\IOTask.c(309,15): warning C4101: 'l': unreferenced local variable
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\IOTask.c(377,15): warning C4101: 'l': unreferenced local variable
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\IOTask.c(447,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\IOTask.c(461,15): warning C4101: 'l': unreferenced local variable
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\IOTask.c(507,1): warning C4142: 'GET_BIT': benign redefinition of type
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\IOTask.h(159,5): message : see declaration of 'GET_BIT'
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\IOTask.c(520,7): warning C4101: 'newline': unreferenced local variable
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\IOTask.c(519,8): warning C4101: 'newterms': unreferenced local variable
+  OFP.c
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\UDP.h(27,2): warning C4091: 'typedef ': ignored on left of 'UDP' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\Port.h(9,2): warning C4091: 'typedef ': ignored on left of 'Port' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\Port.h(15,2): warning C4091: 'typedef ': ignored on left of 'Channel' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\Port.h(22,2): warning C4091: 'typedef ': ignored on left of 'AnalogChannel' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\Port.h(30,2): warning C4091: 'typedef ': ignored on left of 'DiscreteChannel' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\OFP.c(24,25): warning C4244: '=': conversion from 'unsigned int' to 'float', possible loss of data
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\OFP.c(25,25): warning C4244: '=': conversion from 'unsigned int' to 'float', possible loss of data
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\OFP.c(45,31): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+  OFP_Executive.c
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\UDP.h(27,2): warning C4091: 'typedef ': ignored on left of 'UDP' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\Port.h(9,2): warning C4091: 'typedef ': ignored on left of 'Port' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\Port.h(15,2): warning C4091: 'typedef ': ignored on left of 'Channel' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\Port.h(22,2): warning C4091: 'typedef ': ignored on left of 'AnalogChannel' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\Port.h(30,2): warning C4091: 'typedef ': ignored on left of 'DiscreteChannel' when no variable is declared
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\OFP_Executive.c(8,2): warning C4013: 'ofp_var_init' undefined; assuming extern returning int
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\OFP_Executive.c(14,4): warning C4013: 'input_task' undefined; assuming extern returning int
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\OFP_Executive.c(18,4): warning C4013: 'ofp_app_task' undefined; assuming extern returning int
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\OFP_Executive.c(22,4): warning C4013: 'output_task' undefined; assuming extern returning int
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\OFP_Executive.c(29,2): warning C4013: 'Ethernet_init' undefined; assuming extern returning int
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\OFP_Executive.c(31,2): warning C4013: 'GetIOTaskMapping' undefined; assuming extern returning int
+  Generating Code...
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\OFP\IOTask.c(44): warning C4716: 'read_uart': must return a value
+  OFP.vcxproj -> C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\OFP\x64\Debug\OFP.exe
