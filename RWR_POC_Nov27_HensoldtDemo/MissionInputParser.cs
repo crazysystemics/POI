@@ -2,7 +2,7 @@
 //using System.Text.Json;
 //using System.Text.Json.Nodes;
 
-public class MissionInputParser
+public class MissionInputGenerator
 {
     public class AircraftJSON
     {

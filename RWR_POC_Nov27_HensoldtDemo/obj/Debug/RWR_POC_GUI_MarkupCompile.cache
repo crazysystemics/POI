@@ -4,17 +4,17 @@
 exe
 C#
 .cs
-C:\Software\Integrated_RWR_POC_GUI_25_Nov\RWR_POC_GUI\obj\Debug\
+C:\Users\Ravindra Joshi\source\repos\POI\RWR_POC_Nov27_HensoldtDemo\obj\Debug\
 RWR_POC_GUI
 none
 false
 DEBUG;TRACE
-C:\Software\Integrated_RWR_POC_GUI_25_Nov\RWR_POC_GUI\App.xaml
+C:\Users\Ravindra Joshi\source\repos\POI\RWR_POC_Nov27_HensoldtDemo\App.xaml
 2303794692
 
-31-1003192049
+301369997126
 13-38814620
 MainWindow.xaml;RWRDisplay.xaml;
 
-True
+False
 
