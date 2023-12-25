@@ -69,25 +69,21 @@ namespace RWR_POC_GUI
 
             foreach (RadarSignature rs in signatures)
             {
-                int r = rs.r;
-                if (!rangeFound)
-                {
-                    maxRange = r;
-                    rangeFound = true;
-                }
                 angleRadians = rs.theta;// * (Math.PI / 180);
                 if (angleRadians < 0)
                 {
                     angleRadians += (Math.PI * 2);
                 }
                 labels[i] = new Label();
+                //labels[i].FontFamily = new FontFamily("Wingdings 3");
+                labels[i].FontSize = 16;
                 labels[i].Content = rs.symbol;
-                labels[i].Foreground = Brushes.Red;
+                labels[i].Foreground = Brushes.Yellow;
                 //currentX = centerX + (rs.r * Math.Cos(-angleRadians));
                 //currentY = centerY + (rs.r * Math.Sin(-angleRadians));
 
-                currentX = centerX + ((rs.r * 200) / maxRange) * Math.Cos(-angleRadians);
-                currentY = centerY + ((rs.r * 200) / maxRange) * Math.Sin(angleRadians);
+                currentX = centerX + ((rs.r * 200) / rs.maxRange) * Math.Cos(-angleRadians);
+                currentY = centerY + ((rs.r * 200) / rs.maxRange) * Math.Sin(angleRadians);
 
                 //currentX = 400;
                 //currentY = 0;

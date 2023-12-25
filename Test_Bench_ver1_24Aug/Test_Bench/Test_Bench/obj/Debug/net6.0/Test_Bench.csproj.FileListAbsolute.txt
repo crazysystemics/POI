@@ -1,0 +1,15 @@
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\bin\Debug\net6.0\Test_Bench.exe
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\bin\Debug\net6.0\Test_Bench.deps.json
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\bin\Debug\net6.0\Test_Bench.runtimeconfig.json
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\bin\Debug\net6.0\Test_Bench.dll
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\bin\Debug\net6.0\Test_Bench.pdb
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\obj\Debug\net6.0\Test_Bench.csproj.AssemblyReference.cache
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\obj\Debug\net6.0\Test_Bench.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\obj\Debug\net6.0\Test_Bench.AssemblyInfoInputs.cache
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\obj\Debug\net6.0\Test_Bench.AssemblyInfo.cs
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\obj\Debug\net6.0\Test_Bench.csproj.CoreCompileInputs.cache
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\obj\Debug\net6.0\Test_Bench.dll
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\obj\Debug\net6.0\refint\Test_Bench.dll
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\obj\Debug\net6.0\Test_Bench.pdb
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\obj\Debug\net6.0\Test_Bench.genruntimeconfig.cache
+C:\Users\Dell\source\repos\01_Test_Bench\Test_Bench_ver1_24Aug\Test_Bench\Test_Bench\obj\Debug\net6.0\ref\Test_Bench.dll

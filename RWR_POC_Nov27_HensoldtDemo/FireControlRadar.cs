@@ -55,9 +55,12 @@ public class FireControlRadar : Radar
             }
         }
 
-        Console.WriteLine($"Target obtained: {this.targetObtained}");
-        Console.WriteLine($"Target position: {this.targetPosition.x}, {this.targetPosition.y}");
-        Console.WriteLine($"Fire control radar azimuth: {this.mainBeamAzimuth}");
+        if (Globals.debugPrint == Globals.DebugLevel.VERBOSE)
+        {
+            Console.WriteLine($"Target obtained: {this.targetObtained}");
+            Console.WriteLine($"Target position: {this.targetPosition.x}, {this.targetPosition.y}");
+            Console.WriteLine($"Fire control radar azimuth: {this.mainBeamAzimuth}");
+        }
     }
 
     public override List<Pulse> GeneratePulseTrain(int startTime, double angle)
@@ -173,7 +176,10 @@ public class FireControlRadar : Radar
         {
             if (this.launched)
             {
-                Console.WriteLine($"Missile position: {this.position.x}, {this.position.y}");
+                if (Globals.debugPrint == Globals.DebugLevel.VERBOSE)
+                {
+                    Console.WriteLine($"Missile position: {this.position.x}, {this.position.y}");
+                }
                 MoveMissile();
             }
         }

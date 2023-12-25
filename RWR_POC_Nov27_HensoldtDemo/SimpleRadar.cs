@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RWR_POC_GUI
 {
-    class SimpleRadar : Radar
+    public class SimpleRadar : Radar
     {
         public SimpleRadar(Position position, int radius, int beamWidth, int txTick, int id, int startFrameAzimuth = 135, int endFrameAzimuth = 45)
         {

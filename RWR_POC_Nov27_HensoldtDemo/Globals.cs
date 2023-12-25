@@ -6,17 +6,19 @@ using System.Windows.Threading;
 
 public static class Globals
 {
+    // Episode configuration
+    public static Random randomNumberGenerator = new Random(10);
+    public static int flightPathNumber = 0; //-1 random
+    public static int radarSetNumber = 0;//(130,50) //-1;
+
     public static int Tick = 0;
     public static float TimeResolution = 0.10f;
     public static int pulseTravelSpeed = 1;
     public static int guID = 0;
     public static int gTrackID = 0;
-    public static bool debugPrint = true;
-    public static bool distDebugPrint = true;
-    public static bool aircraftDebugPrint = true;
+    public static DebugLevel debugPrint;
     public static string recFileName;
     public static string trackRecFileName;
-    public static Random randomNumberGenerator = new Random();
     public static DispatcherTimer timer;
     public static MainWindow mainWindow;
     public static QLearner qLearner = new QLearner();
@@ -24,6 +26,8 @@ public static class Globals
     public static double matchProbability = 0.5;
     public static int ageIn;
     public static int ageOut;
+
+    public static int action_t;
 
     public static bool isDone = false;
     public static CommandExecutive commandExecutive = new CommandExecutive();
@@ -36,6 +40,21 @@ public static class Globals
         Console.WriteLine(s);
     }
 
+    public static void ExecuteShell()
+    {
+        Globals.timer.Stop();
+        TrackGenerator trackGenerator = new TrackGenerator();
+ 
+        string command = string.Empty;
+        while (command != "quit")
+        {
+            Console.WriteLine("Enter the Command");
+             command = Console.ReadLine();
+            Globals.commandExecutive.ParsePipelineCommand(command);
+        }
+        Globals.timer.Start();
+    }
+
     public enum RadarTypes
     {
         EARLYWARNING,
@@ -43,5 +62,13 @@ public static class Globals
         FIRECONTROL,
         GCI,
         SIMPLE
+    }
+
+    public enum DebugLevel
+    {
+        NONE,
+        BRIEF,
+        SPOT,
+        VERBOSE
     }
 }
