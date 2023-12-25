@@ -14,7 +14,7 @@ void greet(unsigned int country)
 		printf("hello world");
 	}
 }
-
+//
 int main()
 {
 	greet(INDIA);
