@@ -1,0 +1,15 @@
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\bin\Debug\net6.0\AircraftGridTraversal.exe
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\bin\Debug\net6.0\AircraftGridTraversal.deps.json
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\bin\Debug\net6.0\AircraftGridTraversal.runtimeconfig.json
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\bin\Debug\net6.0\AircraftGridTraversal.dll
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\bin\Debug\net6.0\AircraftGridTraversal.pdb
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\obj\Debug\net6.0\AircraftGridTraversal.csproj.AssemblyReference.cache
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\obj\Debug\net6.0\AircraftGridTraversal.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\obj\Debug\net6.0\AircraftGridTraversal.AssemblyInfoInputs.cache
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\obj\Debug\net6.0\AircraftGridTraversal.AssemblyInfo.cs
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\obj\Debug\net6.0\AircraftGridTraversal.csproj.CoreCompileInputs.cache
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\obj\Debug\net6.0\AircraftGridTraversal.dll
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\obj\Debug\net6.0\refint\AircraftGridTraversal.dll
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\obj\Debug\net6.0\AircraftGridTraversal.pdb
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\obj\Debug\net6.0\AircraftGridTraversal.genruntimeconfig.cache
+C:\Users\RohitChaoji\source\repos\AircraftGridTraversal\AircraftGridTraversal\obj\Debug\net6.0\ref\AircraftGridTraversal.dll
