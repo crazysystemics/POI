@@ -40,6 +40,7 @@ namespace AircraftGridTraversal
             Maze maze = new Maze(new Position(0, 0), new Position(4, 4));
             QState QLearner = new QState(new Position(0, 0), new Position(4, 4), maze);
             QLearner.QLearning(QLearner.startPos);
+            QLearner.followFinalPolicy(new Position(2, 2));
         }
     }
 }
@@ -373,6 +374,7 @@ public class QState
 
     int[,] rewardTable = new int[5, 5];
     double[,][] QTable = new double[5, 5][];
+    int[,] finalPolicy = new int[5, 5];
 
     // Initialize Q-table and Reward Value table
     public QState(Position startPos, Position endPos, Maze inputMaze)
@@ -408,18 +410,18 @@ public class QState
             {
                 if (inputMaze.mazeGraph[i, j] == ".")
                 {
-                    rewardTable[i, j] = -99;
+                    rewardTable[i, j] = -9999;
                 }
                 else if (inputMaze.mazeGraph[i, j] == "-")
                 {
                     if (endPos.x == i && endPos.y == j)
                     {
-                        rewardTable[i, j] = 999;
+                        rewardTable[i, j] = 99;
                     }
-                    //else
-                    //{
-                    //    rewardTable[i, j] = -1;
-                    //}
+                    else
+                    {
+                        rewardTable[i, j] = 0;
+                    }
                 }
             }
         }
@@ -446,19 +448,19 @@ public class QState
             {
                 if (inputMaze.mazeGraph[i, j + 1] == ".")
                 {
-                    QTable[i, j][0] = -99;
+                    QTable[i, j][0] = -9999;
                 }
                 if (inputMaze.mazeGraph[i + 1, j] == ".")
                 {
-                    QTable[i, j][1] = -99;
+                    QTable[i, j][1] = -9999;
                 }
                 if (inputMaze.mazeGraph[i, j - 1] == ".")
                 {
-                    QTable[i, j][2] = -99;
+                    QTable[i, j][2] = -9999;
                 }
                 if (inputMaze.mazeGraph[i - 1, j] == ".")
                 {
-                    QTable[i, j][3] = -99;
+                    QTable[i, j][3] = -9999;
                 }
             }
         }
@@ -473,17 +475,49 @@ public class QState
     {
         int selectedAction = 0;
 
-        for (int i = 0; i < 5; i++)
+        double epsilon = 0.2;
+
+        //for (int i = 0; i < 5; i++)
+        //{
+        //    for (int j = 0; j < 5; j++)
+        //    {
+        //        if (state.x == i && state.y == j)
+        //        {
+        //            selectedAction = Array.IndexOf(Qtable[i, j], Qtable[i, j].Max());
+        //        }
+        //    }
+        //}
+
+        if (Globals.randomGenerator.NextDouble() > epsilon)
         {
-            for (int j = 0; j < 5; j++)
+            for (int i = 0; i < 5; i++)
             {
-                if (state.x == i && state.y == j)
+                for (int j = 0; j < 5; j++)
                 {
-                    selectedAction = Array.IndexOf(Qtable[i, j], Qtable[i, j].Max());
+                    if (state.x == i && state.y == j)
+                    {
+                        List<int> maxActions = new List<int>();
+                        for (int k = 0; k < 4; k++)
+                        {
+                            if (QTable[i, j][k] == QTable[i, j].Max())
+                            {
+                                maxActions.Add(k);
+                            }
+                        }
+
+                        maxActions = maxActions.OrderBy(x => Globals.randomGenerator.Next(maxActions.Count)).ToList();
+                        selectedAction = maxActions[0];
+                        break;
+                    }
                 }
             }
+            return selectedAction;
         }
-        return selectedAction;
+
+        else
+        {
+            return Globals.randomGenerator.Next(4);
+        }
     }
 
     public Position Step(Position currentState, int action)
@@ -491,28 +525,28 @@ public class QState
         Position nextState = new Position(currentState.x, currentState.y);
         if (action == 0 && currentState.y != this.rewardTable.GetLength(1) - 1)
         {
-            if (rewardTable[currentState.x, currentState.y + 1] != -99)
+            if (rewardTable[currentState.x, currentState.y + 1] != -9999)
             {
                 nextState.y = currentState.y + 1;
             }
         }
         else if (action == 1 && currentState.x != this.rewardTable.GetLength(0) - 1)
         {
-            if (rewardTable[currentState.x + 1, currentState.y] != -99)
+            if (rewardTable[currentState.x + 1, currentState.y] != -9999)
             {
                 nextState.x = currentState.x + 1;
             }
         }
         else if (action == 2 && currentState.y != 0)
         {
-            if (rewardTable[currentState.x, currentState.y - 1] != -99)
+            if (rewardTable[currentState.x, currentState.y - 1] != -9999)
             {
                 nextState.y = currentState.y - 1;
             }
         }
         else if (action == 3 && currentState.x != 0)
         {
-            if (rewardTable[currentState.x - 1, currentState.y] != -99)
+            if (rewardTable[currentState.x - 1, currentState.y] != -9999)
             {
                 nextState.x = currentState.x - 1;
             }
@@ -520,7 +554,7 @@ public class QState
         return nextState;
     }
 
-    public void QLearning(Position currentState, int episodes = 1000, double alpha = 0.1, double gamma = 0.99)
+    public void QLearning(Position currentState, int episodes = 10000, double alpha = 0.1, double gamma = 0.99)
     {
         bool done = false;
         for (int i = 0; i < episodes; i++)
@@ -539,7 +573,7 @@ public class QState
                 double next_qsa = QTable[nextState.x, nextState.y][nextAction];
                 QTable[currentState.x, currentState.y][action] = qsa + alpha * (reward + gamma * next_qsa - qsa);
 
-                //rewardTable[currentState.x, currentState.y] = -99;
+                //rewardTable[currentState.x, currentState.y] = -1;
 
                 if (currentState.x == this.endPos.x && currentState.y == this.endPos.y)
                 {
@@ -552,9 +586,9 @@ public class QState
             }
         }
 
-        for (int i = 0; i < 5; i++)
+        for (int j = 0; j < 5; j++)
         {
-            for (int j = 0; j < 5; j++)
+            for (int i = 0; i < 5; i++)
             {
                 double[] QValues = new double[4];
                 int maxQSA = 0;
@@ -564,8 +598,33 @@ public class QState
                     maxQSA = Array.IndexOf(QValues, QValues.Max());
                 }
                 Console.Write($" {maxQSA} ");
+                finalPolicy[i, j] = maxQSA;
             }
             Console.WriteLine();
+        }
+    }
+
+    public void followFinalPolicy(Position startPos)
+    {
+        bool reachedEndNode = false;
+        Position currentPos = startPos;
+        Position[] neighbours = new Position[4];
+
+        while (!reachedEndNode)
+        {
+            if (currentPos.x == this.endPos.x && currentPos.y == this.endPos.y)
+            {
+                reachedEndNode = true; break;
+            }
+            neighbours[0] = new Position(currentPos.x, currentPos.y + 1);
+            neighbours[1] = new Position(currentPos.x + 1, currentPos.y);
+            neighbours[2] = new Position(currentPos.x, currentPos.y - 1);
+            neighbours[3] = new Position(currentPos.x - 1, currentPos.y);
+            Console.WriteLine($"Position before action: {currentPos.x}, {currentPos.y}");
+            int action = finalPolicy[currentPos.x, currentPos.y];
+            currentPos = neighbours[action];
+            Console.WriteLine($"Position after action: {currentPos.x}, {currentPos.y}");
+            Console.ReadLine();
         }
     }
 }
