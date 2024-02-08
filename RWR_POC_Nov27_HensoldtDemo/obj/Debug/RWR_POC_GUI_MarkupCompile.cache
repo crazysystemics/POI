@@ -4,26 +4,15 @@
 exe
 C#
 .cs
-<<<<<<< HEAD
-C:\Users\Ravindra Joshi\source\repos\POI\RWR_POC_Nov27_HensoldtDemo\obj\Debug\
-=======
 C:\Users\RohitChaoji\source\repos\crazysystemics\POI\RWR_POC_Nov27_HensoldtDemo\obj\Debug\
->>>>>>> ca293d8675c17861a98411c70bd17d1e7c50a1b6
 RWR_POC_GUI
 none
 false
 DEBUG;TRACE
-<<<<<<< HEAD
-C:\Users\Ravindra Joshi\source\repos\POI\RWR_POC_Nov27_HensoldtDemo\App.xaml
-2303794692
-
-301369997126
-=======
 C:\Users\RohitChaoji\source\repos\crazysystemics\POI\RWR_POC_Nov27_HensoldtDemo\App.xaml
 2303794692
 
 321519916296
->>>>>>> ca293d8675c17861a98411c70bd17d1e7c50a1b6
 13-38814620
 MainWindow.xaml;RWRDisplay.xaml;
 
