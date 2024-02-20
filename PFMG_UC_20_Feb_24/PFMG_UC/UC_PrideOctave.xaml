@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="PFMG_UC.UC_PrideOctave"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+xmlns:local="clr-namespace:PFMG_UC"
+mc:Ignorable="d" Height="415.046" Width="365.807">
+    <Grid Background="#FFEFF9F9" Margin="10,10,0,0" HorizontalAlignment="Left" Width="356">
+        <Label Content="Pride Octave" HorizontalAlignment="Left" Margin="5,36,0,0" VerticalAlignment="Top" Width="145" Height="31" FontFamily="Franklin Gothic Demi" FontSize="18" Foreground="#FF3E45E0"/>
+        <Label Content="ID" HorizontalAlignment="Left" Margin="28,85,0,0" VerticalAlignment="Top" Width="57" Height="23" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_PrideOctaveID" HorizontalAlignment="Left" Height="23" Margin="152,85,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" CaretBrush="Black" />
+        <CheckBox x:Name="txtbox_50_100" Content="50      |--------------------------|  100" HorizontalAlignment="Left" Margin="23,208,0,0" VerticalAlignment="Top" />
+        <Label Content="Octave min" HorizontalAlignment="Left" Margin="23,162,0,0" VerticalAlignment="Top" Width="76" Height="23" FontFamily="Segoe UI Semibold"/>
+        <Label Content="Octave max" HorizontalAlignment="Left" Margin="187,162,0,0" VerticalAlignment="Top" Width="75" Height="23" FontFamily="Segoe UI Semibold" RenderTransformOrigin="0.56,0.174"/>
+        <CheckBox x:Name="txtbox_100_200" Content="100    |--------------------------|  200" HorizontalAlignment="Left" Margin="23,240,0,0" VerticalAlignment="Top" />
+        <CheckBox x:Name="txtbox_200_400" Content="200    |--------------------------|  400" HorizontalAlignment="Left" Margin="23,272,0,0" VerticalAlignment="Top" />
+        <CheckBox x:Name="txtbox_400_500" Content="400    |--------------------------|  500" HorizontalAlignment="Left" Margin="23,304,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.515,3.933" />
+        <CheckBox x:Name="txtbox_500_1600" Content="500    |--------------------------|  1600" HorizontalAlignment="Left" Margin="23,338,0,0" VerticalAlignment="Top" />
+        <CheckBox x:Name="txtbox_1600_3200" Content="1600  |--------------------------|  3200" HorizontalAlignment="Left" Margin="23,371,0,0" VerticalAlignment="Top" />
+        <Label Content="Band" HorizontalAlignment="Left" Margin="28,121,0,0" VerticalAlignment="Top" Width="119" Height="32" FontFamily="Segoe UI Semibold"/>
+        <ComboBox x:Name="cmb_FreqAgility" HorizontalAlignment="Left" Margin="152,123,0,0" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" MinWidth="9">
+            <ComboBoxItem x:Name="cmd_Select" Content="          Select" HorizontalAlignment="Left" Width="120" FontFamily="Segoe UI Semibold" BorderBrush="#FFF0E2E2" Margin="0,0,-2,0" IsHitTestVisible="False" IsSelected="True"/>
+            <ComboBoxItem x:Name="cmd_L" Content="L" HorizontalAlignment="Left" Width="120" FontFamily="Segoe UI Semibold" BorderBrush="#FFF0E2E2" Margin="0,0,-2,0" />
+            <ComboBoxItem x:Name="cmd_A" Content="A" HorizontalAlignment="Left" Width="120" FontFamily="Segoe UI Semibold" BorderBrush="#FFF0E2E2" Margin="0,0,-2,0" />
+            <ComboBoxItem x:Name="cmd_B" Content="B" HorizontalAlignment="Left" Width="120" FontFamily="Segoe UI Semibold" BorderBrush="#FFF0E2E2" Margin="0,0,-2,0" />
+            <ComboBoxItem x:Name="cmd_C" Content="C" HorizontalAlignment="Left" Width="120" FontFamily="Segoe UI Semibold" BorderBrush="#FFF0E2E2" Margin="0,0,-2,0" />
+            <ComboBoxItem x:Name="cmd_D" Content="D" HorizontalAlignment="Left" Width="120" FontFamily="Segoe UI Semibold" BorderBrush="#FFF0E2E2" Margin="0,0,-2,0" />
+        </ComboBox>
+    </Grid>
+</UserControl>

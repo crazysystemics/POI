@@ -1,0 +1,20 @@
+﻿<UserControl x:Class="PFMG_UC.UC_FreqPulseToPulse"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+xmlns:local="clr-namespace:PFMG_UC"
+mc:Ignorable="d" 
+             d:DesignHeight="147.479" Width="736.975">
+    <Grid Background="#FFEFF9F9" Margin="10,10,10,0">
+        <Label Content="Frequency Agility : Pulse to Pulse" HorizontalAlignment="Left" Margin="14,8,0,0" VerticalAlignment="Top" Width="231" Height="33" FontFamily="Segoe UI Semibold"/>
+
+        <Label Content="Frequency min ( Hz )" HorizontalAlignment="Left" Margin="14,47,0,0" VerticalAlignment="Top" Width="123" Height="25" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_Freqmin" HorizontalAlignment="Left" Height="23" Margin="141,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" />
+        <Label Content="Frequency max ( Hz )" HorizontalAlignment="Left" Margin="307,47,0,0" VerticalAlignment="Top" Width="128" Height="25" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_Freqmax" HorizontalAlignment="Left" Height="23" Margin="437,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" />
+
+        <Label Content="Percentage" HorizontalAlignment="Left" Margin="14,88,0,0" VerticalAlignment="Top" Width="112" Height="30" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_Percent" HorizontalAlignment="Left" Height="23" Margin="141,95,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" />
+    </Grid>
+</UserControl>

@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="PFMG_UC.UC_PRIStaggered"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+xmlns:local="clr-namespace:PFMG_UC"
+mc:Ignorable="d" Height="219.328" Width="738.235">
+    <Grid Background="#FFEFF9F9" Margin="10,10,10,0">
+        <Label Content="PRI Agility : Staggered" HorizontalAlignment="Left" Margin="14,6,0,0" VerticalAlignment="Top" Width="134" Height="33" FontFamily="Segoe UI Semibold"/>
+
+        <Label Content="PRI min ( µs )" HorizontalAlignment="Left" Margin="14,47,0,0" VerticalAlignment="Top" Width="93" Height="25" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_PRImin" HorizontalAlignment="Left" Height="23" Margin="108,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" />
+        <Label Content="PRI max ( µs )" HorizontalAlignment="Left" Margin="249,47,0,0" VerticalAlignment="Top" Width="93" Height="25" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_PRImax" HorizontalAlignment="Left" Height="23" Margin="349,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" />
+        <Label Content="Tolerance" HorizontalAlignment="Left" Margin="504,49,0,0" VerticalAlignment="Top" Width="66" Height="25" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_Tolerance" HorizontalAlignment="Left" Height="23" Margin="574,51,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" />
+
+        <TextBox x:Name="txt_NoLevels" HorizontalAlignment="Left" Height="23" Margin="108,126,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" />
+        <Label Content="No of levels" HorizontalAlignment="Left" Margin="14,125,0,0" VerticalAlignment="Top" Width="93" Height="25" FontFamily="Segoe UI Semibold"/>
+        <GroupBox Header="Sub PRI min" HorizontalAlignment="Left" Height="107" Margin="261,88,0,0" VerticalAlignment="Top" Width="131" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_SubPRI1_min" HorizontalAlignment="Left" Height="23" Margin="266,108,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" />
+        <TextBox x:Name="txt_SubPRI2_min" HorizontalAlignment="Left" Height="23" Margin="266,136,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" />
+        <TextBox x:Name="txt_SubPRI3_min" HorizontalAlignment="Left" Height="23" Margin="266,164,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" />
+        <TextBox x:Name="txt_SubPRI1_max" HorizontalAlignment="Left" Height="23" Margin="408,108,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" />
+        <TextBox x:Name="txt_SubPRI2_max" HorizontalAlignment="Left" Height="23" Margin="408,136,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" />
+        <TextBox x:Name="txt_SubPRI3_max" HorizontalAlignment="Left" Height="23" Margin="408,164,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" />
+        <GroupBox Header="Sub PRI max" HorizontalAlignment="Left" Height="107" Margin="403,88,0,0" VerticalAlignment="Top" Width="131" FontFamily="Segoe UI Semibold"/>
+
+    </Grid>
+</UserControl>

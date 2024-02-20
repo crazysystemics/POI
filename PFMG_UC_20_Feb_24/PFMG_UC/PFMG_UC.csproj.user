@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup />
+  <ItemGroup>
+    <ApplicationDefinition Update="App.xaml">
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="UC_EmitterRecord.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UC_FreqBatchToBatch.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UC_FreqPulseToPulse.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UC_Header.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UC_PrideOctave.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UC_PRIFixed.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UC_PRIJrittered.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UC_PRIStaggered.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UC_PRISwitcher.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UC_Radar_Info.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UC_Record.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UC_SearchRegime.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="ViewEmitterTracks.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="MainWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UC_EmitterRecord.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UC_FreqBatchToBatch.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UC_FreqPulseToPulse.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UC_Header.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UC_PrideOctave.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UC_PRIFixed.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UC_PRIJrittered.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UC_PRIStaggered.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UC_PRISwitcher.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UC_Radar_Info.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UC_Record.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UC_SearchRegime.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="ViewEmitterTracks.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+</Project>
