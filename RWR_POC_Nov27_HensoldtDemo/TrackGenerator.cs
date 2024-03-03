@@ -233,14 +233,14 @@ class TrackGenerator
 
    public void commandShow(string[] args)
     {
-        if (args[0].ToLower() == "qsatable")
-        {
-            Console.WriteLine("QsaTable");
-            Console.WriteLine("State\t\tAction-0\tAction-1\tAction-2");
-            foreach (List<double> actionList in Globals.qLearner.Qsa)
-            {
-                Console.WriteLine($"{Globals.qLearner.Qsa.IndexOf(actionList)}\t\t{actionList[0].ToString("N3")}\t\t{actionList[1].ToString("N3")}\t\t{actionList[2].ToString("N3")}");
-            }
-        }
+        //if (args[0].ToLower() == "qsatable")
+        //{
+        //    Console.WriteLine("QsaTable");
+        //    Console.WriteLine("State\t\tAction-0\tAction-1\tAction-2");
+        //    foreach (List<double> actionList in Globals.qLearner.Qsa)
+        //    {
+        //        Console.WriteLine($"{Globals.qLearner.Qsa.IndexOf(actionList)}\t\t{actionList[0].ToString("N3")}\t\t{actionList[1].ToString("N3")}\t\t{actionList[2].ToString("N3")}");
+        //    }
+        //}
     }
 }

@@ -107,8 +107,8 @@ class DiscreteTimeSimulationEngine
         Globals.trackRecFileName = $"RecordedData{currentTime}.csv";
 
         PFM pfm = new PFM();
-        PFM.emitterIDTable.Add(new EmitterID(1, "E1", 800, 1500, 200, 3000, 4000, 500, 100, 200, 50, 5, 5));
-        PFM.emitterIDTable.Add(new EmitterID(2, "E2", 500, 800, 150, 8000, 10000, 500, 50, 150, 25, 5, 5));
+        PFM.emitterIDTable.Add(new PFMEmitterRecord(1, "E1", 800, 1500, 200, 3000, 4000, 500, 100, 200, 50, 5, 5));
+        PFM.emitterIDTable.Add(new PFMEmitterRecord(2, "E2", 500, 800, 150, 8000, 10000, 500, 50, 150, 25, 5, 5));
 
         simMod.Add(newScenario.chosenAircraft);
         simMod.Add(newScenario.chosenAircraft.rwr);
