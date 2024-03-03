@@ -83,10 +83,26 @@ public class QState
         this.restoreClass = restoreClass;
     }
     // public int ageInLength;
+    // public List<double> ercFrequencies = new List<double>();
+    // public List<EtfSnapshot> etfSnapshots = new List<EtfSnapshot>();
 
+    public override bool Equals(object rhs)
+    {
+        return (emitterID == ((QState)rhs).emitterID &&
+               restoreClass == ((QState)rhs).restoreClass);
+                          
+    }
+}
 
-   // public List<double> ercFrequencies = new List<double>();
-   // public List<EtfSnapshot> etfSnapshots = new List<EtfSnapshot>();
+class StateEqualityComparer : IEqualityComparer<QState>
+{
+    public bool Equals(QState qs1, QState qs2)
+    {
+       
+        return (qs1.Equals(qs2));
+    }
+
+    public int GetHashCode(QState qs) => qs.emitterID ^ qs.restoreClass;
 }
 
 public class QLearner
@@ -107,10 +123,15 @@ public class QLearner
     //public List<List<double>> Qsa = new List<List<double>>();
 
 
-    public Dictionary<QState, List<double>> Qsa = new Dictionary<QState, List<double>>();
+    
+    IEqualityComparer<QState> comparator = new StateEqualityComparer();
+    public Dictionary<QState, List<double>> Qsa;
+            
 
     public QLearner()
     {
+        Qsa=new Dictionary<QState, List<double>>(comparator);
+
         // TODO: Issue 3 - How do I add the <<eid, LOW/HIGH>> state to this table
         // Should I change it to a Dict instead of List<List<double>>
         {
@@ -171,7 +192,12 @@ public class QLearner
     public double QsaGet(QState state, int action_j)
     {
         // Issue 1 - Key (state) is not in Dictionary
-        return Qsa[state][action_j];
+        QState state_test = new QState(1, 0);
+        if (state.Equals(state_test))
+        { state_test.emitterID = -1;  }
+
+        List<double> actions = Qsa[state];
+        return actions[action_j];
         //int state_i = QsaMatch(state);//qstates.IndexOf(state);
         //return QSaMatrixGet(state_i, action_j);
     }
