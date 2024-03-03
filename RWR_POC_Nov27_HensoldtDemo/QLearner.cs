@@ -104,13 +104,15 @@ public class QLearner
 
     public List<QState> qstates = new List<QState>();
     public List<int> actions = new List<int>();
-    public List<List<double>> Qsa = new List<List<double>>();
+    //public List<List<double>> Qsa = new List<List<double>>();
+
+
+    public Dictionary<QState, List<double>> Qsa = new Dictionary<QState, List<double>>();
 
     public QLearner()
     {
         // TODO: Issue 3 - How do I add the <<eid, LOW/HIGH>> state to this table
         // Should I change it to a Dict instead of List<List<double>>
-        for(int i= 0; i < PFM.emitterIDTable.Count * 2; i++)
         {
             //Qsa.Add(new List<double> { Globals.randomNumberGenerator.NextDouble(),
             //                           Globals.randomNumberGenerator.NextDouble(),
@@ -118,10 +120,25 @@ public class QLearner
 
             foreach (EmitterID emitter in PFM.emitterIDTable)
             {
-                qstates.Add(new QState(emitter.eID, 0));
-                qstates.Add(new QState(emitter.eID, 1));
-                Qsa.Add(new List<double> { 0.0, 1.0, 0.0 });
-                Qsa.Add(new List<double> { 0.0, 1.0, 0.0 });
+                QState state = new QState(emitter.eID, 0);
+                if (Qsa.ContainsKey(state))
+                {
+                    Qsa[state] = new List<double> { 0.0, 1.0, 0.0 };
+                }
+                else
+                {
+                    Qsa.Add(state, new List<double> { 0.0, 1.0, 0.0 });
+                }
+
+                state = new QState(emitter.eID, 1);
+                if (Qsa.ContainsKey(state))
+                {
+                    Qsa[state] = new List<double> { 0.0, 1.0, 0.0 };
+                }
+                else
+                {
+                    Qsa.Add(state, new List<double> { 0.0, 1.0, 0.0 });
+                }
             }
             
 
@@ -133,7 +150,7 @@ public class QLearner
     public double QSaMatrixGet(int state_i, int action_j)
     {
         if (state_i > -1)
-            return Qsa.ToArray()[state_i].ToArray()[action_j];
+            return Qsa[state_i].ToArray()[action_j];
         else
             return -1;
     }
