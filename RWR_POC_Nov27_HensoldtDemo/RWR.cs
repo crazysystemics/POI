@@ -81,7 +81,7 @@ public class RWR : BattleSystem
 
     public override void OnTick()
     {
-        // QPoint Beginning
+        // QPoint Beginning - select action for QsaMat
 
         Random random = new Random();
         double epsi = random.NextDouble();
@@ -109,7 +109,7 @@ public class RWR : BattleSystem
 
         //QState state_t = GetState(RxBuf, emitterTrackFile);
 
-        int stateIndex = Globals.qLearner.QsaMatch(state_t); // TODO: Issue - StateIndex is always -1
+        int stateIndex = Globals.qLearner.QsaMatch(state_t); // TODO: Issue 1 - StateIndex is always -1
 
         if (epsi < Globals.qLearner.EXPLORE_PROBABILITY)
         {
@@ -135,7 +135,7 @@ public class RWR : BattleSystem
             }
             Globals.action_t = maxaction;
         }
-        // TODO: Below statement adds a "state" for every tick
+        // TODO: Issue 2 - Below statement adds a "state" for every tick
         // causing a state to be present even if there is no record being received
         // For example, at tick 34, there are 34 "states" in this list.
         if (stateIndex == -1 && emitterTrackFile.Count > 0 && !Globals.qLearner.qstates.Contains(state_t))
