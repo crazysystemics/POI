@@ -170,6 +170,7 @@ public class QLearner
 
     public double QsaGet(QState state, int action_j)
     {
+        // Issue 1 - Key (state) is not in Dictionary
         return Qsa[state][action_j];
         //int state_i = QsaMatch(state);//qstates.IndexOf(state);
         //return QSaMatrixGet(state_i, action_j);
