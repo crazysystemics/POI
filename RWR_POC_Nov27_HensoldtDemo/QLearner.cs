@@ -71,8 +71,19 @@ public class EtfSnapshot
 }
 public class QState
 {
-    public double freq;
-    public double maxWindow;
+    //public double freq;
+    //public double maxWindow;
+    // public int ageOutLength;
+    public int emitterID;
+    public int restoreClass;
+
+    public QState(int emitterID, int restoreClass)
+    {
+        this.emitterID = emitterID;
+        this.restoreClass = restoreClass;
+    }
+    // public int ageInLength;
+
 
    // public List<double> ercFrequencies = new List<double>();
    // public List<EtfSnapshot> etfSnapshots = new List<EtfSnapshot>();
@@ -87,7 +98,7 @@ public class QLearner
     public double runningSum;
     public double runningAverage;
 
-    public double EXPLORE_PROBABILITY = 1.0;
+    public double EXPLORE_PROBABILITY = Globals.randomNumberGenerator.NextDouble();
     public int actionSpaceCount = 3;
 
 
@@ -97,11 +108,25 @@ public class QLearner
 
     public QLearner()
     {
-        for(int i= 0; i < 10; i++)
+        // TODO: Issue 3 - How do I add the <<eid, LOW/HIGH>> state to this table
+        // Should I change it to a Dict instead of List<List<double>>
+        for(int i= 0; i < PFM.emitterIDTable.Count * 2; i++)
         {
-            Qsa.Add(new List<double> { Globals.randomNumberGenerator.NextDouble(),
-                                       Globals.randomNumberGenerator.NextDouble(),
-                                       Globals.randomNumberGenerator.NextDouble() });
+            //Qsa.Add(new List<double> { Globals.randomNumberGenerator.NextDouble(),
+            //                           Globals.randomNumberGenerator.NextDouble(),
+            //                           Globals.randomNumberGenerator.NextDouble() });
+
+            foreach (EmitterID emitter in PFM.emitterIDTable)
+            {
+                qstates.Add(new QState(emitter.eID, 0));
+                qstates.Add(new QState(emitter.eID, 1));
+                Qsa.Add(new List<double> { 0.0, 1.0, 0.0 });
+                Qsa.Add(new List<double> { 0.0, 1.0, 0.0 });
+            }
+            
+
+
+
         }  
     }
 
@@ -137,11 +162,22 @@ public class QLearner
        // bool isMatch = true;
         int stateIndex = -1;
 
+        // Match qstate's ageOutLength with emitterTrackRecord's maxAgeOut?
+
+        //foreach (QState qstate in qstates)
+        //{
+        //    //if(qstate.freq == state.freq && qstate.maxWindow == state.maxWindow)
+        //    //{
+        //    //    stateIndex = qstates.IndexOf(qstate);
+        //    //    return stateIndex;
+        //    //}
+        //}
+
         foreach (QState qstate in qstates)
         {
-            if(qstate.freq == state.freq && qstate.maxWindow == state.maxWindow)
+            if (qstate.restoreCount == state.restoreCount)
             {
-                stateIndex = qstates.IndexOf(qstate);
+                stateIndex = qstates.IndexOf(state);
                 return stateIndex;
             }
         }
@@ -169,5 +205,20 @@ public class QLearner
         double qsa = reward + gamma * maxQsa;//QsaGet(state, maxaction);
         QsaSet(state_t, action_t, qsa);
         return qsa;
+    }
+
+    public QState QsaStep(QState state_t, int action_t)
+    {
+        QState nextState = new QState();
+        if (action_t == 0)
+        {
+            nextState.ageOutLength++;
+        }
+
+        if (action_t == 1)
+        {
+            nextState.ageOutLength--;
+        }
+        return nextState;
     }
 }

@@ -107,8 +107,8 @@ class DiscreteTimeSimulationEngine
         Globals.trackRecFileName = $"RecordedData{currentTime}.csv";
 
         PFM pfm = new PFM();
-        PFM.emitterIDTable.Add(new EmitterID(1, "E1", 800, 1500, 200, 3000, 4000, 500, 100, 200, 50));
-        PFM.emitterIDTable.Add(new EmitterID(2, "E2", 500, 800, 150, 8000, 10000, 500, 50, 150, 25));
+        PFM.emitterIDTable.Add(new EmitterID(1, "E1", 800, 1500, 200, 3000, 4000, 500, 100, 200, 50, 5, 5));
+        PFM.emitterIDTable.Add(new EmitterID(2, "E2", 500, 800, 150, 8000, 10000, 500, 50, 150, 25, 5, 5));
 
         simMod.Add(newScenario.chosenAircraft);
         simMod.Add(newScenario.chosenAircraft.rwr);
@@ -353,32 +353,39 @@ class DiscreteTimeSimulationEngine
 
                         if (((Radar)transmitter).beamContains(receiver.position))
                         {
-                            detection = true;
-                            if (transmitter is SimpleRadar)
-                            {
+                            double recordProb = Globals.randomNumberGenerator.NextDouble();
 
+                            if (recordProb > 0.4)
+                            {
+                                detection = true;
+                                if (transmitter is SimpleRadar)
+                                {
+
+                                }
+
+                                if (transmitter is AcquisitionRadar)
+                                {
+                                    ((AcquisitionRadar)transmitter).detection = true;
+                                    ((AcquisitionRadar)transmitter).targetPosition = receiver.position;
+                                }
+
+                                //  List<Pulse> pulseTrainTemp = ((Radar)transmitter).GeneratePulseTrain(Globals.Tick * 1000, angle);
+                                // pulseTrainFromRadar.AddRange(pulseTrainTemp);
+
+                                receivedEmitterRecord = new EmitterRecord();
+                                receivedEmitterRecord.pri = ((Radar)transmitter).pulseRepetitionInterval;
+                                receivedEmitterRecord.freq = ((Radar)transmitter).txPulse.frequency;
+                                receivedEmitterRecord.pw = ((Radar)transmitter).txPulse.pulseWidth;
+                                receivedEmitterRecord.erID = ((Radar)transmitter).id;
+                                receivedEmitterRecord.erIdentifier = ((Radar)transmitter).radarType.ToString();
+                                receivedEmitterRecord.distance = dist;
+                                receivedEmitterRecord.maxRange = ((Radar)transmitter).radius;
+                                receivedEmitterRecord.azimuth = nextWaypointAngle - angle;
+                                receivedEmitterRecord.eID = ((Radar)transmitter).id;
+                                emitterRecords.Add(receivedEmitterRecord);
                             }
 
-                            if (transmitter is AcquisitionRadar)
-                            {
-                                ((AcquisitionRadar)transmitter).detection = true;
-                                ((AcquisitionRadar)transmitter).targetPosition = receiver.position;
-                            }
-
-                            //  List<Pulse> pulseTrainTemp = ((Radar)transmitter).GeneratePulseTrain(Globals.Tick * 1000, angle);
-                            // pulseTrainFromRadar.AddRange(pulseTrainTemp);
-
-                            receivedEmitterRecord = new EmitterRecord();
-                            receivedEmitterRecord.pri = ((Radar)transmitter).pulseRepetitionInterval;
-                            receivedEmitterRecord.freq = ((Radar)transmitter).txPulse.frequency;
-                            receivedEmitterRecord.pw = ((Radar)transmitter).txPulse.pulseWidth;
-                            receivedEmitterRecord.erID = ((Radar)transmitter).id;
-                            receivedEmitterRecord.erIdentifier = ((Radar)transmitter).radarType.ToString();
-                            receivedEmitterRecord.distance = dist;
-                            receivedEmitterRecord.maxRange = ((Radar)transmitter).radius;
-                            receivedEmitterRecord.azimuth = nextWaypointAngle - angle;
-                            receivedEmitterRecord.eID = ((Radar)transmitter).id;
-                            emitterRecords.Add(receivedEmitterRecord);
+                            
 
                             //   ((RWR)receiver).receivingEmitterRecord = true;
 
