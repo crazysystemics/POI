@@ -196,8 +196,10 @@ public class QLearner
         if (state.Equals(state_test))
         { state_test.emitterID = -1;  }
 
-        List<double> actions = Qsa[state];
-        return actions[action_j];
+
+        return Qsa[state][action_j];
+        //List<double> actions = Qsa[state];
+        //return actions[action_j];
         //int state_i = QsaMatch(state);//qstates.IndexOf(state);
         //return QSaMatrixGet(state_i, action_j);
     }

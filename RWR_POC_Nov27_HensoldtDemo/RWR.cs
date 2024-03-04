@@ -82,6 +82,16 @@ public class RWR : BattleSystem
 
     public void env_step()
     {
+        QState qstate = new QState(etr.eid, restoreClass);
+        QState prev_state = new QState(0, 0);
+        foreach (QState qs in prevQStates)
+        {
+            if (qs == qstate)
+            {
+                prev_state = qs;
+                break;
+            }
+        }
         prevQStates = new List<QState>();
         foreach (QState state in Globals.qLearner.qstates)
         {
@@ -321,16 +331,7 @@ public class RWR : BattleSystem
                             restoreClass = 1;
 
                         
-                        QState qstate = new QState(etr.eid, restoreClass);
-                        QState prev_state = new QState(0,0);
-                        foreach (QState qs in prevQStates)
-                        {
-                            if (qs == qstate)
-                            {
-                                prev_state = qs;
-                                break;
-                            }
-                        }
+                        
 
 
 
