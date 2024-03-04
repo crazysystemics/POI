@@ -80,23 +80,16 @@ public class RWR : BattleSystem
         }
     }
 
+    //Assuming only ONE EMITTER IS THERE
+    //TODO: EXTEND TO N EMITTERS
+    public QState prevQState = new QState(0, 0);
+
     public void env_step()
-    {
-        QState qstate = new QState(etr.eid, restoreClass);
-        QState prev_state = new QState(0, 0);
-        foreach (QState qs in prevQStates)
-        {
-            if (qs == qstate)
-            {
-                prev_state = qs;
-                break;
-            }
-        }
-        prevQStates = new List<QState>();
+    {      
+ 
         foreach (QState state in Globals.qLearner.qstates)
         {
-            prevQStates.Add(new QState(state.emitterID, state.restoreClass));
-
+            
             //QState state_t = GetState(RxBuf, emitterTrackFile);
             //int stateIndex = Globals.qLearner.QsaMatch(state_t); 
             // TODO: Issue 1 - StateIndex is always -1
@@ -115,12 +108,12 @@ public class RWR : BattleSystem
                 double maxQsa = 0.0;
                 int maxaction = 0;
 
-                
+
 
                 for (int action_j = 0; action_j < Globals.qLearner.actionSpaceCount;
                     action_j++)
                 {
-                   
+
 
                     //int stateIndex = Globals.qLearner.QsaMatch(stateT);
                     double qsa = Globals.qLearner.QsaGet(state, action_j);
@@ -175,7 +168,7 @@ public class RWR : BattleSystem
         //        state_t = GetState(record);
         //    }
         //}
-
+        prevQState = new QState(1, PFM.emitterIDTable[1].restoreCount / 3);
 
         env_step();
 
@@ -321,7 +314,7 @@ public class RWR : BattleSystem
                         //double reward = trackLength / Math.Abs(etr.freqMax - etr.freqMin); AgeOutCount in denominator
                         //Globals.qLearner.Qsa_cap(new QState(), 0, null, reward);
 
-                        
+
                         string restore = restoreCount(etr.AgeOutRestore);
                         //Globals.qLearner.Qsa.Add(etr.eid, restore);
                         etr.status = TrackState.ETF_oDELETE;
@@ -330,22 +323,25 @@ public class RWR : BattleSystem
                         if (etr.AgeOutRestore > 3)
                             restoreClass = 1;
 
-                        
-                        
+                        PFM.emitterIDTable[etr.eid].restoreCount = etr.AgeOutRestore;
 
 
 
+
+
+                        QState curQState = new QState(1, PFM.emitterIDTable[1].restoreCount/3);
                         if (etr.AgingOutCount != 0)
                         {
-                            Globals.qLearner.Qsa_cap(prev_state, 
-                                                     Globals.action_t, 
-                                                     qstate, 
+                            Globals.qLearner.Qsa_cap(prevQState,
+                                                     Globals.action_t,
+                                                     curQState,
                                                      etr.trackLength / etr.AgingOutCount);
                         }
                         else
                         {
-                            Globals.qLearner.Qsa_cap(prev_state, 
-                                                     Globals.action_t, qstate, 
+                            Globals.qLearner.Qsa_cap(prevQState,
+                                                     Globals.action_t, 
+                                                     curQState,
                                                      0);
                         }
 
@@ -535,7 +531,7 @@ public class RWR : BattleSystem
 
     public QState GetState(EmitterTrackRecord emitterTrackRecord)
     {
-        QState qState = new QState(0,0);
+        QState qState = new QState(0, 0);
         return qState;
 
         //qState.ageOutLength = emitterTrackRecord.AgingOutCount;
@@ -875,10 +871,16 @@ public class PFMEmitterRecord
     public int ceilingAgeOut;
     public int initAgeOut;
 
+    public int restoreCount;
+
     //public ageInMin;
     //public ageInMax;
 
-    public PFMEmitterRecord(int eID, string erIdentifier, double priMin, double priMax, double priTrackWindow, double freqMin, double freqMax, double freqTrackWindow, double pwMin, double pwMax, double pwTrackWindow, int ageOutMax, int ceilingAgeOut)
+    public PFMEmitterRecord(int eID, string erIdentifier, double priMin, 
+                            double priMax, double priTrackWindow, double freqMin,
+                            double freqMax, double freqTrackWindow, double pwMin, 
+                            double pwMax, double pwTrackWindow, int ageOutMax, 
+                            int ceilingAgeOut, int restoreCount=0)
     {
         this.erIdentifier = erIdentifier;
         this.eID = eID;
@@ -895,6 +897,7 @@ public class PFMEmitterRecord
         //this.ageOut = ageOutMax;
         this.initAgeOut = ageOutMax;
         this.ceilingAgeOut = ceilingAgeOut;
+        this.restoreCount = restoreCount;
     }
 }
 
