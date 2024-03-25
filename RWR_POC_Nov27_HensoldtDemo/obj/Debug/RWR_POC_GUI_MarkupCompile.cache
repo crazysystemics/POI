@@ -4,12 +4,20 @@
 exe
 C#
 .cs
+<<<<<<< Updated upstream
 C:\Users\Ravindra Joshi\source\repos\POI\RWR_POC_Nov27_HensoldtDemo\obj\Debug\
+=======
+C:\Users\RohitChaoji\source\repos\crazysystemics\POI\RWR_POC_Nov27_HensoldtDemo\obj\Debug\
+>>>>>>> Stashed changes
 RWR_POC_GUI
 none
 false
 DEBUG;TRACE
+<<<<<<< Updated upstream
 C:\Users\Ravindra Joshi\source\repos\POI\RWR_POC_Nov27_HensoldtDemo\App.xaml
+=======
+C:\Users\RohitChaoji\source\repos\crazysystemics\POI\RWR_POC_Nov27_HensoldtDemo\App.xaml
+>>>>>>> Stashed changes
 2303794692
 
 321519916296
