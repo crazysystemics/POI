@@ -36,7 +36,7 @@ public class Scenario
             new Aircraft(new List<Position>()
             {
                 new Position(50, 50),
-                new Position(170, 50)
+                new Position(200, 50)
             }, 0),
 
             new Aircraft(new List<Position>()

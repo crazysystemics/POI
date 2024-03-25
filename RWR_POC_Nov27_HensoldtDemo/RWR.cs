@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using System.Windows.Navigation;
 using RWR_POC_GUI;
 
@@ -13,15 +14,16 @@ public class RWR : BattleSystem
     public int toaResolution;
     public int aperture;
     public double[] amps = new double[4];
-    public bool receivingEmitterRecord = false;
-    public bool recordLost = false;
-    public EmitterRecord emRecord = new EmitterRecord();
     public List<EmitterRecord> emRecordList = new List<EmitterRecord>();
-    public List<PDW> receivedPDW = new List<PDW>();
-    public EmitterRecord receivedRecord = new EmitterRecord();
-    public PFMEmitterRecord eID;
+    // Issue - In ETF, Received is immediately set to True when a track is deleted and a new track is started
     public List<EmitterTrackRecord> emitterTrackFile = new List<EmitterTrackRecord>();
     public List<QState> prevQStates = new List<QState>();
+    public QState prevState_at_env_step_begin = new QState(1, 0);
+    public QState currentState_at_env_step_begin = new QState(1, 0);
+    public int envActionsPerformed = 0;
+
+    public int trackLossCount = 0;
+    public int rewardValue = 0;
 
     public RWR(ref Position positon, int id)
     {
@@ -84,27 +86,143 @@ public class RWR : BattleSystem
     //TODO: EXTEND TO N EMITTERS
     public QState prevQState = new QState(0, 0);
 
+
+    public void env_step_1()
+    {
+
+        // Choose Actions 0, 1 and 2 sequentially every time env_step is performed
+
+        // Only explores, never exploits
+
+        QState state = prevState_at_env_step_begin;
+
+        string randChoice;
+
+        randChoice = "EXPLORE";
+        Console.WriteLine(randChoice);
+
+        // Action on env_step number 0, 3, 6, 9, etc = 0
+        // Action on env_step number 1, 4, 7, 10, etc = 1
+        // Action on env_step number 2, 5, 8, 11, etc = 2
+
+        Globals.action_t = this.envActionsPerformed % 3;
+
+        // QPoint Execute action_t
+
+        int pfmeid = state.emitterID;
+
+        if (Globals.action_t == 0)
+        {
+            if (PFM.emitterIDTable[pfmeid].initAgeOut < PFM.emitterIDTable[pfmeid].ceilingAgeOut)
+            {
+                PFM.emitterIDTable[pfmeid].initAgeOut++;
+                Console.WriteLine("Action Performed: ++");
+            }
+        }
+        else if (Globals.action_t == 1)
+        {
+            //do nothing
+            Console.WriteLine("Action Performed: Nothing");
+        }
+        else if (Globals.action_t == 2)
+        {
+            if (PFM.emitterIDTable[pfmeid].initAgeOut > PFM.emitterIDTable[pfmeid].floorAgeOut)
+            {
+                PFM.emitterIDTable[pfmeid].initAgeOut--;
+                Console.WriteLine("Action Performed: --");
+            }
+
+        }
+        this.envActionsPerformed++;
+    }
+
+
+    public void env_step_2()
+    {
+        // Explore or Exploit chosen without seeded random
+        // Equal probability for explore and exploit
+
+        QState state = prevState_at_env_step_begin;
+
+        string randChoice = String.Empty;
+        Random exploration_random = new Random();
+        double epsi = exploration_random.NextDouble();
+
+        if (epsi < 0.5)
+        {
+            randChoice = "EXPLORE";
+            Console.WriteLine(randChoice);
+
+            Globals.action_t = Globals.randomNumberGenerator.Next(Globals.qLearner.actionSpaceCount);
+        }
+        else
+        {
+            randChoice = "EXPLOIT";
+            Console.WriteLine(randChoice);
+            double maxQsa = 0.0;
+            int maxaction = 0;
+
+
+
+            for (int action_j = 0; action_j < Globals.qLearner.actionSpaceCount;
+                action_j++)
+            {
+                double qsa = Globals.qLearner.QsaGet(state, action_j);
+                if (qsa > maxQsa)
+                {
+                    maxQsa = qsa;
+                    maxaction = action_j;
+                }
+            }
+            Globals.action_t = maxaction;
+        }
+
+        // QPoint Execute action_t
+
+        int pfmeid = state.emitterID;
+
+        if (Globals.action_t == 0)
+        {
+            PFM.emitterIDTable[pfmeid].initAgeOut++;
+            Console.WriteLine("Action Performed: ++");
+        }
+        else if (Globals.action_t == 1)
+        {
+            //do nothing
+            Console.WriteLine("Action Performed: Nothing");
+        }
+        else if (Globals.action_t == 2)
+        {
+            PFM.emitterIDTable[pfmeid].initAgeOut--;
+            Console.WriteLine("Action Performed: --");
+        }
+
+    }
+
+
     public void env_step()
-    {      
- 
-        foreach (QState state in Globals.qLearner.qstates)
+    {
+
+        QState state = prevState_at_env_step_begin;
+        //foreach (QState state in Globals.qLearner.qstates)
         {
             
             //QState state_t = GetState(RxBuf, emitterTrackFile);
             //int stateIndex = Globals.qLearner.QsaMatch(state_t); 
-            // TODO: Issue 1 - StateIndex is always -1
             string randChoice = String.Empty;
-            double epsi = new Random().NextDouble(); ;
+            double epsi = Globals.randomNumberGenerator.NextDouble(); ;
 
             if (epsi < Globals.qLearner.EXPLORE_PROBABILITY)
             {
                 randChoice = "EXPLORE";
-                Random rand = new Random();
-                Globals.action_t = rand.Next(Globals.qLearner.actionSpaceCount);
+                Console.WriteLine(randChoice);
+
+                Globals.action_t = Globals.randomNumberGenerator.Next(Globals.qLearner.actionSpaceCount);
             }
             else
             {
                 randChoice = "EXPLOIT";
+                Console.WriteLine(randChoice);
                 double maxQsa = 0.0;
                 int maxaction = 0;
 
@@ -116,6 +234,12 @@ public class RWR : BattleSystem
 
 
                     //int stateIndex = Globals.qLearner.QsaMatch(stateT);
+
+                    //if (state.restoreClass > 1)
+                    //{
+                    //    state.restoreClass = 1;
+                    //}
+
                     double qsa = Globals.qLearner.QsaGet(state, action_j);
                     if (qsa > maxQsa)
                     {
@@ -123,28 +247,36 @@ public class RWR : BattleSystem
                         maxaction = action_j;
                     }
                 }
+
                 Globals.action_t = maxaction;
+            }
 
-                //QPoint Execute action_t
+            // QPoint Execute action_t
 
-                int pfmeid = state.emitterID;
+            int pfmeid = state.emitterID;
 
-
-                if (Globals.action_t == 0)
+            if (Globals.action_t == 0)
+            {
+                if (PFM.emitterIDTable[pfmeid].initAgeOut < PFM.emitterIDTable[pfmeid].ceilingAgeOut)
                 {
-                    PFM.emitterIDTable[pfmeid].ageOut++;
-                }
-                else if (Globals.action_t == 1)
-                {
-                    //do nothing
-                    break;
-                }
-                else if (Globals.action_t == 2)
-                {
-                    PFM.emitterIDTable[pfmeid].ageOut--;
-                    break;
+                    PFM.emitterIDTable[pfmeid].initAgeOut++;
+                    Console.WriteLine("Action Performed: ++");
                 }
             }
+            else if (Globals.action_t == 1)
+            {
+                //do nothing
+                Console.WriteLine("Action Performed: Nothing");
+            }
+            else if (Globals.action_t == 2)
+            {
+                if (PFM.emitterIDTable[pfmeid].initAgeOut > PFM.emitterIDTable[pfmeid].floorAgeOut)
+                {
+                    PFM.emitterIDTable[pfmeid].initAgeOut--;
+                    Console.WriteLine("Action Performed: --");
+                }
+            }
+
         }
 
     }
@@ -153,8 +285,14 @@ public class RWR : BattleSystem
     {
         //QPoint Beginning -select action for QsaMat
 
-        Random random = new Random();
-        double epsi = random.NextDouble();
+        if (Globals.episodeIsDone)
+        {
+            this.emRecordList.Clear();
+            this.emitterTrackFile.Clear();
+            Globals.gTrackID = 0;
+        }
+
+        double epsi = Globals.randomNumberGenerator.NextDouble();
         string randChoice = string.Empty;
 
         //Search current state in existing qStates
@@ -168,13 +306,19 @@ public class RWR : BattleSystem
         //        state_t = GetState(record);
         //    }
         //}
+
+        //if (PFM.emitterIDTable[1].restoreCount > 1)
+        //{
+        //    PFM.emitterIDTable[1].restoreCount == 1
+        //}
+        if (PFM.emitterIDTable[1].restoreCount > 3)
+        {
+            PFM.emitterIDTable[1].restoreCount = 1;
+        }
         prevQState = new QState(1, PFM.emitterIDTable[1].restoreCount / 3);
 
-        env_step();
 
-        // TODO: Issue 2 - Below statement adds a "state" for every tick
-        // causing a state to be present even if there is no record being received
-        // For example, at tick 34, there are 34 "states" in this list.
+
         //if (stateIndex == -1 && emitterTrackFile.Count > 0 && !Globals.qLearner.qstates.Contains(state_t))
         //    Globals.qLearner.qstates.Add(state_t);
 
@@ -256,6 +400,7 @@ public class RWR : BattleSystem
             etr.currentTrackLength = Globals.Tick - etr.entryTick;
             if (etr.received)
             {
+                trackLossCount = 0;
                 tempETF.Add(etr);
                 etr.Record("+");
                 if (etr.recordLost)
@@ -263,12 +408,108 @@ public class RWR : BattleSystem
                     Console.WriteLine("Record Restored");
                     etr.AgeOutRestore++;
                     etr.recordLost = false;
+                    env_step();
+
+                    int restoreClass = 0;
+
+                    PFM.emitterIDTable[etr.eid].restoreCount = etr.AgeOutRestore;
+
+                    if (PFM.emitterIDTable[etr.eid].restoreCount >= 6)
+                        restoreClass = 1;
+
+                    prevState_at_env_step_begin = currentState_at_env_step_begin;
+                    currentState_at_env_step_begin = new QState(1, restoreClass);
+
+                    foreach (QState state in Globals.qLearner.Qsa.Keys)
+                    {
+                        foreach (double actionVal in Globals.qLearner.Qsa[state].ToList())
+                        {
+                            for (int i = 0; i < 3; i++)
+                            {
+                                Globals.qLearner.previousQSA[state][i] = Globals.qLearner.Qsa[state][i];
+                            }
+                        }
+                    }
+
+
+
+                    foreach (QState state in Globals.qLearner.Qsa.Keys)
+                    {
+                        foreach (double actionVal in Globals.qLearner.Qsa[state].ToList())
+                        {
+                            for (int i = 0; i < 3; i++)
+                            {
+                                Globals.qLearner.currentQSA[state][i] = Globals.qLearner.Qsa[state][i];
+                            }
+                        }
+                    }
+
+                    // Find delta Qsa
+                    foreach (QState state in Globals.qLearner.Qsa.Keys)
+                    {
+                        foreach (double actionVal in Globals.qLearner.Qsa[state].ToList())
+                        {
+                            for (int i = 0; i < 3; i++)
+                            {
+                                if (Globals.qLearner.currentQSA[state][i] - Globals.qLearner.previousQSA[state][i] != 0)
+                                {
+                                    Globals.qLearner.deltaQSA[state][i] = Globals.qLearner.currentQSA[state][i] - Globals.qLearner.previousQSA[state][i];
+                                }
+                            }
+                        }
+                    }
+
+                    if (etr.AgingOutCount != 0)
+                    {
+                        Globals.qLearner.Qsa_cap(prevState_at_env_step_begin,
+                                                 Globals.action_t,
+                                                 currentState_at_env_step_begin,
+                                                 etr.trackLength / etr.AgingOutCount);
+                    }
+                    else
+                    {
+                        Globals.qLearner.Qsa_cap(prevState_at_env_step_begin,
+                                                 Globals.action_t,
+                                                 currentState_at_env_step_begin,
+                                                 0);
+                    }
+
+                    Console.WriteLine("Current Qsa table: \n");
+                    foreach (var Q in Globals.qLearner.Qsa)
+                    {
+                        foreach (var qsa in Q.Value)
+                        {
+                            Console.Write($"  {qsa}  ");
+                        }
+                        Console.WriteLine();
+                    }
+
+                    Console.WriteLine("\nPrevious Qsa table: \n");
+                    foreach (var Q in Globals.qLearner.previousQSA)
+                    {
+                        foreach (var qsa in Q.Value)
+                        {
+                            Console.Write($"  {qsa}  ");
+                        }
+                        Console.WriteLine();
+                    }
+
+                    Console.WriteLine("\nDelta Qsa table: \n");
+                    foreach (var Q in Globals.qLearner.deltaQSA)
+                    {
+                        foreach (var qsa in Q.Value)
+                        {
+                            Console.Write($"  {qsa}  ");
+                        }
+                        Console.WriteLine();
+                    }
+                    Console.Write("");
                 }
             }
             else
             {
                 // On Delete
-
+                trackLossCount++;
 
                 if (etr.ageIn > 0)
                 {
@@ -284,13 +525,13 @@ public class RWR : BattleSystem
                 else
                 {
                     etr.recordLost = true;
-                    if (etr.ageOut > 0 && etr.AgingOutCount <= etr.ceilingAgeOut)
+                    //etr.received = false;
+                    if (etr.ageOut > 0)
                     {
                         Console.WriteLine("Record Lost");
                         etr.ageOut--;
                         etr.AgingOutCount++;
                         etr.AgeOutDecrement++;
-                        Console.WriteLine($"Ageout: {etr.ageOut}");
 
                         etr.valid = true;
 
@@ -309,41 +550,158 @@ public class RWR : BattleSystem
                         //int trackLength = etr.exitTick - etr.entryTick;
                         etr.trackLength = etr.exitTick - etr.entryTick;
 
+
+                        //Globals.qLearner.qstates
+
                         //double reward = trackLength / etr.AgingOutCount;
                         //Globals.qLearner.Qsa_cap(state_t, action_t, new_state_t, trackLength);
                         //double reward = trackLength / Math.Abs(etr.freqMax - etr.freqMin); AgeOutCount in denominator
                         //Globals.qLearner.Qsa_cap(new QState(), 0, null, reward);
 
-
                         string restore = restoreCount(etr.AgeOutRestore);
                         //Globals.qLearner.Qsa.Add(etr.eid, restore);
                         etr.status = TrackState.ETF_oDELETE;
 
+                        env_step();
+
                         int restoreClass = 0;
-                        if (etr.AgeOutRestore > 3)
-                            restoreClass = 1;
 
                         PFM.emitterIDTable[etr.eid].restoreCount = etr.AgeOutRestore;
 
+                        if (PFM.emitterIDTable[etr.eid].restoreCount >= 6)
+                            restoreClass = 1;
+
+                        prevState_at_env_step_begin = currentState_at_env_step_begin;
+                        currentState_at_env_step_begin = new QState(1, restoreClass);
+
+                        foreach (QState state in Globals.qLearner.Qsa.Keys)
+                        {
+                            foreach (double actionVal in Globals.qLearner.Qsa[state].ToList())
+                            {
+                                for (int i = 0; i < 3; i++)
+                                {
+                                    Globals.qLearner.previousQSA[state][i] = Globals.qLearner.Qsa[state][i];
+                                }
+                            }
+                        }
 
 
 
+                        foreach (QState state in Globals.qLearner.Qsa.Keys)
+                        {
+                            foreach (double actionVal in Globals.qLearner.Qsa[state].ToList())
+                            {
+                                for (int i = 0; i < 3; i++)
+                                {
+                                    Globals.qLearner.currentQSA[state][i] = Globals.qLearner.Qsa[state][i];
+                                }
+                            }
+                        }
 
-                        QState curQState = new QState(1, PFM.emitterIDTable[1].restoreCount/3);
+                        // Find delta Qsa
+                        foreach (QState state in Globals.qLearner.Qsa.Keys)
+                        {
+                            foreach (double actionVal in Globals.qLearner.Qsa[state].ToList())
+                            {
+                                for (int i = 0; i < 3; i++)
+                                {
+                                    if (Globals.qLearner.currentQSA[state][i] - Globals.qLearner.previousQSA[state][i] != 0)
+                                    {
+                                        Globals.qLearner.deltaQSA[state][i] = Globals.qLearner.currentQSA[state][i] - Globals.qLearner.previousQSA[state][i];
+                                    }
+                                }
+                            }
+                        }
+
                         if (etr.AgingOutCount != 0)
                         {
-                            Globals.qLearner.Qsa_cap(prevQState,
+                            Globals.qLearner.Qsa_cap(prevState_at_env_step_begin,
                                                      Globals.action_t,
-                                                     curQState,
+                                                     currentState_at_env_step_begin,
                                                      etr.trackLength / etr.AgingOutCount);
                         }
                         else
                         {
-                            Globals.qLearner.Qsa_cap(prevQState,
-                                                     Globals.action_t, 
-                                                     curQState,
+                            Globals.qLearner.Qsa_cap(prevState_at_env_step_begin,
+                                                     Globals.action_t,
+                                                     currentState_at_env_step_begin,
                                                      0);
                         }
+
+                        Console.WriteLine("Current Qsa table: \n");
+                        foreach (var Q in Globals.qLearner.Qsa)
+                        {
+                            foreach (var qsa in Q.Value)
+                            {
+                                Console.Write($"  {qsa}  ");
+                            }
+                            Console.WriteLine();
+                        }
+
+                        Console.WriteLine("\nPrevious Qsa table: \n");
+                        foreach (var Q in Globals.qLearner.previousQSA)
+                        {
+                            foreach (var qsa in Q.Value)
+                            {
+                                Console.Write($"  {qsa}  ");
+                            }
+                            Console.WriteLine();
+                        }
+
+                        Console.WriteLine("\nDelta Qsa table: \n");
+                        foreach (var Q in Globals.qLearner.deltaQSA)
+                        {
+                            foreach (var qsa in Q.Value)
+                            {
+                                Console.Write($"  {qsa}  ");
+                            }
+                            Console.WriteLine();
+                        }
+
+                        //if (Globals.envStepType == 0)
+                        //{
+                        //    env_step();
+                        //}
+                        //else if (Globals.envStepType == 1)
+                        //{
+                        //    env_step_1();
+                        //}
+
+
+                        //QState curQState = new QState(1, PFM.emitterIDTable[1].restoreCount/3);
+
+                        // Issue - Agent always chooses the first updated QSA during exploit since that state-action pair will
+                        // always have the highest value.
+
+
+                        // Store previous Qsa
+
+
+
+
+
+
+
+
+                        //Testing if some other reward metric works better
+                        //if (etr.AgingOutCount != 0)
+                        //{
+                        //    Globals.qLearner.Qsa_cap(prevState_at_env_step_begin,
+                        //                             Globals.action_t,
+                        //                             currentState_at_env_step_begin,
+                        //                             rewardValue);
+                        //}
+                        //else
+                        //{
+                        //    Globals.qLearner.Qsa_cap(prevState_at_env_step_begin,
+                        //                             Globals.action_t,
+                        //                             currentState_at_env_step_begin,
+                        //                             0);
+                        //}
+
+
+                        // Store Qsa value after applying Qsa_cap
+
 
 
                         Globals.recordedList.Add(
@@ -356,15 +714,27 @@ public class RWR : BattleSystem
                 }
             }
 
+            Console.WriteLine($"Global tick: {Globals.persistentTick}");
             Console.WriteLine($"TrackID: {etr.trackID}");
-            Console.WriteLine($"Entry: {etr.entryTick}, Exit: {etr.exitTick}");
-            Console.WriteLine($"Current Track Length: {etr.currentTrackLength}");
-            Console.WriteLine($"AgeOutRestore (Number of times record in current track was lost, then restored) {etr.AgeOutRestore}");
-
-
-            Console.WriteLine($"Track Length / N(restores) = {etr.restoresPerTrackLength}");
+            Console.WriteLine($"EmitterID: {etr.eid}");
+            Console.WriteLine($"Ageout: {etr.ageOut}");
+            Console.WriteLine($"Init AgeOut: {etr.baseAgeOut}");
+            //Console.WriteLine($"Entry: {etr.entryTick}, Exit: {etr.exitTick}");
+            //Console.WriteLine($"Current Track Length: {etr.currentTrackLength}");
+            int rClass;
+            if (etr.AgeOutRestore >= 6)
+            {
+                rClass = 1;
+            }
+            else
+            {
+                rClass = 0;
+            }
+            Console.WriteLine($"RestoreClass {rClass}");
         }
 
+
+        // Issue - Assertion Failed bug
         StreamWriter writer = new StreamWriter(Globals.trackRecFileName, true);
         foreach (EmitterRecord er in RxBuf)
         {
@@ -397,11 +767,11 @@ public class RWR : BattleSystem
                     //currentFitness = trackLength / temp;
                     currentFitness = etr.restoresPerTrackLength;
                 }
-                else
-                {
-                    Debug.Assert(false);
-                    currentFitness = 0.0;
-                }
+                //else
+                //{
+                //    Debug.Assert(false);
+                //    currentFitness = 0.0;
+                //}
                 Globals.qLearner.runningSum += currentFitness;
                 Globals.qLearner.runningAverage = Globals.qLearner.runningSum / Globals.qLearner.count;
 
@@ -479,6 +849,11 @@ public class RWR : BattleSystem
 
         this.emRecordList.Clear();
         Globals.emitterTrackFile = emitterTrackFile;
+
+        //Console.WriteLine($"Previous Q-state: {prevState_at_env_step_begin.emitterID}, {prevState_at_env_step_begin.restoreClass}");
+        //Console.WriteLine($"Current Q-state: {currentState_at_env_step_begin.emitterID}, {currentState_at_env_step_begin.restoreClass}");
+
+
 
         Console.WriteLine("-----------------------------------\n");
 
@@ -679,6 +1054,7 @@ public class RWR : BattleSystem
                     //OnUpdate
 
                     etr.ageOut = emitterID.initAgeOut;
+                    etr.baseAgeOut = emitterID.initAgeOut;
                     //etr.ceilingAgeOut = emitterID.ceilingAgeOut;
 
 
@@ -742,8 +1118,7 @@ public class RWR : BattleSystem
             etr.ageOut = emitterID.initAgeOut;
             etr.ceilingAgeOut = emitterID.ceilingAgeOut;
             etr.floorAgeOut = emitterID.floorAgeOut;
-
-            etr.received = true;
+            etr.baseAgeOut = emitterID.initAgeOut;
 
             //On Insert
 
@@ -753,6 +1128,14 @@ public class RWR : BattleSystem
                             new RecordedData(Globals.Tick, etr.erID, etr.trackID, etr.ageIn, etr.ageOut,
                             "RECEIVED", etr.status, "AGING IN", etr.entryTick, etr.exitTick, etr.AgingInCount, etr.AgingOutCount));
             emitterTrackFile.Add(etr);
+
+
+            if (etr.trackID != 0)
+            {
+                Console.WriteLine($"trackLossCount = {trackLossCount}");
+                rewardValue = 99 - trackLossCount;
+            }
+
         }
 
         return;
@@ -812,6 +1195,8 @@ public class EmitterTrackRecord
     public double restoresPerTrackLength;
     public int currentTrackLength;
     public bool recordLost;
+    // Testing if such an attribute is a better reward metric
+    //public int zeroAgeOutDuration = 0;
 
     public TrackState status = TrackState.ETF_NOT_DEFINED;
 
@@ -896,8 +1281,10 @@ public class PFMEmitterRecord
         this.ageOutMax = ageOutMax;
         //this.ageOut = ageOutMax;
         this.initAgeOut = ageOutMax;
+        this.ageOut = initAgeOut;
         this.ceilingAgeOut = ceilingAgeOut;
         this.restoreCount = restoreCount;
+        this.floorAgeOut = 0;
     }
 }
 

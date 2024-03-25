@@ -13,6 +13,7 @@ public static class Globals
     public static int radarSetNumber = 0;//(130,50) //-1;
 
     public static int Tick = 0;
+    public static int persistentTick = 0;
     public static float TimeResolution = 0.10f;
     public static int pulseTravelSpeed = 1;
     public static int guID = 0;
@@ -29,7 +30,13 @@ public static class Globals
     public static QLearner qLearner;
     public static int action_t;
 
-    public static bool isDone = false;
+    public static int testCaseID = 9;
+    public static TestCasesList testCases = new TestCasesList();
+
+    public static bool episodeIsDone = false;
+    public static int episodesEnded = 0;
+    public static int numEpisodes = 10;
+    public static int envStepType = 0;
     public static CommandExecutive commandExecutive = new CommandExecutive();
 
     public static List<RecordedData> recordedList = new List<RecordedData>();

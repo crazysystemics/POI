@@ -9,6 +9,7 @@ public class Aircraft : BattleSystem
     public RWR rwr;
     public List<Position> waypoints { get; set; }
     public Position currentWaypoint;
+    public Position startPos = new Position(-1, -1);
     public int currentWaypointID;
     public Position nextWaypoint;
     public int nextWaypointID;
@@ -50,7 +51,7 @@ public class Aircraft : BattleSystem
 
     public override void OnTick()
     {
-        if (Globals.debugPrint == Globals.DebugLevel.VERBOSE)
+        if (Globals.debugPrint == Globals.DebugLevel.BRIEF)
         {
             Console.WriteLine($"Aircraft {id}: \tPosition (x, y): ({position.x}, {position.y})\n");
         }
@@ -256,7 +257,11 @@ public class Aircraft : BattleSystem
             }
             else
             {
-                Globals.isDone = true;
+                //Globals.isDone = true;
+                this.position = this.startPos;
+                this.currentWaypoint = this.startPos;
+                Globals.episodeIsDone = true;
+                Globals.episodesEnded++;
             }
         }
     }
@@ -271,6 +276,8 @@ public class Aircraft : BattleSystem
         this.currentWaypointID = 0;
         this.nextWaypointID = 1;
         this.id = id;
+        this.startPos.x = waypoints[0].x;
+        this.startPos.y = waypoints[0].y;
     }
 
 }

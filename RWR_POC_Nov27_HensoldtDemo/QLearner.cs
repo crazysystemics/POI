@@ -76,12 +76,15 @@ public class QState
     // public int ageOutLength;
     public int emitterID;
     public int restoreClass;
+    public int active;
+    public int deleted;
 
     public QState(int emitterID, int restoreClass)
     {
         this.emitterID = emitterID;
         this.restoreClass = restoreClass;
     }
+
     // public int ageInLength;
     // public List<double> ercFrequencies = new List<double>();
     // public List<EtfSnapshot> etfSnapshots = new List<EtfSnapshot>();
@@ -90,6 +93,8 @@ public class QState
     {
         return (emitterID == ((QState)rhs).emitterID &&
                restoreClass == ((QState)rhs).restoreClass);
+               //active == ((QState)rhs).active &&
+               //deleted == ((QState)rhs).deleted);
                           
     }
 }
@@ -102,7 +107,7 @@ class StateEqualityComparer : IEqualityComparer<QState>
         return (qs1.Equals(qs2));
     }
 
-    public int GetHashCode(QState qs) => qs.emitterID ^ qs.restoreClass;
+    public int GetHashCode(QState qs) => qs.emitterID ^ qs.restoreClass; // ^ qs.active ^ qs.deleted
 }
 
 public class QLearner
@@ -114,7 +119,8 @@ public class QLearner
     public double runningSum;
     public double runningAverage;
 
-    public double EXPLORE_PROBABILITY = Globals.randomNumberGenerator.NextDouble();
+    //public double EXPLORE_PROBABILITY = Globals.randomNumberGenerator.NextDouble();
+    public double EXPLORE_PROBABILITY = 0.20;
     public int actionSpaceCount = 3;
 
 
@@ -126,14 +132,19 @@ public class QLearner
     
     IEqualityComparer<QState> comparator = new StateEqualityComparer();
     public Dictionary<QState, List<double>> Qsa;
-            
+
+    public Dictionary<QState, List<double>> previousQSA;
+    public Dictionary<QState, List<double>> currentQSA;
+    public Dictionary<QState, List<double>> deltaQSA;
+
 
     public QLearner()
     {
         Qsa=new Dictionary<QState, List<double>>(comparator);
+        currentQSA = new Dictionary<QState, List<double>>(comparator);
+        previousQSA = new Dictionary<QState, List<double>>(comparator);
+        deltaQSA = new Dictionary<QState, List<double>>(comparator);
 
-        // TODO: Issue 3 - How do I add the <<eid, LOW/HIGH>> state to this table
-        // Should I change it to a Dict instead of List<List<double>>
         {
             //Qsa.Add(new List<double> { Globals.randomNumberGenerator.NextDouble(),
             //                           Globals.randomNumberGenerator.NextDouble(),
@@ -144,21 +155,35 @@ public class QLearner
                 QState state = new QState(emitter.eID, 0);
                 if (Qsa.ContainsKey(state))
                 {
-                    Qsa[state] = new List<double> { 0.0, 1.0, 0.0 };
+                    Qsa[state] = new List<double> { 0.0, 0.0, 0.0 };
+                    previousQSA[state] = new List<double> { 0.0, 0.0, 0.0 };
+                    currentQSA[state] = new List<double> { 0.0, 0.0, 0.0 };
+                    deltaQSA[state] = new List<double> { 0.0, 0.0, 0.0 };
                 }
                 else
                 {
-                    Qsa.Add(state, new List<double> { 0.0, 1.0, 0.0 });
+                    Qsa.Add(state, new List<double> { 0.0, 0.0, 0.0 });
+                    previousQSA.Add(state, new List<double> { 0.0, 0.0, 0.0 });
+                    currentQSA.Add(state, new List<double> { 0.0, 0.0, 0.0 });
+                    deltaQSA.Add(state, new List<double> { 0.0, 0.0, 0.0 });
+                    qstates.Add(state);
                 }
 
                 state = new QState(emitter.eID, 1);
                 if (Qsa.ContainsKey(state))
                 {
-                    Qsa[state] = new List<double> { 0.0, 1.0, 0.0 };
+                    Qsa[state] = new List<double> { 0.0, 0.0, 0.0 };
+                    previousQSA[state] = new List<double> { 0.0, 0.0, 0.0 };
+                    currentQSA[state] = new List<double> { 0.0, 0.0, 0.0 };
+                    deltaQSA[state] = new List<double> { 0.0, 0.0, 0.0 };
                 }
                 else
                 {
-                    Qsa.Add(state, new List<double> { 0.0, 1.0, 0.0 });
+                    Qsa.Add(state, new List<double> { 0.0, 0.0, 0.0 });
+                    previousQSA.Add(state, new List<double> { 0.0, 0.0, 0.0 });
+                    currentQSA.Add(state, new List<double> { 0.0, 0.0, 0.0 });
+                    deltaQSA.Add(state, new List<double> { 0.0, 0.0, 0.0 });
+                    qstates.Add(state);
                 }
             }
             
@@ -191,7 +216,6 @@ public class QLearner
 
     public double QsaGet(QState state, int action_j)
     {
-        // Issue 1 - Key (state) is not in Dictionary
         QState state_test = new QState(1, 0);
         if (state.Equals(state_test))
         { state_test.emitterID = -1;  }
@@ -241,7 +265,11 @@ public class QLearner
 
     public double Qsa_cap(QState state_t, int action_t, QState state_t1, double reward)
     {
-        double reward0, reward1, reward2;
+        // double reward0, reward1, reward2;
+
+        // Issue - Previous Q-state is always the same as next/current Q-state
+        // Actions do not do cause state change.
+
 
         int action_index = new Random().Next(3);
 
@@ -260,19 +288,4 @@ public class QLearner
         QsaSet(state_t, action_t, qsa);
         return qsa;
     }
-
-    //public QState QsaStep(QState state_t, int action_t)
-    //{
-    //    QState nextState = new QState();
-    //    if (action_t == 0)
-    //    {
-    //        nextState.ageOutLength++;
-    //    }
-
-    //    if (action_t == 1)
-    //    {
-    //        nextState.ageOutLength--;
-    //    }
-    //    return nextState;
-    //}
 }

@@ -1,7 +1,9 @@
 ﻿using RWR_POC_GUI;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Media;
+using System.Windows.Media.TextFormatting;
 
 class DiscreteTimeSimulationEngine
 {
@@ -18,6 +20,8 @@ class DiscreteTimeSimulationEngine
     public Position detectedAircraftPosition = new Position();
     public EmitterRecord receivedEmitterRecord = new EmitterRecord();
     public double nextWaypointAngle = 0;
+    public int patternTick = 0;
+    public UDPListener udpListener = new UDPListener();
 
     public DiscreteTimeSimulationEngine()
     {
@@ -29,6 +33,7 @@ class DiscreteTimeSimulationEngine
     public void Init()
     {
         Globals.debugPrint = Globals.DebugLevel.BRIEF;
+        Globals.episodeIsDone = false;
 
         //List<Position> waypts = new List<Position>()
         //{
@@ -96,7 +101,11 @@ class DiscreteTimeSimulationEngine
         //    AircraftList.rwrList.Add(new RWR(ref air.position, air.id + 10));
         //}
 
+        simMod.Clear();
+
         Scenario newScenario = new Scenario();
+
+        
 
         string currentTime = DateTime.Now.ToString();
         currentTime = currentTime.Replace(":", "-");
@@ -106,15 +115,24 @@ class DiscreteTimeSimulationEngine
         Globals.recFileName = $"erOutputFile{currentTime}.csv";
         Globals.trackRecFileName = $"RecordedData{currentTime}.csv";
 
-        PFM.emitterIDTable.Add(new PFMEmitterRecord(1, "E1", 800, 1500, 200, 3000, 4000, 500, 100, 200, 50, 5, 5));
-        PFM.emitterIDTable.Add(new PFMEmitterRecord(2, "E2", 500, 800, 150, 8000, 10000, 500, 50, 150, 25, 5, 5));
+        PFM.emitterIDTable.Add(new PFMEmitterRecord(0, "E1", 500, 800, 150, 8000, 10000, 500, 50, 150, 25, 3, 100));    
+        PFM.emitterIDTable.Add(new PFMEmitterRecord(1, "E2", 800, 1500, 200, 3000, 4000, 500, 100, 200, 50, 3, 100));
 
-        Globals.initializeQlearner();
+        if (Globals.episodesEnded == 0)
+        {
+            Globals.initializeQlearner();
+        }
+        
 
         simMod.Add(newScenario.chosenAircraft);
         simMod.Add(newScenario.chosenAircraft.rwr);
         simMod.AddRange(newScenario.radars);
-        simMod.Add(pse);
+        //simMod.Add(pse);
+
+
+        
+        //udpListener.StartListener(newScenario.chosenAircraft);
+
 
         //pfm.FormPFMTable();
 
@@ -162,8 +180,16 @@ class DiscreteTimeSimulationEngine
         Globals.timer.Interval = TimeSpan.FromMilliseconds(50);
         Globals.timer.Tick += (sender, e) =>
         {
-            if (!Globals.isDone)
+
+            if (Globals.episodesEnded <= Globals.numEpisodes)
             {
+                Console.WriteLine($"Current Episode: {Globals.episodesEnded + 1}");
+                if (Globals.episodeIsDone)
+                {
+                    this.Init();
+                    Globals.Tick = 0;
+                }
+
                 emitterRecords.Clear();
                 List<InParameter> inParameters = new List<InParameter>();
 
@@ -175,8 +201,11 @@ class DiscreteTimeSimulationEngine
                 // Get() on every Simulation Model
 
                 foreach (SimulationModel sim_model in simMod)
-                {
-                    // physEngine.physInParameters.Add(sim_model.Get());
+                { // triggred in ln 48 in udp listener get if statement
+                  // physEngine.physInParameters.Add(sim_model.Get());
+                  // if model is airc
+                  //  create a tmp variable_airc_get and store the aircraft's position and heading
+
                     dtseOutParameter.Add(sim_model.Get());
                 }
 
@@ -195,11 +224,14 @@ class DiscreteTimeSimulationEngine
                 }
 
                 BuildGlobalSituationAwareness();
+                // Get the emitter records from dtse(udp)
 
                 // Set() on every Simulation Model
 
                 foreach (SimulationModel receiver in simMod)
-                {
+
+                { // triggred in ln 60 in udp listener set if statement. Comment it here.
+
                     //pse.Set(inParameters);
 
                     if (receiver is Radar)
@@ -236,18 +268,6 @@ class DiscreteTimeSimulationEngine
                         }
                     }
 
-                    //if (receiver is FireControlRadar)
-                    //{
-                    //    receiverInParams.Clear();
-                    //    List<InParameter> inParameters3 = new();
-                    //    if (detection)
-                    //    {
-                    //        FireControlRadar.In targetPositions = new FireControlRadar.In(detectedAircraftPosition, 6);
-                    //        receiverInParams.Add(targetPositions);
-                    //    }
-                    //    receiver.Set(receiverInParams);
-                    //}
-
 
 
                     if (receiver is RWR)
@@ -265,56 +285,72 @@ class DiscreteTimeSimulationEngine
                             }
                             detection = false;
                         }
-
-
                         ((RWR)receiver).Set(receiverInParams);
-
+                        //Pass the modified emitter records recieved from dtse(udp)
                     }
+
                 }
+
+                //if (receiver is FireControlRadar)
+                //{
+                //    receiverInParams.Clear();
+                //    List<InParameter> inParameters3 = new();
+                //    if (detection)
+                //    {
+                //        FireControlRadar.In targetPositions = new FireControlRadar.In(detectedAircraftPosition, 6);
+                //        receiverInParams.Add(targetPositions);
+                //    }
+                //    receiver.Set(receiverInParams);
+                //}
 
                 // OnTick() on each Simulation Model
                 Console.WriteLine();
-
-                foreach (SimulationModel sim_model in simMod)
+                // trigger in if statement (cmd[0]=="ontick") in udp code
                 {
-                    sim_model.OnTick();
-                }
-                foreach (SimulationModel sim_model in simMod)
-                {
-                    Globals.mainWindow.DisplayPosition(sim_model);
-                }
-
-                foreach (OutParameter outParam in dtseOutParameter)
-                {
-                    if (outParam is RWR.Out)
+                    foreach (SimulationModel sim_model in simMod)
                     {
-                        Globals.mainWindow.rwrDisplay.DisplaySymbols(((RWR.Out)outParam).visibleRadars);
+                        sim_model.OnTick();
                     }
-                }
-
-                Globals.Tick++;
-                if (Globals.mainWindow.btn_next_tick.Background == Brushes.Yellow)
-                {
-                    count++;
-                    if (count > 0)
+                    foreach (SimulationModel sim_model in simMod)
                     {
-                        Globals.timer.Stop();
-                        count = 0;
-                        Globals.mainWindow.btn_next_tick.Background = Brushes.LightYellow;
+                        Globals.mainWindow.DisplayPosition(sim_model);
+                    }
+
+                    foreach (OutParameter outParam in dtseOutParameter)
+                    {
+                        if (outParam is RWR.Out)
+                        {
+                            Globals.mainWindow.rwrDisplay.DisplaySymbols(((RWR.Out)outParam).visibleRadars);
+                        }
+                    }
+
+                    Globals.Tick++;
+                    Globals.persistentTick++;
+
+                    // Will be done by in UDP instead
+                    if (Globals.mainWindow.btn_next_tick.Background == Brushes.Yellow)
+                    {
+                        count++;
+                        if (count > 0)
+                        {
+                            Globals.timer.Stop();
+                            count = 0;
+                            Globals.mainWindow.btn_next_tick.Background = Brushes.LightYellow;
+                        }
                     }
                 }
             }
 
-                else
+            else
+            {
+                if (Console.KeyAvailable)
                 {
-                    if(Console.KeyAvailable)
-                    {
-                        Console.ReadLine();
-                        Globals.ExecuteShell();
-                    }
-                    
+                    Console.ReadLine();
+                    Globals.ExecuteShell();
                 }
-            };
+
+            }
+        };
       
     }
 
@@ -323,7 +359,7 @@ class DiscreteTimeSimulationEngine
 
     public void BuildGlobalSituationAwareness()
     {
-        pulseTrainFromRadar.Clear();
+        //pulseTrainFromRadar.Clear();
 
         foreach (SimulationModel transmitter in simMod)
         {
@@ -354,9 +390,25 @@ class DiscreteTimeSimulationEngine
 
                         if (((Radar)transmitter).beamContains(receiver.position))
                         {
-                            double recordProb = Globals.randomNumberGenerator.NextDouble();
+                            //bool recordProb = false;
+                            if (Globals.Tick % Globals.testCases.TestCases[Globals.testCaseID].detectionPattern.Count == 0)
+                            {
+                                patternTick = 0;
+                            }
+                            bool recordProb = Globals.testCases.TestCases[Globals.testCaseID].detectionPattern[patternTick];
+                            patternTick++;
 
-                            if (recordProb > 0.4)
+                            //if (Globals.Tick < Globals.testCases.TestCases[Globals.testCaseID].detectionPattern.Count)
+                            {
+                                // Picks boolean from Detection Patterns list from selected test case for current tick.
+
+                            }
+                            //else
+                            //{
+                            //    recordProb = true;
+                            //}
+
+                            if (recordProb)
                             {
                                 detection = true;
                                 if (transmitter is SimpleRadar)
@@ -370,7 +422,7 @@ class DiscreteTimeSimulationEngine
                                     ((AcquisitionRadar)transmitter).targetPosition = receiver.position;
                                 }
 
-                                //  List<Pulse> pulseTrainTemp = ((Radar)transmitter).GeneratePulseTrain(Globals.Tick * 1000, angle);
+                                // List<Pulse> pulseTrainTemp = ((Radar)transmitter).GeneratePulseTrain(Globals.Tick * 1000, angle);
                                 // pulseTrainFromRadar.AddRange(pulseTrainTemp);
 
                                 receivedEmitterRecord = new EmitterRecord();
@@ -384,6 +436,9 @@ class DiscreteTimeSimulationEngine
                                 receivedEmitterRecord.azimuth = nextWaypointAngle - angle;
                                 receivedEmitterRecord.eID = ((Radar)transmitter).id;
                                 emitterRecords.Add(receivedEmitterRecord);
+
+                                // PW, PRI, Freq, AOA, ReceivedPower - emitter record received over network
+
                             }
 
                             
