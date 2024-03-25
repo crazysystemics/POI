@@ -250,7 +250,7 @@ public class Aircraft : BattleSystem
 
         if (this.position.x == nextWaypoint.x && this.position.y == nextWaypoint.y)
         {
-            if (nextWaypointID < waypoints.Count-1)
+            if (nextWaypointID < waypoints.Count - 1)
             {
                 nextWaypointID++;
                 nextWaypoint = waypoints[nextWaypointID];

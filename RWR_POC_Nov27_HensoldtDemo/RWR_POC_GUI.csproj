@@ -73,11 +73,11 @@
     <Compile Include="Scenario.cs" />
     <Compile Include="SimpleRadar.cs" />
     <Compile Include="SimulationModel.cs" />
+    <Compile Include="TestCases.cs" />
     <Compile Include="TestCaseSelector.cs" />
-    <Compile Include="TestCasesList.cs" />
     <Compile Include="TrackGenerator.cs" />
     <Compile Include="TrackParameters.cs" />
-    <Compile Include="UDPInputs.cs" />
+    <Compile Include="UDPListener.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
