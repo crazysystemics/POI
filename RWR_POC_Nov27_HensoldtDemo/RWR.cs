@@ -466,7 +466,14 @@ public class RWR : BattleSystem
                         //Globals.qLearner.Qsa.Add(etr.eid, restore);
                         etr.status = TrackState.ETF_oDELETE;
 
-                        env_step();
+                        if (Globals.envStepType == 0)
+                        {
+                            env_step();
+                        }
+                        else if (Globals.envStepType == 1)
+                        {
+                            env_step_1();
+                        }
 
                         int restoreClass = 0;
 
@@ -489,33 +496,8 @@ public class RWR : BattleSystem
                             }
                         }
 
-
-
-                        foreach (QState state in Globals.qLearner.Qsa.Keys)
-                        {
-                            foreach (double actionVal in Globals.qLearner.Qsa[state].ToList())
-                            {
-                                for (int i = 0; i < 3; i++)
-                                {
-                                    Globals.qLearner.currentQSA[state][i] = Globals.qLearner.Qsa[state][i];
-                                }
-                            }
-                        }
-
                         // Find delta Qsa
-                        foreach (QState state in Globals.qLearner.Qsa.Keys)
-                        {
-                            foreach (double actionVal in Globals.qLearner.Qsa[state].ToList())
-                            {
-                                for (int i = 0; i < 3; i++)
-                                {
-                                    if (Globals.qLearner.currentQSA[state][i] - Globals.qLearner.previousQSA[state][i] != 0)
-                                    {
-                                        Globals.qLearner.deltaQSA[state][i] = Globals.qLearner.currentQSA[state][i] - Globals.qLearner.previousQSA[state][i];
-                                    }
-                                }
-                            }
-                        }
+
 
                         if (etr.AgingOutCount != 0)
                         {
@@ -530,6 +512,31 @@ public class RWR : BattleSystem
                                                      Globals.action_t,
                                                      currentState_at_env_step_begin,
                                                      0);
+                        }
+
+                        foreach (QState state in Globals.qLearner.Qsa.Keys)
+                        {
+                            foreach (double actionVal in Globals.qLearner.Qsa[state].ToList())
+                            {
+                                for (int i = 0; i < 3; i++)
+                                {
+                                    Globals.qLearner.currentQSA[state][i] = Globals.qLearner.Qsa[state][i];
+                                }
+                            }
+                        }
+
+                        foreach (QState state in Globals.qLearner.Qsa.Keys)
+                        {
+                            foreach (double actionVal in Globals.qLearner.Qsa[state].ToList())
+                            {
+                                for (int i = 0; i < 3; i++)
+                                {
+                                    if (Globals.qLearner.currentQSA[state][i] - Globals.qLearner.previousQSA[state][i] != 0)
+                                    {
+                                        Globals.qLearner.deltaQSA[state][i] = Globals.qLearner.currentQSA[state][i] - Globals.qLearner.previousQSA[state][i];
+                                    }
+                                }
+                            }
                         }
 
                         Console.WriteLine("Current Qsa table: \n");
@@ -562,16 +569,6 @@ public class RWR : BattleSystem
                             Console.WriteLine();
                         }
 
-                        //if (Globals.envStepType == 0)
-                        //{
-                        //    env_step();
-                        //}
-                        //else if (Globals.envStepType == 1)
-                        //{
-                        //    env_step_1();
-                        //}
-
-
                         //QState curQState = new QState(1, PFM.emitterIDTable[1].restoreCount/3);
 
                         // Issue - Agent always chooses the first updated QSA during exploit since that state-action pair will
@@ -579,30 +576,6 @@ public class RWR : BattleSystem
 
 
                         // Store previous Qsa
-
-
-
-
-
-
-
-
-                        //Testing if some other reward metric works better
-                        //if (etr.AgingOutCount != 0)
-                        //{
-                        //    Globals.qLearner.Qsa_cap(prevState_at_env_step_begin,
-                        //                             Globals.action_t,
-                        //                             currentState_at_env_step_begin,
-                        //                             rewardValue);
-                        //}
-                        //else
-                        //{
-                        //    Globals.qLearner.Qsa_cap(prevState_at_env_step_begin,
-                        //                             Globals.action_t,
-                        //                             currentState_at_env_step_begin,
-                        //                             0);
-                        //}
-
 
                         // Store Qsa value after applying Qsa_cap
 
@@ -635,7 +608,27 @@ public class RWR : BattleSystem
                 rClass = 0;
             }
             Console.WriteLine($"RestoreClass {rClass}");
+
+            StreamWriter qsaWriter = new StreamWriter(Globals.qsaTableFileName, true);
+
+            foreach (var Q in Globals.qLearner.Qsa)
+            {
+                foreach (var qsa in Q.Value)
+                {
+                    qsaWriter.Write($"  {qsa}  ");
+
+                }
+                if (etr.AgingOutCount != 0)
+                {
+                    qsaWriter.Write($",Tick: {Globals.persistentTick} ,RestoreCount: {etr.AgeOutRestore}");
+                }
+                qsaWriter.WriteLine("");
+            }
+            qsaWriter.WriteLine("");
+            qsaWriter.Close();
         }
+
+
 
 
         // Issue - Assertion Failed bug
@@ -726,6 +719,7 @@ public class RWR : BattleSystem
             writer.WriteLine($"{Globals.Tick},SUMMARY,{Globals.qLearner.runningAverage}");
 
         writer.Close();
+        
         emitterTrackFile = tempETF;
 
         // QPoint

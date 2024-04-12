@@ -114,6 +114,7 @@ class DiscreteTimeSimulationEngine
 
         Globals.recFileName = $"erOutputFile{currentTime}.csv";
         Globals.trackRecFileName = $"RecordedData{currentTime}.csv";
+        Globals.qsaTableFileName = $"QsaTable{currentTime}.csv";
 
         PFM.emitterIDTable.Add(new PFMEmitterRecord(0, "E1", 500, 800, 150, 8000, 10000, 500, 50, 150, 25, 3, 100));    
         PFM.emitterIDTable.Add(new PFMEmitterRecord(1, "E2", 800, 1500, 200, 3000, 4000, 500, 100, 200, 50, 3, 100));

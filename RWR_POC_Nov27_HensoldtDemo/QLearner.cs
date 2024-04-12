@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -120,7 +121,7 @@ public class QLearner
     public double runningAverage;
 
     //public double EXPLORE_PROBABILITY = Globals.randomNumberGenerator.NextDouble();
-    public double EXPLORE_PROBABILITY = 0.20;
+    public double EXPLORE_PROBABILITY = 0.30;
     public int actionSpaceCount = 3;
 
 
@@ -285,6 +286,14 @@ public class QLearner
         }
  
         double qsa = reward + gamma * maxQsa;//QsaGet(state, maxaction);
+        Console.WriteLine($"QSA = {qsa}");
+        Console.WriteLine($"Rewards = {reward}");
+        Console.WriteLine($"MaxQsa = {maxQsa}");
+        StreamWriter qsaWriter = new StreamWriter(Globals.qsaTableFileName, true);
+        qsaWriter.WriteLine("");
+        qsaWriter.Write($"QSA: {qsa}, MaxQsa: {maxQsa}, Reward: {reward}, State1RestoreClass: {state_t.restoreClass}, State2RestoreClass: {state_t1.restoreClass}");
+        qsaWriter.Close();
+
         QsaSet(state_t, action_t, qsa);
         return qsa;
     }

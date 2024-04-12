@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\RohitChaoji\\source\\repos\\AircraftGridTraversal\\AircraftGridTraversal\\AircraftGridTraversal.csproj": {}
+    "C:\\Users\\RohitChaoji\\source\\repos\\crazysystemics\\POI\\AircraftGridTraversal\\AircraftGridTraversal\\AircraftGridTraversal.csproj": {}
   },
   "projects": {
-    "C:\\Users\\RohitChaoji\\source\\repos\\AircraftGridTraversal\\AircraftGridTraversal\\AircraftGridTraversal.csproj": {
+    "C:\\Users\\RohitChaoji\\source\\repos\\crazysystemics\\POI\\AircraftGridTraversal\\AircraftGridTraversal\\AircraftGridTraversal.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\RohitChaoji\\source\\repos\\AircraftGridTraversal\\AircraftGridTraversal\\AircraftGridTraversal.csproj",
+        "projectUniqueName": "C:\\Users\\RohitChaoji\\source\\repos\\crazysystemics\\POI\\AircraftGridTraversal\\AircraftGridTraversal\\AircraftGridTraversal.csproj",
         "projectName": "AircraftGridTraversal",
-        "projectPath": "C:\\Users\\RohitChaoji\\source\\repos\\AircraftGridTraversal\\AircraftGridTraversal\\AircraftGridTraversal.csproj",
+        "projectPath": "C:\\Users\\RohitChaoji\\source\\repos\\crazysystemics\\POI\\AircraftGridTraversal\\AircraftGridTraversal\\AircraftGridTraversal.csproj",
         "packagesPath": "C:\\Users\\RohitChaoji\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\RohitChaoji\\source\\repos\\AircraftGridTraversal\\AircraftGridTraversal\\obj\\",
+        "outputPath": "C:\\Users\\RohitChaoji\\source\\repos\\crazysystemics\\POI\\AircraftGridTraversal\\AircraftGridTraversal\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

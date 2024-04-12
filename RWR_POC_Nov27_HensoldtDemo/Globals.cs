@@ -8,9 +8,9 @@ using System.Windows.Threading;
 public static class Globals
 {
     // Episode configuration
-    public static Random randomNumberGenerator = new Random(10);
-    public static int flightPathNumber = 0; //-1 random
-    public static int radarSetNumber = 0;//(130,50) //-1;
+    public static Random randomNumberGenerator = new Random(8);
+    public static int flightPathNumber = 1; //-1 random
+    public static int radarSetNumber = 2;//(130,50) //-1;
 
     public static int Tick = 0;
     public static int persistentTick = 0;
@@ -21,6 +21,7 @@ public static class Globals
     public static DebugLevel debugPrint;
     public static string recFileName;
     public static string trackRecFileName;
+    public static string qsaTableFileName;
     public static DispatcherTimer timer;
     public static MainWindow mainWindow;
     public static TrackParameters trackParameters = new TrackParameters();
@@ -30,7 +31,7 @@ public static class Globals
     public static QLearner qLearner;
     public static int action_t;
 
-    public static int testCaseID = 9;
+    public static int testCaseID = 12;
     public static TestCasesList testCases = new TestCasesList();
 
     public static bool episodeIsDone = false;
