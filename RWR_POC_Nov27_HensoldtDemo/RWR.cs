@@ -15,7 +15,6 @@ public class RWR : BattleSystem
     public int aperture;
     public double[] amps = new double[4];
     public List<EmitterRecord> emRecordList = new List<EmitterRecord>();
-    // Issue - In ETF, Received is immediately set to True when a track is deleted and a new track is started
     public List<EmitterTrackRecord> emitterTrackFile = new List<EmitterTrackRecord>();
     public List<QState> prevQStates = new List<QState>();
     public QState prevState_at_env_step_begin = new QState(1, 0);
@@ -31,9 +30,15 @@ public class RWR : BattleSystem
         this.id = id;
     }
 
-    public List<EmitterRecord> RxBuf = new List<EmitterRecord>();
+    public List<EmitterRecord> RxBuf = new List<EmitterRecord>(); // Reception buffer for emitter records.
+    // When Emitter records are processed by DTSE, and Set() is called on RWR, the receivedEmitterRecords from DTSE
+    // are first set into this buffer.
+
     public class Out : OutParameter
     {
+
+        // Information sent to DTSE by RWR when Get() is called.
+
         public int r;
         public int theta;
         public Position position;
@@ -49,7 +54,8 @@ public class RWR : BattleSystem
     public class In : InParameter
     {
 
-        // Pulse as InParameter
+        // Information set into RWR from DTSE when Set() is called.
+
         public double[] amps = new double[4];
         public EmitterRecord emRecord = new EmitterRecord();
 
@@ -62,6 +68,9 @@ public class RWR : BattleSystem
 
     public override OutParameter Get()
     {
+
+        // Output information of visible emitters to DTSE to build global situational awareness
+
         Out rwrOutParams = new Out(0, 0, position, 2);
         foreach (EmitterRecord emitterRecord in RxBuf)
         {
@@ -72,6 +81,9 @@ public class RWR : BattleSystem
 
     public override void Set(List<InParameter> inParameters)
     {
+
+        // Add received emitter records from InParameters to RxBuf.
+
         RxBuf.Clear();
         foreach (InParameter inParameter in inParameters)
         {
@@ -287,6 +299,7 @@ public class RWR : BattleSystem
 
         if (Globals.episodeIsDone)
         {
+            // Reset emitter record list and track file at the end of each episode.
             this.emRecordList.Clear();
             this.emitterTrackFile.Clear();
             Globals.gTrackID = 0;
@@ -295,22 +308,6 @@ public class RWR : BattleSystem
         double epsi = Globals.randomNumberGenerator.NextDouble();
         string randChoice = string.Empty;
 
-        //Search current state in existing qStates
-        //ETF empty in the beginning
-        //GetState on each record in ETF using a loop
-
-        //foreach (EmitterTrackRecord record in emitterTrackFile)
-        //{
-        //    if (emRecord.erID == record.erID)
-        //    {
-        //        state_t = GetState(record);
-        //    }
-        //}
-
-        //if (PFM.emitterIDTable[1].restoreCount > 1)
-        //{
-        //    PFM.emitterIDTable[1].restoreCount == 1
-        //}
         if (PFM.emitterIDTable[1].restoreCount > 3)
         {
             PFM.emitterIDTable[1].restoreCount = 1;
@@ -318,72 +315,31 @@ public class RWR : BattleSystem
         prevQState = new QState(1, PFM.emitterIDTable[1].restoreCount / 3);
 
 
-
-        //if (stateIndex == -1 && emitterTrackFile.Count > 0 && !Globals.qLearner.qstates.Contains(state_t))
-        //    Globals.qLearner.qstates.Add(state_t);
-
-
-
-        //foreach (EmitterTrackRecord etr in emitterTrackFile)
-        //{
-        //    foreach (EmitterID emitter in PFM.emitterIDTable)
-        //    {
-        //        if (emitter.eID == etr.erID)
-        //        {
-        //            if (Globals.action_t == 0)
-        //            {
-        //                emitter.ageOutMax++;
-        //            }
-        //            else if (Globals.action_t == 1)
-        //            {
-        //                emitter.ageOutMax--;
-        //            }
-        //        }
-        //    }
-        //}
-
-        //List<EmitterTrackRecord> updatedList = new List<EmitterTrackRecord>();
-        //foreach (EmitterTrackRecord etr in emitterTrackFile)
-        //{
-        //    //updatedList.Add(UpdateTrackingWindows(etr));
-        //    //updatedList.Add(UpdateAgeInOutTrack(etr));
-        //}
-
-        //emitterTrackFile = updatedList;
-
-        //int pulseCount = 1;
-        //foreach (PDW pdw in receivedPDW)
-        //{
-        //    Console.WriteLine($"Pulse {pulseCount}\nPulse Width: {pdw.pulseWidth} ns\n" +
-        //                      $"Amplitudes: {pdw.amplitude[0]}, {pdw.amplitude[1]}, {pdw.amplitude[2]}, {pdw.amplitude[3]}\n" +
-        //                      $"Frequency: {pdw.frequency} MHz\nTime of Arrival: {pdw.timeOfArrival} ns\n");
-        //    pulseCount++;
-        //}
-
-
         // env.step(action_t) => state_(t+1)
 
-        //QState new_state_t = Globals.qLearner.QsaStep(state_t, Globals.action_t);
 
         foreach (EmitterTrackRecord etr in emitterTrackFile)
         {
+            // Set received to false, only set it to true when a emitter record is being received.
             etr.received = false;
         }
 
+        // Add RxBuf to emitter record list.
         this.emRecordList.AddRange(RxBuf);
 
 
         foreach (EmitterRecord e in this.emRecordList)
         {
             EmitterRecord emitterRecord = e;
-            PFMEmitterRecord emitterID = Identify(emitterRecord, PFM.emitterIDTable);
+            PFMEmitterRecord emitterID = Identify(emitterRecord, PFM.emitterIDTable); // Identify emitter from PFM table
             if (emitterID != null)
             {
+                // If emitter exists in PFM table
                 emitterRecord.eID = emitterID.eID;
                 string idenfitier = "" + (char)(emitterRecord.erID + 64);
                 emitterRecord.erIdentifier = idenfitier;
             }
-            ManageTracks(emitterRecord, emitterID, emitterTrackFile);
+            ManageTracks(emitterRecord, emitterID, emitterTrackFile); // Check if emitter already exists in emitter track file
 
             if (Globals.debugPrint == Globals.DebugLevel.VERBOSE)
             {

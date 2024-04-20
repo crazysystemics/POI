@@ -3,6 +3,13 @@ using System.Collections.Generic;
 
 class PhysicalSimulationEngine : SimulationModel
 {
+
+    // This object was supposed to be a SimulationModel in the earlier stages of this program
+    // and was supposed to be used for containing Physical parameters of the simulation, such as
+    // the battlefield and operating space itself. However, its role has been relegated to that of a
+    // library containing functions such as GetDistance and GetAngle.
+    // As such, its Get(), Set() and OnTick() functions serve no purpose.
+
     public Dictionary<int, Position> physicalObjects = new Dictionary<int, Position>();
     //public Pulse previousActivePulse;
 
@@ -74,11 +81,4 @@ class PhysicalSimulationEngine : SimulationModel
         //int id = inParameters[0].ID;
 
     }
-
-    //public Pulse GetPulse(Pulse txPulse, int txTick, Position txPosition,
-    //                      int rxTick, Position rxPosition)
-    //{
-    //    pulseInspace = txPulse;
-    //    return pulseInspace;
-    //}
 }

@@ -1,5 +1,10 @@
 ﻿public class Pulse
 {
+
+    // Class for modeling the pulse sent by an emitter. However, since the program in its current state
+    // only uses Emitter Records directly, the generated pulses are not processed directly. This role
+    // might now be taken over by the FPGA.
+
     public int pulseWidth;
     public int timeOfTraversal;
     public double angleOfTraversal;

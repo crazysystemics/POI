@@ -2,20 +2,9 @@ using System.Collections.Generic;
 
 public abstract class Radar : BattleSystem
 {
-
+    // A parent Radar class that derives from Battle System. This has a few child classes, including
+    // AcquisitionRadar, FireControlRadar, GCIRadar, SimpleRadar and EarlyWarningRadar.
     public override bool Stopped { get; set; }
-    //public abstract Pulse txPulse { get; set; }
-    //public abstract Pulse activePulse { get; set; }
-    //public abstract int pulseRepetitionInterval { get; set; }
-    //public abstract int radius { get; set; }
-    //public abstract int txTick { get; set; }
-    //public abstract int effectiveRadiatedPower { get; set; }
-    //public abstract int aperture { get; set; }
-    //public abstract string radarType { get; set; }
-    //public abstract int endToEndDuration { get; set; }
-    //public abstract int endToEndScanSector { get; set; }
-    //public abstract int mainBeamAzimuth { get; set; }
-    //public abstract int beamWidth { get; set; }
 
     public Pulse txPulse;
     public Pulse activePulse;
@@ -34,6 +23,9 @@ public abstract class Radar : BattleSystem
 
     public class Out : OutParameter
     {
+
+        // The parameters that objects of a Radar class output when Get() is called.
+
         public Pulse p;
         public Position pos;
         public int txTick;

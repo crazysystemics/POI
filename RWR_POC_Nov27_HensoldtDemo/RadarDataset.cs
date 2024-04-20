@@ -4,6 +4,11 @@ using System.Runtime.CompilerServices;
 
 public class RadarDataset
 {
+
+    // This class contains a few hard-coded Radar positions for generating scenarios.
+    // There are four sets of radar positions that can be chosed through the Globals class.
+    // You may also choose a set of randomized radars by selecting the "-1" RadarSet from Globals.
+
     public Dictionary<int, List<SimpleRadar>> radarSets = new Dictionary<int, List<SimpleRadar>>();
     public RadarDataset()
     {

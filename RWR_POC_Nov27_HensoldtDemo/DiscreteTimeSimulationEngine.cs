@@ -32,145 +32,49 @@ class DiscreteTimeSimulationEngine
 
     public void Init()
     {
-        Globals.debugPrint = Globals.DebugLevel.BRIEF;
-        Globals.episodeIsDone = false;
 
-        //List<Position> waypts = new List<Position>()
-        //{
-        //    new Position(25, 25),
-        //    new Position(25, 75),
-        //    new Position(75, 75),
-        //    new Position(75, 25),
-        //    new Position(25, 25)
-        //};
+        // Initialize Discrete Time Simulation Engine
 
-        //List<Position> waypts2 = new List<Position>()
-        //{
-        //    new Position(50, 50),
-        //    new Position(85, 85),
-        //    new Position(135, 85),
-        //    new Position(170, 50),
-        //    new Position(135, 15),
-        //    new Position(85, 15),
-        //    new Position(50, 50)
-        //};
 
-        //List<Position> waypts3 = new List<Position>()
-        //{
-        //    new Position(100, 100),
-        //    new Position(200, 200),
-        //    new Position(300, 200),
-        //    new Position(400, 100),
-        //    new Position(300, 0),
-        //    new Position(200, 0),
-        //    new Position(100, 100)
-        //};
+        Globals.debugPrint = Globals.DebugLevel.BRIEF; // Set Debug level
+        Globals.episodeIsDone = false; // Set initial value of episodeIsDone to false. This is to track multiple episodes of Qlearning
 
-        //List<Position> wayptsLinear = new List<Position>()
-        //{
-        //    new Position(50, 50),
-        //    new Position(200, 200)
-        //};
+        simMod.Clear(); // Clear list of simulation models / battle systems from list
 
-        //RadarList.simpleRadarList = new List<SimpleRadar>()
-        //{
-        //    new SimpleRadar(new Position(85, 90), 20, 15, Globals.Tick, 2),
-        //    new SimpleRadar(new Position(110, 80), 20, 15, Globals.Tick, 3),
-        //    new SimpleRadar(new Position(135, 90), 20, 15, Globals.Tick, 4),
-        //    new SimpleRadar(new Position(135, 10), 20, 15, Globals.Tick, 5),
-        //    new SimpleRadar(new Position(110, 20), 20, 15, Globals.Tick, 6),
-        //    new SimpleRadar(new Position(85, 10), 20, 15, Globals.Tick, 7)
-        //};
+        Scenario newScenario = new Scenario(); // Create a new Scenarion object. Check Scenario.cs for details.
 
-        //AircraftList.aircraftList = new List<Aircraft>()
-        //{
-        //    new Aircraft(new List<Position>()
-        //    {
-        //        new Position(50, 50),
-        //        new Position(85, 85),
-        //        new Position(135, 85),
-        //        new Position(170, 50),
-        //        new Position(135, 15),
-        //        new Position(85, 15),
-        //        new Position(50, 50)
-        //    }, 0)
-        //};
-
-        //foreach (Aircraft air in AircraftList.aircraftList)
-        //{
-        //    AircraftList.rwrList.Add(new RWR(ref air.position, air.id + 10));
-        //}
-
-        simMod.Clear();
-
-        Scenario newScenario = new Scenario();
-
-        
-
-        string currentTime = DateTime.Now.ToString();
-        currentTime = currentTime.Replace(":", "-");
+        string currentTime = DateTime.Now.ToString(); // Set currentTime using DateTime module to get unique names for Output files.
+        currentTime = currentTime.Replace(":", "-"); // Replacing characters not allowed in filenames.
         currentTime = currentTime.Replace(" ", "-");
-        currentTime = currentTime.Remove(16);
+        currentTime = currentTime.Remove(16); // Trim filename to exclude "seconds" from DateTime
 
+
+        // Set Output file names
         Globals.recFileName = $"erOutputFile{currentTime}.csv";
         Globals.trackRecFileName = $"RecordedData{currentTime}.csv";
         Globals.qsaTableFileName = $"QsaTable{currentTime}.csv";
 
+
+        // Adding arbitrary placeholder entries into PFM table.
+
         PFM.emitterIDTable.Add(new PFMEmitterRecord(0, "E1", 500, 800, 150, 8000, 10000, 500, 50, 150, 25, 3, 100));    
         PFM.emitterIDTable.Add(new PFMEmitterRecord(1, "E2", 800, 1500, 200, 3000, 4000, 500, 100, 200, 50, 3, 100));
+        
 
         if (Globals.episodesEnded == 0)
         {
+            // Create Qlearner object.
             Globals.initializeQlearner();
         }
         
+        // Add the selected set of radars positions and aircraft waypoints to simulation models list
 
         simMod.Add(newScenario.chosenAircraft);
         simMod.Add(newScenario.chosenAircraft.rwr);
         simMod.AddRange(newScenario.radars);
-        //simMod.Add(pse);
 
-
-        
-        //udpListener.StartListener(newScenario.chosenAircraft);
-
-
-        //pfm.FormPFMTable();
-
-        //Aircraft a = new Aircraft(waypts2, 0);
-        //Aircraft a2 = new(waypts2, 1);
-
-        //AcquisitionRadar ar1 = new AcquisitionRadar(new Position(200, 180), 150, 15, Globals.Tick, 5, 359, 0);
-        //FireControlRadar fcr1 = new FireControlRadar(new Position(300, 180), 100, 15, Globals.Tick, 7, 359, 0);
-        //FireControlRadar fcr2 = new FireControlRadar(new Position(200, 0), 100, 15, Globals.Tick, 9, 359, 0);
-
-        //a.rwr = new RWR(ref a.position, 2);
-
-        //a2.rwr = new RWR(ref a2.position, 3);
-        // be careful with ref operator
-
-        //SimpleRadar r = new SimpleRadar(new Position(70, 50), 20, 15, Globals.Tick, 120);
-
-        //SimpleRadar r2 = new SimpleRadar(new Position(110, 15), 75, Globals.Tick, 20, 150, 5);
-        //r2.pulseRepetitionInterval = 700;
-        //r2.txPulse.frequency = 8500;
-        //r2.txPulse.pulseWidth = 75;
-        //Radar r3 = new Radar(new Pulse(200, 15, 3000, 5, 0), new Position(110, 0), 70, Globals.Tick, 15, 270, 6);
-        //Radar r4 = new Radar(new Pulse(350, 20, 5000, 5, 0), new Position(110, 50), 30, Globals.Tick, 20, 200, 7);
-
-
-        //simMod.Add(a);
-        //simMod.Add(a.rwr);
-        //simMod.Add(a2);
-        //simMod.Add(a2.rwr);
-        //simMod.Add(ar1);
-        //simMod.Add(r);
-        //simMod.Add(r2);
-        //simMod.Add(fcr1.missile1);
-
-        globalSituationalMatrix = new Pulse[simMod.Count, simMod.Count];
+        // Draw the aircraft waypoints and radar positions on WPF window.
         Globals.mainWindow.DisplayFlightPath(newScenario.chosenAircraft);
-        // Take single aircraft and multiple radars
 
     }
 
@@ -184,14 +88,23 @@ class DiscreteTimeSimulationEngine
 
             if (Globals.episodesEnded <= Globals.numEpisodes)
             {
+                // Run Simulation for a set number of episodes.
+
                 Console.WriteLine($"Current Episode: {Globals.episodesEnded + 1}");
+
                 if (Globals.episodeIsDone)
                 {
+                    // Re-initialize DTSE at the end of an episode.
                     this.Init();
                     Globals.Tick = 0;
                 }
 
                 emitterRecords.Clear();
+
+                // Initialize list of InParameters to be used with Set() function.
+                // InParameters are passed from DTSE's global situational awareness to the relevant Battle System objects.
+                // For example, InParameters for RWR are the emitter records
+
                 List<InParameter> inParameters = new List<InParameter>();
 
                 if (Globals.debugPrint == Globals.DebugLevel.BRIEF || Globals.debugPrint == Globals.DebugLevel.VERBOSE)
@@ -225,9 +138,12 @@ class DiscreteTimeSimulationEngine
                 }
 
                 BuildGlobalSituationAwareness();
+
                 // Get the emitter records from dtse(udp)
 
                 // Set() on every Simulation Model
+
+                // Any relevant information processed by the DTSE module is sent back to Battle Systems registered to it.
 
                 foreach (SimulationModel receiver in simMod)
 
@@ -237,6 +153,11 @@ class DiscreteTimeSimulationEngine
 
                     if (receiver is Radar)
                     {
+
+                        // Any logic for setting InParameters for Radar (emitter) goes here.
+                        // Earlier, this used to contain information of echoed pulses.
+                        // Currently, there is no information being sent back to radars.
+
                         List<InParameter> inParameters2 = new List<InParameter>();
                         for (int j = 0; j < simMod.Count; j++)
                         {
@@ -269,7 +190,8 @@ class DiscreteTimeSimulationEngine
                         }
                     }
 
-
+                    // In case of positive detection, emitter records processed by DTSE are first stored in
+                    // a list of In Parameters called receiverInParams, and then set back to the RWR with the Set() method.
 
                     if (receiver is RWR)
                     {
@@ -292,28 +214,21 @@ class DiscreteTimeSimulationEngine
 
                 }
 
-                //if (receiver is FireControlRadar)
-                //{
-                //    receiverInParams.Clear();
-                //    List<InParameter> inParameters3 = new();
-                //    if (detection)
-                //    {
-                //        FireControlRadar.In targetPositions = new FireControlRadar.In(detectedAircraftPosition, 6);
-                //        receiverInParams.Add(targetPositions);
-                //    }
-                //    receiver.Set(receiverInParams);
-                //}
-
                 // OnTick() on each Simulation Model
+
                 Console.WriteLine();
+
                 // trigger in if statement (cmd[0]=="ontick") in udp code
+
                 {
                     foreach (SimulationModel sim_model in simMod)
                     {
+                        // Run OnTick on each simulation model / battle system
                         sim_model.OnTick();
                     }
                     foreach (SimulationModel sim_model in simMod)
                     {
+                        // Update WPF window with new positions of simulation models
                         Globals.mainWindow.DisplayPosition(sim_model);
                     }
 
@@ -321,16 +236,21 @@ class DiscreteTimeSimulationEngine
                     {
                         if (outParam is RWR.Out)
                         {
+                            // Update RWR display with position of detected emitters
                             Globals.mainWindow.rwrDisplay.DisplaySymbols(((RWR.Out)outParam).visibleRadars);
                         }
                     }
 
-                    Globals.Tick++;
-                    Globals.persistentTick++;
+                    Globals.Tick++; // Increment Tick (resets at the end of each episode)
+                    Globals.persistentTick++; // Increment Persistent Tick (persists across episodes)
 
                     // Will be done by in UDP instead
                     if (Globals.mainWindow.btn_next_tick.Background == Brushes.Yellow)
                     {
+                        // Stops/pauses the simulation based on button clicks in UI.
+                        // This logic depends on background colour of a visual element and must be changed
+                        // to reflect the correct logic for stopping/starting the simulation.
+                        // Events must be used here.
                         count++;
                         if (count > 0)
                         {
@@ -346,6 +266,8 @@ class DiscreteTimeSimulationEngine
             {
                 if (Console.KeyAvailable)
                 {
+                    // Allows interrupting the simulation through command line shell
+                    // and allows monitoring emitter track file during the simulation.
                     Console.ReadLine();
                     Globals.ExecuteShell();
                 }
@@ -360,7 +282,6 @@ class DiscreteTimeSimulationEngine
 
     public void BuildGlobalSituationAwareness()
     {
-        //pulseTrainFromRadar.Clear();
 
         foreach (SimulationModel transmitter in simMod)
         {
@@ -369,12 +290,20 @@ class DiscreteTimeSimulationEngine
                 if (transmitter is Radar)
                 {
 
+                    // Only enter this condition if "transmitter" in the outer For loop is a Radar
+
                     if (receiver is RWR)
                     {
+
+                        // Only enter this condition if "receiver" in the inner For loop is a Radar Warning Receiver
+
+                        // All logic that occurs here will happen between a Radar as Transmitter and RWR as Receiver.
+
                         foreach (SimulationModel aircraft in simMod)
                         {
                             if (aircraft is Aircraft)
                             {
+                                // Find the current heading of the Aircraft in order to find azimuth of all emitters
                                 nextWaypointAngle = ((Aircraft)aircraft).nextWaypointAzimuth;
                             }
                         }
@@ -391,7 +320,16 @@ class DiscreteTimeSimulationEngine
 
                         if (((Radar)transmitter).beamContains(receiver.position))
                         {
+                            // Check beamContains method of Radar for more details
+                            // beamContains returns a boolean based on the detection radius of the radar in question
+                            // as well as its scan sector (for radars other than Simple Radar)
+
                             //bool recordProb = false;
+
+                            // recordProb is currently based on fixed emitter patterns used for testing.
+                            // This boolean may either always be true when beamContains is true,
+                            // but it can be used with a random number generator to imitate environmental noise
+
                             if (Globals.Tick % Globals.testCases.TestCases[Globals.testCaseID].detectionPattern.Count == 0)
                             {
                                 patternTick = 0;
@@ -426,6 +364,11 @@ class DiscreteTimeSimulationEngine
                                 // List<Pulse> pulseTrainTemp = ((Radar)transmitter).GeneratePulseTrain(Globals.Tick * 1000, angle);
                                 // pulseTrainFromRadar.AddRange(pulseTrainTemp);
 
+                                // Extract information from the Emitter record seen by the DTSE and set it to
+                                // receivedEmitterRecord, which is an EmitterRecord object local to DTSE, and used
+                                // during the Set() phase to set the received records (from the Transmitter in this loop)
+                                // to the RWR (the receiver in this loop)
+
                                 receivedEmitterRecord = new EmitterRecord();
                                 receivedEmitterRecord.pri = ((Radar)transmitter).pulseRepetitionInterval;
                                 receivedEmitterRecord.freq = ((Radar)transmitter).txPulse.frequency;
@@ -441,25 +384,6 @@ class DiscreteTimeSimulationEngine
                                 // PW, PRI, Freq, AOA, ReceivedPower - emitter record received over network
 
                             }
-
-                            
-
-                            //   ((RWR)receiver).receivingEmitterRecord = true;
-
-                            //int amp = pulseTrainFromRadar[0].amplitude;
-
-                            //receiverAmps[0] = amp * Math.Cos(angle - (Math.PI / 4));
-                            //receiverAmps[1] = amp * Math.Cos(angle + (Math.PI / 4));
-                            //receiverAmps[2] = amp * Math.Cos(angle - (3 * Math.PI / 4));
-                            //receiverAmps[3] = amp * Math.Cos(angle - (5 * Math.PI / 4));
-
-                            //for (int i = 0; i < 4; i++)
-                            //{
-                            //    if (receiverAmps[i] <= 0)
-                            //    {
-                            //        receiverAmps[i] = 0;
-                            //    }
-                            //}
 
                         }
 

@@ -8,14 +8,17 @@ using System.Windows.Threading;
 public static class Globals
 {
     // Episode configuration
-    public static Random randomNumberGenerator = new Random(8);
-    public static int flightPathNumber = 1; //-1 random
-    public static int radarSetNumber = 2;//(130,50) //-1;
+    public static Random randomNumberGenerator = new Random(8); // Random number generator with a fixed Seed
+    public static int flightPathNumber = 1; //-1 = random flight path
+    public static int radarSetNumber = 2; // -1 = random radars
+
+
+    // Initialize Global variables for the simualtion, including Tick, Output file names
+
 
     public static int Tick = 0;
     public static int persistentTick = 0;
     public static float TimeResolution = 0.10f;
-    public static int pulseTravelSpeed = 1;
     public static int guID = 0;
     public static int gTrackID = 0;
     public static DebugLevel debugPrint;
