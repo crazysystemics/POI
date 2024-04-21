@@ -61,6 +61,8 @@ public class RWR : BattleSystem
 
         public In(EmitterRecord emRecord, int id) : base(id)
         {
+            // When an RWR InParameter object is created, it takes emitter record received by DTSE as argument and sets
+            // it to the emitterRecord attribute of the InParameter.
             this.emRecord = emRecord;
         }
 
@@ -96,6 +98,7 @@ public class RWR : BattleSystem
 
     //Assuming only ONE EMITTER IS THERE
     //TODO: EXTEND TO N EMITTERS
+
     public QState prevQState = new QState(0, 0);
 
 
@@ -215,17 +218,20 @@ public class RWR : BattleSystem
     public void env_step()
     {
 
-        QState state = prevState_at_env_step_begin;
+        QState state = prevState_at_env_step_begin; // Store state before env_step() is performed
+
         //foreach (QState state in Globals.qLearner.qstates)
         {
             
             //QState state_t = GetState(RxBuf, emitterTrackFile);
             //int stateIndex = Globals.qLearner.QsaMatch(state_t); 
+
             string randChoice = String.Empty;
-            double epsi = Globals.randomNumberGenerator.NextDouble(); ;
+            double epsi = Globals.randomNumberGenerator.NextDouble();
 
             if (epsi < Globals.qLearner.EXPLORE_PROBABILITY)
             {
+                // If epsilon is less than threshold value, explore, else exploit
                 randChoice = "EXPLORE";
                 Console.WriteLine(randChoice);
 
@@ -255,6 +261,7 @@ public class RWR : BattleSystem
                     double qsa = Globals.qLearner.QsaGet(state, action_j);
                     if (qsa > maxQsa)
                     {
+                        // Choose action based on maximum value of Qsa from current state
                         maxQsa = qsa;
                         maxaction = action_j;
                     }
@@ -265,12 +272,13 @@ public class RWR : BattleSystem
 
             // QPoint Execute action_t
 
-            int pfmeid = state.emitterID;
+            int pfmeid = state.emitterID; // Extract state of emitter
 
             if (Globals.action_t == 0)
             {
                 if (PFM.emitterIDTable[pfmeid].initAgeOut < PFM.emitterIDTable[pfmeid].ceilingAgeOut)
                 {
+                    // Only perform action if current ageOut is less than ceiling ageOut
                     PFM.emitterIDTable[pfmeid].initAgeOut++;
                     Console.WriteLine("Action Performed: ++");
                 }
@@ -284,6 +292,7 @@ public class RWR : BattleSystem
             {
                 if (PFM.emitterIDTable[pfmeid].initAgeOut > PFM.emitterIDTable[pfmeid].floorAgeOut)
                 {
+                    // Only perform action if current ageOut is greater than floorAgeOut
                     PFM.emitterIDTable[pfmeid].initAgeOut--;
                     Console.WriteLine("Action Performed: --");
                 }
@@ -312,7 +321,10 @@ public class RWR : BattleSystem
         {
             PFM.emitterIDTable[1].restoreCount = 1;
         }
-        prevQState = new QState(1, PFM.emitterIDTable[1].restoreCount / 3);
+        prevQState = new QState(1, PFM.emitterIDTable[1].restoreCount / 3); // Since the second argument here must be either
+        // 0 or 1, we reset the restoreCount if it becomes greater than 3.
+        // Note: I think it should be reset to 3 in the above If statement, but it needs some confirmation
+        // by experimentation
 
 
         // env.step(action_t) => state_(t+1)
@@ -320,7 +332,7 @@ public class RWR : BattleSystem
 
         foreach (EmitterTrackRecord etr in emitterTrackFile)
         {
-            // Set received to false, only set it to true when a emitter record is being received.
+            // Set received to false at the beginning of each ontick, only set it to true when a emitter record is being received.
             etr.received = false;
         }
 
@@ -349,18 +361,23 @@ public class RWR : BattleSystem
 
         }
 
-        List<EmitterTrackRecord> tempETF = new List<EmitterTrackRecord>();
+        List<EmitterTrackRecord> tempETF = new List<EmitterTrackRecord>(); // Create temporary ETF while tracks are being managed
 
+
+        // Logic for emitter track file
         foreach (EmitterTrackRecord etr in emitterTrackFile)
         {
             etr.currentTrackLength = Globals.Tick - etr.entryTick;
             if (etr.received)
             {
+                // If emitter track record is current being received
                 trackLossCount = 0;
-                tempETF.Add(etr);
-                etr.Record("+");
+                tempETF.Add(etr); // Add record to temporary ETF
+                etr.Record("+"); // For output file. Print the symbol "+" when an emitter record is being received.
                 if (etr.recordLost)
                 {
+                    // If an emitter track record was previously lost and is now restored
+                    // Increment AgeOutRestore and set recordLost to false
                     Console.WriteLine("Record Restored");
                     etr.AgeOutRestore++;
                     etr.recordLost = false;
@@ -369,10 +386,18 @@ public class RWR : BattleSystem
             else
             {
                 // On Delete
+
+                // If no emitter record is being received on the current Tick
+                // Increment trackLossCount
                 trackLossCount++;
 
                 if (etr.ageIn > 0)
                 {
+                    // For currently not implemented AgeIn logic
+                    // If a received emitter track record was lost before AgeIn was completed, the record
+                    // will not be considered valid, as the RWR must wait for AgeIn duration before validating
+                    // the emitter record.
+
                     // Since Emitter is not Legal yet it will be immediately deleted
 
                     etr.valid = false;
@@ -384,14 +409,18 @@ public class RWR : BattleSystem
                 }
                 else
                 {
+
+                    // When emitter track record is lost and AgeIn is completed (note that AgeIn is not implemented currently)
+
                     etr.recordLost = true;
                     //etr.received = false;
                     if (etr.ageOut > 0)
                     {
+                        // When aging out is not completed, i.e. ageOut > 0
+                        // we begin aging out by decrementing ageOut value and incrementing the agingOutCount
                         Console.WriteLine("Record Lost");
                         etr.ageOut--;
                         etr.AgingOutCount++;
-                        etr.AgeOutDecrement++;
 
                         etr.valid = true;
 
@@ -413,14 +442,11 @@ public class RWR : BattleSystem
 
                         //Globals.qLearner.qstates
 
-                        //double reward = trackLength / etr.AgingOutCount;
-                        //Globals.qLearner.Qsa_cap(state_t, action_t, new_state_t, trackLength);
-                        //double reward = trackLength / Math.Abs(etr.freqMax - etr.freqMin); AgeOutCount in denominator
-                        //Globals.qLearner.Qsa_cap(new QState(), 0, null, reward);
 
-                        string restore = restoreCount(etr.AgeOutRestore);
-                        //Globals.qLearner.Qsa.Add(etr.eid, restore);
                         etr.status = TrackState.ETF_oDELETE;
+
+                        // The below If statements are for determining which env_step() function to use
+                        // This is chosen in the Globals class
 
                         if (Globals.envStepType == 0)
                         {
@@ -438,9 +464,11 @@ public class RWR : BattleSystem
                         if (PFM.emitterIDTable[etr.eid].restoreCount >= 6)
                             restoreClass = 1;
 
-                        prevState_at_env_step_begin = currentState_at_env_step_begin;
-                        currentState_at_env_step_begin = new QState(1, restoreClass);
+                        prevState_at_env_step_begin = currentState_at_env_step_begin; // Set previous state to current state
+                        currentState_at_env_step_begin = new QState(1, restoreClass); // Set current state based on calculated restoreClass
 
+
+                        // Creating previousQSA table to calculate Delta QSA
                         foreach (QState state in Globals.qLearner.Qsa.Keys)
                         {
                             foreach (double actionVal in Globals.qLearner.Qsa[state].ToList())
@@ -452,9 +480,8 @@ public class RWR : BattleSystem
                             }
                         }
 
-                        // Find delta Qsa
 
-
+                        // Update Qsa Table using states, action and reward
                         if (etr.AgingOutCount != 0)
                         {
                             Globals.qLearner.Qsa_cap(prevState_at_env_step_begin,
@@ -470,6 +497,7 @@ public class RWR : BattleSystem
                                                      0);
                         }
 
+                        // After updating Q-table, store the values in currentQSA
                         foreach (QState state in Globals.qLearner.Qsa.Keys)
                         {
                             foreach (double actionVal in Globals.qLearner.Qsa[state].ToList())
@@ -481,6 +509,8 @@ public class RWR : BattleSystem
                             }
                         }
 
+
+                        // Find the element-wise difference between previous and current Q-table to find Delta QSA
                         foreach (QState state in Globals.qLearner.Qsa.Keys)
                         {
                             foreach (double actionVal in Globals.qLearner.Qsa[state].ToList())
@@ -495,6 +525,8 @@ public class RWR : BattleSystem
                             }
                         }
 
+
+                        // Printing all Q-tables to console
                         Console.WriteLine("Current Qsa table: \n");
                         foreach (var Q in Globals.qLearner.Qsa)
                         {
@@ -525,28 +557,16 @@ public class RWR : BattleSystem
                             Console.WriteLine();
                         }
 
-                        //QState curQState = new QState(1, PFM.emitterIDTable[1].restoreCount/3);
-
-                        // Issue - Agent always chooses the first updated QSA during exploit since that state-action pair will
-                        // always have the highest value.
-
-
-                        // Store previous Qsa
-
-                        // Store Qsa value after applying Qsa_cap
-
-
 
                         Globals.recordedList.Add(
                            new RecordedData(Globals.Tick, etr.erID, etr.trackID, etr.ageIn, etr.ageOut,
                            "NOT RCV ", etr.status, "AGEOUT 0", etr.entryTick, etr.exitTick, etr.AgingInCount, etr.AgingOutCount));
                         etr.Record("-");
-
-                        // In PFM table, for this emitter ID, increase or decrease AgeOut
                     }
                 }
             }
 
+            // Console output for debugging
             Console.WriteLine($"Global tick: {Globals.persistentTick}");
             Console.WriteLine($"TrackID: {etr.trackID}");
             Console.WriteLine($"EmitterID: {etr.eid}");
@@ -585,9 +605,6 @@ public class RWR : BattleSystem
         }
 
 
-
-
-        // Issue - Assertion Failed bug
         StreamWriter writer = new StreamWriter(Globals.trackRecFileName, true);
         foreach (EmitterRecord er in RxBuf)
         {
@@ -595,6 +612,12 @@ public class RWR : BattleSystem
                 $"{er.amplitudes[0]}," +
                 $"{er.freq},{er.pri}");
         }
+
+        // Some of the lines of code below are for Q-learning computations based on frequency window
+        // This will come into play later, but it might not have the same logic or structure that is currently
+        // used here. Keep in mind that eventually, we need to apply Q-learning to optimize frequency windows
+
+
         double currentFitness = 0.0;
 
         List<EmitterTrackRecord> ETFState = emitterTrackFile;
@@ -613,6 +636,9 @@ public class RWR : BattleSystem
                     freqRange = -1.0;
                 }
                 //double temp = freqRange + etr.AgingInCount + etr.AgingOutCount;
+
+                // The lines of code below are relevant to our current problem of optimizing AgeOut
+
                 double temp = etr.AgingOutCount;
 
                 if (temp != 0)
@@ -620,29 +646,15 @@ public class RWR : BattleSystem
                     //currentFitness = trackLength / temp;
                     currentFitness = etr.restoresPerTrackLength;
                 }
+
                 //else
                 //{
                 //    Debug.Assert(false);
                 //    currentFitness = 0.0;
                 //}
+
                 Globals.qLearner.runningSum += currentFitness;
                 Globals.qLearner.runningAverage = Globals.qLearner.runningSum / Globals.qLearner.count;
-
-                // QPoint
-
-                //QState qState_next = GetState(RxBuf, ETFState);
-
-                //Globals.qLearner.Qsa_cap(qState_next, Globals.qLearner.runningAverage);
-
-                //Console.WriteLine($"Tick-State\tEREC-freq\tETR-min-max\tChoice-Type\tAction\t\tNoOfState\tCurFitness\tRunningAverage");
-                //Console.WriteLine($"{Globals.Tick}\t\t{state_t.freq}\t\t{state_t.maxWindow}\t\t{randChoice}\t\t{Globals.action_t}\t\t{Globals.qLearner.qstates.Count}\t\t{currentFitness}\t\t{Globals.qLearner.runningAverage}");
-
-                //Console.WriteLine("QsaTable");
-                //Console.WriteLine("State\t\tAction-0\tAction-1\tAction-2");
-                //foreach (List<double> actionList in Globals.qLearner.Qsa)
-                //{
-                //    Console.WriteLine($"{Globals.qLearner.Qsa.IndexOf(actionList)}\t\t{actionList[0]}\t\t{actionList[1]}\t\t{actionList[2]}");
-                //}
 
                 if (Globals.debugPrint == Globals.DebugLevel.VERBOSE)
                 {
@@ -676,25 +688,18 @@ public class RWR : BattleSystem
 
         writer.Close();
         
+        // Following track management and applying Q-learning algorithm, we set the TempETF to our
+        // RWR's actual emitter track file.
+
         emitterTrackFile = tempETF;
 
-        // QPoint
-
-        //QState state_t1 = GetState(RxBuf, ETFState);
-
-        //Globals.qLearner.Qsa_cap(state_t, Globals.action_t, state_t1, Globals.qLearner.runningAverage);
 
         if (Globals.debugPrint == Globals.DebugLevel.VERBOSE)
         {
             Console.WriteLine($"Tick-State\tEREC-freq\tETR-min-max\tChoice-Type\tAction\t\tNoOfState\tCurFitness\tRunningAverage");
             Console.WriteLine($"{Globals.Tick}\t\t{randChoice}\t\t{Globals.action_t}\t\t{Globals.qLearner.qstates.Count}\t\t{currentFitness}\t\t{Globals.qLearner.runningAverage}");
         }
-        //Console.WriteLine("QsaTable");
-        //Console.WriteLine("State\t\tAction-0\tAction-1\tAction-2");
-        //foreach (List<double> actionList in Globals.qLearner.Qsa)
-        //{
-        //    Console.WriteLine($"{Globals.qLearner.Qsa.IndexOf(actionList)}\t\t{actionList[0]}\t\t{actionList[1]}\t\t{actionList[2]}");
-        //}
+
         if (Console.KeyAvailable)
         {
             Console.ReadLine();
@@ -716,6 +721,9 @@ public class RWR : BattleSystem
 
     public EmitterTrackRecord UpdateTrackingWindows(EmitterTrackRecord etr)
     {
+
+        // Meant for frequency window optimization
+
         //if(Globals.action_t == 0)
         //    etr.freqTrackWindow += etr.freqTrackWindow * 0.1;
         //if(Globals.action_t == 1)
@@ -736,80 +744,24 @@ public class RWR : BattleSystem
         }
     }
 
-    //public EmitterTrackRecord UpdateAgeInOutTrack(EmitterTrackRecord etr)
-    //{
-    //    if (Globals.action_t == 0)
-    //    {
-    //        etr.ageOut++;
-    //    }
-    //    else if (Globals.action_t == 1)
-    //    {
-    //        etr.ageOut--;
-    //    }
-    //    else if (Globals.action_t == 2)
-    //    {
-    //        etr.ageIn++;
-    //    }
-    //    else if (Globals.action_t == 3)
-    //    {
-    //        etr.ageIn--;
-    //    }
-
-    //    return etr;
-    //}
 
     public QState GetState(EmitterTrackRecord emitterTrackRecord)
     {
+
+        // Since our state is currently based only on emitter ID and restore class,
+        // this method does not do a whole lot except return an empty state.
+
         QState qState = new QState(0, 0);
         return qState;
-
-        //qState.ageOutLength = emitterTrackRecord.AgingOutCount;
-        //qState.restoreCount = emitterTrackRecord.AgeOutRestore;
-
-        // Get AgeOut only for current record
-
-        //foreach (EmitterRecord er in emitterRecords)
-        //{
-        //    freqs.Add(er.freq);    
-        //}
-        //if (freqs.Count > 0)
-        //{
-        //    qState.freq = freqs.Max() - freqs.Min();
-        //    if(qState.freq == 0)
-        //        qState.freq = -1;
-        //}
-        //else
-        //    qState.freq = 0; 
-
-        //foreach (EmitterTrackRecord etr in emitterTrackRecords)
-        //{
-        //    windows.Add(etr.freqMax - etr.freqMin);   
-        //}
-        //if (windows.Count > 0)
-        //{
-        //    qState.maxWindow = windows.Max();
-        //    if (qState.maxWindow == 0)
-        //        qState.maxWindow = -1;
-        //}
-        //else
-        //    qState.maxWindow = 0;
-
-        //foreach (EmitterTrackRecord etr in emitterTrackRecords)
-        //{
-        //    ageOuts.Add(etr.baseAgeOut);
-        //}
-        //if (ageOuts.Count > 0)
-        //{
-        //    qState.ageOutCount = ageOuts.Max();
-        //    if (qState.ageOutCount == 0)
-        //        qState.ageOutCount = -1;
-        //}
-
-        // return qState;
     }
 
     public EmitterRecord BuildEmitterRecord(List<PDW> PDWs)
     {
+
+        // This method takes a list of PDWs and converts them into an emitter record
+        // However, since we are directly using emitter records in our program, rather than building them from PDWs,
+        // this function is not being used
+
         int totalPulses = PDWs.Count;
         int dwellTime = PDWs.Last().timeOfArrival - PDWs[0].timeOfArrival;
         int PRI = (int)(dwellTime / (totalPulses - 1));
@@ -838,6 +790,11 @@ public class RWR : BattleSystem
 
     public PFMEmitterRecord Identify(EmitterRecord emitterRecord, List<PFMEmitterRecord> eIDTable)
     {
+
+        // This method matches a received emitter record with the list of emitters already
+        // present in PFM table. If a match is found, it returns the emitter ID of the matched emitter
+        // Attributes compared: PRI and Frequency
+
         foreach (PFMEmitterRecord eID in eIDTable)
         {
             bool match = true;
@@ -862,6 +819,10 @@ public class RWR : BattleSystem
 
     public bool IsMatch(EmitterRecord emitterRecord, EmitterTrackRecord emitterTrackRecord)
     {
+
+        // This method checks if the emitter record being received is already in the emitter track file
+        // or if it ia new emitter found in the field.
+
         bool match = true;
 
         if (emitterRecord.pri < emitterTrackRecord.priCurrent - emitterTrackRecord.priTrackWindow ||
@@ -883,12 +844,24 @@ public class RWR : BattleSystem
     {
         bool foundInETF = false;
 
+        // This method compares the received emitter record to the emitter track file
+        // It checks if it is a consistent or repeated appearance of an emitter that has already been added
+        // to the emitter track file, or if it a new emitter that matches characteristics of emitters
+        // present in the PFM table, or if it is an unknown emitter altogether.
+
         foreach (EmitterTrackRecord etr in emitterTrackFile)
         {
             if (etr.eid != -1)
             {
+
+                // If emitter track record is valid
+
                 if (IsMatch(emitterRecord, etr))
                 {
+
+                    // If received emitter record matches an emitter already in the track file
+                    // Update the emitter track file
+
                     foundInETF = true;
                     etr.received = true;
                     etr.erID = emitterRecord.erID;
@@ -909,7 +882,6 @@ public class RWR : BattleSystem
 
                     etr.ageOut = emitterID.initAgeOut;
                     etr.baseAgeOut = emitterID.initAgeOut;
-                    //etr.ceilingAgeOut = emitterID.ceilingAgeOut;
 
 
                     if (etr.ageIn > 0)
@@ -918,9 +890,6 @@ public class RWR : BattleSystem
                         etr.valid = false;
                         etr.status = TrackState.ETF_iDELETE;
                         etr.AgingInCount++;
-
-                        //   Console.WriteLine($"{Globals.Tick}\t\tRECEIVED\t\t{etr.trackID}\t\tUPDATE\t\t" +
-                        //  $"{etr.ageIn}\t\t{etr.ageOut}\t\tAGING INT");
 
                         Globals.recordedList.Add(
                             new RecordedData(Globals.Tick, etr.erID, etr.trackID, etr.ageIn, etr.ageOut,
@@ -941,6 +910,10 @@ public class RWR : BattleSystem
 
         if (!foundInETF && emitterID != null)
         {
+
+            // If emitter record is valid but is not in the emitter track file
+            // add the emitter record to the emitter track file
+
             EmitterTrackRecord etr = new EmitterTrackRecord();
 
             etr.status = TrackState.ETF_INSERTED;

@@ -8,6 +8,9 @@ namespace RWR_POC_GUI
 {
     public class TestCaseSelector
     {
+
+        // Class that allows selecting test cases from TestCases.cs
+
         public int testCaseID = 0;
         public List<bool> detectionPattern = new List<bool>();
 

@@ -54,6 +54,10 @@ public class EarlyWarningRadar : Radar
 
     public override bool beamContains(Position targetPosition)
     {
+
+        // Checks whether aircraft is within radar range and inside the main scanning sector of the
+        // antenna beam
+
         int radialDistance = PhysicalSimulationEngine.GetDistance(targetPosition, this.position);
         int azimuth = (int)(PhysicalSimulationEngine.GetAngle(targetPosition, this.position) * (180 / Math.PI));
         if (radialDistance < this.radius)

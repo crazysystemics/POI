@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 public class Scenario
 {
+
+    // This class generates a scenario with a distrbution of radars and a few fixed or random aircraft waypoint sets
+
     public List<SimpleRadar> radars = new List<SimpleRadar>();
     public Random radarRandomizer;
 
@@ -16,6 +19,9 @@ public class Scenario
     {
         if (Globals.radarSetNumber < 0)
         {
+
+            // If the chosen radar set is -1, we choose a random distribution of up to 10 radars
+
             int radarCount = Globals.randomNumberGenerator.Next(1, 10);
             for (int i = 0; i < radarCount; i++)
             {
@@ -30,6 +36,8 @@ public class Scenario
             radars.AddRange(radarDataset.radarSets[Globals.radarSetNumber]);
         }
 
+        // Create a new list of aircraft waypoints
+        // The paths included are 0: Straight line, 1: Square, 2: Hexagon, 3: Random, -1: Randomly choose between 0, 1 and 2
 
         aircrafts = new List<Aircraft>()
         {

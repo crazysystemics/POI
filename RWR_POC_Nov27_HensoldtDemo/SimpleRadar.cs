@@ -27,6 +27,10 @@ namespace RWR_POC_GUI
 
         public override bool beamContains(Position targetPosition)
         {
+
+            // Since Simple Radar has no main beam, i.e. it has a roughly spherical/hemispherical scan
+            // beamContains only checks for aircrafts within its scan range/radius.
+
             int dist = PhysicalSimulationEngine.GetDistance(rPos, targetPosition);
             if(dist < radius)
                 return true;

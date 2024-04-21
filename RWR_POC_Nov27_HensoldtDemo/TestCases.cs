@@ -8,6 +8,9 @@ namespace RWR_POC_GUI
 {
     public class TestCasesList
     {
+
+        // Class containing fixed test cases for testing the Q-learning algorithm.
+
         public List<TestCaseSelector> TestCases = new List<TestCaseSelector>();
 
         public TestCasesList()

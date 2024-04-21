@@ -9,7 +9,7 @@ public static class Globals
 {
     // Episode configuration
     public static Random randomNumberGenerator = new Random(8); // Random number generator with a fixed Seed
-    public static int flightPathNumber = 1; //-1 = random flight path
+    public static int flightPathNumber = -1; // 3 = random flight path, -1 = randomly choose from fixed flight paths
     public static int radarSetNumber = 2; // -1 = random radars
 
 
