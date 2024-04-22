@@ -60,6 +60,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="CommandExecutive.cs" />
+    <Compile Include="Position.cs" />
     <Compile Include="Pulse.cs" />
     <Compile Include="PulseInputParser.cs" />
     <Compile Include="QLearner.cs" />

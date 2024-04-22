@@ -8,12 +8,10 @@ using System.Windows.Media.TextFormatting;
 class DiscreteTimeSimulationEngine
 {
     public List<SimulationModel> simMod;
-    public List<InParameter> dtseInParameters;
     public List<OutParameter> dtseOutParameter = new List<OutParameter>();
     public List<InParameter> receiverInParams = new List<InParameter>();
     public PhysicalSimulationEngine pse = new PhysicalSimulationEngine(99);
     public bool detection = false;
-    public List<Pulse> pulseTrainFromRadar = new List<Pulse>();
     public List<EmitterRecord> emitterRecords = new List<EmitterRecord>();
     public EmitterRecord receivedEmitterRecord = new EmitterRecord();
     public double nextWaypointAngle = 0;
@@ -23,7 +21,6 @@ class DiscreteTimeSimulationEngine
     public DiscreteTimeSimulationEngine()
     {
         simMod = new List<SimulationModel>();
-        dtseInParameters = new List<InParameter>();
         Globals.Tick = 0;
     }
 
