@@ -13,11 +13,8 @@ class DiscreteTimeSimulationEngine
     public List<InParameter> receiverInParams = new List<InParameter>();
     public PhysicalSimulationEngine pse = new PhysicalSimulationEngine(99);
     public bool detection = false;
-    public Pulse[,] globalSituationalMatrix;
     public List<Pulse> pulseTrainFromRadar = new List<Pulse>();
     public List<EmitterRecord> emitterRecords = new List<EmitterRecord>();
-    public double[] receiverAmps = new double[4];
-    public Position detectedAircraftPosition = new Position();
     public EmitterRecord receivedEmitterRecord = new EmitterRecord();
     public double nextWaypointAngle = 0;
     public int patternTick = 0;
@@ -107,7 +104,7 @@ class DiscreteTimeSimulationEngine
 
                 List<InParameter> inParameters = new List<InParameter>();
 
-                if (Globals.debugPrint == Globals.DebugLevel.BRIEF || Globals.debugPrint == Globals.DebugLevel.VERBOSE)
+                if (Globals.debugPrint == Globals.DebugLevel.BRIEF || Globals.debugPrint == Globals.DebugLevel.VERBOSE || Globals.debugPrint == Globals.DebugLevel.SPOT)
                 {
                     Console.WriteLine($"----------\nTick = {Globals.Tick}\n----------");
                 }
@@ -324,18 +321,18 @@ class DiscreteTimeSimulationEngine
                             // beamContains returns a boolean based on the detection radius of the radar in question
                             // as well as its scan sector (for radars other than Simple Radar)
 
-                            //bool recordProb = false;
+                            bool recordProb = true;
 
                             // recordProb is currently based on fixed emitter patterns used for testing.
                             // This boolean may either always be true when beamContains is true,
                             // but it can be used with a random number generator to imitate environmental noise
 
-                            if (Globals.Tick % Globals.testCases.TestCases[Globals.testCaseID].detectionPattern.Count == 0)
-                            {
-                                patternTick = 0;
-                            }
-                            bool recordProb = Globals.testCases.TestCases[Globals.testCaseID].detectionPattern[patternTick];
-                            patternTick++;
+                            //if (Globals.Tick % Globals.testCases.TestCases[Globals.testCaseID].detectionPattern.Count == 0)
+                            //{
+                            //    patternTick = 0;
+                            //}
+                            //bool recordProb = Globals.testCases.TestCases[Globals.testCaseID].detectionPattern[patternTick];
+                            //patternTick++;
 
                             //if (Globals.Tick < Globals.testCases.TestCases[Globals.testCaseID].detectionPattern.Count)
                             {
@@ -360,9 +357,6 @@ class DiscreteTimeSimulationEngine
                                     ((AcquisitionRadar)transmitter).detection = true;
                                     ((AcquisitionRadar)transmitter).targetPosition = receiver.position;
                                 }
-
-                                // List<Pulse> pulseTrainTemp = ((Radar)transmitter).GeneratePulseTrain(Globals.Tick * 1000, angle);
-                                // pulseTrainFromRadar.AddRange(pulseTrainTemp);
 
                                 // Extract information from the Emitter record seen by the DTSE and set it to
                                 // receivedEmitterRecord, which is an EmitterRecord object local to DTSE, and used

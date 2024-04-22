@@ -314,7 +314,6 @@ public class RWR : BattleSystem
             Globals.gTrackID = 0;
         }
 
-        double epsi = Globals.randomNumberGenerator.NextDouble();
         string randChoice = string.Empty;
 
         if (PFM.emitterIDTable[1].restoreCount > 3)

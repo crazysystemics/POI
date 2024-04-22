@@ -90,7 +90,6 @@ public class Aircraft : BattleSystem
 
                 if (distanceToNextWaypoint[0] > distanceToNextWaypoint[1])
                 {
-                    // x = distanceToNextWaypoint[0] * moveRatio
                     this.position.x += moveRatio;
                     this.position.y += 1;
                 }
