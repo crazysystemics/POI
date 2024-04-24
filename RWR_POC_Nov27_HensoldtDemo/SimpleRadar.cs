@@ -25,7 +25,7 @@ namespace RWR_POC_GUI
             this.endToEndDuration = 1;
         }
 
-        public override bool beamContains(Position targetPosition)
+        public override bool BeamContains(Position targetPosition)
         {
 
             // Since Simple Radar has no main beam, i.e. it has a roughly spherical/hemispherical scan

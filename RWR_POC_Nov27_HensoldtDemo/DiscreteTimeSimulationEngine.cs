@@ -312,7 +312,7 @@ class DiscreteTimeSimulationEngine
                             Console.WriteLine($"Azimuth = {angle}");
                         }
 
-                        if (((Radar)transmitter).beamContains(receiver.position))
+                        if (((Radar)transmitter).BeamContains(receiver.position))
                         {
                             // Check beamContains method of Radar for more details
                             // beamContains returns a boolean based on the detection radius of the radar in question

@@ -38,6 +38,6 @@ public abstract class Radar : BattleSystem
     }
 
 
-    public abstract bool beamContains(Position targetPosition);
+    public abstract bool BeamContains(Position targetPosition);
     public abstract List<Pulse> GeneratePulseTrain(int startTime, double angle);
 }
