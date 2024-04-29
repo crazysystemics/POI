@@ -21,7 +21,7 @@ class DiscreteTimeSimulationEngine
     public DiscreteTimeSimulationEngine()
     {
         simMod = new List<SimulationModel>();
-        Globals.Tick = 0;
+        Globals.tick = 0;
     }
 
     public void Init()
@@ -58,7 +58,7 @@ class DiscreteTimeSimulationEngine
         if (Globals.episodesEnded == 0)
         {
             // Create Qlearner object.
-            Globals.initializeQlearner();
+            Globals.InitializeQLearner();
         }
         
         // Add the selected set of radars positions and aircraft waypoints to simulation models list
@@ -90,7 +90,7 @@ class DiscreteTimeSimulationEngine
                 {
                     // Re-initialize DTSE at the end of an episode.
                     this.Init();
-                    Globals.Tick = 0;
+                    Globals.tick = 0;
                 }
 
                 emitterRecords.Clear();
@@ -103,7 +103,7 @@ class DiscreteTimeSimulationEngine
 
                 if (Globals.debugPrint == Globals.DebugLevel.BRIEF || Globals.debugPrint == Globals.DebugLevel.VERBOSE || Globals.debugPrint == Globals.DebugLevel.SPOT)
                 {
-                    Console.WriteLine($"----------\nTick = {Globals.Tick}\n----------");
+                    Console.WriteLine($"----------\nTick = {Globals.tick}\n----------");
                 }
 
                 // Get() on every Simulation Model
@@ -235,7 +235,7 @@ class DiscreteTimeSimulationEngine
                         }
                     }
 
-                    Globals.Tick++; // Increment Tick (resets at the end of each episode)
+                    Globals.tick++; // Increment Tick (resets at the end of each episode)
                     Globals.persistentTick++; // Increment Persistent Tick (persists across episodes)
 
                     // Will be done by in UDP instead
@@ -363,7 +363,7 @@ class DiscreteTimeSimulationEngine
                                 receivedEmitterRecord = new EmitterRecord();
                                 receivedEmitterRecord.pri = ((Radar)transmitter).pulseRepetitionInterval;
                                 receivedEmitterRecord.freq = ((Radar)transmitter).txPulse.frequency;
-                                receivedEmitterRecord.pw = ((Radar)transmitter).txPulse.pulseWidth;
+                                receivedEmitterRecord.pulseWidth = ((Radar)transmitter).txPulse.pulseWidth;
                                 receivedEmitterRecord.erID = ((Radar)transmitter).id;
                                 receivedEmitterRecord.erIdentifier = ((Radar)transmitter).radarType.ToString();
                                 receivedEmitterRecord.distance = dist;

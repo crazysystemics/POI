@@ -130,7 +130,7 @@ class TrackGenerator
         }
         else
         {
-            Globals.trackParameters.end_tick = Globals.Tick;
+            Globals.trackParameters.end_tick = Globals.tick;
         }
         Globals.commandExecutive.DisplayRecords();
     }

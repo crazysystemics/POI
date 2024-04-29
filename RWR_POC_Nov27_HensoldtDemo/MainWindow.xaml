@@ -11,7 +11,7 @@
         <Button x:Name="btn_pause_tick" Content="PAUSE TICK" HorizontalAlignment="Left" Margin="139,43,0,0" VerticalAlignment="Top" Width="91" Click="Btn_pause_tick_Click" Background="LightBlue" FontSize="14" FontWeight="Bold" BorderBrush="#FF959292"/>
         <Button x:Name="btn_next_tick" Content="NEXT TICK" HorizontalAlignment="Left" Margin="269,43,0,0" VerticalAlignment="Top" Width="91" Click="Btn_next_tick_Click" Background="LightBlue" FontSize="14" FontWeight="Bold" BorderBrush="#FF959292"/>
         <Menu HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="792">
-            <MenuItem x:Name="menu_rwr_display" Header="RWR Display" Height="24" Width="100" BorderBrush="#FFCDCDC7" FontSize="14" Click ="menu_rwr_display_Click" />
+            <MenuItem x:Name="menu_rwr_display" Header="RWR Display" Height="24" Width="100" BorderBrush="#FFCDCDC7" FontSize="14" Click ="Menu_rwr_display_Click" />
         </Menu>
         <Canvas Name="canvas" Margin="0,116,0,0" Background="#FFEFF7E4"/>
         <Label Content="MISSION SIMULATION" HorizontalAlignment="Left" Height="34" Margin="478,77,0,0" VerticalAlignment="Top" Width="191" FontSize="16" FontWeight="Bold" Foreground="#FF0B61DE" RenderTransformOrigin="1.563,0.692"/>

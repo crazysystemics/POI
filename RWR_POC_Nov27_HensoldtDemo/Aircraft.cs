@@ -17,12 +17,12 @@ public class Aircraft : BattleSystem
 
     public class Out : OutParameter
     {
-        public int Ox;
-        public int Oy;
+        public int posX;
+        public int posY;
         public Out(int x, int y, int id) : base(id)
         {
-            this.Ox = x;
-            this.Oy = y;
+            this.posX = x;
+            this.posY = y;
         }
     }
 

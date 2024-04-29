@@ -16,9 +16,8 @@ public static class Globals
     // Initialize Global variables for the simualtion, including Tick, Output file names
 
 
-    public static int Tick = 0;
+    public static int tick = 0;
     public static int persistentTick = 0;
-    public static float TimeResolution = 0.10f;
     public static int guID = 0;
     public static int gTrackID = 0;
     public static DebugLevel debugPrint;
@@ -46,7 +45,7 @@ public static class Globals
     public static List<RecordedData> recordedList = new List<RecordedData>();
     public static List<EmitterTrackRecord> emitterTrackFile = new List<EmitterTrackRecord>();
 
-    public static void initializeQlearner()
+    public static void InitializeQLearner()
     {
         qLearner = new QLearner();
     }

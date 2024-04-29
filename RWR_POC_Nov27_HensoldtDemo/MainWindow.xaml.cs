@@ -88,7 +88,7 @@ namespace RWR_POC_GUI
 
                 line.X2 = currentX[index];
                 line.Y2 = currentY[index];
-                if (Globals.Tick == 0)
+                if (Globals.tick == 0)
                 {
                     label[index] = new Label();
                     line.X1 = currentX[((Aircraft)obj).id];
@@ -118,7 +118,7 @@ namespace RWR_POC_GUI
             }
             if (obj is Radar)
             {
-                if (Globals.Tick == 0)
+                if (Globals.tick == 0)
                 {
                     Label radarLabel = new Label();
                     double currentX = multiplier * ((Radar)obj).position.x + resolution;
@@ -180,7 +180,7 @@ namespace RWR_POC_GUI
         {
             // acquisitionRadar.Visibility = Visibility.Visible;
         }
-        private void menu_rwr_display_Click(object sender, RoutedEventArgs e)
+        private void Menu_rwr_display_Click(object sender, RoutedEventArgs e)
         {
             rwrDisplay.Visibility = Visibility.Visible;
         }

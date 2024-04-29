@@ -26,7 +26,7 @@ public class Scenario
             for (int i = 0; i < radarCount; i++)
             {
                 Position radarPos = new Position(Globals.randomNumberGenerator.Next(40, 180), Globals.randomNumberGenerator.Next(10, 90));
-                radars.Add(new SimpleRadar(radarPos, Globals.randomNumberGenerator.Next(30, 75), 15, Globals.Tick, i + 1));
+                radars.Add(new SimpleRadar(radarPos, Globals.randomNumberGenerator.Next(30, 75), 15, Globals.tick, i + 1));
             }
         }
 

@@ -77,8 +77,8 @@ public class QState
     // public int ageOutLength;
     public int emitterID;
     public int restoreClass;
-    public int active;
-    public int deleted;
+    //public int active;
+    //public int deleted;
 
     public QState(int emitterID, int restoreClass)
     {
@@ -114,18 +114,18 @@ class StateEqualityComparer : IEqualityComparer<QState>
 public class QLearner
 {
     public double gamma = 0.7;
-    public double eeta = 0.3;
+    //public double eeta = 0.3;
 
     public int count;
     public double runningSum;
     public double runningAverage;
 
     //public double EXPLORE_PROBABILITY = Globals.randomNumberGenerator.NextDouble();
-    public double EXPLORE_PROBABILITY = 0.30;
+    public double exploreProbability = 0.30;
     public int actionSpaceCount = 3;
 
 
-    public List<QState> qstates = new List<QState>();
+    public List<QState> qStates = new List<QState>();
     public List<int> actions = new List<int>();
     //public List<List<double>> Qsa = new List<List<double>>();
 
@@ -167,7 +167,7 @@ public class QLearner
                     previousQSA.Add(state, new List<double> { 0.0, 0.0, 0.0 });
                     currentQSA.Add(state, new List<double> { 0.0, 0.0, 0.0 });
                     deltaQSA.Add(state, new List<double> { 0.0, 0.0, 0.0 });
-                    qstates.Add(state);
+                    qStates.Add(state);
                 }
 
                 state = new QState(emitter.eID, 1);
@@ -184,7 +184,7 @@ public class QLearner
                     previousQSA.Add(state, new List<double> { 0.0, 0.0, 0.0 });
                     currentQSA.Add(state, new List<double> { 0.0, 0.0, 0.0 });
                     deltaQSA.Add(state, new List<double> { 0.0, 0.0, 0.0 });
-                    qstates.Add(state);
+                    qStates.Add(state);
                 }
             }
             
@@ -194,26 +194,26 @@ public class QLearner
         }  
     }
 
-    public double QSaMatrixGet(int state_i, int action_j)
-    {
-        if (state_i > -1)
-        {
-            QState state = qstates[state_i];
-            return Qsa[state][action_j];
-        }
-        else
-            return -1;
-    }
+    //public double QSaMatrixGet(int state_i, int action_j)
+    //{
+    //    if (state_i > -1)
+    //    {
+    //        QState state = qstates[state_i];
+    //        return Qsa[state][action_j];
+    //    }
+    //    else
+    //        return -1;
+    //}
 
-    public void QSaMatrixSet(int state_i, int action_j, double Qval)
-    {
-        if (state_i > -1)
-        {
-            QState state = qstates[state_i];
-            Qsa[state][action_j] = Qval;
-        }
-        //Qsa.ToArray()[state_i].ToArray()[action_j] = Qval;
-    }
+    //public void QSaMatrixSet(int state_i, int action_j, double Qval)
+    //{
+    //    if (state_i > -1)
+    //    {
+    //        QState state = qstates[state_i];
+    //        Qsa[state][action_j] = Qval;
+    //    }
+    //    //Qsa.ToArray()[state_i].ToArray()[action_j] = Qval;
+    //}
 
     public double QsaGet(QState state, int action_j)
     {
@@ -229,42 +229,42 @@ public class QLearner
         //return QSaMatrixGet(state_i, action_j);
     }
 
-    public void QsaSet(QState state, int action_j, double Qval)
+    public void QsaSet(QState state, int action_j, double qVal)
     {
-        Qsa[state][action_j] = Qval;
+        Qsa[state][action_j] = qVal;
        //int state_i = QsaMatch(state);//qstates.IndexOf(state);
        // QSaMatrixSet(state_i, action_j, Qval);
     }
 
-    public int QsaMatch(QState state)
-    {
-       // bool isMatch = true;
-        int stateIndex = -1;
+    //public int QsaMatch(QState state)
+    //{
+    //   // bool isMatch = true;
+    //    int stateIndex = -1;
 
-        // Match qstate's ageOutLength with emitterTrackRecord's maxAgeOut?
+    //    // Match qstate's ageOutLength with emitterTrackRecord's maxAgeOut?
 
-        //foreach (QState qstate in qstates)
-        //{
-        //    //if(qstate.freq == state.freq && qstate.maxWindow == state.maxWindow)
-        //    //{
-        //    //    stateIndex = qstates.IndexOf(qstate);
-        //    //    return stateIndex;
-        //    //}
-        //}
+    //    //foreach (QState qstate in qstates)
+    //    //{
+    //    //    //if(qstate.freq == state.freq && qstate.maxWindow == state.maxWindow)
+    //    //    //{
+    //    //    //    stateIndex = qstates.IndexOf(qstate);
+    //    //    //    return stateIndex;
+    //    //    //}
+    //    //}
 
-        //foreach (QState qstate in qstates)
-        //{
-        //    if (qstate.restoreCount == state.restoreCount)
-        //    {
-        //        stateIndex = qstates.IndexOf(state);
-        //        return stateIndex;
-        //    }
-        //}
+    //    //foreach (QState qstate in qstates)
+    //    //{
+    //    //    if (qstate.restoreCount == state.restoreCount)
+    //    //    {
+    //    //        stateIndex = qstates.IndexOf(state);
+    //    //        return stateIndex;
+    //    //    }
+    //    //}
 
-        return stateIndex;
-    }
+    //    return stateIndex;
+    //}
 
-    public double Qsa_cap(QState state_t, int action_t, QState state_t1, double reward)
+    public double QsaCap(QState state_t, int action_t, QState state_t1, double reward)
     {
         // double reward0, reward1, reward2;
 

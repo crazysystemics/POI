@@ -62,7 +62,6 @@
     <Compile Include="CommandExecutive.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Pulse.cs" />
-    <Compile Include="PulseInputParser.cs" />
     <Compile Include="QLearner.cs" />
     <Compile Include="Radar.cs" />
     <Compile Include="RadarDataset.cs" />
@@ -107,7 +106,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MissionInputParser.cs" />
     <Compile Include="OutParameter.cs" />
     <Compile Include="PhysicalSimulationEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
