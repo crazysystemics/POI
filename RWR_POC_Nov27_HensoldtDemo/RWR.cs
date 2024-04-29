@@ -26,7 +26,7 @@ public class RWR : BattleSystem
         this.id = id;
     }
 
-    public List<EmitterRecord> RxBuf = new List<EmitterRecord>(); // Reception buffer for emitter records.
+    public List<EmitterRecord> rxBuf = new List<EmitterRecord>(); // Reception buffer for emitter records.
     // When Emitter records are processed by DTSE, and Set() is called on RWR, the receivedEmitterRecords from DTSE
     // are first set into this buffer.
 
@@ -66,7 +66,7 @@ public class RWR : BattleSystem
         // Output information of visible emitters to DTSE to build global situational awareness
 
         Out rwrOutParams = new Out(0, 0, position, 2);
-        foreach (EmitterRecord emitterRecord in RxBuf)
+        foreach (EmitterRecord emitterRecord in rxBuf)
         {
             rwrOutParams.visibleRadars.Add(new RadarSignature(emitterRecord.distance, emitterRecord.azimuth, emitterRecord.maxRange, emitterRecord.erIdentifier));
         }
@@ -78,12 +78,12 @@ public class RWR : BattleSystem
 
         // Add received emitter records from InParameters to RxBuf.
 
-        RxBuf.Clear();
+        rxBuf.Clear();
         foreach (InParameter inParameter in inParameters)
         {
             if (((In)inParameter).emRecord.pulseWidth > 0)
             {
-                this.RxBuf.Add(((In)inParameter).emRecord);
+                this.rxBuf.Add(((In)inParameter).emRecord);
             }
         }
     }
@@ -328,7 +328,7 @@ public class RWR : BattleSystem
         }
 
         // Add RxBuf to emitter record list.
-        this.emRecordList.AddRange(RxBuf);
+        this.emRecordList.AddRange(rxBuf);
 
 
         foreach (EmitterRecord e in this.emRecordList)
@@ -595,7 +595,7 @@ public class RWR : BattleSystem
 
 
         StreamWriter writer = new StreamWriter(Globals.trackRecFileName, true);
-        foreach (EmitterRecord er in RxBuf)
+        foreach (EmitterRecord er in rxBuf)
         {
             writer.WriteLine($"{Globals.tick},EREC,{er.erID},{er.azimuth}," +
                 $"{er.amplitudes[0]}," +
@@ -672,7 +672,7 @@ public class RWR : BattleSystem
                    $"{etr.freqTrackWindow},{etr.priCurrent},{etr.agingInCount},{etr.agingOutCount},{etr.entryTick},{etr.exitTick}");
             }
         }
-        if (RxBuf.Count > 0)
+        if (rxBuf.Count > 0)
             writer.WriteLine($"{Globals.tick},SUMMARY,{Globals.qLearner.runningAverage}");
 
         writer.Close();

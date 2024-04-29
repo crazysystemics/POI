@@ -74,30 +74,7 @@ class TrackGenerator
         {
             ListOfCommands();
         }
-
-        //if (args[0].ToLower() == "emitterRecords")
-        //{
-        //    list_of_emitterRecords();
-        //}
     }
-
-    //private void commandSet(string[] args)
-    //{
-    //    if (args[0].ToLower() == "prob")
-    //    {
-    //        SetProb(args);
-    //    }
-
-    //    if (args[0].ToLower() == "agein")
-    //    {
-    //        SetAgeIn(args);
-    //    }
-
-    //    if (args[0].ToLower() == "ageout")
-    //    {
-    //        SetAgeOut(args);
-    //    }
-    //}
 
     private void ListOfCommands()
     {

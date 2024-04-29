@@ -38,17 +38,6 @@ public class GCIRadar : Radar
 
     public override List<Pulse> GeneratePulseTrain(int startTime, double angle)
     {
-        //List<Pulse> pulseTrain = new List<Pulse>();
-        //int totalPulses;
-        //int currentTime = startTime;
-        //int PRI = this.pulseRepetitionInterval;
-        //int dwellTime = beamWidth * endToEndScanSector / endToEndDuration;
-        //totalPulses = (int)(dwellTime * 1000 / PRI);
-        //for (int i = 0; i < totalPulses; i++)
-        //{
-        //    pulseTrain.Add(new Pulse(this.txPulse.pulseWidth, this.txPulse.amplitude, this.txPulse.frequency, currentTime, angle));
-        //    currentTime += PRI;
-        //}
         return null;
     }
 

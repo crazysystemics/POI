@@ -324,6 +324,8 @@ class DiscreteTimeSimulationEngine
                             // This boolean may either always be true when beamContains is true,
                             // but it can be used with a random number generator to imitate environmental noise
 
+                            // Uncomment the lines below to use TestCases patterns.
+
                             //if (Globals.Tick % Globals.testCases.TestCases[Globals.testCaseID].detectionPattern.Count == 0)
                             //{
                             //    patternTick = 0;
@@ -340,6 +342,8 @@ class DiscreteTimeSimulationEngine
                             //{
                             //    recordProb = true;
                             //}
+
+                            // Uncomment the lines above to use the TestCases patterns.
 
                             if (recordProb)
                             {
