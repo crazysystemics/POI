@@ -32,7 +32,7 @@ class TrackGenerator
     {
         if (command == "list")
         {
-            commandList(args);
+            CommandList(args);
         }
 
         
@@ -44,11 +44,11 @@ class TrackGenerator
 
         if(command == "show")
         {
-            commandShow(args);
+            CommandShow(args);
         }
     }
 
-    private void commandList(string[] args)
+    private void CommandList(string[] args)
     {
         if (args[0].ToLower() == "ticks")
         {
@@ -72,7 +72,7 @@ class TrackGenerator
 
         if (args[0].ToLower() == "commands")
         {
-            list_of_commands();
+            ListOfCommands();
         }
 
         //if (args[0].ToLower() == "emitterRecords")
@@ -99,7 +99,7 @@ class TrackGenerator
     //    }
     //}
 
-    private void list_of_commands()
+    private void ListOfCommands()
     {
         Console.WriteLine("\nList of Commands\n");
         Console.WriteLine("command 1: list commands");
@@ -202,7 +202,7 @@ class TrackGenerator
 
    
 
-    public void getERec(string[] args)
+    public void GetErec(string[] args)
     {
         if (args[1] != "*")
         {
@@ -231,7 +231,7 @@ class TrackGenerator
         Globals.ageOut = int.Parse(args[1]);
     }
 
-   public void commandShow(string[] args)
+   public void CommandShow(string[] args)
     {
         //if (args[0].ToLower() == "qsatable")
         //{

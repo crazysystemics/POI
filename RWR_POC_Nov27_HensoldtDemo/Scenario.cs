@@ -5,15 +5,13 @@ using System.Collections.Generic;
 public class Scenario
 {
 
-    // This class generates a scenario with a distrbution of radars and a few fixed or random aircraft waypoint sets
+    // This class generates a scenario with a distrbution of radars and a few fixed or random aircraft waypoint sets.
 
     public List<SimpleRadar> radars = new List<SimpleRadar>();
-    public Random radarRandomizer;
 
     public Aircraft chosenAircraft;
     public List<Aircraft> aircrafts;
     public List<RWR> rwr = new List<RWR>();
-    public int chooseAircraft;
 
     public Scenario()
     {

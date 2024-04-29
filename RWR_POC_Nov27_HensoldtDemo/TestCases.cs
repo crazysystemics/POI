@@ -11,16 +11,16 @@ namespace RWR_POC_GUI
 
         // Class containing fixed test cases for testing the Q-learning algorithm.
 
-        public List<TestCaseSelector> TestCases = new List<TestCaseSelector>();
+        public List<TestCaseSelector> testCases = new List<TestCaseSelector>();
 
         public TestCasesList()
         {
-            TestCases.Add(new TestCaseSelector(0, new List<bool> { true, false, }));
+            testCases.Add(new TestCaseSelector(0, new List<bool> { true, false, }));
 
-            TestCases.Add(new TestCaseSelector(1, new List<bool> { true, true, true,
+            testCases.Add(new TestCaseSelector(1, new List<bool> { true, true, true,
                                                                    false, false, false, false,}));
 
-            TestCases.Add(new TestCaseSelector(2, new List<bool> { true, false, false, false, false, false, false, false, false, false,
+            testCases.Add(new TestCaseSelector(2, new List<bool> { true, false, false, false, false, false, false, false, false, false,
                                                                    true, false, false, false, false, false, false, false, false,
                                                                    true, false, false, false, false, false, false, false,
                                                                    true, false, false, false, false, false, false,
@@ -30,7 +30,7 @@ namespace RWR_POC_GUI
                                                                    true, false, false,
                                                                    true, false,}));
 
-            TestCases.Add(new TestCaseSelector(3, new List<bool> { true, false,
+            testCases.Add(new TestCaseSelector(3, new List<bool> { true, false,
                                                                    true, false, false,
                                                                    true, false, false, false,
                                                                    true, false, false, false, false,
@@ -40,15 +40,15 @@ namespace RWR_POC_GUI
                                                                    true, false, false, false, false, false, false, false, false,
                                                                    true, false, false, false, false, false, false, false, false, false}));
 
-            TestCases.Add(new TestCaseSelector(4, new List<bool> { true, true, true, true,
+            testCases.Add(new TestCaseSelector(4, new List<bool> { true, true, true, true,
                                                                    false, false, false, false, false,}));
 
-            TestCases.Add(new TestCaseSelector(5, new List<bool> { true, false, true, false, true, false, true, false, true, false, true, false, true, false,
+            testCases.Add(new TestCaseSelector(5, new List<bool> { true, false, true, false, true, false, true, false, true, false, true, false, true, false,
                                                                    true, false, true, false, false, false, false, false, false,
                                                                    true, false, true, false, false, false, false, false, false,
                                                                    true, false, true, false, false, false, false, false, false,}));
 
-            TestCases.Add(new TestCaseSelector(6, new List<bool> { true, true, true, false, false, false, false, false, false, false, false,
+            testCases.Add(new TestCaseSelector(6, new List<bool> { true, true, true, false, false, false, false, false, false, false, false,
                                                                    false, false, false, false, false, false, false, false,}));
 
 
@@ -59,25 +59,25 @@ namespace RWR_POC_GUI
             // Randomness in the way we do exploration/exploitation
             // Explore QSA with least score
 
-            TestCases.Add(new TestCaseSelector(7, new List<bool> { true, true, true, true, false, true }));
+            testCases.Add(new TestCaseSelector(7, new List<bool> { true, true, true, true, false, true }));
 
-            TestCases.Add(new TestCaseSelector(8, new List<bool> { true, false, false, false, false, false, false, false, false, false, false }));
+            testCases.Add(new TestCaseSelector(8, new List<bool> { true, false, false, false, false, false, false, false, false, false, false }));
 
-            TestCases.Add(new TestCaseSelector(9, new List<bool> { true, false, false, false, false, false, false, false, false, false,
+            testCases.Add(new TestCaseSelector(9, new List<bool> { true, false, false, false, false, false, false, false, false, false,
                                                                    true, false, false, false, false, false, false, false, false, false,
                                                                    true, false, true, false, true, false, true, false, true, false, true, false, true, false,
                                                                    true, false, false, false, false, false, false, false, false, false,
                                                                    true, false, false, false, false, false, false, false, false, false}));
 
-            TestCases.Add(new TestCaseSelector(10, new List<bool> { true, true, true, false, false, false, false, false, false, false,
+            testCases.Add(new TestCaseSelector(10, new List<bool> { true, true, true, false, false, false, false, false, false, false,
                                                                     true, true, false, false, false, false, false, false, false, false,
                                                                     true, false, false, false, true, true, false, false, false, false, }));
 
-            TestCases.Add(new TestCaseSelector(11, new List<bool> { true, true, true, false, false, true, true, true, true, false,
+            testCases.Add(new TestCaseSelector(11, new List<bool> { true, true, true, false, false, true, true, true, true, false,
                                                                     true, false, false, false, false, false, true, true, false, false, false, false, false, false, true, false, false,
                                                                     true, true, true, false, false, true, true, true, true, false,}));
 
-            TestCases.Add(new TestCaseSelector(12, new List<bool> { true, true, true, true, true, true, true, true, true, true,
+            testCases.Add(new TestCaseSelector(12, new List<bool> { true, true, true, true, true, true, true, true, true, true,
                                                                     false, false, false, false, false, false, false, false, false, false,
                                                                     true, true, true, true, true, true, true, true, true, true,
                                                                     true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true,
