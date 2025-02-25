@@ -21,6 +21,29 @@ public enum TrackState
     ALL
 }
 
+
+public  class goals
+{
+    //aircraft moved through waypoints
+    //radars at these locations
+    //pfm of rwr was x
+    //
+    //output of rwr on console text, console grahpics, win graphics and record.txt
+
+    //INPUT
+    //1. aircraft waypoints
+    //2. emitter record details
+    //3. pfm details
+
+    //OUTPUT
+    //1. Textual output of RWR on Console 
+    //2. console display (aircraft, radar) cop-view, mfd view (obd view)
+    //3. winform/wpf display cop-view, obd-view
+    //4. recording of data into text file
+
+}
+
+
 enum TrackAction
 {
     INSERT, DELETE, UPDATE
@@ -160,8 +183,7 @@ public class QLearner
                 {
                     Qsa.Add(state, new List<double> { 0.0, 1.0, 0.0 });
                 }
-            }
-            
+            }         
 
 
 
