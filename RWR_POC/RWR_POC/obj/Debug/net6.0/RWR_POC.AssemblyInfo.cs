@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RWR_POC")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2baaf9cee4d869d69792691538574de84f1d66f2")]
 [assembly: System.Reflection.AssemblyProductAttribute("RWR_POC")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RWR_POC")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
