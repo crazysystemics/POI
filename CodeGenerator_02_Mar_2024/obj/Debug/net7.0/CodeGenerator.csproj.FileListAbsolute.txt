@@ -1,0 +1,15 @@
+C:\Users\Dell\source\repos\CodeGenerator\bin\Debug\net7.0\CodeGenerator.exe
+C:\Users\Dell\source\repos\CodeGenerator\bin\Debug\net7.0\CodeGenerator.deps.json
+C:\Users\Dell\source\repos\CodeGenerator\bin\Debug\net7.0\CodeGenerator.runtimeconfig.json
+C:\Users\Dell\source\repos\CodeGenerator\bin\Debug\net7.0\CodeGenerator.dll
+C:\Users\Dell\source\repos\CodeGenerator\bin\Debug\net7.0\CodeGenerator.pdb
+C:\Users\Dell\source\repos\CodeGenerator\obj\Debug\net7.0\CodeGenerator.csproj.AssemblyReference.cache
+C:\Users\Dell\source\repos\CodeGenerator\obj\Debug\net7.0\CodeGenerator.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Dell\source\repos\CodeGenerator\obj\Debug\net7.0\CodeGenerator.AssemblyInfoInputs.cache
+C:\Users\Dell\source\repos\CodeGenerator\obj\Debug\net7.0\CodeGenerator.AssemblyInfo.cs
+C:\Users\Dell\source\repos\CodeGenerator\obj\Debug\net7.0\CodeGenerator.csproj.CoreCompileInputs.cache
+C:\Users\Dell\source\repos\CodeGenerator\obj\Debug\net7.0\CodeGenerator.dll
+C:\Users\Dell\source\repos\CodeGenerator\obj\Debug\net7.0\refint\CodeGenerator.dll
+C:\Users\Dell\source\repos\CodeGenerator\obj\Debug\net7.0\CodeGenerator.pdb
+C:\Users\Dell\source\repos\CodeGenerator\obj\Debug\net7.0\CodeGenerator.genruntimeconfig.cache
+C:\Users\Dell\source\repos\CodeGenerator\obj\Debug\net7.0\ref\CodeGenerator.dll

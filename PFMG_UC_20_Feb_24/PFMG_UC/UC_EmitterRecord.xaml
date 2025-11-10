@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="PFMG_UC.UC_EmitterRecord"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+xmlns:local="clr-namespace:PFMG_UC"
+mc:Ignorable="d" Height="1174.546" Width="815.807">
+    <Grid Background="#FFEFF9F9" Margin="10,10,0,-68" HorizontalAlignment="Left" Width="809">
+        <Label Content="Emitter Records" HorizontalAlignment="Left" Margin="5,36,0,0" VerticalAlignment="Top" Width="145" Height="31" FontFamily="Franklin Gothic Demi" FontSize="18" Foreground="#FF3E45E0"/>
+        <local:UC_Radar_Info x:Name="UC_R" Margin="-36,55,46,242" RenderTransformOrigin="0.5,0.5" >
+            <local:UC_Radar_Info.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform AngleX="-0.192"/>
+                    <RotateTransform/>
+                    <TranslateTransform X="-1.081"/>
+                </TransformGroup>
+            </local:UC_Radar_Info.RenderTransform>
+        </local:UC_Radar_Info>
+        <Label Content="ID" HorizontalAlignment="Left" Margin="14,85,0,0" VerticalAlignment="Top" Width="57" Height="23" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_EmitterRecordID" HorizontalAlignment="Left" Height="23" Margin="152,85,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" CaretBrush="Black" />
+        <Label Content="Frequency Track Window" HorizontalAlignment="Right" Margin="0,979,644,0" VerticalAlignment="Top" Width="151" Height="25" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_FreqTrackWindow" HorizontalAlignment="Left" Height="23" Margin="168,981,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" CaretBrush="Black" />
+        <Label Content="PRI Track Window" HorizontalAlignment="Left" Margin="14,1017,0,0" VerticalAlignment="Top" Width="136" Height="23" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_PRITrackWindow" HorizontalAlignment="Left" Height="23" Margin="168,1017,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" CaretBrush="Black" />
+        <Label Content="PW Track Window" HorizontalAlignment="Left" Margin="420,981,0,0" VerticalAlignment="Top" Width="118" Height="23" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_PWTrackWindow" HorizontalAlignment="Left" Height="23" Margin="580,981,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" CaretBrush="Black" />
+        <Label Content="Azimuth Track Window" HorizontalAlignment="Left" Margin="420,1017,0,0" VerticalAlignment="Top" Width="138" Height="23" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_AzimuthTrackWindow" HorizontalAlignment="Left" Height="23" Margin="580,1017,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" CaretBrush="Black" />
+        <Label Content="AGEIN" HorizontalAlignment="Left" Margin="16,1055,0,0" VerticalAlignment="Top" Width="57" Height="23" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_agein" HorizontalAlignment="Left" Height="23" Margin="168,1055,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" CaretBrush="Black" />
+        <Label Content="AGEOUT" HorizontalAlignment="Left" Margin="420,1055,0,0" VerticalAlignment="Top" Width="57" Height="23" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_ageout" HorizontalAlignment="Left" Height="23" Margin="580,1055,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" CaretBrush="Black" />
+        <Label x:Name="lab_RadarList" Content="Available Radars" HorizontalAlignment="Left" Margin="396,170,0,0" VerticalAlignment="Top" Width="403" Height="46" FontFamily="Segoe UI Semibold"/>
+        <Button x:Name="btn_Load" Content="Load" HorizontalAlignment="Left" Margin="310,184,0,0" VerticalAlignment="Top" Width="74" Click="Btn_Load_Click"/>
+    </Grid>
+</UserControl>

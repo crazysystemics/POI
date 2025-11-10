@@ -1,0 +1,42 @@
+﻿<UserControl x:Class="PFMG_UC.UC_Radar_Info"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+xmlns:local="clr-namespace:PFMG_UC"
+mc:Ignorable="d" Height="936.046" Width="860.807">
+    <Grid Background="#FFEFF9F9" Margin="38,42,-27,0" HorizontalAlignment="Left" Width="818">
+        <Label Content="RADAR (Emitter)" HorizontalAlignment="Left" Margin="5,36,0,0" VerticalAlignment="Top" Width="145" Height="31" FontFamily="Franklin Gothic Demi" FontSize="18" Foreground="#FF3E45E0"/>
+        <Label Content="ID" HorizontalAlignment="Left" Margin="14,85,0,0" VerticalAlignment="Top" Width="57" Height="23" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_RadarID" HorizontalAlignment="Left" Height="23" Margin="152,85,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" AutomationProperties.HelpText="Enter PRI min" RenderTransformOrigin="-2,0" CaretBrush="Black" />
+
+        <Label Content="PRI Agility ( µs )" HorizontalAlignment="Left" Margin="10,129,0,0" VerticalAlignment="Top" Width="109" Height="33" FontFamily="Segoe UI Semibold"/>
+        <ComboBox x:Name="cmb_PRIAgility" HorizontalAlignment="Left" Margin="152,133,0,0" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" MinWidth="9">
+            <ComboBoxItem x:Name="cmd_Select" Content="          Select" HorizontalAlignment="Left" Width="120" FontFamily="Segoe UI Semibold" BorderBrush="#FFF0E2E2" Margin="0,0,-2,0" IsSelected="True"/>
+            <ComboBoxItem x:Name="cmb_Fixed" Content="          Fixed" HorizontalAlignment="Left" Width="120" FontFamily="Segoe UI Semibold" BorderBrush="#FFF0E2E2" Margin="0,0,-2,0" Selected="Cmb_Fixed_Selected" />
+            <ComboBoxItem x:Name="cmb_Staggered" Content="       Staggered" HorizontalAlignment="Left" Width="120" BorderBrush="#FFF0E2E2" Margin="0,0,-2,0" Selected="Cmb_Staggered_Selected" />
+            <ComboBoxItem x:Name="cmb_Jittered" Content="        Jittered" HorizontalAlignment="Left" Width="119" BorderBrush="#FFF0E2E2" Margin="0,0,-1,0" Selected="Cmb_Jittered_Selected" />
+            <ComboBoxItem x:Name="cmb_Switched" Content="        Switcher" HorizontalAlignment="Left" Width="117" BorderBrush="#FFF0E2E2" Selected="Cmb_Switched_Selected" />
+        </ComboBox>
+
+        <Label Content="Frequency Agility ( µs )" HorizontalAlignment="Left" Margin="26,489,0,0" VerticalAlignment="Top" Width="135" Height="32" FontFamily="Segoe UI Semibold"/>
+        <ComboBox x:Name="cmb_FreqAgility" HorizontalAlignment="Left" Margin="168,491,0,0" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold" MinWidth="9">
+            <ComboBoxItem x:Name="cmd_FreqSelect" Content="          Select" HorizontalAlignment="Left" Width="120" FontFamily="Segoe UI Semibold" BorderBrush="#FFF0E2E2" Margin="0,0,-2,0" IsHitTestVisible="False" IsSelected="True"/>
+            <ComboBoxItem x:Name="cmd_PulseToPulse" Content="   Pulse To Pulse" HorizontalAlignment="Left" Width="120" FontFamily="Segoe UI Semibold" BorderBrush="#FFF0E2E2" Margin="0,0,-2,0" Selected="Cmd_PulseToPulse_Selected" />
+            <ComboBoxItem x:Name="cmd_BatchToBatch" Content="   Batch To Batch" HorizontalAlignment="Left" Width="120" FontFamily="Segoe UI Semibold" BorderBrush="#FFF0E2E2" Margin="0,0,-2,0" Selected="Cmd_BatchToBatch_Selected"/>
+        </ComboBox>
+
+        <Label Content="PW min ( µs )" HorizontalAlignment="Left" Margin="26,844,0,0" VerticalAlignment="Top" Width="84" Height="36" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_PWmin" HorizontalAlignment="Left" Height="22" Margin="168,848,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold"/>
+        <Label Content="PW max ( µs )" HorizontalAlignment="Left" Margin="318,844,0,0" VerticalAlignment="Top" Width="92" Height="26" FontFamily="Segoe UI Semibold"/>
+        <TextBox x:Name="txt_PWmax" HorizontalAlignment="Left" Height="22" Margin="446,848,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontFamily="Segoe UI Semibold"/>
+
+        <local:UC_PRIFixed x:Name="UC_PRI_F" Margin="10,217,63,585"/>
+        <local:UC_PRIStaggered x:Name="UC_PRI_S" Margin="17,172,63,503"/>
+        <local:UC_PRIJittered x:Name="UC_PRI_J" Margin="10,172,71,466"/>
+        <local:UC_PRISwitcher x:Name="UC_PRI_SW" Margin="5,167,55,410"/>
+
+        <local:UC_FreqPulseToPulse x:Name="UC_Freq_P" Margin="10,588,71,134"/>
+        <local:UC_FreqBatchToBatch x:Name="UC_Freq_B" Margin="10,521,48,52"/>
+    </Grid>
+</UserControl>
