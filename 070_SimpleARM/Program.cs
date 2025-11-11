@@ -24,15 +24,14 @@
         public bool IsAircraftInRange(Aircraft aircraft)
         {
             // Simplified logic for demonstration purposes
-            return (aircraft.x * aircraft.x + aircraft.y * aircraft.y) <= (range * range);
+            return ((x  - aircraft.x) * (x - aircraft.x) + (y - aircraft.y) * (y - aircraft.y)) <= (range * range);
         }
     }
     internal class Program
     {
-        public static Aircraft aircraft = new Aircraft(10, 10);
-        public static Radar radar = new Radar(0, 0, 100);
-        public static int num_iterations = 100;
-
+        public static Aircraft aircraft  = new Aircraft(0, 0);
+        public static Radar    radar     = new Radar(0, 0, 100);
+        public static int      num_iterations = 100;
 
         static void Main(string[] args)
         {
@@ -57,18 +56,20 @@
                 if (!wasInRange && isInRange)
                 {
                     entry_i = i;
-                    System.Console.WriteLine($"Aircraft entered radar range at iteration {i}.");
+                    
                 }
                 else if (wasInRange && !isInRange)
                 {
                     exit_i = i;
-                    System.Console.WriteLine($"Aircraft exited radar range at iteration {i}.");
+                    
                 }
                 wasInRange = isInRange;
             }
 
             // Console.WriteLine("Hello, World!");
             System.Console.WriteLine($"Aircraft detected {detected_count} times.");
+            System.Console.WriteLine($"Aircraft entered radar range at iteration {entry_i}.");
+            System.Console.WriteLine($"Aircraft exited radar range at iteration {exit_i}.");
         }
     }
 }
