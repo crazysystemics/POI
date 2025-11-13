@@ -1,10 +1,12 @@
-﻿namespace SimpleARM
+﻿
+using System;
+namespace SimpleARM
 {
     class Aircraft
     {
-        public int x, y;
+        public double x, y;
 
-        public Aircraft(int x, int y)
+        public Aircraft(double x, double y)
         {
             this.x = x;
             this.y = y;
@@ -13,9 +15,9 @@
 
     class Radar
     {
-        public int range;
-        public int x, y;
-        public Radar(int x, int y, int range)
+        public double range;
+        public double x, y;
+        public Radar(double x, double y, double range)
         {
             this.range = range;
             this.x = x;
@@ -24,13 +26,13 @@
         public bool IsAircraftInRange(Aircraft aircraft)
         {
             // Simplified logic for demonstration purposes
-            return ((x  - aircraft.x) * (x - aircraft.x) + (y - aircraft.y) * (y - aircraft.y)) <= (range * range);
+            return ((x - aircraft.x) * (x - aircraft.x) + (y - aircraft.y) * (y - aircraft.y)) <= (range * range);
         }
     }
     internal class Program
     {
-        public static Aircraft aircraft  = new Aircraft(0, 0);
-        public static Radar    radar     = new Radar(0, 0, 100);
+        public static Aircraft aircraft  = new Aircraft(-2.5, 3.0);
+        public static Radar    radar     = new Radar(0.0, 0.0, 2.5);
         public static int      num_iterations = 100;
 
         static void Main(string[] args)
@@ -38,14 +40,14 @@
 
             int detected_count = 0;
             bool wasInRange = radar.IsAircraftInRange(aircraft);
-            int entry_i = -1, exit_i = 1;
+            int entry_i = -1, exit_i =-1;
             for (int i = 0; i < num_iterations; i++)
             {
                 //generate code to find values of i when aircraft enters radar range
                 //and when exits radar range
                 // Track when aircraft enters and exits radar range                
-                aircraft.x += 1;
-                aircraft.y += 1;
+                aircraft.x += 1.0;
+                aircraft.y += 1.0;
 
                 bool isInRange = radar.IsAircraftInRange(aircraft);
                 if (isInRange)
