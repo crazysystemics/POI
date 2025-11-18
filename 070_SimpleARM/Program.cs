@@ -2,6 +2,11 @@
 using System;
 namespace SimpleARM
 {
+    //Notes
+    //1. Turn by Turn Attack and Defence
+    //2. Red attacks Blue, Blue defends and vice versa
+    //3. Later both attack and defend in full-duplex mode
+
     class Aircraft
     {
         public double x, y;
@@ -26,12 +31,15 @@ namespace SimpleARM
         public bool IsAircraftInRange(Aircraft aircraft)
         {
             // Simplified logic for demonstration purposes
-            return ((x - aircraft.x) * (x - aircraft.x) + (y - aircraft.y) * (y - aircraft.y)) <= (range * range);
+            double act_range = Math.Sqrt((x - aircraft.x) * (x - aircraft.x) + (y - aircraft.y) * (y - aircraft.y));
+            bool inRange = (act_range <= range);
+            Console.WriteLine($"Radar at ({x}, {y}) aircraft at ({aircraft.x}, {aircraft.y}) actual range ({act_range})");
+            return inRange;
         }
     }
     internal class Program
     {
-        public static Aircraft aircraft  = new Aircraft(-2.5, 3.0);
+        public static Aircraft aircraft  = new Aircraft(-2.5, 2.4);
         public static Radar    radar     = new Radar(0.0, 0.0, 2.5);
         public static int      num_iterations = 100;
 
@@ -47,7 +55,7 @@ namespace SimpleARM
                 //and when exits radar range
                 // Track when aircraft enters and exits radar range                
                 aircraft.x += 1.0;
-                aircraft.y += 1.0;
+                //aircraft.y += 1.0;
 
                 bool isInRange = radar.IsAircraftInRange(aircraft);
                 if (isInRange)
@@ -68,7 +76,7 @@ namespace SimpleARM
                 wasInRange = isInRange;
             }
 
-            // Console.WriteLine("Hello, World!");
+            //Console.WriteLine("Hello, World!");
             System.Console.WriteLine($"Aircraft detected {detected_count} times.");
             System.Console.WriteLine($"Aircraft entered radar range at iteration {entry_i}.");
             System.Console.WriteLine($"Aircraft exited radar range at iteration {exit_i}.");
