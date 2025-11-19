@@ -6,6 +6,9 @@ namespace SimpleARM
     //1. Turn by Turn Attack and Defence
     //2. Red attacks Blue, Blue defends and vice versa
     //3. Later both attack and defend in full-duplex mode
+    //4. Define a problem, where given radars position and their range, determine safe flight path
+    //4A. Start with single radar and single aircraft
+    //4B. Next Two Radars and Single Aircraft
 
     class Aircraft
     {
