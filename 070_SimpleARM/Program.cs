@@ -47,9 +47,9 @@ namespace SimpleARM
     }
     internal class Program
     {
-        public static Aircraft aircraft  = new Aircraft(0.0, 0.0);
-        public static Radar    radar     = new Radar(0.0, 0.0, 2.5);
-        public static int      num_iterations = 100;
+        public static Aircraft aircraft = new Aircraft(0.0, 0.0);
+        public static Radar radar = new Radar(0.0, 0.0, 2.5);
+        public static int num_iterations = 100;
 
         static void Main(string[] args)
         {
@@ -58,52 +58,58 @@ namespace SimpleARM
             double dist_from_radar = radar.range;
             int detected_count = 0;
             bool wasInRange = radar.IsAircraftInRange(aircraft);
-            int entry_i = -1, exit_i =-1;
+            int entry_i = -1, exit_i = -1;
             double pd = radar.x - radar.range;
-                
-            
-            for (int iteration_no  = 0; iteration_no < num_iterations; iteration_no++)
+            double initial_appraoch_distance;
+
+            //parameter_distance is x y component of distance from radar
+            //aproach_distance is y component of distance from radar
+            //parameter_distance will vary from -radar.range - delta_parameter_distance to + radar.range + delta_parameter_distance
+            //approach_dist will vary from -radar.range - delta_approach_distance  to + radar.range + delta_approach_distance
+            for (int iteration_no = 0; iteration_no < num_iterations; iteration_no++)
             {
                 parameter_distance = parameter_distance + radar.range / num_iterations;
                 //TODO: Generate 2D state-space to see to determine flight path
-
-                for (int dist = 0; dist < num_iterations; i++)
-            {
-                //generate code to find values of i when aircraft enters radar range
-                //and when exits radar range
-                // Track when aircraft enters and exits radar range                
-                //aircraft.x += 1.0;
-                //aircraft.y += 1.0;
-                aircraft = new Aircraft(aircraft.x , 
-                                          pd);
-
-
-
-                bool isInRange = radar.IsAircraftInRange(aircraft);
-                if (isInRange)
+                //TODO: To set initial approach distance and parameter distance
+                //      and hence derive the flight plan i.e., initial x,y of aircraft
+                //      Calculate how many times aircraft is detected by radar
+                
                 {
-                    detected_count++;
-                }
+                    //generate code to find values of i when aircraft enters radar range
+                    //and when exits radar range
+                    // Track when aircraft enters and exits radar range                
+                    //aircraft.x += 1.0;
+                    //aircraft.y += 1.0;
+                    aircraft = new Aircraft(aircraft.x,
+                                              pd);
 
-                if (!wasInRange && isInRange)
-                {
-                    entry_i = i;
-                    
-                }
-                else if (wasInRange && !isInRange)
-                {
-                    exit_i = i;
-                    
-                }
 
-                pd = pd + radar.range / num_iterations
+
+                    bool isInRange = radar.IsAircraftInRange(aircraft);
+                    if (isInRange)
+                    {
+                        detected_count++;
+                    }
+
+                    if (!wasInRange && isInRange)
+                    {
+                        entry_i = i;
+
+                    }
+                    else if (wasInRange && !isInRange)
+                    {
+                        exit_i = i;
+
+                    }
+
+                    pd = pd + radar.range / num_iterations
                 wasInRange = isInRange;
-            }
+                }
 
-            //Console.WriteLine("Hello, World!");
-            System.Console.WriteLine($"Aircraft detected {detected_count} times.");
-            //System.Console.WriteLine($"Aircraft entered radar range at iteration {entry_i}.");
-            //System.Console.WriteLine($"Aircraft exited radar range at iteration {exit_i}.");
+                //Console.WriteLine("Hello, World!");
+                System.Console.WriteLine($"Aircraft detected {detected_count} times.");
+                //System.Console.WriteLine($"Aircraft entered radar range at iteration {entry_i}.");
+                //System.Console.WriteLine($"Aircraft exited radar range at iteration {exit_i}.");
+            }
         }
     }
-}
