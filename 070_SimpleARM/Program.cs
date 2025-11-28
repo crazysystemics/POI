@@ -13,13 +13,37 @@ namespace SimpleARM
     //4A.1 With Single Radar known position and visibility Radius (sector) - with uncertainty factored in?
     //41.2 What improvement can be made if real-time position by RWR is given? (visibility is still uncertain)
     //4B. Next Two Radars and Single Aircraft
+    //parameter_distance is x y component of distance from radar
+    //aproach_distance is y component of distance from radar
+    //parameter_distance will vary from -radar.range - delta_parameter_distance to + radar.range + delta_parameter_distance
+    //approach_dist will vary from -radar.range - delta_approach_distance  to + radar.range + delta_approach_distance
 
+    //27-11-2025 THURSDAY 
+    //LOG-----------------------------------------------
+    //IDEAS---------------------------------------------
+    //1. Decision Point - a point in vertical strip from which aircraft enters battlefield and does straight field
+    //2. For one radar and deterministic model, it is straight-forward, just tangetial to radar circle
+    //   escaping its visibility
+    //3. But when errors are factored in, it becomes complex. Errors may be in position of radar , its range
+    //4. Another source of complexity is multiple radars
+    //5. Multiple Radars + Errors in position and range of radars make it more complex
+    //6. How RWR can be used to improve situation?
+    //7. Mission Effectiveness with or without RWR can be studied
+
+
+    //28-11-2025 THURSDAY 
+    //LOG-----------------------------------------------
+    //1. ay is varied from -radar.range to + radar.range 
+    //2. For each ay, aircraft is moved from left to right in num_iterations steps
+    //3. For each position of aircraft, check if it is in radar range
+    //4. [ax X ay] constitutes the state space
+    //IDEAS---------------------------------------------
 
     class Aircraft
     {
         public double x, y;
 
-        public Aircraft(double x, double y)
+        public Aircraft(double x=0.0, double y = 0.0)
         {
             this.x = x;
             this.y = y;
@@ -30,7 +54,7 @@ namespace SimpleARM
     {
         public double range;
         public double x, y;
-        public Radar(double x, double y, double range)
+        public Radar(double x= 0.0, double y = 0.0, double range = 0.0)
         {
             this.range = range;
             this.x = x;
@@ -47,43 +71,43 @@ namespace SimpleARM
     }
     internal class Program
     {
-        public static Aircraft aircraft = new Aircraft(0.0, 0.0);
-        public static Radar radar = new Radar(0.0, 0.0, 2.5);
+        public static Aircraft aircraft = new Aircraft();
+        public static Radar radar   = new Radar();
         public static int num_iterations = 100;
 
         static void Main(string[] args)
         {
+            //input parameters
+            double aircraft_start_x = 2.5, aircraft_start_y = 0.0;
+            double radar_start_x = 0.0, radar_start_y = 0.0;    
+            double radar_range = 2.5;
+            double num_samples = 10;
+            double parameter_distance_step = (radar_range * 2 )/ (double) num_samples;
 
-            double parameter_distance = 0.0;
-            double dist_from_radar = radar.range;
+           //output parameters
             int detected_count = 0;
-            bool wasInRange = radar.IsAircraftInRange(aircraft);
+
+            radar = new Radar(radar_start_x, radar_start_y, radar_range);
+            aircraft = new Aircraft(aircraft_start_x, aircraft_start_y);
+
+            double parameter_distance;            
+            bool wasInRange = radar.IsAircraftInRange(aircraft);         
             int entry_i = -1, exit_i = -1;
-            double pd = radar.x - radar.range;
-            double initial_appraoch_distance;
 
-            //parameter_distance is x y component of distance from radar
-            //aproach_distance is y component of distance from radar
-            //parameter_distance will vary from -radar.range - delta_parameter_distance to + radar.range + delta_parameter_distance
-            //approach_dist will vary from -radar.range - delta_approach_distance  to + radar.range + delta_approach_distance
-            for (int iteration_no = 0; iteration_no < num_iterations; iteration_no++)
+            aircraft_start_x = radar.x - radar.range - 1.0;
+            aircraft_start_y = radar.y;
+
+
+            for (parameter_distance = -radar.range;
+                 parameter_distance < radar.range;
+                 parameter_distance += parameter_distance_step)
             {
-                parameter_distance = parameter_distance + radar.range / num_iterations;
-                //TODO: Generate 2D state-space to see to determine flight path
-                //TODO: To set initial approach distance and parameter distance
-                //      and hence derive the flight plan i.e., initial x,y of aircraft
-                //      Calculate how many times aircraft is detected by radar
-                
+                aircraft = new Aircraft(aircraft_start_x, aircraft_start_y + parameter_distance);
+
+                for (int iteration_no = 0; iteration_no < num_iterations; iteration_no++)
                 {
-                    //generate code to find values of i when aircraft enters radar range
-                    //and when exits radar range
-                    // Track when aircraft enters and exits radar range                
-                    //aircraft.x += 1.0;
-                    //aircraft.y += 1.0;
-                    aircraft = new Aircraft(aircraft.x,
-                                              pd);
-
-
+                    aircraft = new Aircraft(aircraft.x + radar.range * 2/ (iteration_no+1), 
+                                            aircraft.y );
 
                     bool isInRange = radar.IsAircraftInRange(aircraft);
                     if (isInRange)
@@ -93,23 +117,24 @@ namespace SimpleARM
 
                     if (!wasInRange && isInRange)
                     {
-                        entry_i = i;
+                        entry_i = iteration_no;
 
                     }
                     else if (wasInRange && !isInRange)
                     {
-                        exit_i = i;
+                        exit_i = iteration_no;
 
                     }
 
-                    pd = pd + radar.range / num_iterations
-                wasInRange = isInRange;
+                    wasInRange = isInRange;
+
                 }
 
-                //Console.WriteLine("Hello, World!");
-                System.Console.WriteLine($"Aircraft detected {detected_count} times.");
+                Console.Write($"ax, ay : {aircraft_start_x}\t {aircraft.y} \t");
+                System.Console.WriteLine($"Parameter {parameter_distance} \t Detection {detected_count} times.");
                 //System.Console.WriteLine($"Aircraft entered radar range at iteration {entry_i}.");
                 //System.Console.WriteLine($"Aircraft exited radar range at iteration {exit_i}.");
             }
         }
     }
+}
