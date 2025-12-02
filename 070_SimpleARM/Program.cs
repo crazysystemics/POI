@@ -21,7 +21,7 @@ namespace SimpleARM
     //27-11-2025 THURSDAY 
     //LOG-----------------------------------------------
     //IDEAS---------------------------------------------
-    //1. Decision Point - a point in vertical strip from which aircraft enters battlefield and does straight field
+    //1. Decision Point - a point in vertical strip from which aircraft enters battlefield and goes in straight line
     //2. For one radar and deterministic model, it is straight-forward, just tangetial to radar circle
     //   escaping its visibility
     //3. But when errors are factored in, it becomes complex. Errors may be in position of radar , its range
@@ -38,6 +38,11 @@ namespace SimpleARM
     //3. For each position of aircraft, check if it is in radar range
     //4. [ax X ay] constitutes the state space
     //IDEAS---------------------------------------------
+
+
+    //02-12-2025 TUESDSAY
+    //LOG-----------------------------------------------
+    //1. detection_count is coming as 1 for every ay. Should examine why.
 
     class Aircraft
     {
@@ -96,6 +101,7 @@ namespace SimpleARM
 
             aircraft_start_x = radar.x - radar.range - 1.0;
             aircraft_start_y = radar.y;
+            
 
 
             for (parameter_distance = -radar.range;
@@ -103,6 +109,7 @@ namespace SimpleARM
                  parameter_distance += parameter_distance_step)
             {
                 aircraft = new Aircraft(aircraft_start_x, aircraft_start_y + parameter_distance);
+                detected_count = 0;
 
                 for (int iteration_no = 0; iteration_no < num_iterations; iteration_no++)
                 {
