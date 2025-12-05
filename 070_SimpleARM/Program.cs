@@ -44,6 +44,20 @@ namespace SimpleARM
     //LOG-----------------------------------------------
     //1. detection_count is coming as 1 for every ay. Should examine why.
 
+    //05-12-2025 FRIDAY
+    //LOG-----------------------------------------------
+    //1. detection_count is incrementing now.
+    //2. Many problems were there. But main one was that aircraft position was not updated properly in inner loop.
+    //3. increment step was divided by iteration_no instead of num_iterations
+    //IDEAS-----------------------------------------------
+    //1. Plot graph of detection_count v/s ay to see how it varies.
+    //2. DO F11 and verify the flow
+    //3. Try two/three radars and see how effectivness is calculated (vertical strip, straight flight path)
+    //4. Check the effectivness when there is error in radar position/range
+    //5. Check the effectivness when RWR information is used to update position of radar (with error)
+
+
+
     class Aircraft
     {
         public double x, y;
@@ -83,7 +97,7 @@ namespace SimpleARM
         static void Main(string[] args)
         {
             //input parameters
-            double aircraft_start_x = 2.5, aircraft_start_y = 0.0;
+            double aircraft_start_x = -2.5, aircraft_start_y = 0.0;
             double radar_start_x = 0.0, radar_start_y = 0.0;    
             double radar_range = 2.5;
             double num_samples = 10;
@@ -113,7 +127,7 @@ namespace SimpleARM
 
                 for (int iteration_no = 0; iteration_no < num_iterations; iteration_no++)
                 {
-                    aircraft = new Aircraft(aircraft.x + radar.range * 2/ (iteration_no+1), 
+                    aircraft = new Aircraft(aircraft.x + radar.range * 2/ num_iterations, 
                                             aircraft.y );
 
                     bool isInRange = radar.IsAircraftInRange(aircraft);
