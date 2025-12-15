@@ -49,6 +49,9 @@ namespace SimpleARM
     //1. detection_count is incrementing now.
     //2. Many problems were there. But main one was that aircraft position was not updated properly in inner loop.
     //3. increment step was divided by iteration_no instead of num_iterations
+    //15-12-2025 MONDAY
+    //   TODO:
+    //       1.Error in position of radar
     //IDEAS-----------------------------------------------
     //1. Plot graph of detection_count v/s ay to see how it varies.
     //2. DO F11 and verify the flow
@@ -151,8 +154,8 @@ namespace SimpleARM
 
                 }
 
-                Console.Write($"ax, ay : {aircraft_start_x}\t {aircraft.y} \t");
-                System.Console.WriteLine($"Parameter {parameter_distance} \t Detection {detected_count} times.");
+                Console.WriteLine($"{aircraft.y}, {detected_count} ");
+                //System.Console.WriteLine($"Parameter {parameter_distance} \t Detection {detected_count} times.");
                 //System.Console.WriteLine($"Aircraft entered radar range at iteration {entry_i}.");
                 //System.Console.WriteLine($"Aircraft exited radar range at iteration {exit_i}.");
             }
