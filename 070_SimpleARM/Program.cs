@@ -49,9 +49,21 @@ namespace SimpleARM
     //1. detection_count is incrementing now.
     //2. Many problems were there. But main one was that aircraft position was not updated properly in inner loop.
     //3. increment step was divided by iteration_no instead of num_iterations
-    //15-12-2025 MONDAY
+    //17-12-2025 MONDAY
     //   TODO:
     //       1.Error in position of radar
+    //       2.Error in range of radar
+    //       3.Use of RWR information (with error) to update radar position    
+    //       4.When taken average, will effectiveness be maximum at 0 error position/range?
+    //       5.Plot graph of effectiveness v/s error in position/range and very hypothesis in point 4
+    //18-12-2025 THURSDAY
+    //  1. [LOG-]Found optimal aircraft y position with minimum detection count
+    //  2. [IDEA]minimum detection count is mission effectiveness in this case
+    //  3. [TODO]Introduce Error in radar position/range
+    //  4. [TODO]Find optimal aircraft y position with minimum detection count
+    //  5. [TODO]Test optimal y with actual aircraft position
+    //  6. [TODO]How can we minimize detection count for different errors?
+    //
     //IDEAS-----------------------------------------------
     //1. Plot graph of detection_count v/s ay to see how it varies.
     //2. DO F11 and verify the flow
@@ -115,6 +127,8 @@ namespace SimpleARM
             double parameter_distance;            
             bool wasInRange = radar.IsAircraftInRange(aircraft);         
             int entry_i = -1, exit_i = -1;
+            int min_detection_count = num_iterations + 1;
+            double optimal_aircraft_y = 0;
 
             aircraft_start_x = radar.x - radar.range - 1.0;
             aircraft_start_y = radar.y;
@@ -154,11 +168,21 @@ namespace SimpleARM
 
                 }
 
+                if (detected_count < min_detection_count)
+                {
+                    min_detection_count = detected_count;
+                    optimal_aircraft_y =  aircraft.y;
+                }
+
+
+
                 Console.WriteLine($"{aircraft.y}, {detected_count} ");
                 //System.Console.WriteLine($"Parameter {parameter_distance} \t Detection {detected_count} times.");
                 //System.Console.WriteLine($"Aircraft entered radar range at iteration {entry_i}.");
                 //System.Console.WriteLine($"Aircraft exited radar range at iteration {exit_i}.");
             }
+
+            Console.WriteLine($"Optimal Aircraft Y Position: {optimal_aircraft_y} with minimum detections: {min_detection_count}");
         }
     }
 }
