@@ -63,7 +63,16 @@ namespace SimpleARM
     //  4. [TODO]Find optimal aircraft y position with minimum detection count
     //  5. [TODO]Test optimal y with actual aircraft position
     //  6. [TODO]How can we minimize detection count for different errors?
-    //
+    //20-12-2025 SATURDAY
+    // BLUE-ATTACK:
+    // In Main Method
+    // 1. [TODO] Run once with all heights and find optimal height with minimum detection count
+    // 2. [TODO] But Radar position is error
+    // 3. [TODO] Place Radar with Error and optimal launch point
+    // 4. [TODO] Repeat Launches with same lauch height but with different random radar positions within error band
+    // 5. [TODO] Restrict randomness to x dimension only first
+    // 4. [INSIGHT] Across multiple simulations, radar position error should average to zero 
+    // RED-DEFENCE::
     //IDEAS-----------------------------------------------
     //1. Plot graph of detection_count v/s ay to see how it varies.
     //2. DO F11 and verify the flow
