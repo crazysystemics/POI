@@ -80,6 +80,14 @@ namespace SimpleARM
     //3 [TODO] Run simulations with different error bands and find success rate (should get from 0 to 100%)
     //4.[TODO] Vary Radar Position in Y axis also
     // RED-DEFENCE
+    //24-12-2025 WEDNESDAY
+    //1. [LOG] Updated .NET to 8.0 to support VS 2026
+    //2. [LOG] Ran simulations with different error bands and found success rate (got from 0 to 100%)
+    //3. [LOG] Mission success is 0 even for 0 error band. Need to investigate.
+    //31-12-2025 WEDNESDAY
+    //1. [LOG] Git is not working (refer GITHUB COPILOT)
+    //2. [TODO]Download SysInternals Handle and Proess Explorer to find file locks
+
 
 
 
@@ -204,8 +212,7 @@ namespace SimpleARM
                 // radar_x_error varies from -radar_error_band to + radar_error_band
                 double radar_x_error = (rand.NextDouble() * 2 - 1) * radar_position_x_error_band;
                 Radar radar_with_error = new Radar(radar_start_x + radar_x_error, radar_start_y, radar_range);
-                Aircraft aircraft_sim = new Aircraft(radar_with_error.x - radar_with_error.range - 1.0,
-                                                     test_aircraft_y);
+                Aircraft aircraft_sim = new Aircraft(radar_with_error.x - radar_with_error.range - 1.0, test_aircraft_y);
                 int sim_detected_count = 0;
                 bool sim_wasInRange = radar_with_error.IsAircraftInRange(aircraft_sim);
 
@@ -256,27 +263,34 @@ namespace SimpleARM
             //double aircraft_start_x = -2.5, aircraft_start_y = 0.0;
             double radar_start_x = 0.0, radar_start_y = 0.0;
             double radar_range = 2.5;
-            double radar_position_x_error_band = 0.5; // error band for radar x position            
+            double radar_position_x_error_band = 0.0; // error band for radar x position            
             double optimal_aircraft_y = estimate_height_02();
             int detection_count = 0;
             int upper_detection_threshold = 3;
             int successful_missions = 0;
 
-            for (int sim = 0; sim < num_simulations; sim++)
+            for (radar_position_x_error_band = 0.0; radar_position_x_error_band <= 1.5; radar_position_x_error_band += 0.25)
             {
-                //Place Radar with Error
-                double radar_x_error = (rand.NextDouble() * 2 - 1) * radar_position_x_error_band;
-                Radar radar_with_error = new Radar(radar_start_x + radar_x_error, radar_start_y, radar_range);
-                Aircraft aircraft_sim = new Aircraft(radar_with_error.x - radar_with_error.range - 1.0,
-                                                optimal_aircraft_y);
-                detection_count = simulate_mission(radar_with_error, aircraft_sim, optimal_aircraft_y);
-                if (detection_count <= upper_detection_threshold)
-                    successful_missions++;
+                successful_missions = 0;
+
+                for (int sim = 0; sim < num_simulations; sim++)
+                {
+                    //Place Radar with Error
+                    double radar_x_error = (rand.NextDouble() * 2 - 1) * radar_position_x_error_band;
+                    Radar radar_with_error = new Radar(radar_start_x + radar_x_error, radar_start_y, radar_range);
+                    optimal_aircraft_y = estimate_height_02();
+                    Aircraft aircraft_sim = new Aircraft(radar_with_error.x - radar_with_error.range - 1.0,
+                                                    optimal_aircraft_y);
+                   
+                    detection_count = simulate_mission(radar_with_error, aircraft_sim, optimal_aircraft_y);
+                    if (detection_count <= upper_detection_threshold)
+                        successful_missions++;
+                }
+
+                double success_rate = (double)(successful_missions / num_simulations) * 100.0;
+
+                Console.WriteLine($"error band: {radar_position_x_error_band} mission success rate:{success_rate}");
             }
-
-            double success_rate = (double)successful_missions / num_simulations * 100.0;
-
-            Console.WriteLine($"error band: {radar_position_x_error_band} mission success rate:{success_rate}");
 
         }
         static void Main(string[] args)
