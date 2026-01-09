@@ -281,7 +281,7 @@ namespace SimpleARM
                     optimal_aircraft_y = estimate_height_02();
                     Aircraft aircraft_sim = new Aircraft(radar_with_error.x - radar_with_error.range - 1.0,
                                                     optimal_aircraft_y);
-                   
+                    //added test comment
                     detection_count = simulate_mission(radar_with_error, aircraft_sim, optimal_aircraft_y);
                     if (detection_count <= upper_detection_threshold)
                         successful_missions++;
