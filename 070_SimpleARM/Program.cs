@@ -1,7 +1,11 @@
 ﻿
 using System;
+using System.Diagnostics;
+
 namespace SimpleARM
 {
+    enum SamplingMethod { EXHAUSTIVE_LINEAR, RANDOM_UNIFORM, RANDOM_GAUSSIAN}
+
     class Aircraft
     {
         public double x, y;
@@ -38,7 +42,7 @@ namespace SimpleARM
     {
         public static Aircraft aircraft = new Aircraft();
         public static Radar radar = new Radar();
-        public static int num_iterations = 100;
+        
         public static double estimate_height_01()
         {
             double aircraft_start_x = -2.5, aircraft_start_y = 0.0;
@@ -92,7 +96,7 @@ namespace SimpleARM
 
             return optimal_aircraft_y;
         }
-        public static double estimate_height_02()
+        public static double estimate_height_02(int num_simulations)
         {
             // 2. Radar position error (randomness in x only)
 
@@ -113,18 +117,25 @@ namespace SimpleARM
             aircraft_start_y = radar.y;
 
             double radar_position_x_error_band = 0.0; // error band for radar x position
-            int num_simulations = 100;
+            
             Random rand = new Random();
 
             //Estimation of Optimal Height
-            for (int sim = 0; sim < num_simulations/2; sim++)
+            int sim = 0;
+            //for (int sim = 0; sim < num_simulations/2; sim++)
             {
                 // radar_x_error varies from -radar_error_band to + radar_error_band
                 double radar_x_error = (rand.NextDouble() * 2 - 1) * radar_position_x_error_band;
                 Radar radar_with_error = new Radar(radar_start_x + radar_x_error, radar_start_y, radar_range);
                 Aircraft aircraft_sim = new Aircraft(radar_with_error.x - radar_with_error.range - 1.0, test_aircraft_y);
+
+
+                Debug.Assert(Math.Abs(radar_with_error.x - radar_start_x) <= 0.0001 &&
+                             Math.Abs(radar_with_error.y - radar_start_y) <= 0.0001);
+                             
                 int sim_detected_count = 0;
                 bool sim_wasInRange = radar_with_error.IsAircraftInRange(aircraft_sim);
+                
 
                 for (int iteration_no = 0; iteration_no < num_iterations; iteration_no++)
                 {
@@ -148,58 +159,123 @@ namespace SimpleARM
             }
 
             return test_aircraft_y;
-        }      
-        public static int simulate_mission(Radar radar, Aircraft aircraft, double plannedHeight)
+        }
+        public static double evaluate_solution(
+                                            
+                                            //Problem Dimension 1: error band in r.x
+                                            Radar r,                                        
+                                            double radar_origin_x_error_band,
+                                            SamplingMethod radar_x_sampling_method,
+
+                                            //Problem Dimension 2: Varying x positions of aircraft
+                                            //a.y is the Solution that needs to be evaluated
+                                            Aircraft a,                                             
+                                            SamplingMethod aircraft_x_sampling_method,
+                                            
+                                            int num_evaluation_runs,
+                                            Random rand=null
+                                        )
         {
-            aircraft.y = plannedHeight;
-            int detection_count = 0;
-            //Run Mission
-            for (int iteration_no = 0; iteration_no < num_iterations; iteration_no++)
+            if (rand == null)
             {
-                aircraft.x += radar.range * 2 / num_iterations;
-                bool isInRange = radar.IsAircraftInRange(aircraft);
-                if (isInRange)
+                rand = new Random();
+            }
+            double radar_start_x = radar.x;
+            double radar_start_y = radar.y;
+            aircraft.y = a.y;
+
+            int trial_count   = 0;
+            int success_count = 0;
+
+            double ax_step = 0;
+            int rx_step = 0;
+
+            if (radar_x_sampling_method !=  SamplingMethod.RANDOM_UNIFORM)
+            {
+                Debug.Assert(false, "Prob Distn Not defined for Radar_x");
+            }
+
+            if (aircraft_x_sampling_method == SamplingMethod.EXHAUSTIVE_LINEAR)
+            {
+                ax_step = ((double)(radar.x - radar.range - 1.0) + (radar.range * 2 + 1.0)) / (double)num_evaluation_runs;
+            }
+            {
+                Debug.Assert(false, "Prob Distn Not defined for Aircraft_x");
+            }
+
+
+            //Evaluate Solution by Running Mission with Random Inputs
+            //Here input varioation is in error associated with Radar x
+            
+            for (int eval_run = 0; eval_run < num_evaluation_runs; eval_run++)
+            {
+                double radar_x_error = (rand.NextDouble() * 2 - 1) * radar_origin_x_error_band;
+                Radar radar_with_error = new Radar(radar_start_x + radar_x_error, radar_start_y, radar.range);
+
+                //aircraft.y is the solution
+                //vary aircraft.x through its range and find how many times it is detected
+                //since aircraft_x is EXHAUSTIVE, every random point of radar_x is checked with ALL_x'es of aircraft
+
+                //Random Set, Exhaustive Set
+                //In one evaluation run, one sample from each random variable is chosen, EXHAUSTIVE set for all points in sample set
+                //Let us say r1, r2, r3 are random sets and
+                //s1, s2, s3, s4 or exhaustive sampling
+                // total number of iterations would be [s1 * s2 * s3 * s4]
+                // in each of these iterations one variable will be chosen from r1, r2, r3
+                for (; aircraft.x < (radar.x + radar.range + 1.0);aircraft.x += ax_step )
                 {
-                    //Detected
-                    detection_count++;
+                    bool isInRange = radar.IsAircraftInRange(aircraft);
+                    if (isInRange)
+                    {
+                        //Detected
+                        success_count++;
+                    }
+
                 }
             }
-            return detection_count;
+            return (double) num_evaluation_runs / (double)success_count;
         }
         public static void configure_run_simualtions()
         {
             Random rand = new Random();
-            int num_simulations = 100;
+            int num_radar_x_error_simulations = 10;
+            int num_aircraft_y_simulations = 10;
             //double aircraft_start_x = -2.5, aircraft_start_y = 0.0;
             double radar_start_x = 0.0, radar_start_y = 0.0;
             double radar_range = 2.5;
-            double radar_position_x_error_band = 0.0; // error band for radar x position            
-            double optimal_aircraft_y = estimate_height_02();
+            double radar_x_error_band = 0.0; // error band for radar x position            
+            double optimal_aircraft_y = estimate_height_02(10);
             int detection_count = 0;
             int upper_detection_threshold = 3;
             int successful_missions = 0;
 
-            for (radar_position_x_error_band = 0.0; radar_position_x_error_band <= 1.5; radar_position_x_error_band += 0.25)
+            radar_x_error_band = 0.0;
+            //for (radar_position_x_error_band = 0.0; radar_position_x_error_band <= 1.5; radar_position_x_error_band += 0.25)
             {
                 successful_missions = 0;
 
-                for (int sim = 0; sim < num_simulations; sim++)
+                for (int sim = 0; sim < num_radar_x_error_simulations; sim++)
                 {
                     //Place Radar with Error
-                    double radar_x_error = (rand.NextDouble() * 2 - 1) * radar_position_x_error_band;
+                    double radar_x_error = (rand.NextDouble() * 2 - 1) * radar_x_error_band;
+
                     Radar radar_with_error = new Radar(radar_start_x + radar_x_error, radar_start_y, radar_range);
-                    optimal_aircraft_y = estimate_height_02();
+
+                    //Optimal Height is computed in this routine
+                    optimal_aircraft_y = estimate_height_02(num_aircraft_y_simulations);
+
+
                     Aircraft aircraft_sim = new Aircraft(radar_with_error.x - radar_with_error.range - 1.0,
                                                     optimal_aircraft_y);
                     //added test comment
-                    detection_count = simulate_mission(radar_with_error, aircraft_sim, optimal_aircraft_y);
+                    detection_count = evaluate_solution(radar_with_error, aircraft_sim, optimal_aircraft_y);
                     if (detection_count <= upper_detection_threshold)
                         successful_missions++;
                 }
 
                 double success_rate = (double)(successful_missions / num_simulations) * 100.0;
 
-                Console.WriteLine($"error band: {radar_position_x_error_band} mission success rate:{success_rate}");
+                Console.WriteLine($"error band: {radar_x_error_band} mission success rate:{success_rate}");
             }
 
         }
