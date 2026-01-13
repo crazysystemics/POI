@@ -161,19 +161,25 @@ namespace SimpleARM
             return test_aircraft_y;
         }
         public static double evaluate_solution(
-                                            
-                                            //Problem Dimension 1: error band in r.x
-                                            Radar r,                                        
-                                            double radar_origin_x_error_band,
-                                            SamplingMethod radar_x_sampling_method,
+                                            //Solution to be evaluated is aircraft.y
+                                            double aircraft_y,
 
-                                            //Problem Dimension 2: Varying x positions of aircraft
-                                            //a.y is the Solution that needs to be evaluated
-                                            Aircraft a,                                             
-                                            SamplingMethod aircraft_x_sampling_method,
-                                            
-                                            int num_evaluation_runs,
-                                            Random rand=null
+                                            //Fixed Parameters, for example, radar position and range
+                                            double radar_x, 
+                                            double radar_y,
+                                            double radar_range,
+                                            //error band should be deterministically increased in steps from min to max
+                                            //once an error band is selected, num_trials simulations are run with
+                                            //random radar positions based on random sample chosen based on error band
+                                            double radar_origin_x_error_band_min,
+                                            double radar_origin_x_error_band_max,
+
+                                            //Fixed Parameters related to Aircraft
+                                            double aircraft_x_min,
+                                            double aircraft_x_max,
+
+                                            int num_trials,
+                                            Random? rand=null
                                         )
         {
             if (rand == null)
@@ -184,11 +190,11 @@ namespace SimpleARM
             double radar_start_y = radar.y;
             aircraft.y = a.y;
 
-            int trial_count   = 0;
+           
             int success_count = 0;
 
             double ax_step = 0;
-            int rx_step = 0;
+           
 
             if (radar_x_sampling_method !=  SamplingMethod.RANDOM_UNIFORM)
             {
@@ -197,7 +203,7 @@ namespace SimpleARM
 
             if (aircraft_x_sampling_method == SamplingMethod.EXHAUSTIVE_LINEAR)
             {
-                ax_step = ((double)(radar.x - radar.range - 1.0) + (radar.range * 2 + 1.0)) / (double)num_evaluation_runs;
+                ax_step = (aircraft_x_max - aircraft_x_min) / (double)num_trials;
             }
             {
                 Debug.Assert(false, "Prob Distn Not defined for Aircraft_x");
@@ -206,8 +212,8 @@ namespace SimpleARM
 
             //Evaluate Solution by Running Mission with Random Inputs
             //Here input varioation is in error associated with Radar x
-            
-            for (int eval_run = 0; eval_run < num_evaluation_runs; eval_run++)
+            int trial_count = 0;
+            while ( trial_count < num_trials)
             {
                 double radar_x_error = (rand.NextDouble() * 2 - 1) * radar_origin_x_error_band;
                 Radar radar_with_error = new Radar(radar_start_x + radar_x_error, radar_start_y, radar.range);
@@ -222,7 +228,7 @@ namespace SimpleARM
                 //s1, s2, s3, s4 or exhaustive sampling
                 // total number of iterations would be [s1 * s2 * s3 * s4]
                 // in each of these iterations one variable will be chosen from r1, r2, r3
-                for (; aircraft.x < (radar.x + radar.range + 1.0);aircraft.x += ax_step )
+                while (aircraft.x < aircraft_x_max )
                 {
                     bool isInRange = radar.IsAircraftInRange(aircraft);
                     if (isInRange)
@@ -231,9 +237,12 @@ namespace SimpleARM
                         success_count++;
                     }
 
+                    aircraft.x += ax_step;
                 }
+
+                trial_count++;
             }
-            return (double) num_evaluation_runs / (double)success_count;
+            return (double)success_count/(double)num_trials;
         }
         public static void configure_run_simualtions()
         {
@@ -243,13 +252,13 @@ namespace SimpleARM
             //double aircraft_start_x = -2.5, aircraft_start_y = 0.0;
             double radar_start_x = 0.0, radar_start_y = 0.0;
             double radar_range = 2.5;
-            double radar_x_error_band = 0.0; // error band for radar x position            
+            double test_radar_x_error_band = 0.0; // error band for radar x position            
             double optimal_aircraft_y = estimate_height_02(10);
             int detection_count = 0;
             int upper_detection_threshold = 3;
             int successful_missions = 0;
 
-            radar_x_error_band = 0.0;
+            test_radar_x_error_band = 0.0;
             //for (radar_position_x_error_band = 0.0; radar_position_x_error_band <= 1.5; radar_position_x_error_band += 0.25)
             {
                 successful_missions = 0;
@@ -257,7 +266,7 @@ namespace SimpleARM
                 for (int sim = 0; sim < num_radar_x_error_simulations; sim++)
                 {
                     //Place Radar with Error
-                    double radar_x_error = (rand.NextDouble() * 2 - 1) * radar_x_error_band;
+                    double radar_x_error = (rand.NextDouble() * 2 - 1) * test_radar_x_error_band;
 
                     Radar radar_with_error = new Radar(radar_start_x + radar_x_error, radar_start_y, radar_range);
 
@@ -275,7 +284,7 @@ namespace SimpleARM
 
                 double success_rate = (double)(successful_missions / num_simulations) * 100.0;
 
-                Console.WriteLine($"error band: {radar_x_error_band} mission success rate:{success_rate}");
+                Console.WriteLine($"error band: {test_radar_x_error_band} mission success rate:{success_rate}");
             }
 
         }
