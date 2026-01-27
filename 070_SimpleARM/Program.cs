@@ -40,11 +40,13 @@ namespace SimpleARM
 
     internal class Program
     {
-        public static Aircraft aircraft = new Aircraft();
-        public static Radar radar = new Radar();
+        //public static Aircraft aircraft = new Aircraft();
+       // public static Radar radar = new Radar();
         
-        public static double estimate_height_01()
+        public static double estimate_height_01(Aircraft aircraft, Radar radar, int num_iterations)
         {
+            
+
             double aircraft_start_x = -2.5, aircraft_start_y = 0.0;
             double radar_start_x = 0.0, radar_start_y = 0.0;
             double radar_range = 2.5;
@@ -96,7 +98,7 @@ namespace SimpleARM
 
             return optimal_aircraft_y;
         }
-        public static double estimate_height_02(int num_simulations)
+        public static double estimate_height_02(Aircraft aircraft, Radar radar, int num_simulations, int num_iterations)
         {
             // 2. Radar position error (randomness in x only)
 
@@ -161,6 +163,8 @@ namespace SimpleARM
             return test_aircraft_y;
         }
         public static double evaluate_solution(
+                                            Aircraft aircraft, Radar radar,
+
                                             //Solution to be evaluated is aircraft.y
                                             double aircraft_y,
 
@@ -179,7 +183,10 @@ namespace SimpleARM
                                             double aircraft_x_max,
 
                                             int num_trials,
-                                            Random? rand=null
+                                            Random? rand=null,
+                                            SamplingMethod radar_x_sampling_method = SamplingMethod.RANDOM_UNIFORM,
+                                            SamplingMethod aircraft_x_sampling_method = SamplingMethod.EXHAUSTIVE_LINEAR
+
                                         )
         {
             if (rand == null)
@@ -188,7 +195,7 @@ namespace SimpleARM
             }
             double radar_start_x = radar.x;
             double radar_start_y = radar.y;
-            aircraft.y = a.y;
+            aircraft.y = aircraft_y;
 
            
             int success_count = 0;
@@ -215,6 +222,7 @@ namespace SimpleARM
             int trial_count = 0;
             while ( trial_count < num_trials)
             {
+                //TODOGenerate Random Radar Position based on Uniform Distribution
                 double radar_x_error = (rand.NextDouble() * 2 - 1) * radar_origin_x_error_band;
                 Radar radar_with_error = new Radar(radar_start_x + radar_x_error, radar_start_y, radar.range);
 
