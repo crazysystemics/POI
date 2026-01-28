@@ -177,12 +177,13 @@ namespace SimpleARM
                                             //random radar positions based on random sample chosen based on error band
                                             double radar_origin_x_error_band_min,
                                             double radar_origin_x_error_band_max,
+                                            SamplingMethod radar_x_error_sampling_method = SamplingMethod.RANDOM_UNIFORM,
 
                                             //Fixed Parameters related to Aircraft
-                                            double aircraft_x_min,
-                                            double aircraft_x_max,
+                                            double aircraft_x_min=0.0,
+                                            double aircraft_x_max=0.0,
 
-                                            int num_trials,
+                                            int num_trials=0,
                                             Random? rand=null,
                                             SamplingMethod radar_x_sampling_method = SamplingMethod.RANDOM_UNIFORM,
                                             SamplingMethod aircraft_x_sampling_method = SamplingMethod.EXHAUSTIVE_LINEAR
