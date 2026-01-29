@@ -162,6 +162,8 @@ namespace SimpleARM
 
             return test_aircraft_y;
         }
+
+
         public static double evaluate_solution(
                                             Aircraft aircraft, Radar radar,
 
@@ -286,6 +288,11 @@ namespace SimpleARM
                     Aircraft aircraft_sim = new Aircraft(radar_with_error.x - radar_with_error.range - 1.0,
                                                     optimal_aircraft_y);
                     //added test comment
+                    //Here Solution with respect to to state-space
+                    //state-space value of radar.x vs error(radar.x)
+                    //Measure average detection count over num_simulations
+                    // In beginning we can fix position of radar and  state space would be various error_bands;
+                    // n trials will be conducted by chosing random x locations from this band
                     detection_count = evaluate_solution(radar_with_error, aircraft_sim, optimal_aircraft_y);
                     if (detection_count <= upper_detection_threshold)
                         successful_missions++;
