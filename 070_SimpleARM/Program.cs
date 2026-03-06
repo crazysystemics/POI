@@ -345,48 +345,51 @@ namespace SimpleARM
 
             long totalIterations = 0;
             long detectionCount = 0;
+            Aircraft ac;
 
-            for (int i = 0; i < radarSamples; i++)
+            for (int cur_ac_x = ac_min_x; cur_ac_x < ac_max_x; cur_ac_x += ((ac_max_x) - (ac_min_x)) / num_samples)
             {
+
+                ac = new Aircraft(ac_min_x, ac_optimal_y);
+
                 // Radar position without error
-                double cur_radar_x_without_error = min_radar_x + i * radarStep;
-
-                // Linearly increment the radar x error range between min and max
-                double cur_radar_x_error_max = (radarSamples > 1)
-                    ? (min_radar_x_error + i * (double)(max_radar_x_error - min_radar_x_error) / (radarSamples - 1))
-                    : min_radar_x_error;
-
-                // Sample an actual error from uniform distribution [0, cur_radar_x_error_max]
-                double cur_radar_x_error_sample = rand.NextDouble() * Math.Max(0.0, cur_radar_x_error_max);
-
-                // Offset so that error is centered around the nominal position
-                double cur_radar_x = cur_radar_x_without_error - (cur_radar_x_error_max / 2.0) + cur_radar_x_error_sample;
-
-                Radar radar = new Radar(cur_radar_x, radar_y, radar_range);
-
-                    // Single check at ac_min_x when acStep is effectively zero
-                    totalIterations++;
-                    Aircraft ac = new Aircraft(ac_min_x, ac_optimal_y);
-                    if (radar.IsAircraftInRange(ac))
-                        detectionCount++;
-              
-                else
+                for (double cur_radar_x = min_radar_x; cur_radar_x < max_radar_x;
+                           cur_radar_x += (max_radar_x - min_radar_x) / num_samples)
                 {
-                    for (double acx = ac_min_x; acx <= ac_max_x + 1e-9; acx += acStep)
-                    {
+
+                    for (int i = 0; i < radarSamples; i++)
+                    {                  
+                        // Linearly increment the radar x error range between min and max
+                        double cur_radar_x_error_max = (radarSamples > 1)
+                            ? (min_radar_x_error + i * (double)(max_radar_x_error - min_radar_x_error) / (radarSamples - 1))
+                            : min_radar_x_error;
+
+                        // Sample an actual error from uniform distribution [0, cur_radar_x_error_max]
+                        double cur_radar_x_error_sample = rand.NextDouble() * Math.Max(0.0, cur_radar_x_error_max);
+
+                        // Offset so that error is centered around the nominal position
+                        double cur_radar_x_with_error = cur_radar_x - (cur_radar_x_error_max / 2.0) + cur_radar_x_error_sample;
+
+                        Radar radar = new Radar(cur_radar_x_with_error, radar_y, radar_range);
+
+                        // Single check at ac_min_x when acStep is effectively zero
+                        totalIterations++;
+
+                        if (radar.IsAircraftInRange(ac))
+                            detectionCount++;
                     }
- 
+
                 }
+
             }
 
             // Avoid division by zero
             if (totalIterations == 0)
-            {
-                best_score_index = -1;
+            {                
                 return 0.0;
             }
 
-            best_score_index = 0; // single score evaluated
+            
             return (double)detectionCount / (double)totalIterations;
         }
 
