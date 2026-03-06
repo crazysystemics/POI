@@ -6,3 +6,25 @@ Now, the threads are
 			 b. i.e., irrespective of error (from min_error to max_error), y should be same
 			 c. verify this
 			 d. now, go to code
+	3. Based on Aho, Ullman Abstraction Article
+	          
+			  
+			   
+			  a. define (aircraft with rwr, radar) as an abstraction
+			  b. define a mission as an algorithm that takes in the abstraction and produces a result (e.g., optimal y)
+			  c. implement manually aircrraft, rwr and radar
+			  d. DTSE->dtse is the compiler/simulator that runs the mission and generates effectiveness score of y
+			  e. alternate paths/uncertainty in each iteration, data should be captured as shown below
+			            example vector of optimal y for each position error
+			  i. Algorithm: while tick < max_ticks do the below
+			        parameters = { {x, x.range.type = deterministic_linear, x.range.min, x.range.max, x.range.sample_interval},
+					               {x_error, x_error.range.type = random_uniform, x_error.range.min, x_error.range.max},
+
+			        position error = min_error to max_error with step size of error_step_size
+					       y = min_y to max_y with step size of y_step_size
+						       run missions with y, position error and get effectiveness score
+							   if (effectiveness score > max_effectiveness_score)
+								   max_effectiveness_score = effectiveness score
+								   optimal_y = y
+						   optimal_y_vector[position error] = optimal_y
+					effeciveness_score is optimal_y_vector

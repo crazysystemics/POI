@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace SimpleARM
 {
-    enum SamplingMethod { EXHAUSTIVE_LINEAR, RANDOM_UNIFORM, RANDOM_GAUSSIAN}
+    enum SamplingMethod { EXHAUSTIVE_LINEAR, RANDOM_UNIFORM, RANDOM_GAUSSIAN }
 
     class Aircraft
     {
@@ -41,11 +41,11 @@ namespace SimpleARM
     internal class Program
     {
         //public static Aircraft aircraft = new Aircraft();
-       // public static Radar radar = new Radar();
-        
+        // public static Radar radar = new Radar();
+
         public static double estimate_height_01(Aircraft aircraft, Radar radar, int num_iterations)
         {
-            
+
 
             double aircraft_start_x = -2.5, aircraft_start_y = 0.0;
             double radar_start_x = 0.0, radar_start_y = 0.0;
@@ -119,7 +119,7 @@ namespace SimpleARM
             aircraft_start_y = radar.y;
 
             double radar_position_x_error_band = 0.0; // error band for radar x position
-            
+
             Random rand = new Random();
 
             //Estimation of Optimal Height
@@ -134,10 +134,10 @@ namespace SimpleARM
 
                 Debug.Assert(Math.Abs(radar_with_error.x - radar_start_x) <= 0.0001 &&
                              Math.Abs(radar_with_error.y - radar_start_y) <= 0.0001);
-                             
+
                 int sim_detected_count = 0;
                 bool sim_wasInRange = radar_with_error.IsAircraftInRange(aircraft_sim);
-                
+
 
                 for (int iteration_no = 0; iteration_no < num_iterations; iteration_no++)
                 {
@@ -157,7 +157,7 @@ namespace SimpleARM
 
                 test_aircraft_y += radar.range / num_simulations; // increment aircraft y for next simulation
 
-                
+
             }
 
             return test_aircraft_y;
@@ -171,7 +171,7 @@ namespace SimpleARM
                                             double aircraft_y,
 
                                             //Fixed Parameters, for example, radar position and range
-                                            double radar_x, 
+                                            double radar_x,
                                             double radar_y,
                                             double radar_range,
                                             //error band should be deterministically increased in steps from min to max
@@ -182,11 +182,11 @@ namespace SimpleARM
                                             SamplingMethod radar_x_error_sampling_method = SamplingMethod.RANDOM_UNIFORM,
 
                                             //Fixed Parameters related to Aircraft
-                                            double aircraft_x_min=0.0,
-                                            double aircraft_x_max=0.0,
+                                            double aircraft_x_min = 0.0,
+                                            double aircraft_x_max = 0.0,
 
-                                            int num_trials=0,
-                                            Random? rand=null,
+                                            int num_trials = 0,
+                                            Random? rand = null,
                                             SamplingMethod radar_x_sampling_method = SamplingMethod.RANDOM_UNIFORM,
                                             SamplingMethod aircraft_x_sampling_method = SamplingMethod.EXHAUSTIVE_LINEAR
 
@@ -200,13 +200,13 @@ namespace SimpleARM
             double radar_start_y = radar.y;
             aircraft.y = aircraft_y;
 
-           
+
             int success_count = 0;
 
             double ax_step = 0;
-           
 
-            if (radar_x_sampling_method !=  SamplingMethod.RANDOM_UNIFORM)
+
+            if (radar_x_sampling_method != SamplingMethod.RANDOM_UNIFORM)
             {
                 Debug.Assert(false, "Prob Distn Not defined for Radar_x");
             }
@@ -223,7 +223,7 @@ namespace SimpleARM
             //Evaluate Solution by Running Mission with Random Inputs
             //Here input varioation is in error associated with Radar x
             int trial_count = 0;
-            while ( trial_count < num_trials)
+            while (trial_count < num_trials)
             {
                 //TODOGenerate Random Radar Position based on Uniform Distribution
                 double radar_x_error = (rand.NextDouble() * 2 - 1) * radar_origin_x_error_band;
@@ -239,7 +239,7 @@ namespace SimpleARM
                 //s1, s2, s3, s4 or exhaustive sampling
                 // total number of iterations would be [s1 * s2 * s3 * s4]
                 // in each of these iterations one variable will be chosen from r1, r2, r3
-                while (aircraft.x < aircraft_x_max )
+                while (aircraft.x < aircraft_x_max)
                 {
                     bool isInRange = radar.IsAircraftInRange(aircraft);
                     if (isInRange)
@@ -253,7 +253,7 @@ namespace SimpleARM
 
                 trial_count++;
             }
-            return (double)success_count/(double)num_trials;
+            return (double)success_count / (double)num_trials;
         }
         public static void configure_run_simualtions()
         {
@@ -302,8 +302,94 @@ namespace SimpleARM
 
                 Console.WriteLine($"error band: {test_radar_x_error_band} mission success rate:{success_rate}");
             }
-
         }
+
+        int find_optimal_y(int min_y, int max_y,
+                            int radar_y, //single y, no range
+                            int radar_min_x, int radar_max_x,
+                            int min_x_error, int max_x_error)
+        {
+            //let us assume optimal_y maximally away from radar.y
+            return Math.Max(Math.Abs(max_y - radar_y), Math.Abs(min_y - radar_y));
+        }
+
+        //validate whether optimal_y is indeed optimal by running multiple simulations with random radar positions
+        //and calculating detection count for optimal_y and comparing it with detection count for other y values in the range
+        double validate_optimal_y(
+                            int num_samples,
+                            int ac_optimal_y,
+                            int ac_min_x, int ac_max_x,
+                         
+                            int min_radar_x, int max_radar_x, int radar_y,
+                            int min_radar_x_error, int max_radar_x_error,
+                            ref int best_score_index)
+        {
+            // Validate inputs
+            if (num_samples <= 0)
+                num_samples = 1;
+
+            if (ac_max_x < ac_min_x || max_radar_x < min_radar_x)
+            {
+                best_score_index = -1;
+                return 0.0;
+            }
+
+            // Use a reasonable default radar range if not provided elsewhere in the program.
+            double radar_range = 2.5;
+
+            Random rand = new Random();
+
+            int radarSamples = num_samples;
+            double radarStep = (radarSamples > 1) ? (max_radar_x - min_radar_x) / (double)(radarSamples - 1) : 0.0;
+            double acStep = (radarSamples > 1) ? (ac_max_x - ac_min_x) / (double)(radarSamples - 1) : (ac_max_x - ac_min_x);
+
+            long totalIterations = 0;
+            long detectionCount = 0;
+
+            for (int i = 0; i < radarSamples; i++)
+            {
+                // Radar position without error
+                double cur_radar_x_without_error = min_radar_x + i * radarStep;
+
+                // Linearly increment the radar x error range between min and max
+                double cur_radar_x_error_max = (radarSamples > 1)
+                    ? (min_radar_x_error + i * (double)(max_radar_x_error - min_radar_x_error) / (radarSamples - 1))
+                    : min_radar_x_error;
+
+                // Sample an actual error from uniform distribution [0, cur_radar_x_error_max]
+                double cur_radar_x_error_sample = rand.NextDouble() * Math.Max(0.0, cur_radar_x_error_max);
+
+                // Offset so that error is centered around the nominal position
+                double cur_radar_x = cur_radar_x_without_error - (cur_radar_x_error_max / 2.0) + cur_radar_x_error_sample;
+
+                Radar radar = new Radar(cur_radar_x, radar_y, radar_range);
+
+                    // Single check at ac_min_x when acStep is effectively zero
+                    totalIterations++;
+                    Aircraft ac = new Aircraft(ac_min_x, ac_optimal_y);
+                    if (radar.IsAircraftInRange(ac))
+                        detectionCount++;
+              
+                else
+                {
+                    for (double acx = ac_min_x; acx <= ac_max_x + 1e-9; acx += acStep)
+                    {
+                    }
+ 
+                }
+            }
+
+            // Avoid division by zero
+            if (totalIterations == 0)
+            {
+                best_score_index = -1;
+                return 0.0;
+            }
+
+            best_score_index = 0; // single score evaluated
+            return (double)detectionCount / (double)totalIterations;
+        }
+
         static void Main(string[] args)
         {
             //Testing Optimal Height
@@ -311,9 +397,20 @@ namespace SimpleARM
             //and calculate average detection count
             //Optimation Height Estimation (Training may be any method) this is Test           
             configure_run_simualtions();
+            optimal_y = find_optimal_y();
+
+            //validate whether optimal_y is indeed optimal by running multiple simulations with random radar positions
+            //and calculating detection count for optimal_y and comparing it with detection count for other y values in the range
+            validate_optimal_y(optimal_y, min_y, max_y,
+                                                min_x, max_x,
+                                                min_x_error, max_x_error);
         }
     }
 }
+
+
+
+
 
 
 
