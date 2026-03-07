@@ -28,3 +28,20 @@ Now, the threads are
 								   optimal_y = y
 						   optimal_y_vector[position error] = optimal_y
 					effeciveness_score is optimal_y_vector
+			 j. n-dimensions 
+			          [on each dimension, n samples can be sampled, n may be 1 also]
+					  [if nd > 1, it is a range, and sample is linear, 
+					               xd (x on d) is tranversed from min to max with step size of (max - min)/n]
+					  [if nd > 1, and sampling is random, then xd is sampled randomly from min to max n times]
+					  [nd = 1 linear can be modeled by mid = maxd = some fixed xd value]
+					  [nd = 1 random -;> xd is sampled randomly from min to max]
+
+					  //foreground dimensions - dimensions on which output is dependent
+					  //these are tested for nd samples, ranges are covered
+					  //for random variables, six sigma is used to cover the range
+					  //background dimensions - dimensions on which output is not dependent
+					  //a single random sample is drawn from each of the background dimensions, and 
+					  //in same output iteration output is computed.
+					  //if background dimensions indeed have no impact on output, 
+					  //then output should be same across all samples of background dimensions
+
