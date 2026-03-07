@@ -410,7 +410,6 @@ namespace SimpleARM
             //validate whether optimal_y is indeed optimal by running multiple simulations with random radar positions
             //and calculating detection count for optimal_y and comparing it with detection count for other y values in the range
             double detect_number =  validate_optimal_y( 10, optimal_y, 0, 100, 10, 90, 0, 0, 1, ref best_score);
-
             Console.WriteLine($"Optimal Y: {optimal_y} Detection Rate: {detect_number * 100}");
 
 
