@@ -358,6 +358,11 @@ namespace SimpleARM
                            cur_radar_x += (max_radar_x - min_radar_x) / num_samples)
                 {
 
+                    //given radar_x_min and radar_x_max
+                    //      radar_y_min and radar_y_max 
+                    //      generate random_x, and random_y between min and max
+                    //      mission_success_rate = 1 -(detection_count/num_trials)
+
                     for (int i = 0; i < radarSamples; i++)
                     {
                         // Linearly increment the radar x error range between min and max
