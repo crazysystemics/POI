@@ -1,7 +1,9 @@
 ﻿Simple ARM is an initial pilot for to defence project. It should evolve into VN project.
 Now, the threads are
-	1. Optimal Path Finding for Fighter Aircraft (Simple ARM) 
-	2. Find Optima y in presence of errors for Radar Position in x 
+	Optimal Path Finding for Fighter Aircraft (Simple ARM)
+	1A.[DONE] Find optimal y in presence of no errors
+	1B.[***]Find effectiveness of optimal y in presence of no errors
+	2. Find Optimal y in presence of errors for Radar Position in x 
 	         a. ideally, this should not impact y
 			 b. i.e., irrespective of error (from min_error to max_error), y should be same
 			 c. verify this

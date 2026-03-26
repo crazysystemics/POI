@@ -1,0 +1,38 @@
+{
+  "project": "The Ghee-Stained Blueprint",
+  "base_art_style": "2D Comic Style, Technical Schematic Blueprint",
+  "style_descriptors": {
+    "background": "Deep indigo-blue gridded paper (engineering schematic style)",
+    "line_art": "Crisp, technical white schematic lines (like architectural drawings)",
+    "overlays": "Organic, translucent golden-amber 'ghee' or oil stains scattered randomly"
+  },
+  "character_library": {
+    "hari_hara": {
+      "role": "Patriotic Defense/Aerospace Engineer (Writes poems)",
+      "visage": "Slim, chiseled face, fair complexion",
+      "outfit": "Plain white shirt neatly tucked-in, sleeveless teal vest over the shirt",
+      "anchors": [
+        "Small image of a fighter jet taking off (Tiranga/Indian flag beside it)",
+        "Positioned on the right upper side of his vest or shirt."
+      ]
+    },
+    "shashidhara": {
+      "role": "Philanthropic Computer Science Engineer (Intelligence Utility)",
+      "visage": "Curly black hair, hippie style, combed back",
+      "outfit": "Collarless white/light t-shirt",
+      "anchors": [
+        "A black messenger bag hung loosely on his back",
+        "Laptop is visible in the bag."
+      ]
+    },
+    "sheshadri": {
+      "role": "Hardcore Orthodox Madhva Philosopher (Dialectic Logic)",
+      "visage": "Traditional Madhva symbols of ಅಂಗಾರ (Angara) and ಅಕ್ಷತಾ (Akshata) on his forehead",
+      "outfit": "Careless dressing of loose-fitting kurta and jeans",
+      "anchors": [
+        "Forehead markings (essential vertical Gopi Chandan/Namam)",
+        "Traditional Madhva shoulder texture/work on the kurta."
+      ]
+    }
+  }
+}
