@@ -23,7 +23,7 @@ from enum import Enum
 
 
 # ─────────────────────────────────────────────────────────────────
-# CONFIG
+# CONFIG section: tweak these to see how results change!
 # ─────────────────────────────────────────────────────────────────
 LIGHT_CYCLE     = 14      # ticks per full RED/GREEN cycle (7 each)
 AMB_SPEED       = 0.28    # fraction of edge per tick  (~4 ticks/edge)
