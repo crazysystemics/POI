@@ -4,9 +4,13 @@ Now, the threads are
 	1A.[DONE] Find optimal pdist in presence of no errors
 	1B.[+]Prove pdist is optimal when no errors are present
 	        1B1. Find detection_count for pymin to pmax in steps of pstep
+			         int[]  detection_counts = find_detection_counts(pymin, pmax, pstep)
 			1B2. Verify the assertion that detection_count(pdist) is minimmum 
 			      among all detection_count(py) for py in [pymin, pmax] with step size of pstep
 				       [***] write a function to find detection_count for a given py
+					   [***] min_detection = find_index_of_minimum(detection_counts)
+					   [***] assert that pymin + min_detection*pstep == pdist
+					   
 ]			[1B3] [***] Generate code for 1B1 and 1B2
 	2. Find Optimal y in presence of errors for Radar Position in x 
 	         a. ideally, this should not impact y
