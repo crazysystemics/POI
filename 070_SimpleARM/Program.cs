@@ -43,17 +43,12 @@ namespace SimpleARM
     internal class Program
     {
         //public static Aircraft aircraft = new Aircraft();
-        // public static Radar radar = new Radar();
+        // public static Radar radar = new Radar();     
 
-       
-
-        public static int find_optimal_y(int min_y, int max_y,
-                            int radar_y, //single y, no range
-                            int radar_min_x, int radar_max_x,
-                            int min_x_error, int max_x_error)
+        public static int find_optimal_y(int minay, int maxay, Radar radar)                
         {
             //let us assume optimal_y maximally away from radar.y
-            return Math.Max(Math.Abs(max_y - radar_y), Math.Abs(min_y - radar_y));
+            return Math.Max(Math.Abs(maxay - radar.y), Math.Abs(minay - radar.y));
         }
 
         //Find the mission effectiveness (detection rate) for a given testy and radar error range
@@ -146,16 +141,13 @@ namespace SimpleARM
                                         int axmin, int axmax, int ax_num_samples
                                        )
         {
-            // Check if the optimal_y is indeed optimal by comparing detection counts
-            // for optimal_y and other y values in the range
-            int detection_count_optimal = 0;
-            int detection_count_other = 0;
-            // Check detection count for optimal_y
+           
+            
             aircraft.y = testy;
 
-            int aymin = (int)radar.y;
-            int aymax = (int)(radar.y + radar.range);
-            int aystep = (int)((aymax - aymin) / 10.0); //
+            int aymin  = (int)radar.y;
+            int aymax  = (int)(radar.y + radar.range);
+            int aystep = (int)((aymax - aymin) / 10.0); 
 
             //[***] write a function to find detection_count for a given py
             //[***] min_detection = find_index_of_minimum(detection_counts)
@@ -188,24 +180,8 @@ namespace SimpleARM
         }
         static void Main(string[] args)
         {
-            //Testing Optimal Height
-            //Run simulations with random radar positions within error band (across x) 
-            //and calculate average detection count
-            //Optimation Height Estimation (Training may be any method) this is Test
-            int optimal_y = 0;
-
-            //configure_run_simualtions();
-            optimal_y = find_optimal_y(0, 100, 0, 0, 100, 0, 1)/2;
-            bool y_is_optimal = isoptimal_y(optimal_y, new Aircraft(), new Radar(), -100, 100, 10);
-                                       
-            Debug.Assert(y_is_optimal, $"Optimal Y {optimal_y} is not optimal according to detection counts.");
-
-            //validate whether optimal_y is indeed optimal by running multiple simulations with random radar positions
-            //and calculating detection count for optimal_y and comparing it with detection count for other y values in the range
-            //double detect_number =  validate_optimal_y( 10, optimal_y, 0, 100, 10, 90, 0, 0, 1, ref best_score);
-            Console.WriteLine($"Optimal Y: {optimal_y}");
-
-
+            Test test = new Test();
+            test.Test01();
 
         }
     }
