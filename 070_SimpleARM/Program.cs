@@ -138,10 +138,11 @@ namespace SimpleARM
 
         public static bool isoptimal_y(
                                         int testy, Aircraft aircraft, Radar radar,
-                                        int axmin, int axmax, int ax_num_samples
+                                        int axmin, int axmax, int ax_num_samples,
+                                        ref int[] debug_ays,
+                                        ref int[] debug_detect_counts
                                        )
-        {
-           
+        {         
             
             aircraft.y = testy;
 
@@ -154,8 +155,10 @@ namespace SimpleARM
             //[***] assert that pymin + min_detection * pstep == pdist
             int[] detect_counts = sglobal.MissionPlanner.FindDetectionCounts(aircraft, radar, 
                                                                                aymin, aymax, aystep,
-                                                                               axmin,axmax, ax_num_samples);
-
+                                                                               axmin, axmax, ax_num_samples,
+                                                                               debug_ays);
+            debug_detect_counts = detect_counts; // Store for debugging purposes
+            
             // Guard against empty/null results
             if (detect_counts == null || detect_counts.Length == 0)
                 return false;
@@ -172,6 +175,7 @@ namespace SimpleARM
                 }
             }
 
+
             if (minIndex < 0)
                 return false;
 
@@ -186,6 +190,22 @@ namespace SimpleARM
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

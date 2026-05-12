@@ -33,13 +33,18 @@ namespace SimpleARM
             //Run simulations with random radar positions within error band (across x) 
             //and calculate average detection count
             //Optimation Height Estimation (Training may be any method) this is Test
+            Radar radar = new Radar(0, 0, 200);
+            Aircraft aircraft = new Aircraft(0.0, 50.0);
             int optimal_y = 0;
 
-            Radar radar = new Radar(0, 0, 100);
-            Aircraft aircraft = new Aircraft(0.0, 50.0);
+            int[] debug_detect_counts = new int[20];
+            int[] debug_ays = new int[20];
+           
             //configure_run_simualtions();
             optimal_y = Program.find_optimal_y(50, 150, radar);
-            bool y_is_optimal = Program.isoptimal_y(optimal_y, aircraft, radar, -100, 100, 10);
+            bool y_is_optimal = Program.isoptimal_y(optimal_y, aircraft, radar, -100, 100, 10,
+                                                    ref debug_ays,
+                                                    ref debug_detect_counts);
             Debug.Assert( y_is_optimal, $"Optimal Y {optimal_y} is not optimal according to detection counts.");
             //validate whether optimal_y is indeed optimal by running multiple simulations with random radar positions
             //and calculating detection count for optimal_y and comparing it with detection count for other y values in the range

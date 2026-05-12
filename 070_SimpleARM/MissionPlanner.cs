@@ -87,19 +87,31 @@ public class MissionPlanner
     //    return bestPy;
     //}
 
+    // Overload: captures iterated ay values in debug_ays reference parameter
     public int[] FindDetectionCounts(Aircraft aircraft, Radar radar,
                         int aymin, int aymax, int aystep,
-                        int axmin, int axmax, int ax_num_samples)
+                        int axmin, int axmax, int ax_num_samples,
+                        int[] debug_ays = null)
     {
         int numPySamples = (aymax - aymin) / aystep + 1;
         int[] detectionCounts = new int[numPySamples];
+        if (debug_ays != null)
+        {
+            debug_ays = new int[numPySamples];
+        }
         int index = 0;
+
         for (int ay = aymin; ay <= aymax; ay += aystep)
         {
-            int count = findDetectionCountForPY(ay, radar, axmin,  axmax, ax_num_samples);
+            if (debug_ays != null)
+                debug_ays[index] = ay;
+            
+            int count = findDetectionCountForPY(ay, radar, axmin, axmax, ax_num_samples);
             if (index < detectionCounts.Length)
                 detectionCounts[index++] = count;
         }
         return detectionCounts;
     }
 }
+
+
