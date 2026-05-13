@@ -17,9 +17,7 @@ Now, the threads are
 			 b. i.e., irrespective of error (from min_error to max_error), y should be same
 			 c. verify this
 			 d. now, go to code
-	3. Based on Aho, Ullman Abstraction Article         
-			  
-			   
+	3. Based on Aho, Ullman Abstraction Article       
 			  a. define (aircraft with rwr, radar) as an abstraction
 			  b. define a mission as an algorithm that takes in the abstraction and produces a result (e.g., optimal y)
 			  c. implement manually aircrraft, rwr and radar
@@ -44,3 +42,4 @@ Now, the threads are
 					  //if background dimensions indeed have no impact on output, 
 					  //then output should be same across all samples of background dimensions
 			k. Aho Ullman Abstraction Framework also has to-be incorporated
+		4. Modeling whole thing as Dynamic Space and then State Space

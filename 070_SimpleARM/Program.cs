@@ -139,8 +139,9 @@ namespace SimpleARM
         public static bool isoptimal_y(
                                         int testy, Aircraft aircraft, Radar radar,
                                         int axmin, int axmax, int ax_num_samples,
-                                        ref int[] debug_ays,
-                                        ref int[] debug_detect_counts
+                                        int ay_num_samples,
+                                        int[] debug_ays,
+                                        int[] debug_detect_counts
                                        )
         {         
             
@@ -148,22 +149,18 @@ namespace SimpleARM
 
             int aymin  = (int)radar.y;
             int aymax  = (int)(radar.y + radar.range);
-            int aystep = (int)((aymax - aymin) / 10.0); 
+            int aystep = (int)Math.Ceiling((double)(aymax - aymin) / ay_num_samples);
+            if (aystep < 1) aystep = 1;
 
-            //[***] write a function to find detection_count for a given py
-            //[***] min_detection = find_index_of_minimum(detection_counts)
-            //[***] assert that pymin + min_detection * pstep == pdist
             int[] detect_counts = sglobal.MissionPlanner.FindDetectionCounts(aircraft, radar, 
-                                                                               aymin, aymax, aystep,
+                                                                               aymin, aymax, ay_num_samples,
                                                                                axmin, axmax, ax_num_samples,
                                                                                debug_ays);
-            debug_detect_counts = detect_counts; // Store for debugging purposes
+            debug_detect_counts = detect_counts;
             
-            // Guard against empty/null results
             if (detect_counts == null || detect_counts.Length == 0)
                 return false;
 
-            // Find index of minimum detection count without relying on LINQ
             int minVal = int.MaxValue;
             int minIndex = -1;
             for (int i = 0; i < detect_counts.Length; i++)
@@ -174,7 +171,6 @@ namespace SimpleARM
                     minIndex = i;
                 }
             }
-
 
             if (minIndex < 0)
                 return false;
@@ -190,6 +186,38 @@ namespace SimpleARM
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

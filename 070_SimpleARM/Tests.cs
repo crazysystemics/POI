@@ -37,21 +37,25 @@ namespace SimpleARM
             Aircraft aircraft = new Aircraft(0.0, 50.0);
             int optimal_y = 0;
 
-            int[] debug_detect_counts = new int[20];
-            int[] debug_ays = new int[20];
+            //Engineering Information
+            int ay_num_samples = 10;  // Primary parameter for ay sampling
+            int ax_num_samples = 10;  // Primary parameter for ax sampling
+
+            //Debug Information
+            int[] debug_detect_counts = new int[ay_num_samples];
+            int[] debug_ays = new int[ay_num_samples];
            
             //configure_run_simualtions();
             optimal_y = Program.find_optimal_y(50, 150, radar);
-            bool y_is_optimal = Program.isoptimal_y(optimal_y, aircraft, radar, -100, 100, 10,
-                                                    ref debug_ays,
-                                                    ref debug_detect_counts);
+            bool y_is_optimal = Program.isoptimal_y(optimal_y, aircraft, radar, -100, 100, ax_num_samples,
+                                                    ay_num_samples,  // NEW: pass num_samples
+                                                    debug_ays,
+                                                    debug_detect_counts);
             Debug.Assert( y_is_optimal, $"Optimal Y {optimal_y} is not optimal according to detection counts.");
             //validate whether optimal_y is indeed optimal by running multiple simulations with random radar positions
             //and calculating detection count for optimal_y and comparing it with detection count for other y values in the range
             //double detect_number =  validate_optimal_y( 10, optimal_y, 0, 100, 10, 90, 0, 0, 1, ref best_score);
             Console.WriteLine($"Optimal Y: {optimal_y}");
-
-
         }
 
     }

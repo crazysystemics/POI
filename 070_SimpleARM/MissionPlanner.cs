@@ -18,22 +18,20 @@ public class MissionPlanner
 
     // Helper: compute detection count for a single aircraft altitude `py`.
     // This was extracted from the original `detection_count` logic.
-    private  int findDetectionCountForPY(int paramAy, Radar radar, int ax_min = -100, int ax_max = 100, int num_samples = 10, 
+    private  int findDetectionCountForPY(int paramAy, Radar radar, int ax_min = -100, int ax_max = 100, int num_ax_samples = 10, 
                                          int radar_range = 2)
                                          
     {
-        // Ensure sensible num_samples
-        if (num_samples <= 0) num_samples = 1;
+        // Ensure sensible num_ax_samples
+        if (num_ax_samples <= 0) num_ax_samples = 1;
 
-        // compute an integer step for ax iteration; ensure >= 1
-        int step = (int)Math.Ceiling((2.0 * (ax_max - ax_min + 1)) / (double)num_samples);
-        if (step < 1) step = 1;
+        // Compute step size from num_ax_samples (primary parameter)
+        int ax_step = (int)Math.Ceiling((double)(ax_max - ax_min + 1) / num_ax_samples);
+        if (ax_step < 1) ax_step = 1;
 
         int detection_count = 0;
 
-        //int ax_start = radar_x - ax_len;
-        //int ax_end = radar_x + ax_len;
-        for (int ax = ax_min; ax <= ax_max; ax += step)
+        for (int ax = ax_min; ax <= ax_max; ax += ax_step)
         {
             Aircraft aircraft = new Aircraft(ax, paramAy);          
 
@@ -47,66 +45,33 @@ public class MissionPlanner
         return detection_count;
     }
 
-
-
-    // New method implementing the TODO described in comments:
-    // - remove single `py` parameter, accept py_min and py_max
-    // - run detection_count for each py in [py_min, py_max]
-    // - return the py with the minimum detection count (optimal_y)
-    // OptimalPY0 is when there is no error in radar position (radar_x, radar_y are fixed and known)
-    //public  int FindFirstOptimalPY0(int py_min, int py_max,
-    //                               int radar_x = 0, int radar_y = 0,
-    //                               int ax_len = 100, int num_samples = 10, double radar_range = 2.5)
-    //{
-    //    if (py_max < py_min)
-    //    {
-    //        // invalid range -> return py_min as fallback
-    //        return py_min;
-    //    }
-
-    //    int bestPy = py_min;
-    //    int bestCount = int.MaxValue;
-    //    int[] detnCounts = new int[num_samples];
-    //    int index = 0;
-
-    //    for (int py = py_min; py <= py_max; py++)
-    //    {
-            
-    //        int count = findDetectionCountForPY(py, radar, ax_min: -100, ax_max: 100, num_samples: num_samples, radar_range: (int)radar_range);
-            
-    //        if (index < detnCounts.Length)
-    //            detnCounts[index++] = count;
-
-    //        if (count < bestCount)
-    //        {
-    //            bestCount = count;
-    //            bestPy = py;
-    //        }
-    //    }
-
-    //    return bestPy;
-    //}
-
-    // Overload: captures iterated ay values in debug_ays reference parameter
+    // Captures iterated ay values in debug_ays reference parameter
     public int[] FindDetectionCounts(Aircraft aircraft, Radar radar,
-                        int aymin, int aymax, int aystep,
-                        int axmin, int axmax, int ax_num_samples,
+                        int aymin, int aymax, int num_ay_samples,
+                        int axmin, int axmax, int num_ax_samples,
                         int[] debug_ays = null)
     {
-        int numPySamples = (aymax - aymin) / aystep + 1;
-        int[] detectionCounts = new int[numPySamples];
-        if (debug_ays != null)
-        {
-            debug_ays = new int[numPySamples];
-        }
+        // Ensure sensible num_ay_samples
+        if (num_ay_samples <= 0) num_ay_samples = 1;
+
+        // Compute step size from num_ay_samples (primary parameter)
+        int ay_step = (int)Math.Ceiling((double)(aymax - aymin + 1) / num_ay_samples);
+        if (ay_step < 1) ay_step = 1;
+
+        // Calculate actual iterations using formula - O(1) instead of O(n)
+        int actual_iterations = (aymax - aymin) / ay_step + 1;
+
+        // Array dimension based on actual iterations
+        int[] detectionCounts = new int[actual_iterations];
+        
         int index = 0;
 
-        for (int ay = aymin; ay <= aymax; ay += aystep)
+        for (int ay = aymin; ay <= aymax && index < actual_iterations; ay += ay_step)
         {
-            if (debug_ays != null)
-                debug_ays[index] = ay;
+            if (debug_ays != null && index < debug_ays.Length)
+                        debug_ays[index] = ay;
             
-            int count = findDetectionCountForPY(ay, radar, axmin, axmax, ax_num_samples);
+            int count = findDetectionCountForPY(ay, radar, axmin, axmax, num_ax_samples);
             if (index < detectionCounts.Length)
                 detectionCounts[index++] = count;
         }
