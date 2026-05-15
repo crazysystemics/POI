@@ -49,7 +49,7 @@ public class MissionPlanner
     public int[] FindDetectionCounts(Aircraft aircraft, Radar radar,
                         int aymin, int aymax, int num_ay_samples,
                         int axmin, int axmax, int num_ax_samples,
-                        int[] debug_ays = null)
+                        int[] out_debug_ays=null)
     {
         // Ensure sensible num_ay_samples
         if (num_ay_samples <= 0) num_ay_samples = 1;
@@ -68,9 +68,9 @@ public class MissionPlanner
 
         for (int ay = aymin; ay <= aymax && index < actual_iterations; ay += ay_step)
         {
-            if (debug_ays != null && index < debug_ays.Length)
-                        debug_ays[index] = ay;
-            
+            if ( out_debug_ays != null && index < out_debug_ays.Length)
+                        out_debug_ays[index] = ay;
+            //count is detections for current ay
             int count = findDetectionCountForPY(ay, radar, axmin, axmax, num_ax_samples);
             if (index < detectionCounts.Length)
                 detectionCounts[index++] = count;

@@ -51,6 +51,15 @@ namespace SimpleARM
                                                     ay_num_samples,  // NEW: pass num_samples
                                                     debug_ays,
                                                     debug_detect_counts);
+            Debug.Assert(debug_ays.Length == debug_detect_counts.Length);
+            
+            if (sglobal.debug)
+            {
+                for (int i = 0; i < debug_ays.Length; i++)
+                {
+                    Console.WriteLine($"ay: {debug_ays[i]}, Detection Count: {debug_detect_counts[i]}");
+                }
+            }
             Debug.Assert( y_is_optimal, $"Optimal Y {optimal_y} is not optimal according to detection counts.");
             //validate whether optimal_y is indeed optimal by running multiple simulations with random radar positions
             //and calculating detection count for optimal_y and comparing it with detection count for other y values in the range

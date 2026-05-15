@@ -42,4 +42,9 @@ Now, the threads are
 					  //if background dimensions indeed have no impact on output, 
 					  //then output should be same across all samples of background dimensions
 			k. Aho Ullman Abstraction Framework also has to-be incorporated
-		4. Modeling whole thing as Dynamic Space and then State Space
+		4. Modeling whole thing as Dynamic Space and then State Space[next iteration]
+			  a. state space is the space of all possible states of the system
+			  b. dynamic space is the space of all possible trajectories of the system
+			  c. we can model the problem as a state space problem, where each state is defined by the position of the aircraft, the position of the radar, and the position of the RWR
+			  d. we can then model the problem as a dynamic space problem, where each trajectory is defined by the sequence of states that the system goes through over time
+			  e. we can then use techniques from control theory to find optimal trajectories in this dynamic space

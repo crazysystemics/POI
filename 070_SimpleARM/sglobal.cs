@@ -8,6 +8,7 @@ namespace SimpleARM
 {
     static class sglobal
     {
+        public static bool debug = true;
         public static MissionPlanner MissionPlanner = new MissionPlanner();
     }
 }
