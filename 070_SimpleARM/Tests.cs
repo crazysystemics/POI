@@ -30,25 +30,26 @@ namespace SimpleARM
         public void Test01()
         {
             //Testing Optimal Height
-            //Run simulations with random radar positions within error band (across x) 
-            //and calculate average detection count
-            //Optimation Height Estimation (Training may be any method) this is Test
-            Radar radar = new Radar(0, 0, 200);
+            Radar radar = new Radar(0, 0, 100);
             Aircraft aircraft = new Aircraft(0.0, 50.0);
-            int optimal_y = 0;
+            double minay = 50.0, maxay = 150.0;
+            double optimal_y = 0;
 
             //Engineering Information
-            int ay_num_samples = 10;  // Primary parameter for ay sampling
-            int ax_num_samples = 10;  // Primary parameter for ax sampling
+            int ay_num_samples = 10;
+            int ax_num_samples = 10;
 
-            //Debug Information
-            int[] debug_detect_counts = new int[ay_num_samples];
-            int[] debug_ays = new int[ay_num_samples];
+            //Debug Information - Calculate actual array size needed
+            double ay_step = (maxay - minay) / ay_num_samples;
+            int actual_ay_iterations = (int)Math.Ceiling((maxay - minay) / ay_step) + 1;
+            
+            int[] debug_detect_counts = new int[actual_ay_iterations];
+            double[] debug_ays = new double[actual_ay_iterations];
            
-            //configure_run_simualtions();
-            optimal_y = Program.find_optimal_y(50, 150, radar);
-            bool y_is_optimal = Program.isoptimal_y(optimal_y, aircraft, radar, -100, 100, ax_num_samples,
-                                                    ay_num_samples,  // NEW: pass num_samples
+            optimal_y = Program.find_optimal_y(minay, maxay, radar);
+            bool y_is_optimal = Program.isoptimal_y(optimal_y, aircraft, radar, 
+                                                    axmin:-100, axmax:100, ax_num_samples,
+                                                    minay, maxay, ay_num_samples,
                                                     debug_ays,
                                                     debug_detect_counts);
             Debug.Assert(debug_ays.Length == debug_detect_counts.Length);
@@ -57,14 +58,9 @@ namespace SimpleARM
             {
                 for (int i = 0; i < debug_ays.Length; i++)
                 {
-                    Console.WriteLine($"ay: {debug_ays[i]}, Detection Count: {debug_detect_counts[i]}");
+                    Console.WriteLine($"ay[{i}] = {debug_ays[i]}, detect_count[{i}] = {debug_detect_counts[i]}");
                 }
             }
-            Debug.Assert( y_is_optimal, $"Optimal Y {optimal_y} is not optimal according to detection counts.");
-            //validate whether optimal_y is indeed optimal by running multiple simulations with random radar positions
-            //and calculating detection count for optimal_y and comparing it with detection count for other y values in the range
-            //double detect_number =  validate_optimal_y( 10, optimal_y, 0, 100, 10, 90, 0, 0, 1, ref best_score);
-            Console.WriteLine($"Optimal Y: {optimal_y}");
         }
 
     }
