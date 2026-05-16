@@ -182,7 +182,7 @@ namespace SimpleARM
                                                                                debug_ays);
 
             // Copy detection counts element by element to debug_detect_counts
-            int copyLength = Math.Min(detect_counts.Length, debug_detect_counts.Length);
+            int copyLength = Math.Min(detect_counts.Length, debug_detect_counts.Length); 
             Array.Copy(detect_counts, debug_detect_counts, copyLength);
 
             if (detect_counts == null || detect_counts.Length == 0)
