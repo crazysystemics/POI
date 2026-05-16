@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SimpleARM
 {
-    static class sglobal
+    static class SGlobal
     {
         public static bool debug = true;
         public static MissionPlanner MissionPlanner = new MissionPlanner();

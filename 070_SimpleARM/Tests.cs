@@ -29,6 +29,8 @@ namespace SimpleARM
         //}
         public void Test01()
         {
+            MissionPlanner planner = new MissionPlanner();
+
             //Testing Optimal Height
             Radar radar = new Radar(0, 0, 100);
             Aircraft aircraft = new Aircraft(0.0, 50.0);
@@ -46,15 +48,15 @@ namespace SimpleARM
             int[] debug_detect_counts = new int[actual_ay_iterations];
             double[] debug_ays = new double[actual_ay_iterations];
            
-            optimal_y = Program.find_optimal_y(minay, maxay, radar);
-            bool y_is_optimal = Program.isoptimal_y(optimal_y, aircraft, radar, 
+            optimal_y = planner.find_optimal_y(minay, maxay, radar);
+            bool y_is_optimal = planner.isoptimal_y(optimal_y, aircraft, radar, 
                                                     axmin:-100, axmax:100, ax_num_samples,
                                                     minay, maxay, ay_num_samples,
                                                     debug_ays,
                                                     debug_detect_counts);
             Debug.Assert(debug_ays.Length == debug_detect_counts.Length);
             
-            if (sglobal.debug)
+            if (SGlobal.debug)
             {
                 for (int i = 0; i < debug_ays.Length; i++)
                 {
