@@ -182,28 +182,31 @@ namespace SimpleARM
                                                                                debug_ays);
 
             // Copy detection counts element by element to debug_detect_counts
-            int copyLength = Math.Min(detect_counts.Length, debug_detect_counts.Length); 
+            int copyLength = Math.Min(detect_counts.Length, debug_detect_counts.Length);
             Array.Copy(detect_counts, debug_detect_counts, copyLength);
 
             if (detect_counts == null || detect_counts.Length == 0)
                 return false;
 
-            int minVal = int.MaxValue;
-            int minIndex = -1;
-            for (int i = 0; i < detect_counts.Length; i++)
-            {
-                if (detect_counts[i] < minVal)
-                {
-                    minVal = detect_counts[i];
-                    minIndex = i;
-                }
-            }
+            // Compute testy's detection count directly — testy may not fall on the sampled grid.
+            int testy_count = findDetectionCountForPY(testy, radar, axmin, axmax, ax_num_samples);
 
-            if (minIndex < 0)
+            int minVal = detect_counts.Min();
+
+            // testy must achieve the minimum detection count.
+            if (testy_count > minVal)
                 return false;
 
-            double minPy = aymin + minIndex * aystep;
-            return (minPy == testy);
+            // No sampled y strictly below testy may achieve a count <= testy_count;
+            // that would mean a lower (safer) altitude already beats testy.
+            for (int i = 0; i < detect_counts.Length; i++)
+            {
+                double sampled_y = aymin + i * aystep;
+                if (sampled_y < testy && detect_counts[i] <= testy_count)
+                    return false;
+            }
+
+            return true;
         }
 
         public double find_optimal_y(double minay, double maxay, Radar radar)

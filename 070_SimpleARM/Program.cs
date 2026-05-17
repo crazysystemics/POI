@@ -1,41 +1,46 @@
-﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Numerics;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace SimpleARM
+﻿namespace SimpleARM
 {
     enum SamplingMethod { EXHAUSTIVE_LINEAR, RANDOM_UNIFORM, RANDOM_GAUSSIAN }
 
-    public class Aircraft
+    public class Aircraft(double x = 0.0, double y = 0.0)
     {
-        public double x, y;
+        public double x = x, y = y;
+    }
 
-        public Aircraft(double x = 0.0, double y = 0.0)
+    public class Radar(int x = 0, int y = 0, int range = 0)
+    {
+        public int x = x, y = y, range = range;
+
+        public bool IsAircraftInRange(Aircraft aircraft)
         {
-            this.x = x;
-            this.y = y;
+            double act_range = Math.Sqrt((x - aircraft.x) * (x - aircraft.x) + (y - aircraft.y) * (y - aircraft.y));
+            return act_range <= range + 0.11; // 0.11 is floating point tolerance
         }
     }
 
-    public class Radar
+    public class Battlespace(Radar radar, Aircraft aircraft, double axMin, double axMax, double ayMin, double ayMax)
     {
-        public int range;
-        public int x, y;
-        public Radar(int x = 0, int y = 0, int range = 0)
-        {
-            this.range = range;
-            this.x = x;
-            this.y = y;
-        }
-        public bool IsAircraftInRange(Aircraft aircraft)
-        {
-            // Simplified logic for demonstration purposes
-            double act_range = Math.Sqrt((x - aircraft.x) * (x - aircraft.x) + (y - aircraft.y) * (y - aircraft.y));
-            bool inRange = (act_range <= range + 0.11); //0.11 is for floating point tolerance 
-                return inRange;
-        }
+        //Initial Configuration of enemy
+        public Radar Radar = radar;
+        public Aircraft Aircraft = aircraft;
+        public double ox, oy;
+        public double AxMin = axMin, AxMax = axMax;
+        public double AyMin = ayMin, AyMax = ayMax;
+
+        // Mission results — populated by MissionPlanner after planning
+        // Result or Solution for Blue(Self(
+        public double OptimalAy;
+
+        //fitness metric associated with solutionoptimal y
+        public int OptimalAyDetectCount;
+        //In this case it is Parameter Distance vs Detection CountS
+        Dictionary<double, int> fitnessVector = new Dictionary<double, int>();
+        
+
+        //Result of Validation
+        public bool IsAyOptimal;
+
+       
     }
 
     internal class Program
@@ -43,11 +48,9 @@ namespace SimpleARM
         //Find the mission effectiveness (detection rate) for a given testy and radar error range
         //by simulating multiple runs with random radar positions and calculating the average detection count
        
-        static void Main(string[] args)
+        static void Main()
         {
-            Test test = new Test();
-            test.Test01();
-
+            Test.Test01();
         }
     }
 }

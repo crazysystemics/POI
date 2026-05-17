@@ -1,61 +1,49 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
-
 
 namespace SimpleARM
 {
-     class Test
+    class Test
     {
-        //MissionPlanner  planner = new MissionPlanner();
-        //int radar_x = 50, radar_y = 0, visibility_radius = 3;
-        //public  void Test01()
-        //{
-        //    // Example usage of the new FindOptimalY method:
-        //    int calculatedPY0 = planner.calcOptimalPY(
-        //                                radar_x, radar_y, 
-        //                                visibility_radius
-        //                                      );
-        //    int fistOptimalY0 = planner.FindFirstOptimalPY0(
-        //                                            py_min: 0, py_max: 100,
-        //                                            radar_x, radar_y
-        //                                      );
-
-
-        //    Debug.Assert(calculatedPY0 == fistOptimalY0, $"Test01 failed: expected {calculatedPY0}, got {fistOptimalY0}");
-        //}
-        public void Test01()
+        public static void Test01()
         {
-            MissionPlanner planner = new MissionPlanner();
+            //TBD-IMPORTANT
+            //Abstractions are
+            //Battlespace, Radar, Aircraft, MissionPlanner
+            //Battlespace belongs to Defence and Aerospace domain
+            //MissionPlanner belongs to Computation-AIML domain
+            //Same topology is to be continued in further development.
+            MissionPlanner planner = new();
 
             //Testing Optimal Height
-            Radar radar = new Radar(0, 0, 100);
-            Aircraft aircraft = new Aircraft(0.0, 50.0);
-            double minay = 50.0, maxay = 150.0;
-            double optimal_y = 0;
+            Radar radar = new(0, 0, 100);
+            Aircraft aircraft = new(0.0, 50.0);
+            double aymin = 50.0, aymax = 150.0;   //TBD: should convert to double. input dimensions. need to be  improved;
+            int axmin = -100, axmax = 100; //TBD: input dimensions. need to be  improved;
 
             //Engineering Information
             int ay_num_samples = 10;
-            int ax_num_samples = 10;
+            int ax_num_samples = 201; // step=1 so ax=0 (radar.x) is always sampled
 
             //Debug Information - Calculate actual array size needed
-            double ay_step = (maxay - minay) / ay_num_samples;
-            int actual_ay_iterations = (int)Math.Ceiling((maxay - minay) / ay_step) + 1;
+            double ay_step = (aymax - aymin) / ay_num_samples;
+            int actual_ay_iterations = (int)Math.Ceiling((aymax - aymin) / ay_step) + 1;
             
             int[] debug_detect_counts = new int[actual_ay_iterations];
             double[] debug_ays = new double[actual_ay_iterations];
+            //======================================================================
            
-            optimal_y = planner.find_optimal_y(minay, maxay, radar);
-            bool y_is_optimal = planner.isoptimal_y(optimal_y, aircraft, radar, 
-                                                    axmin:-100, axmax:100, ax_num_samples,
-                                                    minay, maxay, ay_num_samples,
+            Battlespace bspace = new(radar, aircraft,axmin, axmax, aymin, aymax);
+            bspace.OptimalAy = planner.find_optimal_y(bspace.AyMin,bspace.AyMax, radar);
+            bspace.IsAyOptimal = planner.isoptimal_y(bspace.OptimalAy, aircraft, radar, 
+                                                    (int)bspace.AxMin,(int) bspace.AxMax, ax_num_samples,
+                                                    (int)bspace.AyMin, (int)    bspace.AyMax, ay_num_samples,
                                                     debug_ays,
-                                                    debug_detect_counts);
+                                                    debug_detect_counts);//TBD: need to convert to double and improve 
+
             Debug.Assert(debug_ays.Length == debug_detect_counts.Length);
             
+            Console.WriteLine($"optimal_y = {bspace.OptimalAy}, y_is_optimal = {bspace.IsAyOptimal}");
             if (SGlobal.debug)
             {
                 for (int i = 0; i < debug_ays.Length; i++)
