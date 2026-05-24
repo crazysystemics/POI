@@ -9,13 +9,32 @@ namespace SimpleARM
         {
         }
 
-        public int calcOptimalPY(
-                          int radar_x, int radar_y,
-                          int visibility_radius = 3
-                         )
+       
+        public double find_optimal_y(double minay, double maxay, Radar radar)
         {
-            //let us assume optimal_y maximally away from radar.y
-            return radar_y + visibility_radius;
+            // Find the minimum y between minay and maxay that is OUTSIDE radar detection range
+            // Radar detection zone: [radar.y - radar.range, radar.y + radar.range]
+
+            double radar_min = radar.y - radar.range;
+            double radar_max = radar.y + radar.range;
+
+            // Priority 1: Return minimum y if entire range is already outside radar
+            if (maxay < radar_min)  // Entire range is below radar
+                return minay;
+
+            if (minay > radar_max)  // Entire range is above radar
+                return minay;
+
+            // Priority 2: Try to go below radar (prefer lower altitudes for stealth)
+            if (minay < radar_min)
+                return radar_min - 1;
+
+            // Priority 3: Go above radar (if we can't go below)
+            if (maxay > radar_max)
+                return radar_max + 1;
+
+            // Priority 4: Trapped inside radar range - return minay as least-worst option
+            return minay;
         }
 
         // Helper: compute detection count for a single aircraft altitude `py`.
@@ -80,87 +99,38 @@ namespace SimpleARM
             return detectionCounts;
         }
 
-        public static double FindMissionEffectiveness(
-                               int testy,
-                               int ac_min_x, int ac_max_x,
-                               int min_radar_x, int max_radar_x, int radar_y,
-                               int min_radar_x_error, int max_radar_x_error,
-                               int num_samples,
-                               ref int best_score_index)
+        
+
+        public (bool passed, double passRate) isoptimal_y_statistical(
+            double testy,
+            Radar[] sampleRadars,
+            int axmin, int axmax, int num_ax_samples,
+            double aymin, double aymax, int ay_num_samples,
+            double required_pass_rate)
         {
-            // Validate inputs
-            if (num_samples <= 0)
-                num_samples = 1;
+            if (sampleRadars == null || sampleRadars.Length == 0)
+                return (false, 0.0);
 
-            if (ac_max_x < ac_min_x || max_radar_x < min_radar_x)
+            Aircraft tempAircraft = new Aircraft(axmin, testy);
+            int pass_count = 0;
+
+            foreach (var sampleRadar in sampleRadars)
             {
-                best_score_index = -1;
-                return 0.0;
+                // testy passes for this sample if it achieves the minimum detection count.
+                // Less strict than isoptimal_y: does not require testy to be the lowest y
+                // achieving that count — only that it is not beaten by any sampled y.
+                int testy_count = findDetectionCountForPY(testy, sampleRadar, axmin, axmax, num_ax_samples);
+                int[] detect_counts = SGlobal.MissionPlanner.FindDetectionCounts(
+                    tempAircraft, sampleRadar,
+                    aymin, aymax, ay_num_samples,
+                    axmin, axmax, num_ax_samples);
+                if (testy_count <= detect_counts.Min())
+                    pass_count++;
             }
 
-            // Use a reasonable default radar range if not provided elsewhere in the program.
-            double radar_range = 2.5;
-
-            Random rand = new Random();
-
-            int radarSamples = num_samples;
-            double radarStep = (radarSamples > 1) ? (max_radar_x - min_radar_x) / (double)(radarSamples - 1) : 0.0;
-            double acStep = (radarSamples > 1) ? (ac_max_x - ac_min_x) / (double)(radarSamples - 1) : (ac_max_x - ac_min_x);
-
-            long totalIterations = 0;
-            long detectionCount = 0;
-            Aircraft ac;
-
-            for (int cur_ac_x = ac_min_x; cur_ac_x < ac_max_x; cur_ac_x += ((ac_max_x) - (ac_min_x)) / num_samples)
-            {
-
-                ac = new Aircraft(ac_min_x, testy);
-
-                // Radar position without error
-                for (double cur_radar_x = min_radar_x; cur_radar_x < max_radar_x;
-                           cur_radar_x += (max_radar_x - min_radar_x) / num_samples)
-                {
-
-                    //given radar_x_min and radar_x_max
-                    //      radar_y_min and radar_y_max 
-                    //      generate random_x, and random_y between min and max
-                    //      mission_success_rate = 1 -(detection_count/num_trials)
-
-                    for (int i = 0; i < radarSamples; i++)
-                    {
-                        // Linearly increment the radar x error range between min and max
-                        double cur_radar_x_error_max = (radarSamples > 1)
-                            ? (min_radar_x_error + i * (double)(max_radar_x_error - min_radar_x_error) / (radarSamples - 1))
-                            : min_radar_x_error;
-
-                        // Sample an actual error from uniform distribution [0, cur_radar_x_error_max]
-                        double cur_radar_x_error_sample = rand.NextDouble() * Math.Max(0.0, cur_radar_x_error_max);
-
-                        // Offset so that error is centered around the nominal position
-                        double cur_radar_x_with_error = cur_radar_x - (cur_radar_x_error_max / 2.0) + cur_radar_x_error_sample;
-
-                        Radar radar = new Radar((int)cur_radar_x_with_error, radar_y, (int)radar_range);
-
-                        // Single check at ac_min_x when acStep is effectively zero
-                        totalIterations++;
-
-                        if (radar.IsAircraftInRange(ac))
-                            detectionCount++;
-                    }
-
-                }
-
-            }
-
-            // Avoid division by zero
-            if (totalIterations == 0)
-            {
-                return 0.0;
-            }
-
-            return (double)detectionCount / (double)totalIterations;
+            double passRate = (double)pass_count / sampleRadars.Length;
+            return (passRate >= required_pass_rate, passRate);
         }
-
 
         public  bool isoptimal_y(
                                         double testy, Aircraft aircraft, Radar radar,
@@ -170,6 +140,10 @@ namespace SimpleARM
                                         int[] debug_detect_counts
                                        )
         {
+            //[CLAUDE] Validation in case of Test05 should be statistical
+            //[CLAUDE] There will be a non-zero probability that for some visibility zone
+            //[CLAUDE] tesy will fail. But for a percentage of cases, it should pass
+            //[CLAUDE] It should accept pass percentage as a parameter
 
             aircraft.y = testy;
 
@@ -210,32 +184,7 @@ namespace SimpleARM
             return true;
         }
 
-        public double find_optimal_y(double minay, double maxay, Radar radar)
-        {
-            // Find the minimum y between minay and maxay that is OUTSIDE radar detection range
-            // Radar detection zone: [radar.y - radar.range, radar.y + radar.range]
-
-            double radar_min = radar.y - radar.range;
-            double radar_max = radar.y + radar.range;
-
-            // Priority 1: Return minimum y if entire range is already outside radar
-            if (maxay < radar_min)  // Entire range is below radar
-                return minay;
-
-            if (minay > radar_max)  // Entire range is above radar
-                return minay;
-
-            // Priority 2: Try to go below radar (prefer lower altitudes for stealth)
-            if (minay < radar_min)
-                return radar_min - 1;
-
-            // Priority 3: Go above radar (if we can't go below)
-            if (maxay > radar_max)
-                return radar_max + 1;
-
-            // Priority 4: Trapped inside radar range - return minay as least-worst option
-            return minay;
-        }
+        
     }
 }
 

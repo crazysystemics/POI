@@ -2,113 +2,29 @@
     1. DONE
 	2. Find Optimal y in presence of errors for Radar Position in x 
 	         a. ideally, this should not impact y
-			 b. i.e., irrespective of error (from min_error to max_error), y should be same
-			 c. verify this
-			 d. now, go to code
-	3. Based on Aho, Ullman Abstraction Article       
-			  a. define (aircraft with rwr, radar) as an abstraction
-			  b. define a mission as an algorithm that takes in the abstraction and produces a result (e.g., optimal y)
-			  c. implement manually aircrraft, rwr and radar
-			  d. DTSE->dtse is the compiler/simulator that runs the mission and generates effectiveness score of y
-			  e. alternate paths/uncertainty in each iteration, data should be captured as shown below
-			            example vector of optimal y for each position error
-			  i. Algorithm: find_optimal_y and validate_optimal_y 			       
-			 j. n-dimensions 
-			          [on each dimension, n samples can be sampled, n may be 1 also]
-					  [if nd > 1, it is a range, and sample is linear, 
-					               xd (x on d) is tranversed from min to max with step size of (max - min)/n]
-					  [if nd > 1, and sampling is random, then xd is sampled randomly from min to max n times]
-					  [nd = 1 linear can be modeled by mid = maxd = some fixed xd value]
-					  [nd = 1 random -;> xd is sampled randomly from min to max]
+			 b. Radar.x_error is the error associated with radar position in x
+			 b. Radar.x can be anywhere from Radar.x - Radar.x_error to Radar.x + Radar.x_error
+			 c. Assuming aircraft's flight envelope is superset of radar visibility zone,
+			      Radar's positional variation in x should not affect choice of y
+			 d. Validate this
+			 e. Also, show that if aircraft's flight envelope is not superset of radar visibility zone, 
+			           then Radar's positional variation in x can affect choice of y
+	3. Same logic as above, there can be error in position on Radar Y also.
+	4. Radar position's error is probabilistic
+	         a. Radar position x's error distribution specified in Application Note.
+	         b. How to compute visibility zone and optimal y in this case?
+			       Every sample will be drawn from distribution, 
+				   and for each sample, visibility zone will be computed, 
+				   and optimal optimal_y for that should be computed.
+			b.  let  visibility_zone_set =   visibility zones fron n random sample positions 
+				                                corresponding to n samples of 
+												radar position errors
+			c.  average_visibility_zone = average of visibility zones in visibility_zone_set
+			d.  optimal_y = optimal y for average_visibility_zone (based on overlapping rectangle logic)
+			e.  validate that optimal_y is indeed optimal for all visibility zones in visibility_zone_set
+			          compute count_better_than_optimal_y
+					  compute  count_worse_than_optimal_y
+					  some of both better and worse count should be #visibility_zone_set
+			f. Further validation can be done by drawing different samples.			 								 
 
-					  //foreground dimensions - dimensions on which output is dependent
-					  //these are tested for nd samples, ranges are covered
-					  //for random variables, six sigma is used to cover the range
-					  //background dimensions - dimensions on which output is not dependent
-					  //a single random sample is drawn from each of the background dimensions, and 
-					  //in same output iteration output is computed.
-					  //if background dimensions indeed have no impact on output, 
-					  //then output should be same across all samples of background dimensions
-			k. Aho Ullman Abstraction Framework also has to-be incorporated
-		4. Modeling whole thing as Dynamic Space and then State Space[next iteration]
-			  a. state space is the space of all possible states of the system
-			  b. dynamic space is the space of all possible trajectories of the system
-			  c. we can model the problem as a state space problem, where each state is defined by the position of the aircraft, the position of the radar, and the position of the RWR
-			  d. we can then model the problem as a dynamic space problem, where each trajectory is defined by the sequence of states that the system goes through over time
-			  e. we can then use techniques from control theory to find optimal trajectories in this dynamic space
-
-	2. Find Optimal y in presence of errors for Radar Position in x 
-	         a. ideally, this should not impact y
-			 b. i.e., irrespective of error (from min_error to max_error), y should be same
-			 c. verify this
-			 d. now, go to code
-	3. Based on Aho, Ullman Abstraction Article       
-			  a. define (aircraft with rwr, radar) as an abstraction
-			  b. define a mission as an algorithm that takes in the abstraction and produces a result (e.g., optimal y)
-			  c. implement manually aircrraft, rwr and radar
-			  d. DTSE->dtse is the compiler/simulator that runs the mission and generates effectiveness score of y
-			  e. alternate paths/uncertainty in each iteration, data should be captured as shown below
-			            example vector of optimal y for each position error
-			  i. Algorithm: find_optimal_y and validate_optimal_y 			       
-			 j. n-dimensions 
-			          [on each dimension, n samples can be sampled, n may be 1 also]
-					  [if nd > 1, it is a range, and sample is linear, 
-					               xd (x on d) is tranversed from min to max with step size of (max - min)/n]
-					  [if nd > 1, and sampling is random, then xd is sampled randomly from min to max n times]
-					  [nd = 1 linear can be modeled by mid = maxd = some fixed xd value]
-					  [nd = 1 random -;> xd is sampled randomly from min to max]
-
-					  //foreground dimensions - dimensions on which output is dependent
-					  //these are tested for nd samples, ranges are covered
-					  //for random variables, six sigma is used to cover the range
-					  //background dimensions - dimensions on which output is not dependent
-					  //a single random sample is drawn from each of the background dimensions, and 
-					  //in same output iteration output is computed.
-					  //if background dimensions indeed have no impact on output, 
-					  //then output should be same across all samples of background dimensions
-			k. Aho Ullman Abstraction Framework also has to-be incorporated
-		4. Modeling whole thing as Dynamic Space and then State Space[next iteration]
-			  a. state space is the space of all possible states of the system
-			  b. dynamic space is the space of all possible trajectories of the system
-			  c. we can model the problem as a state space problem, where each state is defined by the position of the aircraft, the position of the radar, and the position of the RWR
-			  d. we can then model the problem as a dynamic space problem, where each trajectory is defined by the sequence of states that the system goes through over time
-			  e. we can then use techniques from control theory to find optimal trajectories in this dynamic space
-
-					   
-]			[1B3] [***] Generate code for 1B1 and 1B2
-	2. Find Optimal y in presence of errors for Radar Position in x 
-	         a. ideally, this should not impact y
-			 b. i.e., irrespective of error (from min_error to max_error), y should be same
-			 c. verify this
-			 d. now, go to code
-	3. Based on Aho, Ullman Abstraction Article       
-			  a. define (aircraft with rwr, radar) as an abstraction
-			  b. define a mission as an algorithm that takes in the abstraction and produces a result (e.g., optimal y)
-			  c. implement manually aircrraft, rwr and radar
-			  d. DTSE->dtse is the compiler/simulator that runs the mission and generates effectiveness score of y
-			  e. alternate paths/uncertainty in each iteration, data should be captured as shown below
-			            example vector of optimal y for each position error
-			  i. Algorithm: find_optimal_y and validate_optimal_y 			       
-			 j. n-dimensions 
-			          [on each dimension, n samples can be sampled, n may be 1 also]
-					  [if nd > 1, it is a range, and sample is linear, 
-					               xd (x on d) is tranversed from min to max with step size of (max - min)/n]
-					  [if nd > 1, and sampling is random, then xd is sampled randomly from min to max n times]
-					  [nd = 1 linear can be modeled by mid = maxd = some fixed xd value]
-					  [nd = 1 random -;> xd is sampled randomly from min to max]
-
-					  //foreground dimensions - dimensions on which output is dependent
-					  //these are tested for nd samples, ranges are covered
-					  //for random variables, six sigma is used to cover the range
-					  //background dimensions - dimensions on which output is not dependent
-					  //a single random sample is drawn from each of the background dimensions, and 
-					  //in same output iteration output is computed.
-					  //if background dimensions indeed have no impact on output, 
-					  //then output should be same across all samples of background dimensions
-			k. Aho Ullman Abstraction Framework also has to-be incorporated
-		4. Modeling whole thing as Dynamic Space and then State Space[next iteration]
-			  a. state space is the space of all possible states of the system
-			  b. dynamic space is the space of all possible trajectories of the system
-			  c. we can model the problem as a state space problem, where each state is defined by the position of the aircraft, the position of the radar, and the position of the RWR
-			  d. we can then model the problem as a dynamic space problem, where each trajectory is defined by the sequence of states that the system goes through over time
-			  e. we can then use techniques from control theory to find optimal trajectories in this dynamic space
+	
