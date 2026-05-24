@@ -20,7 +20,7 @@ namespace SimpleARM
 
         // Helper: compute detection count for a single aircraft altitude `py`.
         public int findDetectionCountForPY(double paramAy, Radar radar, int ax_min = -100, int ax_max = 100, int num_ax_samples = 10,
-                                             int radar_range = 2)
+                                           int radar_range = 2)
 
         {
             // Ensure sensible num_ax_samples
@@ -196,6 +196,7 @@ namespace SimpleARM
             // testy must achieve the minimum detection count.
             if (testy_count > minVal)
                 return false;
+
 
             // No sampled y strictly below testy may achieve a count <= testy_count;
             // that would mean a lower (safer) altitude already beats testy.

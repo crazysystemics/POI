@@ -28,7 +28,8 @@ namespace SimpleARM
             //Debug Information - Calculate actual array size needed
             double ay_step = (aymax - aymin) / ay_num_samples;
             int actual_ay_iterations = (int)Math.Ceiling((aymax - aymin) / ay_step) + 1;
-            
+
+            int debug_OptimalYIndex = -1;
             int[] debug_detect_counts = new int[actual_ay_iterations];
             double[] debug_ays = new double[actual_ay_iterations];
             //======================================================================
@@ -37,13 +38,37 @@ namespace SimpleARM
             bspace.OptimalAy = planner.find_optimal_y(bspace.AyMin,bspace.AyMax, radar);
             bspace.IsAyOptimal = planner.isoptimal_y(bspace.OptimalAy, aircraft, radar, 
                                                     (int)bspace.AxMin,(int) bspace.AxMax, ax_num_samples,
-                                                    (int)bspace.AyMin, (int)    bspace.AyMax, ay_num_samples,
+                                                    (int)bspace.AyMin,(int) bspace.AyMax, ay_num_samples,
                                                     debug_ays,
                                                     debug_detect_counts);//TBD: need to convert to double and improve 
 
-            Debug.Assert(debug_ays.Length == debug_detect_counts.Length);
-            
-            Console.WriteLine($"optimal_y = {bspace.OptimalAy}, y_is_optimal = {bspace.IsAyOptimal}");
+            bspace.OptimalAyDetectCount = 
+                planner.findDetectionCountForPY(bspace.OptimalAy, radar, 
+                                                axmin, axmax, ax_num_samples);
+
+            //Solution found is validated to be optimal
+            Debug.Assert(bspace.IsAyOptimal);
+            //Validate isoptimal_y over the ay range.
+            int debug_ay_index = 0;
+            foreach(double debug_ay in debug_ays)
+            {
+                if (debug_ay != bspace.OptimalAy)
+                {
+                    //(bspace.OptimalAy >= debug_ay) ==>
+                    //                bspace.OptimalAyDetectCount < debug_detect_counts[debug_ay_index])
+                    //by rule p=>q is equivalent to !p or q
+                    Debug.Assert(bspace.OptimalAy <= debug_ay ||
+                                 bspace.OptimalAyDetectCount <
+                                        debug_detect_counts[debug_ay_index]);                             
+                }
+                debug_ay_index++;
+            }
+            Debug.Assert(debug_ays.Length == debug_detect_counts.Length);          
+
+
+            Console.WriteLine($"optimal_y = {bspace.OptimalAy}," + 
+                             $" y_is_optimal = {bspace.IsAyOptimal}, " +
+                             $" optimal_detection_count = {bspace.OptimalAyDetectCount} "    );
             if (SGlobal.debug)
             {
                 for (int i = 0; i < debug_ays.Length; i++)

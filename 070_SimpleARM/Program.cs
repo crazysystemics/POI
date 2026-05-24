@@ -38,9 +38,7 @@
         
 
         //Result of Validation
-        public bool IsAyOptimal;
-
-       
+        public bool IsAyOptimal;       
     }
 
     internal class Program
